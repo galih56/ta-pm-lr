@@ -125,12 +125,10 @@ const Attachments = (props) => {
     }
     
     const handleAddAttachment=(body, payload)=>{
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'task-attachments/';
-        const config = { mode: 'no-cors', crossdomain: true, }
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + 'task-attachments/';
         axios.defaults.headers.post['Content-Type'] = 'multipart/form-data';
-    
-        axios.post(url, body, config).then((result) => {
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.post(url, body).then((result) => {
             payload.data=result.data;
             setDetailTask({...detailTask,attachments:[...detailTask.attachments, ...payload.data]});
             setData([...data, ...payload.data]);
@@ -149,11 +147,10 @@ const Attachments = (props) => {
         setDetailTask({...detailTask,attachments:newAttachments})
         setTimeout(()=>{
             //Selalu pending, tapi berhasil. Ditaruh di setTimeout biar masuk eventloop dan dikirim di belakang layar :)
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = `${process.env.REACT_APP_BACK_END_BASE_URL}task-attachments/${payload.id}`;
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            const url = `${process.env.MIX_BACK_END_BASE_URL}task-attachments/${payload.id}`;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.delete(url, {}, config)
+            axios.delete(url)
                 .then((result) => {
                     snackbar(`Data has been deleted`, 'success');
                     setDeleteConfirmOpen(false);
@@ -202,7 +199,7 @@ const Attachments = (props) => {
                         <ListItem key={item.id} style={{ width: '100%' }}>
                             <ListItemText primary={`${item.name}`} />
                             <ListItemSecondaryAction>
-                                <IconButton component="a" target="_blank" href={item.source=='upload'?`${process.env.REACT_APP_BACK_END_BASE_URL}files/${item.files_id}/download`:item.path}>
+                                <IconButton component="a" target="_blank" href={item.source=='upload'?`${process.env.MIX_BACK_END_BASE_URL}files/${item.files_id}/download`:item.path}>
                                     <GetAppIcon fontSize="small" />
                                 </IconButton >
                                 {showDeleteButton(isEditing, item.id)}

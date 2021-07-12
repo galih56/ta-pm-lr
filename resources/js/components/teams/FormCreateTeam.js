@@ -52,13 +52,14 @@ const FormCreateTeam=({open,handleClose,onCreate})=>{
             description: description,
             users: users
         }
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'team';
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        
+        const url = process.env.MIX_BACK_END_BASE_URL + 'teams';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, body, config)
+        axios.post(url, body)
             .then((result) => {
                 onCreate(result.data);
+                handleClose();
                 snackbar(`A new list successfully created`, 'success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
@@ -100,6 +101,7 @@ const FormCreateTeam=({open,handleClose,onCreate})=>{
                                 onChange={(e) => setDescription(e.target.value) }
                                 multiline
                                 style={{ width: '100%' }}
+                                required
                                 rows={4}
                             />
                         </Grid>

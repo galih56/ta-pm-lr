@@ -5,7 +5,7 @@ import 'fontsource-roboto';
 import Layout from "./layout/Layout";
 import UserContext, {
     initState, resetState, getAuthDataFromStorage,
-    storeAuthData, runDelayedHTTPRequest, 
+    storeAuthData, runDelayedHTTPRequest, logout,
     storeGoogleAuth, storeGithubAuth, removeGithubAuth
 } from './context/UserContext';
 import { createNewList, removeList, updateList } from './context/ListsReducer';
@@ -34,7 +34,7 @@ const ModalAuthentication = React.lazy(() => import("./layout/auth/ModalAuthenti
 
 const checkAuthentication = (payload, state) => {
     const { history } = payload;
-    const auth = JSON.parse(localStorage.getItem('auth'));
+    const auth = JSON.parse(localStorage.getItem('user'));
     if (auth) {
         if (!auth.authenticated) {
             history.push('/auth');
@@ -45,15 +45,12 @@ const checkAuthentication = (payload, state) => {
 
 const handleFetchError = (payload, state) => {
     const { error, snackbar, dispatch, history } = payload;
-    console.log('Payload : ',payload)
     try {
         if (error.response) {
             // Request made and server responded
             switch (error.response.status) {
                 case 401:
-                    if (snackbar) snackbar(`Please login before updating any data`, 'warning');
-                        dispatch({ type: 'logout' });
-                    if (history) history.push('/auth');
+                    if (snackbar) snackbar(`Unauthenticated`, 'warning');
                     break;
                 case 409:
                     var message = '';
@@ -130,7 +127,7 @@ const reducer = (state, action) => {
         case 'remove-meeting':
             return removeMeeting(payload);
         case 'logout':
-            return resetState();
+            return logout();
         case 'handle-fetch-error':
             return handleFetchError(payload, state);
         case 'run-delayed-http-request':
@@ -163,9 +160,7 @@ function RemoveTrailingSlashes({ path }) {
 }
 
 const App = () => {
-    //using array destructuring
     const [state, dispatch] = useReducer(reducer, initState);
-
     return (
         <UserContext.Provider value={{ state, dispatch }}>
             <SnackbarProvider maxSnack={5}>

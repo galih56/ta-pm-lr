@@ -76,7 +76,7 @@ const OpenEditForm = ({ isEdit, data, setData }) => {
                         <Select onChange={e => {
                             setData({ ...data, occupation: e.target.value });
                         }}
-                            defaultValue={data.occupation.id}>
+                            defaultValue={data.occupation?data.occupation.id:null}>
                             {
                                 occupations.map((occupation, index) => (<MenuItem value={occupation.id} key={occupation.id}>{occupation.name}</MenuItem>))
                             } 

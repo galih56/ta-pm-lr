@@ -18,7 +18,7 @@ const FormCreateNewTask=({classes,newTask,setNewTask,handleAddNewTask,detailProj
     const [dateRange, setDateRange] = useState([null, null]);
     
     useEffect(()=>{
-        setNewTask({...newTask,isSubtask:isSubtask});
+        setNewTask({...newTask,is_subtask:isSubtask});
     },[]);
     
     return (

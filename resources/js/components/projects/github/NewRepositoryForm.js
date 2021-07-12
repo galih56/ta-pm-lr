@@ -7,7 +7,7 @@ import axios from 'axios';
 import { useSnackbar } from 'notistack';
 import TextField from '@material-ui/core/TextField';
 
-const NewRepositoryForm=({projectId,onSave})=>{
+const NewRepositoryForm=({projects_id,onSave})=>{
     const { enqueueSnackbar } = useSnackbar();
     const history = useHistory();
     const global=useContext(UserContext);
@@ -17,16 +17,15 @@ const NewRepositoryForm=({projectId,onSave})=>{
 
     const saveRepository=(e) => {
         e.preventDefault();
-        const config = { mode: 'no-cors', crossdomain: true, }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'github-repository';
+       const url = process.env.MIX_BACK_END_BASE_URL + `github-repositories`;
         const body= {
             owner_name: usernameOwner,
             repository_name: repositoryName,
-            project: projectId,
+            projects_id: projects_id,
         }
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url,body, config)
+        axios.post(url,body)
         .then(result => {
             onSave(result.data)
             snackbar(`Data was added successfuly`, 'success'); 

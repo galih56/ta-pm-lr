@@ -35,10 +35,10 @@ const DetailProject = (props) => {
     const snackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     const getDetailProject = () => {
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'project/' + params.id;
+        const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then((result) => {
                 const data = result.data;
                 global.dispatch({ type: 'store-detail-project', payload: data })
@@ -47,7 +47,6 @@ const DetailProject = (props) => {
                 const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
                 global.dispatch({ type: 'handle-fetch-error', payload: payload });
             });
-            
     }
 
     useEffect(() => {
@@ -90,7 +89,7 @@ const DetailProject = (props) => {
                 <Grid lg={12} md={12} sm={12} xs={12} item>
                     <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label={`project reports - ${detailProject.title}`}>
                         <Button component={Link}  color="primary"
-                            to="/">
+                            to="/projects">
                             Projects
                         </Button>
                         <Button component={Link}  color="primary"
@@ -102,11 +101,11 @@ const DetailProject = (props) => {
                         </Typography>
                     </Breadcrumbs>
                 </Grid>
-                <Suspense fallback={<LinearProgress />}>
-                    <Grid xl={12} lg={12} md={12} sm={12} xs={12}>
+                <Grid xl={12} lg={12} md={12} sm={12} xs={12}>
+                    <Suspense fallback={<LinearProgress />}>
                         <Overview detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen} refreshDetailProject={getDetailProject}/>
-                    </Grid>
-                </Suspense>
+                    </Suspense>
+                </Grid>
             </Grid>
     );
 }

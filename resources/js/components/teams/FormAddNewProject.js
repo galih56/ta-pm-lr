@@ -10,8 +10,6 @@ import { Dialog, IconButton, Typography, } from '@material-ui/core/';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import CloseIcon from '@material-ui/icons/Close';
-import AddIcon from '@material-ui/icons/Add';
-import { Chip, Autocomplete } from '@material-ui/core';
 import axios from 'axios';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -47,12 +45,11 @@ const FormAddNewProject=({teamId,open,closeModal,onCreate})=>{
 
     const getProjects = () => {
         let url =''
-        if(global.state.occupation=='System administrator' || global.state.occupation=='CEO') url = process.env.REACT_APP_BACK_END_BASE_URL + 'user/' + global.state.id + '/project';
-        else url = process.env.REACT_APP_BACK_END_BASE_URL + 'project';
-        const config = { mode: 'no-cors', crossdomain: true, }
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        if(global.state.occupation?.name.toLowerCase()=='system administrator' || global.state.occupation?.name.toLowerCase()=='ceo') url = process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';
+        else url = process.env.MIX_BACK_END_BASE_URL + 'projects';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url, {}, {})
             .then((result) => {
                 setProjects(result.data)
             }).catch((error) => {
@@ -70,11 +67,10 @@ const FormAddNewProject=({teamId,open,closeModal,onCreate})=>{
             team:teamId,
             project:project 
         }
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'team-member';
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + 'team-members';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, body, config)
+        axios.post(url, body)
             .then((result) => {
                 onCreate(result.data);
                 snackbar(`A new list successfully created`, 'success');

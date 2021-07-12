@@ -40,7 +40,7 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 export default function ModalCreateMember(props) {
-    var { open, projectId, exceptedUsers,onCreate } = props;
+    var { open, projects_id, exceptedUsers,onCreate } = props;
     var closeModal = props.handleClose;
     const history = useHistory();
     const [newMembers, setNewMembers] = useState([]);
@@ -51,11 +51,10 @@ export default function ModalCreateMember(props) {
     const global = useContext(UserContext);
 
     const getRoles = () => {
-        const config = { mode: 'no-cors', crossdomain: true, }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'memberrole';
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + 'member-roles';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then(result => setRoles(result.data)).catch((error) => {
                 const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
                 global.dispatch({ type: 'handle-fetch-error', payload: payload });
@@ -74,14 +73,12 @@ export default function ModalCreateMember(props) {
         else setShowAlert(false);
         
         if (!showAlert) {
-            const body = { projectId: projectId, members: newMembers, roleId: selectedRole }
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + 'member/';
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            const body = { projects_id: projects_id, members: newMembers, roleId: selectedRole }
+            const url = process.env.MIX_BACK_END_BASE_URL + 'project-members/';
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.post(url, body, config)
+            axios.post(url, body)
                 .then((result) => {
-                    console.log('create members ',result.data)
                     // global.dispatch({ type: 'create-new-member', payload: result.data });
                     onCreate(result.data)
                     handleSnackbar(`New members successfuly created`, 'success');

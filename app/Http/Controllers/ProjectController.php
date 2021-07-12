@@ -11,10 +11,16 @@ use App\Models\Team;
 use App\Models\Task;
 use App\Models\Meeting;
 use App\Models\TaskAttachment;
+use App\Models\GithubRepository;
 use DB;
 
 class ProjectController extends Controller
 {
+    public function __construct(Request $request)
+    {
+        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+    }
+
     public function index()
     {
         $projects=Project::with('columns.cards.cards')->get();
@@ -67,6 +73,10 @@ class ProjectController extends Controller
                 $inserted_members[]=$new_pm->id;
             }
         }        
+        $project=$project->toArray();
+        $project['columns']=[]; //prevent error on front-end
+        
+        return response()->json($project);
     }
 
     public function show($id)
@@ -78,6 +88,7 @@ class ProjectController extends Controller
                                     }]);
                         }])
                         ->with('members.role')->with('members.user')
+                        ->with('meetings')
                         ->findOrFail($id)->toArray();
 
         $members=$project['members'];
@@ -105,13 +116,13 @@ class ProjectController extends Controller
     public function update(Request $request, $id)
     {
         $project=Project::findOrFail($id);
-        $project->title=$request->title;
-        $project->complete=$request->complete;
-        $project->description=$request->description;
-        $project->actual_start=$request->actual_start;
-        $project->actual_end=$request->actual_end;
-        $project->start=$request->start;
-        $project->end=$request->end;
+        if($request->has('title')) $project->title=$request->title;
+        if($request->has('complete')) $project->complete=$request->complete;
+        if($request->has('description')) $project->description=$request->description;
+        if($request->has('actual_start')) $project->actual_start=$request->actual_start;
+        if($request->has('actual_end')) $project->actual_end=$request->actual_end;
+        if($request->has('start')) $project->start=$request->start;
+        if($request->has('end')) $project->end=$request->end;
         $project->save();
         return response()->json($project);
     }
@@ -151,8 +162,24 @@ class ProjectController extends Controller
     public function getTeams($id){
         $teams=Team::from('teams AS t')
                         ->join('teams_has_projects AS tp','t.id','=','tp.teams_id')
-                        ->where('tp.projects_id','=',$id)
-                        ->get();
+                        ->where('tp.projects_id','=',$id)->with('members.user')
+                        ->get()->toArray();
+        $new_teams=[];
+        for ($i=0; $i < count($teams); $i++) { 
+            $team=$teams[$i];
+            $members=[];
+            for ($j=0; $j < count($team['members']); $j++) { 
+                $member=$team['members'][$j];
+                $user=$member['user'];
+                $user['teams_id']=$team['id'];
+                $user['team_members_id']=$member['id'];
+                $member=$user;
+                $members[]=$member;
+            }
+            $team['members']=$members;
+            $new_teams[]=$team;
+        }
+        $teams=$new_teams;
         return response()->json($teams);
     }
 
@@ -228,7 +255,7 @@ class ProjectController extends Controller
                                         ->from('tasks AS t1')
                                         ->leftJoin('lists AS l1','t1.lists_id','=','l1.id')
                                         ->where('l1.projects_id','=',$id);
-                        })->get($id);
+                        })->orderBy('t.start','ASC')->get($id);
 
         $mulai_cepat=[];
         $selesai_cepat=[];
@@ -298,6 +325,84 @@ class ProjectController extends Controller
             'total'=> count($tasks)
         ];
         return response()->json($grouped_tasks_counter);
+    }
 
+    public function getoverallProjectReports(Request $request){
+        $projects=Project::get()->toArray();
+        $new_projects=[];
+        for ($i=0; $i < count($projects); $i++) { 
+            $project=$projects[$i];
+            $tasks=Task::selectRaw('t1.*,t1.parent_task_id AS parentTask,l1.projects_id')
+                ->from('tasks AS t1')
+                ->join('lists AS l1','t1.lists_id','=','l1.id')
+                ->where('l1.projects_id','=',$project['id'])
+                ->orWhereIn('t1.parent_task_id',function($query) use($project){
+                    return $query->select('t2.id')
+                                    ->from('tasks AS t2')
+                                    ->leftJoin('lists AS l2','t2.lists_id','l2.id')
+                                    ->where('l2.projects_id','=',$project['id'])->get();
+                })->get();
+            $project['tasks']=$tasks;
+            $complete_task_counter=0;
+            $incomplete_task_counter=0;
+            for ($j=0; $j < count($tasks); $j++) { 
+                $task=$tasks[$j];
+                if($task->complete) $complete_task_counter++;
+                else $incomplete_task_counter++;
+            }
+            $project['total_complete_tasks']=$complete_task_counter;
+            $project['total_incomplete_tasks']=$incomplete_task_counter;
+            $new_projects[]=$project;
+        }
+        $projects=$new_projects;
+        return response()->json($projects);
+    }
+
+    public function getGithubRepos(Request $request,$id){
+        $repos=GithubRepository::where('projects_id','=',$id)->get();
+        return response()->json($repos);
+    }
+
+    public function getGanttDataSource($id){
+        
+        $project=Project::with(['columns.cards'=>function($q1){
+            return $q1->orderBy('start','ASC')
+                    ->with(['cards'=>function($q2){
+                        return $q2->orderBy('start','ASC');
+                    }]);
+        }])
+        ->findOrFail($id)->toArray();
+
+        $data=[];
+        $realization_data=[];
+        for ($i=0; $i < count($project['columns']); $i++) { 
+            $column=$project['columns'][$i];
+            $new_column=$column;
+            for ($j=0; $j < count($column['cards']); $j++) { 
+                $column['cards'][$j]['realization']=false;
+                $task=$column['cards'][$j];
+                $task_realization=$task;
+                $task_realization['start']=$task['actual_start'];
+                $task_realization['end']=$task['actual_end'];
+                $task_realization['realization']=true;
+                unset($task_realization['actual_start']);
+                unset($task_realization['actual_end']);
+                for ($k=0; $k < count($task['cards']); $k++) { 
+                    $task['cards'][$k]['realization']=false;
+                    $subtask=$task['cards'][$k];
+                    $subtask_realization=$subtask;
+                    $subtask_realization['start']=$subtask['actual_start'];
+                    $subtask_realization['end']=$subtask['actual_end'];
+                    $subtask_realization['realization']=true;
+                    unset($subtask_realization['actual_start']);
+                    unset($subtask_realization['actual_end']);
+                    $task_realization['cards'][]=$subtask_realization;
+                }
+                $new_column['cards'][]=$task;
+                $new_column['cards'][]=$task_realization;
+            }
+            $data[]=$new_column;
+        }
+        return response()->json($data);
     }
 }

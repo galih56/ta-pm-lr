@@ -10,6 +10,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 const selectProjects = (props) => {
+    const projects_id=props.defaultValue;
     let global = useContext(UserContext);
     const classes = useStyles();
 
@@ -20,7 +21,7 @@ const selectProjects = (props) => {
             <InputLabel id="select-project">Projects</InputLabel>
             <Select
                 labelId="select-project"
-                value={projectId}
+                value={projects_id}
                 onChange={handleSelectChange}
                 className={classes.selectEmpty}
             >

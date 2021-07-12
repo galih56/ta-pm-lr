@@ -6,7 +6,6 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import UserContext from '../../../context/UserContext';
 import CloseIcon from '@material-ui/icons/Close';
-import { useSnackbar } from 'notistack';
 import Grid from '@material-ui/core/Grid';
 import axios from 'axios';
 import GithubLoginButton from './GithubLoginButton';
@@ -74,16 +73,13 @@ export default function ModalRepositoryInformation(props) {
     const classes = useStyles();
 
     useEffect(()=>{
-        getRepositoryInfo();
-        console.log(initialState);
+        if(initialState.owner_name) getRepositoryInfo();
     },[initialState])
 
     const getRepositoryInfo = () => {
         setCommits([]);
         setIssues([]);
-        const config = { mode: 'no-cors', crossdomain: true, }
         const url = `https://api.github.com/repos/${initialState.owner_name}/${initialState.repository_name}`;
-        axios.defaults.headers.common['Authorization'] = 'Bearer '+global.state.githubAuth.access_token;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url, {}, config)
             .then((result) => {
@@ -97,7 +93,6 @@ export default function ModalRepositoryInformation(props) {
     const getRepositoryIssues=()=>{
         const config = { mode: 'no-cors', crossdomain: true, }
         const url = `https://api.github.com/repos/${initialState.owner_name}/${initialState.repository_name}/issues`;
-        axios.defaults.headers.common['Authorization'] = 'Bearer '+global.state.githubAuth.access_token;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url, {}, config)
             .then((result) => {
@@ -107,7 +102,6 @@ export default function ModalRepositoryInformation(props) {
     const getRepositoryCommits=()=>{
         const config = { mode: 'no-cors', crossdomain: true, }
         const url = `https://api.github.com/repos/${initialState.owner_name}/${initialState.repository_name}/commits`;
-        axios.defaults.headers.common['Authorization'] = 'Bearer '+global.state.githubAuth.access_token;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url, {}, config)
             .then((result) => {

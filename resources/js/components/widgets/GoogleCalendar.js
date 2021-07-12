@@ -143,7 +143,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                     <Button onClick={()=>{
                         gapi.load('client:auth2', function(){
                             gapi.auth2.authorize({
-                                client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+                                client_id: process.env.MIX_GOOGLE_CLIENT_ID,
                                 scope: "https://www.googleapis.com/auth/calendar",
                                 response_type: 'id_token permission code'
                             }, async function(response) {
@@ -186,7 +186,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                 <Button onClick={()=>{
                     gapi.load('client:auth2', function(){
                         gapi.auth2.authorize({
-                            client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+                            client_id: process.env.MIX_GOOGLE_CLIENT_ID,
                             scope: "https://www.googleapis.com/auth/calendar",
                             response_type: 'id_token permission code'
                         }, async function(response) {

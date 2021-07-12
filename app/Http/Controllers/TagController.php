@@ -7,6 +7,11 @@ use App\Models\Tag;
 
 class TagController extends Controller
 {
+    public function __construct(Request $request)
+    {
+        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+    }
+
     public function index()
     {
         $tags=Tag::all();
@@ -51,7 +56,7 @@ class TagController extends Controller
     public function update(Request $request, $id)
     {
         $tag=Tag::findOrFail($id);
-        $tag->title=$request->title;
+        if($request->has('title')) $tag->title=$request->title;
         $tag->save();
         return response()->json($tag);
     }
@@ -59,6 +64,6 @@ class TagController extends Controller
     public function destroy($id)
     {
         $tag=Tag::findOrFail($id);
-        return response()->json($tag->delete(););
+        return response()->json($tag->delete(),200);
     }
 }

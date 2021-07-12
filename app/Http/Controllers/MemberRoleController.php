@@ -7,6 +7,11 @@ use App\Models\MemberRole;
 
 class MemberRoleController extends Controller
 {
+    public function __construct(Request $request)
+    {
+        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]);  
+    }
+    
     public function index()
     {
         $roles=MemberRole::get();
@@ -51,7 +56,7 @@ class MemberRoleController extends Controller
     public function update(Request $request, $id)
     {
         $member_role=MemberRole::findOrFail($id);
-        $member_role->name=$request->name;
+        if($request->has('name'))$member_role->name=$request->name;
         $member_role->save();
         return response()->json($member_role);
     }

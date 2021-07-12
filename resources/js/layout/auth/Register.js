@@ -28,7 +28,7 @@ const SignUp = (props) => {
             name: username,
             password: password,
             confirmation: confirmPassword,
-            phoneNumber: phoneNumber,
+            phone_number: phoneNumber,
             email: email
         }
         if (username.trim() === '' || password.trim() === '' || phoneNumber.trim() === '' || email.trim() === '') {
@@ -43,15 +43,12 @@ const SignUp = (props) => {
             setPasswordConfirmAlert(true);
             return;
         }
-        const config = {
-            mode: 'no-cors', crossdomain: true, headers: { 'Content-Type': 'application/json' }
-        };
-        if (!window.navigator.onLine) {
-            setOfflineAlert(true);
-        } else {
-            setOfflineAlert(false);
-        }
-        axios.post(process.env.REACT_APP_BACK_END_BASE_URL + 'user', body, config)
+
+        if (!window.navigator.onLine) setOfflineAlert(true);
+        else setOfflineAlert(false);
+        
+        const config = { mode: 'no-cors', crossdomain: true, headers: { 'Content-Type': 'application/json' } };
+        axios.post(process.env.MIX_BACK_END_BASE_URL+'register', body, config)
             .then((result) => {
                 if (result.data.success === true) {
                     setSignUpSuccess(true);

@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
 export default function ModalCreateMeeting(props) {
     const classes = useStyles();
     var open = props.open;
-    var projectId = props.projectId;
+    var projects_id = props.projects_id;
     var closeModal = props.handleClose;
     const history = useHistory();
     const refreshData = props.refreshDetailProject;
@@ -84,16 +84,14 @@ export default function ModalCreateMeeting(props) {
         var datetime_start=moment(date).format('YYYY-MM-DD')+' '+moment(start).format('HH:mm:ss');
         var datetime_end=moment(date).format('YYYY-MM-DD')+' '+moment(end).format('HH:mm:ss');
         const body = {
-            title: title,  start:datetime_start,  end:datetime_end,  projects_id: projectId,  
+            title: title,  start:datetime_start,  end:datetime_end,  projects_id: projects_id,  
             members: members,  users_id: global.state.id
         }
         if (!window.navigator.onLine)  handleSnackbar(`You are currently offline`, 'warning');
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'meeting/';
-
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, body, config)
+        const url = process.env.MIX_BACK_END_BASE_URL + 'meetings/';
+        axios.post(url, body)
             .then((result) => {
                 clearState();
                 refreshData();

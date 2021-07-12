@@ -45,7 +45,6 @@ const headCells = [
     { id: 'title', align: 'left', disablePadding: true, label: 'Title' },
     { id: 'deadline', align: 'right', disablePadding: false, label: 'Start - End' },
     { id: 'project', align: 'right', disablePadding: false, label: 'Project' },
-    { id: 'creator', align: 'right', disablePadding: false, label: 'Creator' },
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -137,9 +136,8 @@ export default function EnhancedTable({data}) {
         setRows(newRows);
         const body = { id: taskId, complete: isChecked };
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + `task/${taskId}`;
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            const config = { headers: { 'X-Authorization':`Bearer ${global.state.token}`, 'Content-Type': 'application/json'  } };
+            const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${taskId}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.patch(url, body, config)
                 .then((result) => {
@@ -202,9 +200,11 @@ export default function EnhancedTable({data}) {
                                             </TableCell>
                                             <TableCell component="th" scope="row" padding="none" style={{ cursor: 'pointer' }}
                                                 onClick={() => {
+                                                    var projects_id=(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id;
+                                                    var lists_id=(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id;
                                                     handleModalOpen({
-                                                        projectId: row.list.project.id,
-                                                        listId: row.list.id,
+                                                        projectId: projects_id,
+                                                        listId: lists_id,
                                                         taskId: row.id,
                                                         open: true
                                                     });
@@ -213,11 +213,10 @@ export default function EnhancedTable({data}) {
                                             </TableCell>
                                             <TableCell align="right">{row.start ? moment(row.start).format('DD MMM YYYY') : ''} - {row.end ? moment(row.end).format('DD MMM YYYY') : ''}</TableCell>
                                             <TableCell align="right">
-                                                <Link to={`/projects/${row.project.id}/`} style={{ textDecoration: 'none', color: 'black' }}>
-                                                    {row.project.title}
+                                                <Link to={`/projects/${(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id}/`} style={{ textDecoration: 'none', color: 'black' }}>
+                                                    {(!row.is_subtask)?row.list.project.title:row.parent_task.list.project}
                                                 </Link>
                                             </TableCell>
-                                            <TableCell align="right">{row.creator.name}</TableCell>
                                         </TableRow>
                                     );
                                 })}

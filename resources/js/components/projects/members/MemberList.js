@@ -95,7 +95,7 @@ function EnhancedTableHead(props) {
 export default function EnhancedTable(props) {
     const classes = useStyles();
     const handleDetailTaskOpen = props.handleDetailTaskOpen;
-    const projectId = props.projectId;
+    const projects_id = props.projects_id;
     const data = props.data;
     let initStateUser = { id: null, name: '', email: '', role: { id: null, name: '' } }
     const [clickedUser, setClickedUser] = useState(initStateUser);
@@ -176,7 +176,7 @@ export default function EnhancedTable(props) {
                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((row, index) => {
                                 return (
-                                    <Row key={row.id} data={row} handleDetailTaskOpen={handleDetailTaskOpen} handleModalOpen={handleModalOpen} projectId={projectId}/>
+                                    <Row key={row.id} data={row} handleDetailTaskOpen={handleDetailTaskOpen} handleModalOpen={handleModalOpen} projects_id={projects_id}/>
                                 );
                             })}
                         {emptyRows > 0 && (
@@ -197,7 +197,7 @@ export default function EnhancedTable(props) {
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
             <ModalCreateMember 
-                projectId={projectId} 
+                projects_id={projects_id} 
                 open={newMemberOpen} 
                 handleClose={() => setNewMemberOpen(false)} 
                 exceptedUsers={rows} 
@@ -214,15 +214,14 @@ function Row(props) {
     const { data, handleDetailTaskOpen, handleModalOpen } = props;
     const [open, setOpen] = useState(false);
     const [tasks, setTasks] = useState([]);
-    const projectId=props.projectId;
+    const projects_id=props.projects_id;
     let global = useContext(UserContext);
 
     const getTasks = (id) => {
-        const config = { mode: 'no-cors', crossdomain: true, }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'member/' + id + '/tasks';
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + 'project-members/' + id + '/tasks';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then((result) => {
                 setTasks(result.data);
             }).catch((error) => {
@@ -258,7 +257,7 @@ function Row(props) {
                     <Collapse in={open} timeout="auto">
                     <Grid container>
                         <Grid xs={12} sm={12} md={12} lg={12} lg={12} item style={{ padding: '1em' }}>
-                            <TaskList projectId={projectId} data={tasks} handleDetailTaskOpen={handleDetailTaskOpen} />
+                            <TaskList projects_id={projects_id} data={tasks} handleDetailTaskOpen={handleDetailTaskOpen} />
                         </Grid>
                     </Grid>
                     </Collapse>

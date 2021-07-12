@@ -6,19 +6,12 @@ function compareDataPointXAscend(dataPoint1, dataPoint2) {
     return dataPoint1.x - dataPoint2.x;
 }
 
-function compareDataPointYDescend(dataPoint1, dataPoint2) {
-    return dataPoint2.y - dataPoint1.y;
-}
-
 const LineChart=({data,title})=> {
     var options = {
         animationEnabled: true,
 		zoomEnabled: true,
         axisX: {
-            title: "Dates",
-            labelFormatter: function ( e ) {       
-                return moment(e.value).format('DD-MM-YYYY');
-             }  
+            title: "Activities",
         },
         axisY: {
             title: "Estimations",
@@ -44,32 +37,37 @@ const LineChart=({data,title})=> {
             shared: true,
             contentFormatter: function ( e ) {
                 var task_title=e.entries[0].dataPoint.title;  
-                var progress=e.entries[0].dataPoint.progress;  
+                var start_label=e.entries[0].dataPoint.start_label;  
+                var end_label=e.entries[0].dataPoint.end_label;  
                 var start=e.entries[0].dataPoint.start;  
-                var actualStart=e.entries[0].dataPoint.actualStart;  
+                var actual_start=e.entries[0].dataPoint.actual_start;  
                 var end=e.entries[0].dataPoint.end;  
-                var actualEnd=e.entries[0].dataPoint.actualEnd;
-                start=moment(start).format('DD-MM-YYYY');
-                actualStart=moment(actualStart).format('DD-MM-YYYY');
-                end=moment(end).format('DD-MM-YYYY');
-                actualEnd=moment(actualEnd).format('DD-MM-YYYY');
-                return (
-                    `<div>
-                        ${task_title} (${(progress?progress:0)}%) <br/>
-                        Plan : ${start} - ${end}<br/>
-                        Realization : ${actualStart} - ${actualEnd} <br/>
-                    </div>`
-                )
+                var actual_end=e.entries[0].dataPoint.actual_end;
+                start=moment(start).format('DD-MMM-YYYY');
+                actual_start=moment(actual_start).format('DD-MM-YYYY');
+                end=moment(end).format('DD-MMM-YYYY');
+                actual_end=moment(actual_end).format('DD-MM-YYYY');
+                var str_html=``;
+                if(title=='Starts')str_html+=  `<div>
+                                                    ${task_title} <br/>
+                                                    Start : ${start} (${actual_start} - ${start_label})<br/>
+                                                </div>`
+                                                
+                if(title=='Ends')str_html+=  `<div>
+                                                    ${task_title} <br/>
+                                                    End : ${end} (${actual_end} - ${end_label})<br/>
+                                                </div>`
+                return str_html;
             }
         },
         data: [{
-            type: "spline",
+            type: "line",
             name: `${title} estimations `,
             showInLegend: true,
             dataPoints: data.estimations
         },
         {
-            type: "spline",
+            type: "line",
             name: `${title} realizations `,
             axisYType: "secondary",
             showInLegend: true,

@@ -44,24 +44,6 @@ const UserMenu = (props) => {
         global.dispatch({ type: 'check-authentication', payload: { history: history } });
     }, []);
 
-    const checkRole = () => {
-        if (global.state.occupation) return (
-            <ListItemText>
-                {global.state.name}
-                <br />
-                {global.state.email}
-                <br />
-                {global.state.occupation.name}
-            </ListItemText>
-        )
-        else return (
-            <ListItemText>
-                {global.state.name}
-                <br />
-                {global.state.email}
-            </ListItemText>
-        )
-    }
 
     return (
         <React.Fragment>
@@ -77,12 +59,21 @@ const UserMenu = (props) => {
                 <UserContext.Consumer>
                     {
                         () => {
-                            // console.log('UserMenu : ', global.state, global.state.authenticated);
                             if (global.state.authenticated) {
                                 return (
                                     <React.Fragment>
                                         <StyledMenuItem>
-                                            {checkRole()}
+                                            <ListItemText>
+                                                {global.state.name}
+                                                <br />
+                                                {global.state.email}
+                                                {(global.state.occupation)?(
+                                                    <>
+                                                        <br />
+                                                        {global.state.occupation.name}
+                                                    </>
+                                                ):<></>}
+                                            </ListItemText>
                                         </StyledMenuItem>
                                         <StyledMenuItem onClick={() => { setLogoutDialog(true); }}>
                                             <ListItemText primary="Logout" />

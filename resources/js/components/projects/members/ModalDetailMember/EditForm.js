@@ -21,7 +21,7 @@ const OpenEditForm = ({ isEdit, data, setData}) => {
 
     const getRoles = () => {
         const config = { mode: 'no-cors', crossdomain: true, }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'memberrole';
+        const url = process.env.MIX_BACK_END_BASE_URL + 'memberrole';
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url, {}, config)
             .then((result) => {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {Link} from 'react-router-dom'
+import {Link, BrowserRouter as Router} from 'react-router-dom'
 import { Paper, Grid, ListItem, Collapse } from '@material-ui/core/';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
@@ -27,13 +27,15 @@ const UserInformation = (props) => {
                     <Paper className={classes.paper}>
                         <Grid container>
                             <Grid lg={12} md={12} sm={12} xs={12} item>
-                                <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="teams">
-                                    <Button component={Link}  color="primary"
-                                        to="/">
-                                        Projects
-                                    </Button>
-                                    <Typography color="textPrimary">Users</Typography>
-                                </Breadcrumbs>
+                                <Router>
+                                    <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="teams">
+                                        <Button component={Link}  color="primary"
+                                            to="/projects">
+                                            Projects
+                                        </Button>
+                                        <Typography color="textPrimary">Users</Typography>
+                                    </Breadcrumbs>
+                                </Router>
                             </Grid>
                             <Grid lg={12} md={12} sm={12} xs={12} item>
                                 <ListItem button dense font="small" onClick={handleUserTableOpen} style={{ paddingBottom: '1.2em' }}> {userTableOpen ? <ExpandLess /> : <ExpandMore />}Users</ListItem>

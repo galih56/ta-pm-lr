@@ -60,13 +60,12 @@ export default function ModalCreateOccupation(props) {
     const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
     const submitData = () => {
         const body = { name: name, children: children }
-        const config = { mode: 'no-cors', crossdomain: true }
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
         if (!window.navigator.onLine) handleSnackbar(`You are currently offline`, 'warning');
         else {
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + 'occupation';
-            axios.defaults.headers.common['Authorization'] = global.state.token;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.post(url, body, config)
+            const url = process.env.MIX_BACK_END_BASE_URL + 'occupations';
+            axios.post(url, body)
                 .then((result) => {
                     setName('');
                     setChildren([]);

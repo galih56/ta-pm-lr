@@ -93,15 +93,12 @@ export default function ModalCreateProject(props) {
             handleSnackbar(`You are currently offline`, 'warning');
         } else {
             var url = '';
-            if(global.state.occupation=='System administrator' || global.state.occupation=='CEO'){
-                url=process.env.REACT_APP_BACK_END_BASE_URL + 'user/' + global.state.id + '/project';
-            }else{
-                url=process.env.REACT_APP_BACK_END_BASE_URL + 'project';
-            }
+            if(global.state.occupation?.name=='system administrator' || global.state.occupation?.name=='ceo') url=process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';
+            else url=process.env.MIX_BACK_END_BASE_URL + 'projects';
 
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.post(url, body,  { mode: 'no-cors', crossdomain: true})
+            axios.post(url, body)
                 .then((result) => {
                     if (result.status === 200) {
                         global.dispatch({ type: 'create-new-project', payload: result.data })
@@ -168,10 +165,10 @@ export default function ModalCreateProject(props) {
                                 </LocalizationProvider> 
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <UserSearchBar inputLabel={"Project Owner"}onChange={(values)=>setProjectOwner(values.map((value)=>value.id))}/>
+                                <UserSearchBar required={true} inputLabel={"Project Owner"}onChange={(values)=>setProjectOwner(values.map((value)=>value.id))}/>
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <UserSearchBar inputLabel={"Project Manager"}onChange={(values)=>setProjectManager(values.map((value)=>value.id))}/>
+                                <UserSearchBar required={true} inputLabel={"Project Manager"}onChange={(values)=>setProjectManager(values.map((value)=>value.id))}/>
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
                                 <TextField variant="standard"
@@ -187,7 +184,7 @@ export default function ModalCreateProject(props) {
                         </Grid>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={submitData} color="primary">Create</Button>
+                        <Button type="submit" color="primary">Create</Button>
                     </DialogActions>
                 </form>
             )

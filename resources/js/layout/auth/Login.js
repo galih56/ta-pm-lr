@@ -2,13 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import { withRouter, useHistory } from 'react-router-dom';
 import Button  from '@material-ui/core/Button';
 import TextField  from '@material-ui/core/TextField';
-import Checkbox  from '@material-ui/core/Checkbox';
-import Grid  from '@material-ui/core/Grid';
-import Typography  from '@material-ui/core/Typography';
-import Container  from '@material-ui/core/Container';
 import axios from 'axios';
 import UserContext from '../../context/UserContext';
-import GoogleLogin from 'react-google-login';
 import Alert from '@material-ui/lab/Alert';
 import {useSnackbar} from 'notistack';
 
@@ -32,13 +27,13 @@ const SignIn = (props) => {
 
     }, [global.state.authenticated]);
 
-    const sendLoginRequest = (context, body, config) => {
-        if (context.state.authenticated && context.state.authenticated == false) {
-            context.dispatch({ type: 'remember-authentication' });
+    const sendLoginRequest = ( body) => {
+        if (global.state.authenticated && global.state.authenticated == false) {
+            global.dispatch({ type: 'remember-authentication' });
         } else {
-            axios.post(process.env.REACT_APP_BACK_END_BASE_URL + 'login', body, config)
+            axios.post(process.env.MIX_BACK_END_BASE_URL + 'login', body, { headers: { 'Content-Type': 'application/json' } })
                 .then((result) => {
-                    context.dispatch({
+                    global.dispatch({
                         type: 'authenticate',
                         payload: result.data
                     });
@@ -46,7 +41,7 @@ const SignIn = (props) => {
                     if (error.response) {
                         // Request made and server responded
                         switch (error.response.status) {
-                            case 403:
+                            case 401:
                                 handleSnackbar(`Wrong Credentials`, 'warning');
                                 setWrongCredentialAlert(true);
                                 break;
@@ -68,10 +63,7 @@ const SignIn = (props) => {
         const body = { password: password, email: email }
         if (email.trim() == '' || password.trim() == '') setInputRequireAlert(true);
         else setInputRequireAlert(false);
-        const config = {
-           headers: { 'Content-Type': 'application/json' }
-        }
-        sendLoginRequest(global, body, config);
+        sendLoginRequest(body);
     }
 
     return (

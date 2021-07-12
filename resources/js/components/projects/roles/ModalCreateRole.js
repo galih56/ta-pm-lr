@@ -59,23 +59,19 @@ export default function ModalCreateRole(props) {
     const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
     const submitData = () => {
         const body = { name: name, children: children }
-        const config = { mode: 'no-cors', crossdomain: true }
-        if (!window.navigator.onLine) handleSnackbar(`You are currently offline`, 'warning');
-        else {
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + 'memberrole';
-            axios.defaults.headers.common['Authorization'] = global.state.token;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.post(url, body, config)
-                .then((result) => {
-                    setName('');
-                    handleSnackbar(`A new role successfully created`, 'success');
-                    closeModal();
-                    props.onCreate(result.data);
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                });
-        }
+        const url = process.env.MIX_BACK_END_BASE_URL + 'member-roles';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.post(url, body)
+            .then((result) => {
+                setName('');
+                handleSnackbar(`A new role successfully created`, 'success');
+                closeModal();
+                props.onCreate(result.data);
+            }).catch((error) => {
+                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
+                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            });
     }
     const checkIfAuthenticated = () => {
         if (global.state.authenticated === true) {

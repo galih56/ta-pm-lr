@@ -49,24 +49,24 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                     <Grid item lg={6} md={6} sm={6} xs={12}>
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                             <DatePicker 
-                                value={data.actualStart} 
+                                value={data.actual_start} 
                                 label="Execution start at : "
                                 ampm={false}
                                 renderInput={(params) => <TextField {...params} variant="standard" />}
                                 onChange={(value)=>{
-                                    setData({ ...data,actualStart:moment(value).format()})
+                                    setData({ ...data,actual_start:moment(value).format()})
                             }}/>
                         </LocalizationProvider>
                     </Grid>
                     <Grid item lg={6} md={6} sm={6} xs={12}>
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                         <DatePicker 
-                            value={data.actualEnd} 
+                            value={data.actual_end} 
                             label="Execution end at : "
                             ampm={false}
                             renderInput={(params) => <TextField {...params} variant="standard" />}
                             onChange={(value)=>{
-                                setData({ ...data,actualEnd:moment(value).format()})
+                                setData({ ...data,actual_end:moment(value).format()})
                             }}/>
                         </LocalizationProvider>
                     </Grid>
@@ -83,14 +83,15 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <Typography>Attachments : </Typography>
                     <Attachments
-                        detailTask={data} setDetailTask={setData} 
+                        detailTask={data} 
+                        setDetailTask={setData} 
                         isEdit={isEdit}
                         taskId={data.id}
                         projectId={detailProject.id}
                         listId={data.listId}
                     ></Attachments>
                 </Grid>
-               {!data.isSubtask?(
+               {!data.is_subtask?(
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                         <Subtasks isEdit={isEdit} 
                             detailTask={data}  
@@ -119,8 +120,8 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                     <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>End : {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}</Typography>
                 </Grid>
                 <Grid item lg={6} md={6} sm={6} xs={12} >
-                    <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>Actual Start : {data.actualStart ? moment(data.actualStart).format('DD MMMM YYYY') : ''}<StatusChip status={data.startLabel}/></Typography>
-                    <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>Actual End : {data.actualEnd ? moment(data.actualEnd).format('DD MMMM YYYY') : ''}<StatusChip status={data.endLabel}/></Typography>
+                    <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>Actual Start : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''}<StatusChip status={data.start_label}/></Typography>
+                    <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>Actual End : {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}<StatusChip status={data.end_label}/></Typography>
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <Typography>Description : </Typography>
@@ -135,7 +136,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                         listId={data.listId}>
                     </Attachments>
                 </Grid>
-               {!data.isSubtask?(
+               {!data.is_subtask?(
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <Subtasks  
                         isEdit={isEdit} 

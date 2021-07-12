@@ -8,6 +8,11 @@ use App\Models\TaskMember;
 
 class ProjectMemberController extends Controller
 {
+    public function __construct(Request $request)
+    {
+        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+    }
+
     public function index()
     {
         $members=ProjectMember::with('project')->with('user')->get();
@@ -63,7 +68,7 @@ class ProjectMemberController extends Controller
     public function update(Request $request, $id)
     {
         $project_member=ProjectMember::findOrFail($id);
-        $project_member->roles_id=$request->roles_id;
+        if($request->has('roles_id')) $project_member->roles_id=$request->roles_id;
         $project_member->save();
 
         $project_member=$this->getDetailProjectMember($id);

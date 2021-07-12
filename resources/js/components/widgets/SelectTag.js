@@ -18,8 +18,8 @@ const SelectTag = (props) => {
     const fetchData = () => {
         if (window.navigator.onLine) {
             const config = { mode: 'no-cors', crossdomain: true, }
-            const url = 'http://localhost:1337/tag/';
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            const url = process.env.MIX_BACK_END_BASE_URL+'tags';
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.get(url, {}, config)
                 .then(result => {

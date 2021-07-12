@@ -67,34 +67,28 @@ export default function ModalDetailUser(props) {
             occupation: data.occupation, profilePicture: ''
         };
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + `user/${props.initialState.id}`;
-            try {
-                axios.defaults.headers.common['Authorization'] = global.state.token;
-                axios.defaults.headers.post['Content-Type'] = 'application/json';
-                axios.patch(url, body, config)
-                    .then(result => {
-                        setData(result.data);
-                        props.onUpdate(result.data, 'update');
-                        handleSnackbar(`Data has been updated`, 'success');
-                    }).catch((error) => {
-                        const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                        global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                    });
-            } catch (error) {
-                handleSnackbar('Failed to send request', 'error');
-            }
+            const url = process.env.MIX_BACK_END_BASE_URL + `users/${props.initialState.id}`;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+            axios.defaults.headers.post['Content-Type'] = 'application/json';
+            axios.patch(url, body)
+                .then(result => {
+                    setData(result.data);
+                    props.onUpdate(result.data, 'update');
+                    handleSnackbar(`Data has been updated`, 'success');
+                }).catch((error) => {
+                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
+                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                });
         }
     }
 
     const deleteUser = () => {
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + `user/${data.id}`;
+            const url = process.env.MIX_BACK_END_BASE_URL + `users/${data.id}`;
             try {
-                axios.defaults.headers.common['Authorization'] = global.state.token;
+                axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
                 axios.defaults.headers.post['Content-Type'] = 'application/json';
-                axios.delete(url, {}, config)
+                axios.delete(url)
                     .then((result) => {
                         props.onUpdate(data, 'delete');
                         handleSnackbar(`Data has been deleted`, 'success');

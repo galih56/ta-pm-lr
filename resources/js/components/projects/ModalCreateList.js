@@ -58,7 +58,7 @@ const useStyles = makeStyles((theme) => ({
 export default function ModalCreateList(props) {
     const classes = useStyles();
     var open = props.open;
-    var projectId = props.projectId;
+    var projects_id = props.projects_id;
     var closeModal = props.handleClose;
     const history = useHistory();
     const refreshData = props.refreshDetailProject;
@@ -76,16 +76,12 @@ export default function ModalCreateList(props) {
             title: title,
             start: start,
             end: end,
-            projects_id: projectId,
+            projects_id: projects_id,
             cards: []
         }
-        if (!window.navigator.onLine) {
-            snackbar(`You are currently offline`, 'warning');
-        }
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'list/';
-
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        
+        const url = process.env.MIX_BACK_END_BASE_URL + 'lists/';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.post(url, body, config)
             .then((result) => {

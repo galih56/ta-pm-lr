@@ -55,11 +55,10 @@ export default function ModalDetailMeeting(props) {
 
     const getDetailMeeting = () => {
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + 'meeting/' + initialState.id;
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            const url = process.env.MIX_BACK_END_BASE_URL + 'meetings/' + initialState.id;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.get(url, {}, config)
+            axios.get(url)
                 .then((result) => {
                     const data = result.data;
                     global.dispatch({ type: 'store-detail-meeting', payload: data })
@@ -78,17 +77,14 @@ export default function ModalDetailMeeting(props) {
     }, [initialState]);
 
     const saveChanges = (body) => {
-        console.log(body);
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + `meeting/${initialState.id}`;
+            const url = process.env.MIX_BACK_END_BASE_URL + `meetings/${initialState.id}`;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+            axios.defaults.headers.post['Content-Type'] = 'application/json';
             try {
-                axios.defaults.headers.common['Authorization'] = global.state.token;
-                axios.defaults.headers.post['Content-Type'] = 'application/json';
-                axios.patch(url, body, config)
+                axios.patch(url, body)
                     .then((result) => {
                         handleSnackbar(`Data has been updated`, 'success');
-                        console.log('result.data : ',result.data)
                         setData(result.data);
                     }).catch((error) => {
                         const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
@@ -102,11 +98,10 @@ export default function ModalDetailMeeting(props) {
 
     const deleteMeeting = () => {
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + `meeting/${data.id}`;
+            const url = process.env.MIX_BACK_END_BASE_URL + `meetings/${data.id}`;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+            axios.defaults.headers.post['Content-Type'] = 'application/json';
             try {
-                axios.defaults.headers.common['Authorization'] = global.state.token;
-                axios.defaults.headers.post['Content-Type'] = 'application/json';
                 axios.delete(url, {}, config)
                     .then((result) => {
                         handleSnackbar(`Data has been deleted`, 'success');

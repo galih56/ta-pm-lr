@@ -1,38 +1,56 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext,useCallback } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import {
-    Grid, List, ListItem, ListItemSecondaryAction,
-    IconButton, Typography, Button, Checkbox,
-    Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
-} from '@material-ui/core';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Grid from '@material-ui/core/Grid';
 import ModalCreateSubtask from '../../ModalCreateSubtask';
 import FormCreateNewTask from '../../FormCreateNewTask';
 import CancelRoundedIcon from '@material-ui/icons/CancelRounded';
-import axios from 'axios';
 import UserContext from '../../../../context/UserContext';
 import { useSnackbar } from 'notistack';
+import ModalDetailTask from './../ModalDetailTask';
 import moment from 'moment';
-import ModalDetailSubtask from './ModalDetailSubtask';
+import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
     root: { width: '100%', backgroundColor: theme.palette.background.paper, },
 }));
-
 const Subtasks = (props) => {
+    const global = useContext(UserContext);
     var isEditing = props.isEdit;
     const classes = useStyles();
-    const parentTask = props.detailTask.id;
+    const parent_task_id = props.detailTask.id;
     const {detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDelete}=props;
-    
-    const { listId } = props.detailTask;
-    const global = useContext(UserContext);
+    const [detailTaskOpen, setDetailTaskOpen] = useState(false);
+    const [clickedTask, setClickedTask] = useState(clickedTaskInitialState);
+        
+    var clickedTaskInitialState={
+        id: '', projects_id: '', lists_id: null, list:null,
+        title: '', description: '', label: '', complete: false, progress: 0,
+        start:null,end:null,actual_start:null,actual_end:null, start_label:'',end_label:'',
+        list: null, tags: [], members: [], parent_task_id:parent_task_id,
+        cards: [], logs: [], comments: [], attachments: [],creator:null,is_subtask:false
+    }
+
     var initialStateNewTask= {
-        id: '', title: '', description: '', projectId:detailProject.id,
+        id: '', title: '', description: '', projects_id:detailProject.id,
         label: '', progress: 0, start: null, end: null, 
         actualStart: null, actualEnd: null, creator:null,
-        tags: [],  creator: global.state.id,
-        isSubtask:true, parentTask:parentTask
+        tags: [], users_id: global.state.id,
+        isSubtask:true, parent_task_id:parent_task_id
     }
+
+
     const [data, setData] = useState([]);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [showCreateSubtaskForm, setShowCreateSubtaskForm] = useState(false);
@@ -46,11 +64,10 @@ const Subtasks = (props) => {
     }, [props.detailTask]);
 
     const handleAddNewTask=()=>{
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + `task`;
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, newTask, config)
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.post(url, newTask)
             .then((result) => {
                 setShowCreateSubtaskForm(false);
                 var newData=[...data,result.data];
@@ -76,11 +93,10 @@ const Subtasks = (props) => {
         if(onTaskUpdate)onTaskUpdate(newDetailTask);
 
         const body = { id: id, complete: event.target.checked };
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + `task/${id}`;
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${id}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.patch(url, body, config)
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.patch(url, body)
             .then((result) => {
                 handleSnackbar(`Data has been updated`, 'success');
             }).catch((error) => {
@@ -89,27 +105,23 @@ const Subtasks = (props) => {
             });
     }
     const handleRemoveSubtask = (subtask) => {
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + `task/${subtask.id}`;
-
-        if (window.navigator.onLine) {
-            axios.defaults.headers.common['Authorization'] = global.state.token;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.delete(url, {}, config)
-                .then((result) => {
-                    var newSubtasks = data.filter((item) => {
-                        if (item.id != subtask.id) return item
-                    });
-                    setData(newSubtasks)
-                    setDetailTask({...detailTask,cards:newSubtasks});
-                    if(onTaskDelete)onTaskDelete(subtask);
-                    global.dispatch({ type: 'remove-subtask', payload: subtask })
-                }).catch((error) => {
-                    error = { ...error };
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${subtask.id}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.delete(url)
+            .then((result) => {
+                var newSubtasks = data.filter((item) => {
+                    if (item.id != subtask.id) return item
                 });
-        } 
+                setData(newSubtasks)
+                setDetailTask({...detailTask,cards:newSubtasks});
+                if(onTaskDelete)onTaskDelete(subtask);
+                global.dispatch({ type: 'remove-subtask', payload: subtask })
+            }).catch((error) => {
+                error = { ...error };
+                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
+                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            });
     }
 
     const buttonShowCreateSubtask = (isEdit) => {
@@ -124,9 +136,7 @@ const Subtasks = (props) => {
                             return (
                                 <ModalCreateSubtask 
                                 open={showCreateSubtaskForm} 
-                                handleClose={()=>{
-                                    setShowCreateSubtaskForm(false);
-                                }}>
+                                handleClose={()=> setShowCreateSubtaskForm(false)}>
                                     <FormCreateNewTask
                                         classes={classes} 
                                         newTask={newTask} 
@@ -143,6 +153,30 @@ const Subtasks = (props) => {
             );
         }
     }
+
+    const handleDetailTaskOpen = (taskInfo) => {
+        const {task, open } = taskInfo;
+        setDetailTaskOpen(open);
+        setClickedTask({ ...task,tasks_id:task.id });
+    };
+
+    const showModalDetailTask = useCallback(() => {
+        if (clickedTask?.id && detailTaskOpen == true) {
+            return (
+                <ModalDetailTask
+                    open={detailTaskOpen}
+                    closeModalDetailTask={() => {
+                        handleDetailTaskOpen({task :clickedTaskInitialState,open:false})
+                    }}
+                    projects_id={detailProject.id}
+                    detailProject={detailProject}
+                    initialState={clickedTask} 
+                    onTaskUpdate={onTaskUpdate}
+                    onTaskDelete={onTaskDelete}
+                    />
+            )
+        }
+    }, [clickedTask]);
 
     const showActionButton = (isEdit, subtask) => {
         if (isEdit) {
@@ -175,16 +209,15 @@ const Subtasks = (props) => {
                             <Grid container>
                                 <Grid item xl={12} md={12} sm={12} xs={12} 
                                     style={{cursor:'pointer'}}
-                                >
-                                                    
+                                >        
                                     <Checkbox
                                         onChange={(event)=>{
                                             handleCompleteTask(item.id,event)
                                         }}
                                         checked={item.complete}
                                     />
-                                    <span  > 
-                                        {item.title} {item.end ? moment(item.end).format('DD MMMM YYYY') : ''} - {item.end ? moment(item.end).format('DD MMMM YYYY') : ''}
+                                    <span onClick={()=> handleDetailTaskOpen({task:item,open:true})} > 
+                                        {item.title} {item.start ? moment(item.start).format('DD MMMM YYYY') : ''} - {item.end ? moment(item.end).format('DD MMMM YYYY') : ''}
                                     </span>
                                 </Grid>
                                 <Grid item xl={6} md={6} sm={12} xs={12}>
@@ -197,6 +230,7 @@ const Subtasks = (props) => {
                     )
                 })}
             </List >
+            {showModalDetailTask()}
         </React.Fragment>
     );
 }

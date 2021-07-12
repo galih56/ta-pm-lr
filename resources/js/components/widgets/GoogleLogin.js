@@ -10,7 +10,7 @@ const GoogleLogin  = ({meeting}) => {
     const setAuth2 = async () => {
       const auth2 = await loadAuth2(
         gapi,
-        process.env.REACT_APP_GOOGLE_CLIENT_ID, 
+        process.env.MIX_GOOGLE_CLIENT_ID, 
         "https://www.googleapis.com/auth/calendar"
       )
       if (auth2.isSignedIn.get()) {
