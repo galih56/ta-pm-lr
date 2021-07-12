@@ -146,17 +146,21 @@ const DetailProject = (props) => {
     }
 
     const getGanttDataSource=()=>{
+        console.log('gantt datasource update')
         var data=[];
         var columns=detailProject.columns;
         for (let i = 0; i < columns.length; i++) {
+            columns[i].isManual=false;
             var column=columns[i];
             var new_column={...column,cards:[]};
             for (let j = 0; j < column.cards.length; j++) {
                 column.cards[j].realization=false;
+                column.cards[j].isManual=true;
                 var task=column.cards[j];
                 var task_realization={...task,title:`Realisasi ${task.title}`,start:task.actual_start,end:task.actual_end,realization:true,cards:[]};
                 for (let k = 0; k < task.cards.length; k++) {
                     column.cards[j].cards[k].realization=false;
+                    column.cards[j].cards[k].isManual=true;
                     var subtask=task.cards[k];
                     var subtask_realization={...subtask,title:`Realisasi ${subtask.title}`, start:subtask.actual_start,end:subtask.actual_end,realization:true};
                     task_realization.cards.push(subtask_realization);

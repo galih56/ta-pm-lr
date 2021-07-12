@@ -12,6 +12,7 @@ class GanttChart extends React.Component {
         this.taskFields = {
             id: 'id', name: 'title', startDate: 'start', endDate:'end',
             duration: 'duration', progress: 'progress', child: 'cards',
+            manual: 'isManual'
         };
         this.splitterSettings = {
             position: "20%"
@@ -123,12 +124,12 @@ class GanttChart extends React.Component {
                 splitterSettings={this.splitterSettings}
                 toolbar={this.toolbarOptions}
                 highlightWeekends={true}
-                taskFields={this.taskFields} 
                 taskbarTemplate={this.TaskbarTemplate.bind(this)} 
                 parentTaskbarTemplate={this.ParentTaskbarTemplate.bind(this)} 
                 milestoneTemplate={this.MilestoneTemplate.bind(this)}
                 labelSettings={this.labelSettings} 
                 actionComplete={this.HandleActionComplete.bind(this)}
+                taskMode="Custom"
             >
                 <Inject services={[Toolbar,Selection, Sort,Edit ]}/>
                 <ColumnsDirective>
