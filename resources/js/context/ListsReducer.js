@@ -1,7 +1,5 @@
 const createNewList = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
-
+    var user = JSON.parse(localStorage.getItem('user'));
     const newProjects = user.projects.map((project) => {
         if (project.id == payload.projects_id) {
             project.columns.push(payload);
@@ -10,18 +8,16 @@ const createNewList = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 const removeList = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
-
+    var user = JSON.parse(localStorage.getItem('user'));
+    console.log('removeList',payload)
     const newProjects = user.projects.map((project) => {
-        if (project.id == payload.projectId) {
+        if (project.id == payload.projects_id) {
             project.columns = project.columns.filter(column => {
-                console.log('column : ',column.id,payload.id,payload.laneId)
-                if (column.id != payload.id ||column.id != payload.laneId ) {
+                if (column.id != payload.id ) {
                     return column;
                 }
             });
@@ -29,15 +25,13 @@ const removeList = (payload) => {
         return project;
     });
     user.projects = newProjects;
-    console.log('newProjects : ',newProjects)
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 
 const updateList = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
     const newProjects = user.projects.map((project) => {
         if (project.id == payload.project) {
             project.columns = project.columns.map((column) => {
@@ -51,7 +45,7 @@ const updateList = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 export { createNewList, removeList, updateList }

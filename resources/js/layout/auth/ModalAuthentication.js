@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import useGlobalState from './../../hooks/GlobalState';
+import React, { useState, useEffect,useContext } from 'react';
+import UserContext from './../../context/UserContext';
 import { useHistory, useLocation } from "react-router-dom";
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Avatar from '@material-ui/core/Avatar';
@@ -52,7 +52,7 @@ const AuthPage = (props) => {
     const [value, setValue] = useState(0);
     let history = useHistory();
     let location = useLocation();
-    let global = useGlobalState();
+    let global = useContext(UserContext);
     const handleChange = (event, newValue) => setValue(newValue);
 
     useEffect(() => {

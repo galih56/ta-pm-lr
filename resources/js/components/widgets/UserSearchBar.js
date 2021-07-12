@@ -12,14 +12,12 @@ export default function UserSearchbar(props) {
     const [users, setUsers] = useState([]);
     const [options, setOptions] = useState([]);
     let global = useContext(UserContext);
-    let history = useHistory();
 
     const getUsers = () => {
-        const config = { mode: 'no-cors', crossdomain: true, }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'user';
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + 'users';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then((result) => {
                 console.log('getUsers : ',result.data);
                 setUsers(result.data);
@@ -34,7 +32,7 @@ export default function UserSearchbar(props) {
         else getUsers();
     }, []);
 
-    function checkExistingMember(id, arr) {
+    function checkExistingMember(id, arr=[]) {
         var exists = false;
         try {  
             for (let i = 0; i < arr.length; i++) {
@@ -51,10 +49,10 @@ export default function UserSearchbar(props) {
     }
 
     useEffect(() => {
-        global.dispatch({ type: 'check-authentication', payload: { history: history } });
         var filteredOptions = users.filter((option) => { 
             if (!checkExistingMember(option.id, exceptedUsers)
-                && !'administrator sistem'.includes(option.name.toLowerCase())) return option;
+                && !('administrator sistem'.includes(option.name.toLowerCase()) 
+                || 'ceo'.includes(option.name.toLowerCase()))) return option;
         });
         filteredOptions = filteredOptions.map((option) => {
             const firstLetter = option.name[0].toUpperCase();

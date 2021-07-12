@@ -46,9 +46,9 @@ const GoogleDriveButton = (props) => {
             }
             if (!window.navigator.onLine) handleSnackbar(`You are currently offline`, 'warning');
 
-            const config = { mode: 'no-cors', crossdomain: true }
+            const config ={ headers: { 'X-Authorization':`Bearer ${global.state.token}`, 'Content-Type': 'application/json'  } }
             const url = process.env.REACT_APP_BACK_END_BASE_URL + 'task-attachments/';
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.post(url, body, config)
                 .then((result) => {

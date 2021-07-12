@@ -29,6 +29,9 @@ const Home = (props) => {
     const history =useHistory();
 
     useEffect(()=>{
+        if(global.state.authenticated==false){ 
+            history.push('/auth');
+        }
         const queryParams = new URLSearchParams(history.location.search)
         if (queryParams.has('code')) {
             var codeResponse=queryParams.get('code');
@@ -37,18 +40,20 @@ const Home = (props) => {
         getProjects();
         getTasks();
     },[])
-    
+
     const getProjects = () => {
         let url =''
-        if(global.state.occupation=='System administrator' || global.state.occupation=='CEO'){
-            url = process.env.REACT_APP_BACK_END_BASE_URL + 'user/' + global.state.id + '/project';
+        if(global.state.occupation?.name.toLowerCase()=='system administrator' 
+            || global.state.occupation?.name.toLowerCase()=='ceo'
+            || global.state.occupation?.name.toLowerCase()=='manager'
+            || global.state.occupation?.name.toLowerCase()=='project manager'){
+            url = process.env.MIX_BACK_END_BASE_URL + 'projects';
         }else{
-            url = process.env.REACT_APP_BACK_END_BASE_URL + 'project';
+            url = process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';
         }
-        const config = { mode: 'no-cors', crossdomain: true, }
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then((result) => {
                 global.dispatch({ type: 'store-projects', payload: result.data });
             }).catch((error) => {
@@ -58,16 +63,14 @@ const Home = (props) => {
     }
 
     const getTasks = () => {
-        const config = { mode: 'no-cors', crossdomain: true, }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'user/' + global.state.id + '/tasks';
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/tasks';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then((result) => {
                 setTasks(result.data);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                console.log(error);
             });
     }
 

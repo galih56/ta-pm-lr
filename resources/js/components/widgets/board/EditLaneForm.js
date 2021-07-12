@@ -73,7 +73,7 @@ const EditLaneForm = (props) => {
     const initCardState = {
         id: null, title: '', description: '', 
         label: '', progress: 0, start: null, end: null, 
-        tags: [], listId: laneId,creator:null ,members:[]
+        tags: [], lists_id: laneId,creator:null ,members:[]
     };
     const [laneDetail, setLaneDetail] = useState(initLaneState);
     const [newCard, setNewCard] = useState(initCardState);
@@ -117,11 +117,9 @@ const EditLaneForm = (props) => {
         if(list){
             setLaneDetail(list);
         }else{
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = 'http://localhost:1337/list/' + laneId;
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            const url = process.env.MIX_BACK_END_BASE_URL+'lists/' + laneId;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.get(url, {}, config)
+            axios.get(url, {}, {})
                 .then((result) => {
                     setLaneDetail(result.data)
                 }).catch((error) => {
@@ -138,11 +136,10 @@ const EditLaneForm = (props) => {
             project: laneDetail.project,
         }
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = 'http://localhost:1337/list/' + laneDetail.id;
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            const url = process.env.MIX_BACK_END_BASE_URL+'lists/' + laneDetail.id;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.patch(url, body, config)
+            axios.patch(url, body)
                 .then((result) => {
                     handleSnackbar(`Data has been updated`, 'success');
                     global.dispatch({ type: 'update-list', payload: body });
@@ -157,24 +154,22 @@ const EditLaneForm = (props) => {
     }
 
     const deleteList = () => {
+        global.dispatch({ type: 'remove-list', payload: {projects_id:detailProject.id,id:laneId} });
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = 'http://localhost:1337/list/' + laneDetail.id;
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            const url = process.env.MIX_BACK_END_BASE_URL+'lists/' + laneDetail.id;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.delete(url, { id: laneDetail.id }, config)
+            axios.delete(url, { id: laneDetail.id })
             .then((result) => {
                 handleSnackbar(`Data has been deleted`, 'success');
                 setModalOpen(false);
-                global.dispatch({ type: 'remove-list', payload: {projectId:detailProject.id,listId:laneId,...laneDetail} });
-            }).catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history };
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
-            });
+                onCancel();
+            }).catch((error) => console.log(error));
         } else {
             handleSnackbar(`You are currently offline`, 'warning');
         }
     }
+
     const checkIfDeletingList = (isDeletingLane) => {
         if (isDeletingLane) {
             return (
@@ -182,7 +177,7 @@ const EditLaneForm = (props) => {
                     <Typography variant="body2">Data will be permanently deleted. Are you sure?</Typography>
                     <br />
                     <Button onClick={() => setIsDeletingLane(false)}>Cancel</Button>
-                    <Button onClick={()=>deleteList()} variant="contained" color="secondary">Delete</Button>
+                    <Button onClick={(e)=>{e.preventDefault();deleteList();}} variant="contained" color="secondary">Delete</Button>
                 </Grid>
             );
         } else {

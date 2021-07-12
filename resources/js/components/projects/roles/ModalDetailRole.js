@@ -64,29 +64,23 @@ export default function ModalDetailRole(props) {
     const saveChanges = () => {
         let body = data;
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + `memberrole/${props.initialState.id}`;
-            try {
-                axios.defaults.headers.common['Authorization'] = global.state.token;
-                axios.defaults.headers.post['Content-Type'] = 'application/json';
-                axios.patch(url, body, config)
-                    .then((result) => {
-                        handleSnackbar(`Data has been updated`, 'success');
-                        props.onUpdate(result.data);
-                    }).catch((error) => {
-                        const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                        global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                    });
-            } catch (error) {
-                handleSnackbar('Failed to send request', 'error');
-            }
-        }
+            const url = process.env.MIX_BACK_END_BASE_URL + `member-roles/${props.initialState.id}`;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+            axios.defaults.headers.post['Content-Type'] = 'application/json';
+            axios.patch(url, body, config)
+                .then((result) => {
+                    handleSnackbar(`Data has been updated`, 'success');
+                    props.onUpdate(result.data);
+                }).catch((error) => {
+                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
+                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                });        }
     }
 
     const deleteRole = () => {
         if (window.navigator.onLine) {
             const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + `memberrole/${data.id}`;
+            const url = process.env.MIX_BACK_END_BASE_URL + `memberrole/${data.id}`;
             try {
                 axios.defaults.headers.common['Authorization'] = global.state.token;
                 axios.defaults.headers.post['Content-Type'] = 'application/json';

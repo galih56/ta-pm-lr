@@ -94,8 +94,7 @@ export default function EnhancedTable() {
 
     const getUsers = () => {
         const config = { mode: 'no-cors', crossdomain: true, }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'user';
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + 'users';
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url, {}, config)
             .then((result) => {
@@ -190,7 +189,7 @@ export default function EnhancedTable() {
                                                     label="Unverified"
                                                     style={{ outlineColor: '#D50000', color: '#D50000', backgroundColor: '#FFEBEE' }} />}
                                         </TableCell>
-                                        <TableCell align="left">{row.occupation.name}</TableCell>
+                                        <TableCell align="left">{row.occupation?.name}</TableCell>
                                         <TableCell align="right">{row.last_login ? moment(row.last_login).format('DD MMM YYYY') : ''}</TableCell>
                                     </TableRow>
                                 );

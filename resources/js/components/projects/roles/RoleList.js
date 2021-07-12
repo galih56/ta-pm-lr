@@ -15,7 +15,6 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { visuallyHidden } from '@material-ui/utils';
 import { useSnackbar } from 'notistack';
-import moment from 'moment';
 import axios from 'axios';
 import ModalCreateRole from './ModalCreateRole';
 import ModalDetailRole from './ModalDetailRole';
@@ -86,7 +85,7 @@ function EnhancedTableHead(props) {
 
 export default function EnhancedTable(props) {
     const classes = useStyles();
-    const projectId = props.projectId;
+    const projects_id = props.projects_id;
     const [newRoleOpen, setNewRoleOpen] = useState(false);
     const [modalDetailOpen,setModalDetailOpen]=useState({open:false,data:{ id:null, name:'' }});
     const [rows, setRows] = useState([]);
@@ -105,8 +104,8 @@ export default function EnhancedTable(props) {
 
     const getRoles = () => {
         const config = { mode: 'no-cors', crossdomain: true, }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'memberrole';
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + 'member-roles';        
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url, {}, config)
             .then((result) => {
@@ -175,28 +174,30 @@ export default function EnhancedTable(props) {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
-            <ModalCreateRole projectId={projectId} 
+            <ModalCreateRole 
+                projects_id={projects_id} 
                 open={newRoleOpen} 
                 closeModal={() => setNewRoleOpen(false)}
                 onCreate={(newRole)=>{
                     setRows([...rows,newRole])
                 }} 
             />
-            <ModalDetailRole open={modalDetailOpen.open} 
-                            initialState={modalDetailOpen.data} 
-                            closeModal={()=>{
-                                setModalDetailOpen({
-                                    open:false,
-                                    data:{ id:null, name:'' }
-                                });
-                            }} 
-                            onUpdate={(value)=>{
-                                console.log('onUpdate : ',value)
-                                setRows(rows.map(function(item){
-                                    if(item.id==value.id) return value;
-                                    return item;
-                                }));
-                            }}/>
+            <ModalDetailRole 
+                open={modalDetailOpen.open} 
+                initialState={modalDetailOpen.data} 
+                closeModal={()=>{
+                    setModalDetailOpen({
+                        open:false,
+                        data:{ id:null, name:'' }
+                    });
+                }} 
+                onUpdate={(value)=>{
+                    console.log('onUpdate : ',value)
+                    setRows(rows.map(function(item){
+                        if(item.id==value.id) return value;
+                        return item;
+                    }));
+            }}/>
         </div>
     );
 }

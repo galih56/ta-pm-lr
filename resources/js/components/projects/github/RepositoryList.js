@@ -17,7 +17,7 @@ import Typography from '@material-ui/core/Typography';
 import { Icon, InlineIcon } from '@iconify/react';
 import githubIcon from '@iconify-icons/logos/github-icon';
 
-const RepositoryList=({projectId})=>{
+const RepositoryList=({projects_id})=>{
     const { enqueueSnackbar } = useSnackbar();
     const history = useHistory();
     const global=useContext(UserContext);
@@ -29,22 +29,20 @@ const RepositoryList=({projectId})=>{
         open:false
     })
     const getRepositories=()=>{
-        const config = { mode: 'no-cors', crossdomain: true, }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'project/'+projectId+'/github-repository';
-        axios.defaults.headers.common['Authorization'] = 'Bearer '+global.state.githubAuth.access_token;
+        const url = process.env.MIX_BACK_END_BASE_URL + 'projects/'+projects_id+'/github-repositories';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then((result) => {
                 setRepos(result.data) 
             });
     }
 
     const deleteRepository=(id) => {
-        const config = { mode: 'no-cors', crossdomain: true, }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'github-repository/'+id;
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + 'github-repository/'+id;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.delete(url,{}, config)
+        axios.delete(url)
         .then(result => {
             setRepos(repos.filter((item)=>{
                 if(item.id!=id) return item
@@ -57,7 +55,7 @@ const RepositoryList=({projectId})=>{
     }
     useEffect(()=>{
         getRepositories();
-    },[projectId]);
+    },[projects_id]);
     
     return (
         <>
@@ -70,7 +68,7 @@ const RepositoryList=({projectId})=>{
                    
                 </Grid>
                 <Grid item xl={12} md={12} sm={12} xs={12} style={{paddingLeft:'1em'}} > 
-                    <NewRepositoryForm projectId={projectId}
+                    <NewRepositoryForm projects_id={projects_id}
                         onSave={(newRepo)=>{
                             setRepos([...repos,newRepo]);
                         }}/>

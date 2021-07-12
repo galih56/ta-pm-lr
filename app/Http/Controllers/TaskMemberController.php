@@ -7,6 +7,11 @@ use App\Models\TaskMember;
 
 class TaskMemberController extends Controller
 {
+    public function __construct(Request $request)
+    {
+        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+    }
+
     public function index()
     {
         $task_members=TaskMember::all();
@@ -58,8 +63,8 @@ class TaskMemberController extends Controller
     public function update(Request $request, $id)
     {
         $task_member=TaskMember::findOrFail($id);
-        $task_member->tasks_id=$request->tasks_id;
-        $task_member->project_members_id=$request->project_members_id;
+        if($request->has('tasks_id')) $task_member->tasks_id=$request->tasks_id;
+        if($request->has('project_members_id')) $task_member->project_members_id=$request->project_members_id;
         $task_member->save();
         return response()->json($task_member);
     }

@@ -32,7 +32,7 @@ const DialogContent = withStyles((theme) => ({
 
 
 export default function ModalChooseFile(props) {
-    var {open,projectId,closeModal,onPick}=props;
+    var {open,projects_id,closeModal,onPick}=props;
     return (
         <Dialog aria-labelledby="Choose File" open={open} maxWidth='lg' fullWidth={true}>
             <DialogTitle onClose={
@@ -40,7 +40,7 @@ export default function ModalChooseFile(props) {
                     closeModal(false);
                 }} > Choose file </DialogTitle>
             <DialogContent>
-                <Files projectId={projectId} onPick={onPick}/>
+                <Files projects_id={projects_id} onPick={onPick}/>
             </DialogContent>
         </Dialog>
     );

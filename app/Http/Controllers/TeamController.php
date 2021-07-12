@@ -8,10 +8,15 @@ use App\Models\TeamMember;
 
 class TeamController extends Controller
 {
+    public function __construct(Request $request)
+    {
+        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+    }
+
     public function index()
     {
         $teams=Team::all();
-        return response()->json($team);
+        return response()->json($teams);
     }
 
     public function create()
@@ -22,9 +27,9 @@ class TeamController extends Controller
     public function store(Request $request)
     {
         $team=new Team();
-        $team->name=$request->name;
-        $team->description=$request->description;
-        $team->save()
+        if($request->has('name')) $team->name=$request->name;
+        if($request->has('description')) $team->description=$request->description;
+        $team->save();
         return response()->json($team);
     }
 

@@ -61,43 +61,34 @@ export default function ModalDetailOccupation(props) {
     const saveChanges = () => {
         let body = data;
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + `occupation/${props.initialState.id}`;
-            try {
-                axios.defaults.headers.common['Authorization'] = global.state.token;
-                axios.defaults.headers.post['Content-Type'] = 'application/json';
-                axios.patch(url, body, config)
-                    .then((result) => {
-                        handleSnackbar(`Data has been updated`, 'success');
-                        props.onUpdate(result.data);
-                    }).catch((error) => {
-                        const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                        global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                    });
-            } catch (error) {
-                handleSnackbar('Failed to send request', 'error');
-            }
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+            axios.defaults.headers.post['Content-Type'] = 'application/json';
+            const url = process.env.MIX_BACK_END_BASE_URL + `occupations/${props.initialState.id}`;
+            axios.patch(url, body, config)
+                .then((result) => {
+                    handleSnackbar(`Data has been updated`, 'success');
+                    props.onUpdate(result.data);
+                }).catch((error) => {
+                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
+                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                });
         }
     }
 
     const deleteOccupation = () => {
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + `occupation/${data.id}`;
-            try {
-                axios.defaults.headers.common['Authorization'] = global.state.token;
-                axios.defaults.headers.post['Content-Type'] = 'application/json';
-                axios.delete(url, {}, config)
-                    .then((result) => {
-                        handleSnackbar(`Data has been deleted`, 'success');
-                        props.onDelete(data);
-                    }).catch((error) => {
-                        const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                        global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                    });
-            } catch (error) {
-                handleSnackbar('Failed to send request', 'error')
-            }
+            
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+            axios.defaults.headers.post['Content-Type'] = 'application/json';
+            const url = process.env.MIX_BACK_END_BASE_URL + `occupations/${data.id}`;
+            axios.delete(url)
+                .then((result) => {
+                    handleSnackbar(`Data has been deleted`, 'success');
+                    props.onDelete(data);
+                }).catch((error) => {
+                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
+                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                });
         }
     }
 

@@ -1,5 +1,5 @@
 import React,{useState,useEffect,useContext} from 'react';
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, BrowserRouter as Router } from "react-router-dom";
 import UserContext from '../../context/UserContext';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
@@ -22,11 +22,10 @@ export default function TeamTable() {
     let history = useHistory();
 
     const getTeams = () => {
-        const config = { mode: 'no-cors', crossdomain: true, }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'team';
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + 'teams';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then((result) => {
                 setRows(result.data);
             }).catch((error) => {
@@ -43,18 +42,22 @@ export default function TeamTable() {
     return (
         <Paper style={{ padding: '1em' }}>
             <Grid container spacing={2}>
-                <Grid lg={12} md={12} sm={12} xs={12} item>
-                    <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="teams">
-                        <Button component={Link}  color="primary"
-                            to="/">
-                            Projects
-                        </Button>
-                        <Typography color="textPrimary">Teams</Typography>
-                    </Breadcrumbs>
+                <Grid xl={12} lg={12} md={12} sm={12} xs={12} item>
+                    <Router>
+                        <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="teams">
+                            <Button component={Link}  color="primary"
+                                to="/projects">
+                                Projects
+                            </Button>
+                            <Typography color="textPrimary">Teams</Typography>
+                        </Breadcrumbs>
+                    </Router>
                 </Grid>
                 <Grid  lg={12} md={12} sm={12} xs={12} item>
                     <Typography variant="h5">Teams</Typography>
-                    <Button onClick={()=>setOpenFormCreate(true)}>Create a new team</Button>
+                    {(global.state.occupation?.name.toLowerCase()=='manager' ||global.state.occupation?.name.toLowerCase()=='project manager' )?(
+                            <Button onClick={()=>setOpenFormCreate(true)}>Create a new team</Button>
+                        ):<></>}
                     <FormCreateTeam 
                         open={openFormCreate}
                         handleClose={()=>setOpenFormCreate(false)}

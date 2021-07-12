@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useHistory } from "react-router-dom";
+import { Link, useHistory, BrowserRouter as Router } from "react-router-dom";
 import Grid from '@material-ui/core/Grid';
 import CardContent from '@material-ui/core/CardContent';
 import Card from '@material-ui/core/Card';
@@ -19,16 +19,14 @@ const ProjectList = (props) => {
     const [completeTasks,setCompleteTasks]=useState({complete:[],incomplete:[]});
     
     useEffect(()=>{
-        // console.log(getCompleteTasksForChart(projects));
         setCompleteTasks(getCompleteTasksForChart(projects));
     },[projects])
 
     const getProjects = () => {
-        let url = process.env.REACT_APP_BACK_END_BASE_URL + 'project-reports';
-        const config = { mode: 'no-cors', crossdomain: true, }
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        let url = process.env.MIX_BACK_END_BASE_URL + 'projects-overview';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then((result) => {
                 setProjects(result.data)
             }).catch((error) => {
@@ -46,15 +44,17 @@ const ProjectList = (props) => {
     return (
         <Grid container spacing={2}>
              <Grid lg={12} md={12} sm={12} xs={12} item>
-                <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
-                    <Button component={Link}  color="primary"
-                        to="/">
-                        Projects
-                    </Button>
-                    <Typography>
-                        Reports
-                    </Typography>
-                </Breadcrumbs>
+                <Router>
+                    <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
+                        <Button component={Link}  color="primary"
+                            to="/projects">
+                            Projects
+                        </Button>
+                        <Typography>
+                            Reports
+                        </Typography>
+                    </Breadcrumbs>
+                </Router>
             </Grid>
             {
                 projects.map(
@@ -86,15 +86,13 @@ const getCompleteTasksForChart=(projects)=>{
     var y1=[]
     var y2=[]
     projects.forEach(project => {
-        console.log(project)
-        y1.push({y:project.totalCompleteTasks, label:project.title});
-        y2.push({y:project.totalIncompleteTasks, label:project.title});
+        y1.push({y:project.total_complete_tasks, label:project.title});
+        y2.push({y:project.total_incomplete_tasks, label:project.title});
     });
     var results={
         complete:y1,
         incomplete:y2
     }
-    console.log(results)
     return results;
 }
 export default ProjectList;

@@ -36,11 +36,10 @@ const MemberList=({isEdit,data,setData,detailProject})=>{
     },[data.members])
 
     const addMembers = (body) => {
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + `task-member`;
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+       const url = process.env.MIX_BACK_END_BASE_URL + `task-members`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, body, config)
+        axios.post(url, body)
             .then((result) => {
                 const payload = { projectId: data.projectId, listId: data.listId, data: data };
                 setData({...data,members:[...data.members,...result.data]});
@@ -53,11 +52,10 @@ const MemberList=({isEdit,data,setData,detailProject})=>{
     }
     
     const removeMember = (user) => {
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + `task-member/${user.task_member_id}`;
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + `task-members/${user.task_members_id}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.delete(url, {id:user.task_member_id}, config)
+        axios.delete(url, {id:user.task_member_id})
             .then((result) => {
                 const payload = { projectId: data.projectId, listId: data.listId, data: data };
                 setData({...data,complete:result.data.complete})
@@ -109,7 +107,7 @@ const MemberList=({isEdit,data,setData,detailProject})=>{
                             <ListItem alignItems="flex-start" key={member.id} >
                                 <ListItemAvatar>
                                     {member.profilePicturePath?
-                                    <Avatar alt={"Photo profile " + member.name} src={`${process.env.REACT_APP_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
+                                    <Avatar alt={"Photo profile " + member.name} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
                                     <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name.charAt(0).toUpperCase()}</Avatar>}
                                 </ListItemAvatar>
                                 <ListItemText

@@ -8,6 +8,11 @@ use App\Models\File;
 
 class TaskAttachmentController extends Controller
 {
+    public function __construct(Request $request)
+    {        
+        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+    }
+
     public function index()
     {
         $attachments=TaskAttachment::selectRaw('f.id as files_id, f.name, f.type, f.size, f.icon, 
@@ -29,6 +34,7 @@ class TaskAttachmentController extends Controller
         $source=$request->source;
         $saved_files=[];
         $tasks_id=$request->tasks_id;
+        $users_id=$request->users_id;
 
         if($source=='upload'){
             foreach ($request->file('file') as $uploaded_file) {
@@ -38,6 +44,7 @@ class TaskAttachmentController extends Controller
                 $file->name = $namafile;
                 $file->path = 'files/task-'.$id.'/'.$namafile;
                 $file->source = 'upload';
+                $file->users_id=$request->users_id;
                 $file->save();
 
                 $attachment=new TaskAttachment();
@@ -77,7 +84,7 @@ class TaskAttachmentController extends Controller
                 $file->type=$uploaded_file->mimeType;
                 $file->path=$uploaded_file->url;
                 $file->icon=$uploaded_file->iconUrl;
-                $file->users_id=$uploaded_file->users_id;
+                $file->users_id=$request->users_id;
                 $file->save();
 
                 $attachment=new TaskAttachment();

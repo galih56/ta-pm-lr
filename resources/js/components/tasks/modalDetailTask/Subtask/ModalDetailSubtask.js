@@ -70,7 +70,7 @@ export default function ModalDetailSubtask(props) {
     const getDetailTask = useCallback(() => {
         if (window.navigator.onLine) {
             const config = { mode: 'no-cors', crossdomain: true, }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + 'task/' + taskId;
+            const url = process.env.MIX_BACK_END_BASE_URL + 'tasks/' + taskId;
             axios.defaults.headers.common['Authorization'] = global.state.token;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.get(url, {}, config)
@@ -97,7 +97,7 @@ export default function ModalDetailSubtask(props) {
         let body = data;
         if (window.navigator.onLine) {
             const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + `task/${data.id}`;
+            const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}`;
             try {
                 axios.defaults.headers.common['Authorization'] = global.state.token;
                 axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -121,7 +121,7 @@ export default function ModalDetailSubtask(props) {
     const handleCompleteTask = (event) => {
         const body = { id: taskId, complete: event.target.checked };
         const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + `task/${data.id}`;
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}`;
         axios.defaults.headers.common['Authorization'] = global.state.token;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.patch(url, body, config)
@@ -137,27 +137,18 @@ export default function ModalDetailSubtask(props) {
     }
 
     const deleteTask = () => {
-        if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + `task/${taskId}`;
-            try {
-                axios.defaults.headers.common['Authorization'] = global.state.token;
-                axios.defaults.headers.post['Content-Type'] = 'application/json';
-                axios.delete(url, {}, config)
-                    .then((result) => {
-                        global.dispatch({ type: 'remove-task', payload: data });
-                        handleSnackbar(`Data has been deleted`, 'success');
-                        if(props.onDelete)props.onDelete(data.list,taskId)
-                    }).catch((error) => {
-                        const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                        global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                    });
-            } catch (error) {
-                handleSnackbar('Failed to send request', 'error')
-            }
-        } else {
-            global.dispatch({ type: 'remove-task', payload: data });
-        }
+        const config = { mode: 'no-cors', crossdomain: true }
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${taskId}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.delete(url, {}, config)
+            .then((result) => {
+                global.dispatch({ type: 'remove-task', payload: data });
+                handleSnackbar(`Data has been deleted`, 'success');
+                if(props.onDelete)props.onDelete(data.list,taskId)
+            }).catch((error) => {
+                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
+                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            });
     }
     
     return (

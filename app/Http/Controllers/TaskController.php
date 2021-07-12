@@ -7,9 +7,17 @@ use App\Models\File;
 use App\Models\Task;
 use App\Models\Tag;
 use App\Models\TasksHasTags;
+use App\Models\TaskMember;
+use App\Models\ProjectMember;
+use Carbon\Carbon;
 
 class TaskController extends Controller
 {
+    public function __construct(Request $request)
+    {
+        $this->middleware('auth:sanctum',['only'=>['index','update','store','destroy']]); 
+    }
+
     public function index()
     {
         $tasks=Task::orderBy('start','ASC')
@@ -21,15 +29,19 @@ class TaskController extends Controller
 
     public function create()
     {
-        //
+        abort(404);
     }
 
     public function store(Request $request)
     {
-        $project_member=ProjectMember::where('projects_id','=',$request->projects_id)->where('users_id','=',$request->creator)->first();
-        if(!$project_member){
-            return response()->json(["error"=>"User id : $request->creator is not registered in the project $request->projects_id"],403);
-        }
+        $fields = $request->validate([
+            'users_id' => 'required',
+            'projects_id' => 'required',
+            'title' => 'required',
+            'is_subtask'=>'required',
+            'start'=>'required',
+            'end'=>'required',
+        ]);
 
         $task=new Task();
         $task->title=$request->title;
@@ -38,14 +50,13 @@ class TaskController extends Controller
         $task->end=$request->end;
         
         if($request->start && $request->end){
-            $start = new DateTime($request->start);
-            $end = new DateTime($request->end);
-            $days= $start->diff($end);
+            $start = Carbon::parse($request->start);
+            $end = Carbon::parse($request->end);
+            $days= $start->diffInDays($end);
             $task->days=$days;
     
         }
         $task->lists_id=$request->lists_id;
-        $task->list=$request->list;
         $task->is_subtask=$request->is_subtask;
         $task->users_id=$request->users_id;
         $task->parent_task_id=$request->parent_task_id;
@@ -58,9 +69,9 @@ class TaskController extends Controller
             $inserted_tags=[];
             for ($i=0; $i < count($tags); $i++) { 
                 $tag=$tags[$i];
-                if($tag->inputNewTag){
+                if(array_key_exists('inputNewTag', $tag)){
                     $new_tag=new Tag();
-                    $new_tag->title=$tag->inputNewTag;
+                    $new_tag->title=$tag['inputNewTag'];
                     $new_tag->save();
 
                     $new_tag_relation=new TasksHasTags();
@@ -70,7 +81,7 @@ class TaskController extends Controller
                 }else{
                     $new_tag_relation=new TasksHasTags();
                     $new_tag_relation->tasks_id=$task->id;
-                    $new_tag_relation->tags_id=$tag->id;
+                    $new_tag_relation->tags_id=$tag['id'];
                     $new_tag_relation->save();
                 }
             }
@@ -81,11 +92,11 @@ class TaskController extends Controller
         if($members){
             for ($i=0; $i < count($members); $i++) { 
                 $member=$members[$i];
-                if($request->users_id!=$member->id){
+                if($request->users_id!=$member['id']){
                     $task_member=new TaskMember();
                     $task_member->tasks_id=$task->id;
-                    $task_member->users_id=$member->id;
-                    $task_member->project_members_id=$project_member->id;
+                    $task_member->users_id=$member['id'];
+                    $task_member->project_members_id=$member['project_members_id'];
                     $task_member->save();
                 }
             }
@@ -101,49 +112,50 @@ class TaskController extends Controller
 
     public function edit($id)
     {
-        //
+        abort(404);
     }
 
     public function update(Request $request, $id)
     {
         $task=Task::findOrFail($id);
-        $task->title=$request->title;
-        $task->description=$request->description;
-        $task->lists_id=$request->lists_id;
-        $task->progress=$request->progress;
-        $task->start=$request->start;
-        $task->end=$request->end;
-        $task->actual_start=$request->actual_start;
-        $task->actual_end=$request->actual_end;
-        $task->parent_task_id=$request->parent_task_id;
+        if($request->has('title')) $task->title=$request->title;
+        if($request->has('description')) $task->description=$request->description;
+        if($request->has('lists_id')) $task->lists_id=$request->lists_id;
+        if($request->has('progress')) $task->progress=$request->progress;
+        if($request->has('start')) $task->start=$request->start;
+        if($request->has('end')) $task->end=$request->end;
+        if($request->has('actual_start')) $task->actual_start=$request->actual_start;
+        if($request->has('actual_end')) $task->actual_end=$request->actual_end;
+        if($request->has('parent_task_id')) $task->parent_task_id=$request->parent_task_id;
+        if($request->has('complete')) $task->complete=$request->complete;
 
-        if($request->actual_start){
-            $start = new DateTime($request->start);
-            $actual_start = new DateTime($request->actual_start);
-            	
-            if($start<$actual_start) $task->start_label='Mulai terlambat';
-            if($start>$actual_start) $task->start_label='Mulai lebih cepat';
-            if($start==$actual_start) $task->start_label='Mulai tepat waktu';
+        if($request->has('actual_start')){
+            $start = Carbon::parse($task->start)->format('Y-m-d');
+            $actual_start = Carbon::parse($task->actual_start)->format('Y-m-d');
+            if($actual_start<$start) $task->start_label='Mulai lebih cepat';
+            if($actual_start>$start) $task->start_label='Mulai terlambat';
+            if($actual_start==$start) $task->start_label='Mulai tepat waktu';
+            // dd($task->start,$request->actual_start,$start,$actual_start,$task->start_label,'($actual_start<$start)',($actual_start<$start),'($actual_start>$start)',($actual_start>$start),'($actual_start==$start)',($actual_start==$start));
         }
         
-        if($request->actual_end){
-            $end = new DateTime($request->end);
-            $actual_end = new DateTime($request->actual_end);
-            	
-            if($end<$actual_end) $task->end_label='Selesai terlambat';
-            if($end>$actual_end) $task->end_label='Selesai lebih cepat';
-            if($end==$actual_end) $task->end_label='Selesai tepat waktu';
+        if($request->has('actual_end')){
+            $end = Carbon::parse($task->end)->format('Y-m-d');
+            $actual_end = Carbon::parse($task->actual_end)->format('Y-m-d');
+            if($actual_end<$end) $task->end_label='Selesai lebih cepat';
+            if($actual_end>$end) $task->end_label='Selesai terlambat';
+            if($actual_end==$end) $task->end_label='Selesai tepat waktu';
         }
         
-        if($request->actual_start && $request->actual_end){
-            $work_days= $request->actual_start->diff($request->actual_end);
+        if($request->has('actual_start') && $request->has('actual_end')){
+            $actual_start = Carbon::parse($request->actual_start);
+            $actual_end = Carbon::parse($request->actual_end);
+            $days= $actual_start->diffInDays($actual_end);
+            $work_days= $actual_start->diffInDays($actual_end);
             $task->work_days=$work_days;
         }
 
         $task->save();
-
-        $task=Task::with('tags.tag')->findOrFail($task->id)->toArray();
-        $task['tags']=$this->getTagsFromTask($task);
+        $task=$this->getDetailTask($task->id);
         return response()->json($task);
     }
 
@@ -156,13 +168,15 @@ class TaskController extends Controller
     function getDetailTask($id){
         $task=Task::findOrFail($id);
         
-        $task=Task::with('creator')->with('cards')->with('logs')->with('comments.creator')->with('list')
+        $task=Task::with('creator')->with('cards')->with('logs')->with('comments.creator')
+                    ->with('list')->with('taskMembers.member.role')->with('taskMembers.user')
                     ->with('tags.tag')->findOrFail($id)->toArray();
 
         $task['attachments']=$this->getAttachments($id);
-
         $task['tags']=$this->getTagsFromTask($task);
-        return $task;
+        $task['members']=$this->getTaskMembers($task);
+        unset($task['task_members']);
+        return collect($task);
     }
     
     public function addTag(Request $request,$id){
@@ -172,9 +186,9 @@ class TaskController extends Controller
             $inserted_tags=[];
             for ($i=0; $i < count($tags); $i++) { 
                 $tag=$tags[$i];
-                if($tag->inputNewTag){
+                if(array_key_exists('inputNewTag', $tag)){
                     $new_tag=new Tag();
-                    $new_tag->title=$tag->inputNewTag;
+                    $new_tag->title=$tag['inputNewTag'];
                     $new_tag->save();
 
                     $new_tag_relation=new TasksHasTags();
@@ -184,7 +198,7 @@ class TaskController extends Controller
                 }else{
                     $new_tag_relation=new TasksHasTags();
                     $new_tag_relation->tasks_id=$task->id;
-                    $new_tag_relation->tags_id=$tag->id;
+                    $new_tag_relation->tags_id=$tag['id'];
                     $new_tag_relation->save();
                 }
             }
@@ -231,5 +245,20 @@ class TaskController extends Controller
                             ->join('files AS f','f.id','=','ta.files_id')
                             ->where('ta.tasks_id','=',$tasks_id)->with('user')->get()->toArray();
         return $attachments;
+    }
+
+    function getTaskMembers($task){
+        $members=[];
+        $task_members=$task['task_members'];
+        for ($i=0; $i < count($task_members); $i++) { 
+            $task_member=$task_members[$i];
+            $user=$task_member['user'];
+            $user['role']=$task_member['member']['role'];
+            $user['project_members_id']=$task_member['project_members_id'];
+            $user['tasks_id']=$task_member['tasks_id'];
+
+            $members[]=$user;
+        }
+        return $members;
     }
 }

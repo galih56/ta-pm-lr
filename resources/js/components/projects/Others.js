@@ -20,18 +20,18 @@ const Others = ({detailProject,handleDetailTaskOpen}) => {
                 </Grid>
                 <Grid item xl={7} md={7} sm={12} xs={12} >
                     <MemberList 
-                        projectId={detailProject.id} 
+                        projects_id={detailProject.id} 
                         data={detailProject.members} 
                         handleDetailTaskOpen={handleDetailTaskOpen} />
                 </Grid>
                 <Grid item xl={5} md={5} sm={12} xs={12} >
-                    <RoleList projectId={detailProject.id} />
+                    <RoleList projects_id={detailProject.id} />
                 </Grid>
                 <Grid item xl={6} md={6} sm={6} xs={12}>
-                    <RepositoryList projectId={detailProject.id}/>
+                    <RepositoryList projects_id={detailProject.id}/>
                 </Grid>
                 <Grid item xl={6} md={6} sm={6} xs={12}>
-                    <TeamList projectId={detailProject.id}/>
+                    <TeamList projects_id={detailProject.id}/>
                 </Grid>
             </Suspense>
         </Grid >

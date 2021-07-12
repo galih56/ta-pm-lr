@@ -1,8 +1,7 @@
 
 
 const storeMeetings = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
 
     const newProjects = user.projects.map((project) => {
         if (project.id == payload.projects_id) {
@@ -12,12 +11,11 @@ const storeMeetings = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 const createNewMeeting = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
 
     const newProjects = user.projects.map((project) => {
         if (project.id == payload.projects_id) {
@@ -27,12 +25,11 @@ const createNewMeeting = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 const storeDetailMeeting = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
 
     const newProjects = user.projects.map((project) => {
         if (project.id == payload.projects_id) {
@@ -45,15 +42,14 @@ const storeDetailMeeting = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 const removeMeeting = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
 
     const newProjects = user.projects.map((project) => {
-        if (project.id == payload.project) {
+        if (project.id == payload.projects_id) {
             project.meetings = project.meetings.filter(meeting => {
                 if (meeting.id != payload.id) {
                     return meeting;
@@ -64,15 +60,14 @@ const removeMeeting = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 
 const updateMeeting = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
     const newProjects = user.projects.map((project) => {
-        if (project.id == payload.project) {
+        if (project.id == payload.projects_id) {
             project.meetings = project.meetings.map((meeting) => {
                 if (meeting.id == payload.id) {
                     meeting = payload;
@@ -84,7 +79,7 @@ const updateMeeting = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 export { storeMeetings,createNewMeeting, storeDetailMeeting, removeMeeting, updateMeeting }

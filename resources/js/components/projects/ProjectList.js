@@ -24,7 +24,7 @@ const ProjectList = ({data}) => {
     return (
         <Grid container spacing={2}>
             {
-                (global.state.occupation.name=='Manager' ||global.state.occupation.name=='Project Manager' )?(
+                (global.state.occupation?.name.toLowerCase()=='manager' || global.state.occupation?.name.toLowerCase()=='project manager' )?(
                     <Grid item xl={3} md={3} sm={3} xs={4} >
                         <Card >
                             <CardActionArea style={{ height: '100%' }} onClick={openModalCreateProject}>
@@ -48,9 +48,6 @@ const ProjectList = ({data}) => {
                                         <CardActionArea style={{ height: '100%' }}>
                                             <CardContent component='div' align='center'>
                                                 <Typography gutterBottom variant="h6" align="center"> {row.title} </Typography>
-                                                <Typography variant="body2" color="textSecondary" component="p" style={{ marginTop: '1em', lineHeight: '1em' }}>
-                                                    {row.description?substringDots(row.description):''}
-                                                </Typography>
                                             </CardContent>
                                         </CardActionArea>
                                     </Card>
@@ -62,11 +59,5 @@ const ProjectList = ({data}) => {
             }
         </Grid >
     );
-}
-const substringDots = (text) => {
-    if (text.length > 60) {
-        text = text.substring(0, 60) + " ...";;
-    }
-    return text
 }
 export default ProjectList;

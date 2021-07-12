@@ -96,7 +96,7 @@ export default function EnhancedTable({detailProject}) {
     const [orderBy, setOrderBy] = useState('end');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [clickedTask, setClickedTask] = useState({ projectId: null, listId: null, taskId: null });
+    const [clickedTask, setClickedTask] = useState({ projects_id: null, lists_id: null, tasks_id: null });
     const [modalOpen, setModalOpen] = useState(false);
     let history=useHistory();
 
@@ -105,37 +105,36 @@ export default function EnhancedTable({detailProject}) {
     const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     const handleModalOpen = (taskInfo) => {
-        const { projectId, listId, taskId, open } = taskInfo;
+        const { projects_id, lists_id, tasks_id, open } = taskInfo;
         setModalOpen(open);
-        setClickedTask({ projectId: projectId, listId: listId, taskId: taskId });
+        setClickedTask({ projects_id: projects_id, lists_id: lists_id, tasks_id: tasks_id });
     }
 
     const showModalDetailTask = () => {
-        if (clickedTask.taskId != null && clickedTask.taskId !== undefined && modalOpen == true) {
+        if (clickedTask.tasks_id != null && clickedTask.tasks_id !== undefined && modalOpen == true) {
             return (
                 <ModalDetailTask
                     open={modalOpen}
                     closeModalDetailTask={() => {
-                        handleModalOpen({ projectId: null, listId: null, taskId: null, open: false })
+                        handleModalOpen({ projects_id: null, lists_id: null, tasks_id: null, open: false })
                     }}
-                    projectId={clickedTask.projectId}
+                    projects_id={clickedTask.projects_id}
                     initialState={clickedTask} />
             )
         }
     }
 
-    const handleCompleteTask = (taskId, isChecked) => {
+    const handleCompleteTask = (tasks_id, isChecked) => {
         var oldRows = rows;
         var newRows = rows.map((row) => {
-            if (row.id == taskId) row.complete = isChecked;
+            if (row.id == tasks_id) row.complete = isChecked;
             return row;
         });
         setRows(newRows);
-        const body = { id: taskId, complete: isChecked };
+        const body = { id: tasks_id, complete: isChecked };
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + `task/${taskId}`;
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            const config = { headers: { 'X-Authorization':`Bearer ${global.state.token}`, 'Content-Type': 'application/json'  } }
+            const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${tasks_id}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.patch(url, body, config)
                 .then((result) => {
@@ -204,9 +203,9 @@ export default function EnhancedTable({detailProject}) {
                                             <TableCell component="th" scope="row" padding="none" style={{ cursor: 'pointer' }}
                                                 onClick={() => {
                                                     handleModalOpen({
-                                                        projectId: row.list.project.id,
-                                                        listId: row.list.id,
-                                                        taskId: row.id,
+                                                        projects_id: row.list.project.id,
+                                                        lists_id: row.list.id,
+                                                        tasks_id: row.id,
                                                         open: true
                                                     });
                                                 }}>

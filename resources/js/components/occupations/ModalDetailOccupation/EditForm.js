@@ -6,7 +6,6 @@ import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import OccupationSearchBar from './../../widgets/OccupationSearchBar';
 
-
 const OpenEditForm = ({ isEdit, data, setData }) => {
     if (isEdit) {
         return (

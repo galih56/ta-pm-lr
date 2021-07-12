@@ -21,7 +21,7 @@ class Meeting extends Model
     }
 
     public function meeting_members(){
-        return $this->hasMany(User::class,'users_id');
+        return $this->hasMany(MeetingMember::class,'meetings_id');
     }
     
     public function project(){

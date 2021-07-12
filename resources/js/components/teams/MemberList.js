@@ -31,7 +31,6 @@ const MemberList = ({teamId,data}) => {
     
     useEffect(()=> {
         setRows(data)
-        console.log('memberlist : ',data);
     },[data])
     return (
         <React.Fragment>
@@ -44,15 +43,15 @@ const MemberList = ({teamId,data}) => {
                     setRows([...rows,newMember])
                 }}/>
             <List className={classes.root}>
-                {rows.length?rows.map(function(member){
+                {rows?rows.map(function(member){
                     return(    
                         <>
                             <ListItem alignItems="flex-start">
-                                {/* <ListItemAvatar>
-                                    {member.profilePicturePath?
-                                        <Avatar alt={"Photo profile " + member.name} src={`${process.env.REACT_APP_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
-                                        <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name.charAt(0).toUpperCase()}</Avatar>}
-                                </ListItemAvatar> */}
+                                {(member.profilePicturePath && member.name)?(
+                                <ListItemAvatar>
+                                        <Avatar alt={"Photo profile " + member.name} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
+                                        <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name.charAt(0).toUpperCase()}</Avatar>
+                                </ListItemAvatar>):<></>}
                                 <ListItemText
                                     primary={member.name} 
                                     secondary={

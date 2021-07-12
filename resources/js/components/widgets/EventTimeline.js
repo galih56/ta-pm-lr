@@ -29,7 +29,7 @@ const EventTimeline = (props) => {
     const handleDetailTaskOpen = props.handleDetailTaskOpen;
     const classes = useStyles();
 
-    const onEventClick = (projectId, listId, taskId) => handleDetailTaskOpen({ projectId, listId, taskId, open: true })
+    const onEventClick = (projects_id, lists_id, tasks_id) => handleDetailTaskOpen({ projects_id, lists_id, tasks_id, open: true })
 
     const getEventsFromLists = useCallback(() => {
         var events = []

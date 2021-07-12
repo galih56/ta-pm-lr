@@ -32,11 +32,10 @@ export default function TeamList(props) {
         if (!window.navigator.onLine) {
             snackbar(`You are currently offline`, 'warning');
         }
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + `project/${props.projectId}/team`;
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${props.projects_id}/teams`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then((result) => {
                 setTeams(result.data);
             }).catch((error) => {
@@ -49,11 +48,10 @@ export default function TeamList(props) {
         if (!window.navigator.onLine) {
             snackbar(`You are currently offline`, 'warning');
         }
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + `team`;
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + `teams`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url, {})
             .then((result) => {
                 setOptions(result.data);
             }).catch((error) => {
@@ -67,11 +65,10 @@ export default function TeamList(props) {
         if (!window.navigator.onLine) {
             snackbar(`You are currently offline`, 'warning');
         }
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + `project/${props.projectId}/team/${selectedTeam.id}`;
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+         const url = process.env.MIX_BACK_END_BASE_URL + `projects/${props.projects_id}/team/${selectedTeam.id}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.delete(url, {}, config)
+        axios.delete(url)
     
         var newTeams=teams.filter((team)=>{
             if(team.id!=selectedTeam.id) return team;
@@ -83,11 +80,10 @@ export default function TeamList(props) {
         if (!window.navigator.onLine) {
             snackbar(`You are currently offline`, 'warning');
         }
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + `project/${props.projectId}/team`;
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${props.projects_id}/teams`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, { projectId:props.projectId,teams:selectedTeams}, config)
+        axios.post(url, { projects_id:props.projects_id,teams:selectedTeams})
             .then((result) => {
                 setTeams([...teams,...result.data]);
             }).catch((error) => {
@@ -98,12 +94,12 @@ export default function TeamList(props) {
     
     useEffect(()=>{
         getAllTeams();
-        if(props.projectId)getTeams()
-    },[props.projectId])    
+        if(props.projects_id)getTeams()
+    },[props.projects_id])    
     
     return (
         <Grid container>
-            <Grid xl={12} lg={12} md={12} sm={12} xs={12}>
+            <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                 <Typography variant="h6">Teams </Typography>
             </Grid>
             <Grid xl={12} lg={12} md={12} sm={12} xs={12}>
@@ -135,7 +131,7 @@ export default function TeamList(props) {
                 <List component="nav" aria-label="teams">
                     {teams.map((team)=>{
                         return(
-                            <CustomListItem team={team} deleteTeam={deleteTeam}/>
+                            <CustomListItem key={team.id} team={team} deleteTeam={deleteTeam}/>
                         )
                     })}   
                 </List>

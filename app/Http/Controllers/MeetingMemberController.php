@@ -7,6 +7,11 @@ use App\Models\MeetingMember;
 
 class MeetingMemberController extends Controller
 {
+    public function __construct(Request $request)
+    {
+        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+    }
+
     public function index()
     {
         $meeting_member=MeetingMember::all();
@@ -42,8 +47,8 @@ class MeetingMemberController extends Controller
     public function update(Request $request, $id)
     {
         $meeting_member=MeetingMember::findOrFail($id);
-        $meeting_member->meetings_id=$request->meetings_id;
-        $meeting_member->project_members_id=$request->project_members_id;
+        if($request->has('meetings_id')) $meeting_member->meetings_id=$request->meetings_id;
+        if($request->has('project_members_id')) $meeting_member->project_members_id=$request->project_members_id;
         $meeting_member->save();
 
         return response()->json($meeting_member);

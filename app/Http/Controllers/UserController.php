@@ -10,11 +10,19 @@ use App\Models\Meeting;
 use App\Models\ProjectMember;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 use DB;
 
 
 class UserController extends Controller
 {
+    public function __construct(Request $request)
+    {
+        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+    }
+
     public function index()
     {
         $users=User::with('occupation')
@@ -53,16 +61,14 @@ class UserController extends Controller
     public function update(Request $request, $id)
     {
         $user=User::findOrFail($id);
-        $user->name=$request->name;
-        $user->email=$request->email;
-        $user->phone_number=$request->phone_number;
-        $user->token=$request->token;
-        $user->occupations_id=$request->occupations_id;
-        $user->last_login=$request->last_login;
-        $user->verified=$request->verified;
-        $user->profile_picture_path=$request->profile_picture_path;
-        $user->created_at=$request->created_at;
-        $user->updated_at=$request->updated_at;
+        if($request->has('name')) $user->name=$request->name;
+        if($request->has('email')) $user->email=$request->email;
+        if($request->has('phone_number')) $user->phone_number=$request->phone_number;
+        if($request->has('token')) $user->token=$request->token;
+        if($request->has('occupations_id')) $user->occupations_id=$request->occupations_id;
+        if($request->has('last_login')) $user->last_login=$request->last_login;
+        if($request->has('verified')) $user->verified=$request->verified;
+        if($request->has('profile_picture_path')) $user->profile_picture_path=$request->profile_picture_path;
         $user->save();
         return response()->json($user);
     }
@@ -80,25 +86,27 @@ class UserController extends Controller
                                             return $q1->with('cards',function($q2){
                                                 return $q2->with('cards');
                                             });
-                                        })
-                                        ->with('role')->get();
+                                        })->with('role')->get();
         $projects=[];
         for ($i=0; $i < count($project_members); $i++) {
-            $projects[]=$project_members[$i]['project'];
+            $project=$project_members[$i]['project'];
+            if($project) $projects[]=$project;
         }
         return response()->json($projects);
     }
 
     public function getMeetings(Request $request,$id){
         $user=User::findOrFail($id);
+        
         $meetings=Meeting::select('m.*')
                             ->from('meetings AS m')
                             ->join('users AS u','m.users_id','=','u.id')
                             ->join(DB::raw("(
-                                SELECT meetings_id,count(*) AS counts
-                                FROM meeting_members AS tm 
-                                GROUP BY meetings_id
-                            ) AS counter "),'m.id','=','counter.meetings_id')
+                                SELECT mm.meetings_id,count(mm.meetings_id) AS counts
+                                FROM meeting_members AS mm 
+                                WHERE mm.users_id=$id
+                                GROUP by mm.meetings_id 
+                            ) AS counter"),'m.id','=','counter.meetings_id')
                             ->where('counter.counts','>=',1)
                             ->orWhere('m.users_id','=',$id)
                             ->get();
@@ -107,22 +115,27 @@ class UserController extends Controller
     
     public function getTasks(Request $request,$id){
         $tasks=Task::select("t.*")
-                            ->from('tasks AS t')
-                            ->join('lists AS l','t.lists_id','=','l.id')
-                            ->join('projects AS p','p.id','l.projects_id')
-                            ->join('users AS u','t.users_id','=','u.id')
-                            ->join(DB::raw("(
-                                            SELECT tasks_id,count(*) AS counts
-                                            FROM task_members AS tm 
-                                            GROUP BY tasks_id
-                                    ) AS counter "),'t.id','=','counter.tasks_id')
-                            ->where('counter.counts','>=','1')
-                            ->orWhere('t.users_id','=',$id)
-                            ->orderBy('t.start','ASC')
-                                ->with('attachments')
-                                ->with('list.project')
-                                ->with('creator')
-                                ->with('cards')->get();
+                    ->from('tasks AS t')
+                    ->join('lists AS l','t.lists_id','=','l.id')
+                    ->join('projects AS p','p.id','l.projects_id')
+                    ->join('users AS u','t.users_id','=','u.id')
+                    ->join(DB::raw("(
+                        SELECT tm.tasks_id,count(tm.tasks_id) AS counts
+                        FROM task_members AS tm 
+                        WHERE tm.users_id=$id
+                        GROUP by tm.tasks_id 
+                    ) AS counter"),'t.id','=','counter.tasks_id')
+                    ->where('counter.counts','>=','1')
+                    ->orWhere('t.users_id','=',$id)
+                    ->orderBy('t.start','ASC')
+                        ->with('attachments')
+                        ->with(['list.project'=>function($query){
+                            return $query->select('id','title','start','end','progress','complete');
+                        }])
+                        ->with(['parentTask.list.project'=>function($query){
+                            return $query->select('id','title','start','end','progress','complete');
+                        }])
+                        ->with('creator')->get();
         return response()->json($tasks);
     }
 
@@ -151,15 +164,60 @@ class UserController extends Controller
     }
 
     public function login(Request $request){
+        $fields = $request->validate([
+            'email' => 'required|string',
+            'password' => 'required|string'
+        ]); 
 
-    }
+        $user = User::where('email', $fields['email'])->with('occupation')->first();
 
-    public function logout(Request $request){
+        if(!$user || !Hash::check($fields['password'], $user->password)) {
+            return response([
+                'message' => 'Wrong credentials'
+            ], 401);
+        }
 
+        $token = $user->createToken('myapptoken')->plainTextToken;
+
+        $response = [
+            'user' => $user,
+            'token' => "Bearer $token",
+            'success' =>true
+        ];
+
+        return response($response, 201);
     }
 
     public function register(Request $request){
+        $fields=$request->validate([
+            'name'=>'required|string',
+            'email'=>'required|string|unique:users,email',
+            'password'=>'required|string',
+            'phone_number'=>'required|string',
+        ]);
 
+        $user=User::create([
+            'name'=> $fields['name'],
+            'email'=> $fields['email'],
+            'phone_number'=> $fields['phone_number'],
+            'password'=> Hash::make($fields['password']),
+            'verified'=> false,
+        ]);
+
+        $user = User::where('email', $fields['email'])->with('occupation')->first();
+        $token=$user->createToken('tugas-akhir-pm-project-management-2021')->plainTextToken;
+
+        return response([
+            'user'=>$user,
+            'token' => "Bearer $token",
+            'success' =>true
+        ],201);
     }
 
+    public function logout(Request $request){
+        auth()->user()->tokens()->delete();
+        return response()->json([
+            'message'=>'Logged Out',
+        ]);
+    }
 }

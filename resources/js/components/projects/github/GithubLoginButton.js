@@ -18,12 +18,14 @@ const GithubLoginButton=()=>{
     
     const getAccessToken = () => {
         const body = {
-            client_id: process.env.REACT_APP_GITHUB_API_CLIENT_ID,
-            client_secret: process.env.REACT_APP_GITHUB_API_SECRET,
+            client_id: process.env.MIX_GITHUB_API_CLIENT_ID,
+            client_secret: process.env.MIX_GITHUB_API_SECRET,
             code: global.state.githubAuth.code,
         }
         
-        const url = `${process.env.REACT_APP_BACK_END_BASE_URL}get-github-access-token`;
+        const url = `${process.env.MIX_BACK_END_BASE_URL}get-github-access-token`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.post(url, body)
             .then((result) => {
                 global.dispatch({type: 'store-github-auth',payload:{
@@ -36,11 +38,9 @@ const GithubLoginButton=()=>{
     };
 
     const getGithubUserInfo=()=>{
-        const config = { mode: 'no-cors', crossdomain: true, }
         const url = 'https://api.github.com/user';
-        axios.defaults.headers.common['Authorization'] = 'Bearer '+global.state.githubAuth.access_token;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then((result) => {
                 global.dispatch({
                     type: 'store-github-auth',
@@ -79,7 +79,7 @@ const GithubLoginButton=()=>{
                 }
                 return(
                     <>
-                        <a href={`https://github.com/login/oauth/authorize?scope=read:user,repo&client_id=${process.env.REACT_APP_GITHUB_API_CLIENT_ID}`}>
+                        <a href={`https://github.com/login/oauth/authorize?scope=read:user,repo&client_id=${process.env.MIX_GITHUB_API_CLIENT_ID}`}>
                     Connect to github</a>
                     </>            
                 )

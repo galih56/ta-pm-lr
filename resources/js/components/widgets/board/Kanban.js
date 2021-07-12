@@ -33,26 +33,24 @@ const Kanban = (props) => {
 
     const onCardNew = (newCard, laneId) => {
         newCard.id = Date.now();
-        newCard.listId = laneId;
-        newCard.userId = global.state.id;
-        newCard.projectId = detailProject.id;
-        newCard.creator=global.state.id;
-        
+        newCard.lists_id = laneId;
+        newCard.users_id = global.state.id;
+        newCard.projects_id = detailProject.id;
+
         for (let i = 0; i < detailProject.members.length; i++) {
             const member = detailProject.members[i];
             if(member.id==global.state.id) newCard.projectMemberId=member.id; break;
         }
 
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + 'task/';
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            const url = process.env.MIX_BACK_END_BASE_URL + 'tasks/';
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.post(url, newCard, config)
+            axios.post(url, newCard)
                 .then((result) => {
                     newCard.id = result.data.id;
-                    newCard.projectId = detailProject.id;
-                    newCard.listId = laneId;
+                    newCard.projects_id = detailProject.id;
+                    newCard.lists_id = laneId;
                     newCard={...newCard,...result.data}
                     global.dispatch({ type: 'create-new-task', payload: newCard })
                     handleSnackbar(`A new card successfuly created`, 'success');
@@ -69,15 +67,14 @@ const Kanban = (props) => {
     }
 
     const onLaneRename = (laneId, data) => {
-        data.projectId = detailProject.id;
-        data.listId = laneId;
+        data.projects_id = detailProject.id;
+        data.lists_id = laneId;
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + 'list/' + laneId;
+            const url = process.env.MIX_BACK_END_BASE_URL + 'lists/' + laneId;
             try {
-                axios.defaults.headers.common['Authorization'] = global.state.token;
+                axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
                 axios.defaults.headers.post['Content-Type'] = 'application/json';
-                axios.patch(url, data, config)
+                axios.patch(url, data)
                     .then((result) => {
                         global.dispatch({ type: 'update-list', payload: data })
                         handleSnackbar(`Data has been updated successfuly`, 'success');
@@ -94,14 +91,10 @@ const Kanban = (props) => {
         }
     }
     const onCardMove = (fromLaneId, toLaneId, cardId, index) => {
-        const body = {
-            id: cardId,
-            listId: toLaneId
-        }
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'task/' + cardId;
-            axios.defaults.headers.common['Authorization'] = global.state.token;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
+        const body = { id: cardId, lists_id: toLaneId }
+        const url = process.env.MIX_BACK_END_BASE_URL + 'tasks/' + cardId;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.patch(url, body, config)
                 .then((result) => {
                     global.dispatch({ type: 'move-card', payload: result.data })
@@ -113,7 +106,7 @@ const Kanban = (props) => {
                 });
     }
     const onCardClick = (cardId, metadata,laneId) =>{ 
-        handleDetailTaskOpen({ projectId: detailProject.id, listId: laneId, taskId: cardId, open: true,onCardDelete:onCardDelete});
+        handleDetailTaskOpen({ projects_id: detailProject.id, lists_id: laneId, tasks_id: cardId, open: true,onCardDelete:onCardDelete});
     }
     const EditLaneFormWithDetailProject=(props)=>{
         return (<EditLaneForm detailProject={{id:detailProject.id,members:detailProject.members}} {...props}/>)
@@ -121,9 +114,9 @@ const Kanban = (props) => {
    
     const [eventBus, setEventBus] = useState(undefined);
 
-    const onCardDelete=(listId,taskId)=>{
-        console.log(listId,taskId)
-        eventBus.publish({type: 'REMOVE_CARD', laneId: listId, cardId: taskId});
+    const onCardDelete=(lists_id,tasks_id)=>{
+        console.log(lists_id,tasks_id)
+        eventBus.publish({type: 'REMOVE_CARD', laneId: listId, cardId: tasks_id});
     }
     return (
         <React.Fragment>

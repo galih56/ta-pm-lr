@@ -7,6 +7,11 @@ use App\Models\Occupation;
 
 class OccupationController extends Controller
 {
+    public function __construct(Request $request)
+    {
+        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+    }
+
     public function index()
     {
         $occupations=Occupation::with('users')->get();
@@ -45,7 +50,7 @@ class OccupationController extends Controller
     public function update(Request $request, $id)
     {
         $occupation=Occupation::findOrFail($id);
-        $occupation->name=$request->name;
+        if($request->has('name')) $occupation->name=$request->name;
         $occupation->save();
         return response()->json($occupation);
     }
@@ -119,7 +124,7 @@ class OccupationController extends Controller
             $tree=$this->restructureData($root,$users);
             return response()->json($tree,200); 
         }else{
-            return response()->json("root not found",200);
+            return response()->json("root not found",204);
         }
     }
 }

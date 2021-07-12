@@ -38,25 +38,18 @@ const ProjectInfo = (props) => {
 
     const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
-    const saveChanges = () => {
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'project/' + detailProject.id;
-        try {
-            axios.defaults.headers.common['Authorization'] = global.state.token;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.patch(url, detailProject, config)
-                .then((result) => {
-                    handleSnackbar(`Data has been changed`, 'success');
-                    setIsEditing(false)
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                });
-        }
-        catch (error) {
-            console.log(error)
-            handleSnackbar(`Server Error`, 'error');
-        }
+    const saveChanges = () => {        
+        const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.patch(url, detailProject, config)
+            .then((result) => {
+                handleSnackbar(`Data has been changed`, 'success');
+                setIsEditing(false)
+            }).catch((error) => {
+                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
+                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            });
 
         if (!window.navigator.onLine) {
             handleSnackbar(`You are currently offline`, 'warning');
@@ -64,25 +57,19 @@ const ProjectInfo = (props) => {
         }
     }
 
-    const handleRemoveProject = (projectId) => {
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = `${process.env.REACT_APP_BACK_END_BASE_URL}project/${projectId}`;
-        try {
-            axios.defaults.headers.common['Authorization'] = global.state.token;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.delete(url, {}, config)
-                .then((result) => {
-                    global.dispatch({ type: 'remove-project', payload: projectId });
-                    handleSnackbar(`Data has been deleted successfuly`, 'success');
-                    history.push('/');
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                });
-        }
-        catch (error) {
-            handleSnackbar('Failed to send request');
-        }
+    const handleRemoveProject = (projects_id) => {      
+        const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${projects_id}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.delete(url, {}, {})
+            .then((result) => {
+                global.dispatch({ type: 'remove-project', payload: projects_id });
+                handleSnackbar(`Data has been deleted successfuly`, 'success');
+                history.push('/');
+            }).catch((error) => {
+                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
+                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            });
     }
 
     const checkIfEditing = (isEdit) => {

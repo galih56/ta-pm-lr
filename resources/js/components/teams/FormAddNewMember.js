@@ -40,11 +40,10 @@ const FormAddNewMember=({teamId,open,closeModal,onCreate})=>{
 
     const formCreateOnSubmit=()=>{
         const body = { teamId:teamId, users: users }
-        const config = { mode: 'no-cors', crossdomain: true }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + `team/${teamId}`;
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + `teams/${teamId}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, body, config)
+        axios.post(url, body)
             .then((result) => {
                 onCreate(result.data);
                 snackbar(`A new list successfully created`, 'success');

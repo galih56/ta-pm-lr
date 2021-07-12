@@ -1,5 +1,5 @@
-import React, { useEffect, useState,memo } from 'react';
-import useGlobalState from './../../hooks/GlobalState';
+import React, { useEffect, useState, useContext,memo } from 'react';
+import UserContext from './../../context/UserContext';
 import { Link, useLocation } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
@@ -33,8 +33,6 @@ import WordIcon from './../../assets/icons/word.svg';
 import ZipIcon from './../../assets/icons/zip.svg';
 import FilesIcon from './../../assets/icons/files.svg';
 import PlayButtonIcon from './../../assets/icons/play-button.svg';
-import GetAppIcon from '@material-ui/icons/GetApp';
-import DeleteIcon from '@material-ui/icons/Delete';
 import axios from 'axios';
 import { useSnackbar } from 'notistack';
 import Alert from '@material-ui/core/Alert';
@@ -53,6 +51,15 @@ const useStyles = makeStyles((theme) => ({
     avatar: { backgroundColor: red[500] },
 }));
 
+const trimString=(str)=>{
+    var space_counter=str.split(' ').length;
+    var trimmedString = str;
+    var trimmed=false
+    if(space_counter>3 && str.length<20) {trimmedString=str.substring(0, 24)+'..';trimmed=true}
+    if(space_counter>3 && str.length>20) {trimmedString=str.substring(0, 20)+'..';trimmed=true}
+    if(space_counter<=3 && str.length>20) {trimmedString=str.substring(0, 16)+'..';trimmed=true}
+    return (trimmed?trimmedString:str);
+}
 const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
     const location = useLocation(); 
     const [anchorPopover, setAnchorPopover] = useState(false);
@@ -62,7 +69,7 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
     const open = Boolean(anchorPopover);
     const id = open ? 'file-popover' : undefined;
 
-    var file_url = process.env.REACT_APP_BACK_END_BASE_URL;
+    var file_url = process.env.MIX_BACK_END_BASE_URL;
     if (file.source == 'upload') file_url += file.path
     if (file.source == 'google-drive') file_url = file.path;
 
@@ -97,14 +104,14 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
         <Card className={classes.root}>
             <CardHeader
                 avatar={
-                    <Avatar aria-label="recipe" className={classes.avatar}> {file.user_name.charAt(0).toUpperCase()} </Avatar>
+                    <Avatar aria-label="recipe" className={classes.avatar}> {file.user.name.charAt(0).toUpperCase()} </Avatar>
                 }
                 action={
                     <IconButton onClick={handleClick}>
                         <MoreVertIcon />
                     </IconButton>
                 }
-                title={file.file_name}
+                title={trimString(file.file_name)}
                 subheader={moment(file.createdAt).format('MMMM Do YYYY, h:mm a')}
             />
             <Popover
@@ -132,7 +139,7 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
                             return (<>
                                 Task: <Link to={{ pathname: pathname, search: searchParams.toString() }}
                                     onClick={() => {
-                                        handleDetailTaskOpen({ projectId: file.projects_id, listId: file.lists_id, taskId: file.tasks_id, open: true });
+                                        handleDetailTaskOpen({ projects_id: file.projects_id, listId: file.lists_id, taskId: file.tasks_id, open: true });
                                     }}>
                                     {file.task_title}
                                 </Link>
@@ -150,9 +157,9 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
     )
 }
 const Files = (props) => {
-    let global = useGlobalState();
+    let global = useContext(UserContext);
     const classes = useStyles();
-    const { projectId, handleDetailTaskOpen,onPick} = props;
+    const { projects_id, handleDetailTaskOpen,onPick} = props;
     const [files, setFiles] = useState([]);
     const [deleteModalOpen,setDeleteModalOpen]=useState(false);
     const [choosenFileId,setChoosenFileId]=useState(null);
@@ -163,11 +170,9 @@ const Files = (props) => {
 
     const getFiles = () => {
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + 'project/' + projectId + '/files';
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            const url = process.env.MIX_BACK_END_BASE_URL + 'projects/' + projects_id + '/files';
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.get(url, {}, config)
+            axios.get(url, {}, {})
                 .then((result) => {
                     const data = result.data;
                     console.log('chooseFile : ',data)
@@ -184,8 +189,7 @@ const Files = (props) => {
     const handleDelete = (id) => {
         if (window.navigator.onLine) {
             const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + 'files/' + id;
-            axios.defaults.headers.common['Authorization'] = global.state.token;
+            const url = process.env.MIX_BACK_END_BASE_URL + 'files/' + id;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.delete(url, {}, config)
                 .then((result) => {
@@ -201,9 +205,8 @@ const Files = (props) => {
     }
 
     useEffect(() => {
-        console.log(projectId);
-        if (projectId) getFiles();
-    }, [projectId])
+        if (projects_id) getFiles();
+    }, [projects_id])
 
     return (
         <Grid container spacing={2}>

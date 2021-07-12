@@ -1,4 +1,3 @@
-
 import 'fontsource-roboto';
 import React, { memo } from 'react';
 import ModalDeleteConfirm from './ModalDeleteConfirm';

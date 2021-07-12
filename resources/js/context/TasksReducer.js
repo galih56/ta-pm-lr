@@ -1,7 +1,6 @@
 
 const storeDetailTask = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
     const newProjects = user.projects.map((project) => {
         project.columns = project.columns.map(column => {
             column.cards = column.cards.map((card) => {
@@ -16,16 +15,15 @@ const storeDetailTask = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 const storeDetailSubtask = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
     const newProjects = user.projects.map((project) => {
         project.columns = project.columns.map(column => {
             column.cards = column.cards.map((card) => {
-                if (card.id == payload.parentTask) {
+                if (card.id == payload.parent_task_id) {
                     card.cards=card.cards.map((subtask)=>{
                         if(subtask.id=payload.id) return payload
                         return subtask;
@@ -39,18 +37,17 @@ const storeDetailSubtask = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 const storeSubtasks = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
     const newProjects = user.projects.map((project) => {
-        if (project.id == payload.projectId) {
+        if (project.id == payload.projects_id) {
             project.columns = project.columns.map(column => {
-                if (column.id == payload.listId) {
+                if (column.id == payload.lists_id) {
                     column.cards = column.cards.map((card) => {
-                        if (card.id == payload.parentTask)
+                        if (card.id == payload.parent_task_id)
                             card.cards = payload;
                         return card;
                     })
@@ -62,16 +59,15 @@ const storeSubtasks = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 const createNewTask = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
     console.log(payload)
     const newProjects = user.projects.map((project) => {
         project.columns = project.columns.map(column => {
-            if(column.id==payload.listId ||column.id==payload.laneId){ 
+            if(column.id==payload.lists_id ||column.id==payload.laneId){ 
                 column.cards.push(payload);
             }
             return column;
@@ -80,12 +76,11 @@ const createNewTask = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 const removeTask = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
 
     console.log('removing-task',payload);
     const newProjects = user.projects.map((project) => {
@@ -101,17 +96,16 @@ const removeTask = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 const createNewSubtask = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
 
     const newProjects = user.projects.map((project) => {
         project.columns = project.columns.map((column) => {
             column.cards = column.cards.map((card) => {
-                if (card.id == payload.parentTask) {
+                if (card.id == payload.parent_task_id) {
                     card.cards.push(payload);
                 }
                 return card;
@@ -122,20 +116,18 @@ const createNewSubtask = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 const removeSubtask = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
 
     const newProjects = user.projects.map((project) => {
         project.columns = project.columns.map((column) => {
             column.cards = column.cards.map((card) => {
-                console.log('removesubtask : ',card);
-                if('cards'in card){
+                if(card.id==payload.parent_task_id && 'cards'in card){
                     card.cards = card.cards.filter((item) => {
-                        if (item.id != payload)  return  item;
+                        if (item.id != payload.id)  return  item;
                     });
                 }
                 return card;
@@ -146,16 +138,15 @@ const removeSubtask = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 const createNewAttachments = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
     
     const newProjects = user.projects.map((project) => {
         project.columns = project.columns.map(column => {
             column.cards = column.cards.map((card) => {
-                if (card.id == payload.taskId) {
+                if (card.id == payload.tasks_id) {
                     if('attachments' in card){
                         const newArr = [...card.attachments, ...payload.data];
                         card.attachments = newArr;
@@ -171,12 +162,11 @@ const createNewAttachments = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 const removeAttachment = (payload) => {
-    const auth = JSON.parse(localStorage.getItem('auth'));
-    const user = JSON.parse(localStorage.getItem('user'));
+    var user = JSON.parse(localStorage.getItem('user'));
 
     const newProjects = user.projects.map((project) => {
         project.columns = project.columns.map((column) => {
@@ -194,7 +184,7 @@ const removeAttachment = (payload) => {
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
-    return { ...auth, ...user };
+    return user;
 }
 
 export {
