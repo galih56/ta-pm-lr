@@ -176,7 +176,9 @@ class UserController extends Controller
                 'message' => 'Wrong credentials'
             ], 401);
         }
-
+        $user->last_login=Carbon::now()->format('Y-m-d');
+        $user->save();
+        
         $token = $user->createToken('myapptoken')->plainTextToken;
 
         $response = [

@@ -57,11 +57,9 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ModalCreateList(props) {
     const classes = useStyles();
-    var open = props.open;
-    var projects_id = props.projects_id;
+    const{ open , projects_id , detailProject}= props;
     var closeModal = props.handleClose;
     const history = useHistory();
-    const refreshData = props.refreshDetailProject;
     const [title, setTitle] = useState('');
     const [start, setStart] = useState(null);
     const [end, setEnd] = useState(null);
@@ -83,11 +81,10 @@ export default function ModalCreateList(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + 'lists/';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, body, config)
+        axios.post(url, body)
             .then((result) => {
                 setTitle('');
                 closeModal();
-                refreshData();
                 global.dispatch({ type: 'create-new-list', payload: result.data });
                 snackbar(`A new list successfully created`, 'success');
             }).catch((error) => {
@@ -117,6 +114,8 @@ export default function ModalCreateList(props) {
                                         required
                                         startText="Planned to start at : "
                                         endText="Planned to finish at : "
+                                        minDate={detailProject.start}
+                                        maxDate={detailProject.end}
                                         value={dateRange}
                                         onChange={(newValue) => {
                                             var start= newValue[0];

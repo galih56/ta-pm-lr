@@ -64,7 +64,7 @@ export default function ModalDetailUser(props) {
         let body = {
             id: data.id, name: data.name, email: data.email, 
             phone_number: data.phone_number,
-            occupation: data.occupation, profilePicture: ''
+            verified: data.verified, occupations_id: data.occupation, profile_picture_path: ''
         };
         if (window.navigator.onLine) {
             const url = process.env.MIX_BACK_END_BASE_URL + `users/${props.initialState.id}`;

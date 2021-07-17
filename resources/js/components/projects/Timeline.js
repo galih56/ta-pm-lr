@@ -30,7 +30,6 @@ const headCells = [
     { id: 'Realisasi Start', align: 'left',  label: 'Realisasi Start' },
     { id: 'Realisasi End', align: 'left',  label: 'Realisasi End' },
     { id: 'Work days', align: 'right', label: 'Work days' },
-    { id: 'Progress', align: 'right', label: 'Progress' },
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -44,12 +43,23 @@ const useStyles = makeStyles((theme) => ({
     sortSpan: visuallyHidden,
 }));
 
+const getDetailMember=(project_members,users_id)=>{
+    var user=null;
+    for(let i=0;i<project_members.length;i++){
+        const member=project_members[i];
+        if(member.id==users_id) {
+            user=member;
+            break;
+        }
+    }
+    return user;
+}
+
 function EnhancedTableHead({extraCells}) {
     return (
         <TableHead>
             <TableRow>
                 {extraCells}
-                <TableCell></TableCell>
                 {headCells.map((headCell) => (
                     <TableCell
                         key={headCell.id}
@@ -66,7 +76,7 @@ var clickedTaskInitialState={
     id: '', projects_id: '', lists_id: null, list:null,
     title: '', description: '', label: '', complete: false, progress: 0,
     start:null,end:null,actual_start:null,actual_end:null, start_label:'',end_label:'',
-    list: null, tags: [], members: [], parentTask:'',
+    list: null, tags: [], members: [], parent_task_id:'',
     cards: [], logs: [], comments: [], attachments: [],creator:null,is_subtask:false
 }
 
@@ -88,7 +98,7 @@ export default function EnhancedTable(props) {
     useEffect(() => {
         setRows(props.data);
         setDetailProject(props.detailProject)
-    }, [props.detailProject.id,props.detailProject.columns]);
+    }, [props.data,props.detailProject.id,props.detailProject.columns]);
 
     const handleDetailTaskOpen = (taskInfo) => {
         const {task, open } = taskInfo;
@@ -100,7 +110,7 @@ export default function EnhancedTable(props) {
         var newRows=rows.map(row=>{
             row.cards=row.cards.map(card=>{
                 if(card.id==task.id) return task;
-                if(card.id==task.parentTask){
+                if(card.id==task.parent_task_id){
                     card.cards=card.cards.map(subtask=>{
                         if(subtask.id==task.id)return task;
                         return subtask;
@@ -116,7 +126,7 @@ export default function EnhancedTable(props) {
         var newRows=rows.map(row=>{
             if(task.is_subtask){
                 row.cards=row.cards.map(card=>{
-                    if(card.id==task.parentTask){
+                    if(card.id==task.parent_task_id){
                         card.cards=card.cards.filter((subtask)=>{
                             if(subtask.id!=task.id) return subtask
                         })
@@ -194,7 +204,8 @@ export default function EnhancedTable(props) {
                     <TableBody>
                         {rows.map((row, index) => {
                             return (
-                                <Row classes={classes} key={row.id} 
+                                <Row classes={classes} 
+                                    key={row.id} 
                                     data={row} 
                                     handleDetailTaskOpen={handleDetailTaskOpen} 
                                     projects_id={projects_id}
@@ -212,7 +223,7 @@ export default function EnhancedTable(props) {
             {(selectedList.id && openEditList)?(
                 <EditLaneForm 
                     laneId={selectedList.id}
-                    detailProject={{id:detailProject.id,members:detailProject.members}} 
+                    detailProject={{id:detailProject.id,start:detailProject.start,end:detailProject.end,members:detailProject.members}} 
                     open={openEditList}
                     onCancel={()=>setOpenEditList(false)}
                     onAdd={(newTask)=>{
@@ -227,28 +238,8 @@ export default function EnhancedTable(props) {
 }
 
 function Row(props) {
-    const { data, handleDetailTaskOpen,classes,onClick } = props;
+    const { data, handleDetailTaskOpen,classes,onClick,detailProject } = props;
     const [openCollapsible, setOpenCollapsible] = useState(false);
-    let global = useContext(UserContext);
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
-
-    const handleCompleteTask = (task,event) => {
-        const body = { ...task, complete: event.target.checked };
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${task.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.patch(url, body)
-            .then((result) => {
-                var result=result.data;
-                if(task.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
-                else global.dispatch({ type: 'store-detail-task', payload: result });
-                handleSnackbar(`Data has been updated`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
-            });
-    }
     
     return (
         <React.Fragment>
@@ -274,8 +265,8 @@ function Row(props) {
                         <TableTasks 
                             tasks={data.cards} 
                             classes={classes} 
-                            handleCompleteTask={handleCompleteTask}
                             handleDetailTaskOpen={handleDetailTaskOpen}
+                            detailProject={detailProject}
                             />
                     </Collapse>
                 </TableCell>
@@ -284,7 +275,7 @@ function Row(props) {
     );
 }
 
-const TableTasks=({tasks,classes,handleCompleteTask,handleDetailTaskOpen})=>{
+const TableTasks=({tasks,classes,handleDetailTaskOpen,detailProject})=>{
     const [rows,setRows]=useState([]);
     
     useEffect(()=>{
@@ -297,79 +288,87 @@ const TableTasks=({tasks,classes,handleCompleteTask,handleDetailTaskOpen})=>{
             <TableBody>
                 {rows?rows.map((task)=>{
                     return(
-                    <>
                         <TaskRow 
                             key={task.id}
                             data={task} 
                             classes={classes} 
-                            handleCompleteTask={handleCompleteTask}
                             handleDetailTaskOpen={handleDetailTaskOpen}
+                            detailProject={detailProject}
                             />
-                    </>
                     )
                 }):<></>}
             </TableBody>
         </Table>
     )
 }
-const TaskRow=({data,classes,handleCompleteTask,handleDetailTaskOpen})=>{
+const TaskRow=({data,classes,handleDetailTaskOpen,detailProject})=>{
     const [openCollapsible, setOpenCollapsible] = useState(false);
+    const [row,setRow]=useState(data);
+    
+    const [progress,setProgress]=useState(0)
+    
+    useEffect(()=>{
+        if(!data.is_subtask && data.cards){
+            var valuePerSubtask=100/data.cards.length;
+            var completeSubtaskCounter=0;
+            for (let i = 0; i < data.cards.length; i++) {
+                const subtask = data.cards[i];
+                if(subtask.complete) completeSubtaskCounter++;
+            }
+            var finalValue=completeSubtaskCounter*valuePerSubtask;
+            setProgress(finalValue);
+        }
+        setRow(data)
+    },[data,detailProject.columns]);
+
     return(
         <>
-            <TableRow hover key={data.id} >
+            <TableRow hover key={row.id} >
                 <TableCell>
                     <IconButton size="small" onClick={() =>setOpenCollapsible(!openCollapsible)} > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton>
-                        
-                </TableCell>
-                <TableCell pading="checkbox">
-                    <Checkbox
-                        onChange={(event)=> handleCompleteTask(data,event)}
-                        checked={data.complete}
-                    />
                 </TableCell>
                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}
-                    onClick={()=>handleDetailTaskOpen({task:data,open:true})} > 
-                    {data.title}
+                    onClick={()=>handleDetailTaskOpen({task:row,open:true})} > 
+                    {row.title} ({isNaN(progress)?0:progress}%)
                 </TableCell>
                 <TableCell>
-                    {data.members?data.members.map((member,i)=>{
+                    {row.task_members?row.task_members.map((member,i)=>
+                        {
+                            member=getDetailMember(detailProject.members,member.users_id);
                             return (
-                                <span>{member.role?.name}</span>
+                                <span key={i}>{member?.role.name}</span>
                             )
                         }):<></>}
                 </TableCell>
                 <TableCell align="left">
-                    {data.start ? moment(data.start).format('DD MMMM YYYY') : ''}
+                    {row.start ? moment(row.start).format('DD MMMM YYYY') : ''}
                 </TableCell>
                 <TableCell align="left">
-                    {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}
+                    {row.end ? moment(row.end).format('DD MMMM YYYY') : ''}
                 </TableCell>
                 <TableCell align="right">
-                    {(data.start && data.end)?Math.round(moment.duration(moment(data.start).diff(moment(data.end))).asDays())*(-1):''}
+                    {(row.start && row.end)?Math.round(moment.duration(moment(row.start).diff(moment(row.end))).asDays())*(-1):''}
                 </TableCell>
                 <TableCell align="left">
-                    {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''}<br/>
-                    {data.start_label?<StatusChip status={data.start_label}/>:''}
+                    {row.actual_start ? moment(row.actual_start).format('DD MMMM YYYY') : ''}<br/>
+                    {row.start_label?<StatusChip status={row.start_label}/>:''}
                 </TableCell>
                 <TableCell align="left">
-                    {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}<br/>
-                    {data.end_label?<StatusChip status={data.end_label}/>:''}
+                    {row.actual_end ? moment(row.actual_end).format('DD MMMM YYYY') : ''}<br/>
+                    {row.end_label?<StatusChip status={row.end_label}/>:''}
                 </TableCell>
                 <TableCell align="right">
-                    {(data.actual_start && data.actual_end)?Math.round(moment.duration(moment(data.actual_start).diff(moment(data.actual_end))).asDays())*(-1):''}
-                </TableCell>
-                <TableCell align="right">
-                    {data.progress}
+                    {(row.actual_start && row.actual_end)?Math.round(moment.duration(moment(row.actual_start).diff(moment(row.actual_end))).asDays())*(-1):''}
                 </TableCell>
             </TableRow>
             <TableRow >
                 <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={headCells.length+1}>
                     <Collapse in={openCollapsible} timeout="auto">
                         <TableSubtask 
-                            tasks={data.cards} 
+                            tasks={row.cards} 
                             classes={classes} 
-                            handleCompleteTask={handleCompleteTask}
                             handleDetailTaskOpen={handleDetailTaskOpen}
+                            detailProject={detailProject}
                         />
                     </Collapse>
                 </TableCell>
@@ -377,8 +376,30 @@ const TaskRow=({data,classes,handleCompleteTask,handleDetailTaskOpen})=>{
         </>
     )
 }
-const TableSubtask=({tasks,classes,handleCompleteTask,handleDetailTaskOpen,projects_id,detailProject})=>{
+const TableSubtask=({tasks,classes,handleDetailTaskOpen,detailProject})=>{
     const [subtasks,setSubtasks]=useState([])
+    
+    let global = useContext(UserContext);
+    const { enqueueSnackbar } = useSnackbar();
+    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
+
+    const handleCompleteTask = (task,event) => {
+        const body = { ...task, complete: event.target.checked };
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${task.id}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.patch(url, body)
+            .then((result) => {
+                var result=result.data;
+                if(task.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                else global.dispatch({ type: 'store-detail-task', payload: result });
+                handleSnackbar(`Data has been updated`, 'success');
+            }).catch((error) => {
+                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
+                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            });
+    }
+
     useEffect(()=>{
         setSubtasks(tasks);
     },[tasks])
@@ -409,9 +430,10 @@ const TableSubtask=({tasks,classes,handleCompleteTask,handleDetailTaskOpen,proje
                                     {subtask.title}
                                 </TableCell>
                                 <TableCell>
-                                    {subtask.members?subtask.members.map((member,i)=>{
+                                    {subtask.task_members?subtask.task_members.map((member,i)=>{
+                                        member=getDetailMember(detailProject.members,member.users_id);
                                         return (
-                                            <span key={i}>{member.role?member.role.name:''}</span>
+                                            <span key={i}>{member?.role.name}</span>
                                         )
                                     }):<></>}
                                 </TableCell>
@@ -434,9 +456,6 @@ const TableSubtask=({tasks,classes,handleCompleteTask,handleDetailTaskOpen,proje
                                 </TableCell>
                                 <TableCell align="right">
                                     {(subtask.actual_start && subtask.actual_end)?Math.round(moment.duration(moment(subtask.actual_start).diff(moment(subtask.actual_end))).asDays())*(-1):''}
-                                </TableCell>
-                                <TableCell align="right">
-                                    {subtask.progress}
                                 </TableCell>
                             </TableRow>
                         )

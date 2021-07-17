@@ -76,7 +76,7 @@ const Overview=({detailProject,refreshDetailProject,handleDetailTaskOpen})=>{
             </Grid>
             <GroupedTasksChart groupedTasks={groupedTasks}/>
             {/* <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                <TaskComparasionChart data={all_tasks}/>
+                <TaskComparasionChart tasks={allTasks}/>
             </Grid> */}
             <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
                 <Typography variant="body2">Starts : </Typography>

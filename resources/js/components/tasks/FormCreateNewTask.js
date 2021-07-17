@@ -12,7 +12,7 @@ import UserSearchBar from '../widgets/UserSearchBar';
 import moment from 'moment';
 import UserContext from './../../context/UserContext';
 
-const FormCreateNewTask=({classes,newTask,setNewTask,handleAddNewTask,detailProject,isSubtask})=>{
+const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSubtask,minDate,maxDate})=>{
     const global=useContext(UserContext);
     const handleTagChanges = (tags) => setNewTask({ ...newTask, tags: tags });
     const [dateRange, setDateRange] = useState([null, null]);
@@ -22,7 +22,9 @@ const FormCreateNewTask=({classes,newTask,setNewTask,handleAddNewTask,detailProj
     },[]);
     
     return (
-        <Grid container spacing={2} style={{ paddingLeft: "1em", paddingRight: "1em",paddingTop:"1em" }} component="form" 
+        <Grid container spacing={2} 
+            style={{ paddingLeft: "1em", paddingRight: "1em",paddingTop:"1em" }} 
+            component="form" 
             onSubmit={(e) => { 
                 e.preventDefault(); 
                 handleAddNewTask();
@@ -40,10 +42,12 @@ const FormCreateNewTask=({classes,newTask,setNewTask,handleAddNewTask,detailProj
             <Grid item lg={12} md={12} sm={12} xs={12} container>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <MobileDateRangePicker
-                         required
-                         startText="Start : "
+                        required
+                        startText="Start : "
                         endText="End : "
                         value={dateRange}
+                        minDate={minDate}
+                        maxDate={maxDate}
                         onChange={(newValue) => {
                             var start= newValue[0];
                             var end= newValue[1];

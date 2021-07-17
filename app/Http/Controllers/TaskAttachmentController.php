@@ -37,13 +37,15 @@ class TaskAttachmentController extends Controller
         $users_id=$request->users_id;
 
         if($source=='upload'){
-            foreach ($request->file('file') as $uploaded_file) {
+            foreach ($request->get('files') as $uploaded_file) {
                 $file = new File();
-                $namafile=$uploaded_file->getClientOriginalName();
-                $uploaded_file->move(public_path('files/task-'.$id),$namafile);
-                $file->name = $namafile;
-                $file->path = 'files/task-'.$id.'/'.$namafile;
+                // $namafile=$uploaded_file->getClientOriginalName();
+                // $uploaded_file->move(public_path('files/task-'.$id),$namafile);
+                // $file->name = $namafile;
+                // $file->path = 'files/task-'.$id.'/'.$namafile;
                 $file->source = 'upload';
+                $file->base64 = $uploaded_file['base64'];
+                $file->type = $uploaded_file['type'];
                 $file->users_id=$request->users_id;
                 $file->save();
 

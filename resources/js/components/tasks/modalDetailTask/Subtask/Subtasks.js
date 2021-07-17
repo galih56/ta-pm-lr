@@ -144,6 +144,8 @@ const Subtasks = (props) => {
                                         handleAddNewTask={handleAddNewTask}
                                         detailProject={detailProject}
                                         isSubtask={true}
+                                        minDate={props.detailTask.start}
+                                        maxDate={props.detailTask.end}
                                     />
                                 </ModalCreateSubtask>
                             )

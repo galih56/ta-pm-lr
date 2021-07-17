@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useEffect,useState} from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MovableCardWrapper } from 'react-trello/dist/styles/Base';
 import Tag from 'react-trello/dist/components/Card/Tag';
@@ -11,13 +11,43 @@ const CustomCard = (props) => {
     const { 
         onClick, cardStyle, className, onDelete, 
         id, title, label, start, end,
-        actualStart,actualEnd,startLabel,endLabel,
-        tags, complete, progress 
+        actual_start,actual_end,start_label,end_label,
+        tags, complete, cards,tagStyle
     } = props;
     let location = useLocation();
     let pathname = location.pathname;
     let searchParams = new URLSearchParams(location.search);
     searchParams.set('task_id', id);
+    const [progress,setProgress]=useState(0)
+    const [overdue,setOverdue]=useState(false);
+
+    const checkOverdue=()=>{
+        var current_date=moment();
+        var end_date=moment(end, "YYYY-MM-DD");
+        var actual_end_date=moment(actual_end, "YYYY-MM-DD");
+        
+		var timeDiff=moment.duration(current_date.diff(end_date)).asDays();
+        if(timeDiff>0 && !actual_end && progress<100) setOverdue(true);
+        if(timeDiff>0 && progress<100) setOverdue(true);
+        if(end_label=='Selesai terlambat') setOverdue(true);
+    }
+
+    const getProgress=()=>{
+        var valuePerSubtask=100/cards.length;
+        var completeSubtaskCounter=0;
+        for (let i = 0; i < cards.length; i++) {
+            const subtask = cards[i];
+            if(subtask.complete) completeSubtaskCounter++;
+        }
+        var finalValue=completeSubtaskCounter*valuePerSubtask;
+        if(isNaN(finalValue)) setProgress(0);
+        else setProgress(finalValue);
+    }
+
+    useEffect(()=>{
+        getProgress();
+        checkOverdue();
+    },[])
 
     return (
             <MovableCardWrapper
@@ -33,15 +63,15 @@ const CustomCard = (props) => {
                                 display: 'flex', flexDirection: 'row', justifyContent: 'space-between'
                             }}>
                                 <div style={{ fontSize: '1em', fontWeight: 'bold', color: '#393939' }}>
-                                    {title}
+                                    {title} <br/> ({progress}%)
                                 </div>
                         </header>
                         <div style={{ fontSize: '1em' }}>
-                            {formattedDateTimes(start, end,actualStart,actualEnd,startLabel,endLabel)}
+                            {formattedDateTimes(start, end,actual_start,actual_end,start_label,end_label)}
                             <div style={{ marginTop: 5, textAlign: 'center', fontSize: '1em', fontWeight: 'bold' }}>
-                               {(startLabel=='Belum dikerjakan' && endLabel=='Belum dikerjakan')?(
+                               {(start_label=='Belum dikerjakan' && end_label=='Belum dikerjakan')?(
                                 <span style={{margin:'0.2em'}}>
-                                    <StatusChip status={startLabel}/>
+                                    <StatusChip status={start_label}/>
                                 </span>
                                ):<></>}
                             </div>
@@ -51,10 +81,30 @@ const CustomCard = (props) => {
                                         borderTop: '1px solid #eee', paddingTop: 6, display: 'flex',
                                         justifyContent: 'flex-end', flexDirection: 'row', flexWrap: 'wrap'
                                     }}>
-                                    {isCompleted(complete, progress)}
-                                    {tags.map(tag => (
-                                        <Tag key={tag.id} {...tag} />
-                                    ))}
+                                    {/* {tags.map(item =>{ 
+                                        return (
+                                            <span key={`${item.id}-${item.tag?.id}`} 
+                                            style={{
+                                                padding: '2px 3px',
+                                                borderRadius: '3px',
+                                                margin: '2px 5px',
+                                                fontSize: '70%',
+                                                color: 'white',
+                                                backgroundColor: 'orange'
+                                            }} >{item.tag?.title}</span>)
+                                    })} */}
+                                    {overdue?(    
+                                        <span style={{
+                                                padding: '2px 3px',
+                                                borderRadius: '3px',
+                                                margin: '2px 5px',
+                                                fontSize: '70%',
+                                                color: 'white',
+                                                backgroundColor: '#e53935'
+                                            }}>
+                                            Overdue
+                                        </span>
+                                    ):<></>}
                                 </div>
                             )}
                         </div>
@@ -71,9 +121,5 @@ const formattedDateTimes = (start, end,) => {
             End : {end}
         </div>
     )
-}
-const isCompleted = (complete, progress) => {
-    if (progress >= 100 || complete) return (<Tag title={'Complete'} bgColor={'#009703'} />);
-    return (<></>)
 }
 export default CustomCard;

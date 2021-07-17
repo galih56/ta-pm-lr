@@ -7,6 +7,7 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import DashboardIcon from '@material-ui/icons/Dashboard';
 import PeopleIcon from '@material-ui/icons/People';
 import BarChartIcon from '@material-ui/icons/BarChart';
+import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import UserContext from './../context/UserContext'
 
 export const MainListItems = () => (
@@ -29,9 +30,14 @@ export const MainListItems = () => (
             <ListItemIcon>
                 <BarChartIcon />
             </ListItemIcon>
-            <ListItemText>Reports
-            </ListItemText>
+            <ListItemText>Reports</ListItemText>
         </ListItem>
+        {/* <ListItem button component={Link} to="/budget" >
+            <ListItemIcon>
+                <MonetizationOnIcon />
+            </ListItemIcon>
+            <ListItemText>Budget</ListItemText>
+        </ListItem> */}
     </React.Fragment >
 );
 

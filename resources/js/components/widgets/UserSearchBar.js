@@ -70,7 +70,7 @@ export default function UserSearchbar(props) {
             getOptionLabel={(option) => {
                 var label='';
                 if('role' in option &&  typeof option.role=='object') label= `${option.name} (${option.role.name})`;
-                if('occupation' in option && typeof option.occupation=='object') label= `${option.name} (${option.occupation.name})`; 
+                if('occupation' in option && typeof option.occupation=='object') label= `${option.name} ${option.occupation?'('+option.occupation.name+')':''}`; 
                 if(!('role' in option) && !('occupation' in option)) label= `${option.name} (${option.email})`;
                 return label;
                }

@@ -86,9 +86,9 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                         detailTask={data} 
                         setDetailTask={setData} 
                         isEdit={isEdit}
-                        taskId={data.id}
-                        projectId={detailProject.id}
-                        listId={data.listId}
+                        tasks_id={data.id}
+                        projects_id={detailProject.id}
+                        lists_id={data.lists_id}
                     ></Attachments>
                 </Grid>
                {!data.is_subtask?(
@@ -131,9 +131,9 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                     <Typography>Attachments : </Typography>
                     <Attachments
                         detailTask={data} setDetailTask={setData} 
-                        taskId={data.id}
-                        projectId={detailProject.id}
-                        listId={data.listId}>
+                        tasks_id={data.id}
+                        projects_id={detailProject.id}
+                        lists_id={data.lists_id}>
                     </Attachments>
                 </Grid>
                {!data.is_subtask?(

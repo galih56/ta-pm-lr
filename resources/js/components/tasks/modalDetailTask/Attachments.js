@@ -58,16 +58,17 @@ const Attachments = (props) => {
     const [uploadModalOpen, setUploadModalOpen] = useState(false);
     const [chooseFileModalOpen, setChooseFileModalOpen] = useState(false);
     const [data, setData] = useState([]);
-    const { taskId, projectId, listId } = props;
+    const { tasks_id, projects_id, lists_id } = props;
     const global = useContext(UserContext);
     const [toBeDeletedFile, setToBeDeletedFile] = useState(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    var payload = { projectId: projectId, listId: listId, taskId: taskId }
+    var payload = { projects_id: projects_id, lists_id: lists_id, tasks_id: tasks_id }
 
     const { enqueueSnackbar } = useSnackbar();
     const snackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     useEffect(() => {
+        console.log(tasks_id, projects_id, lists_id );
         setData(props.detailTask.attachments);
     }, [props.detailTask])
 
@@ -100,8 +101,8 @@ const Attachments = (props) => {
             attachments=await Promise.all(attachments);
     
             var body={
-                taskId:payload.taskId,
-                userId:global.state.id,
+                tasks_id:payload.tasks_id,
+                users_id:global.state.id,
                 source:'upload',
                 files:attachments
             }
@@ -115,17 +116,17 @@ const Attachments = (props) => {
             snackbar(`You are currently offline`, 'warning');
         } else {
             var body={
-                taskId:payload.taskId,
-                userId:global.state.id,
+                tasks_id:payload.tasks_id,
+                users_id:global.state.id,
                 source:'pick',
-                fileId:file.id
+                files_id:file.id
             }
             handleAddAttachment(body, payload);
         }
     }
     
     const handleAddAttachment=(body, payload)=>{
-        const url = process.env.MIX_BACK_END_BASE_URL + 'task-attachments/';
+        const url = process.env.MIX_BACK_END_BASE_URL + 'task-attachments';
         axios.defaults.headers.post['Content-Type'] = 'multipart/form-data';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.post(url, body).then((result) => {
@@ -211,14 +212,14 @@ const Attachments = (props) => {
             {/* <PublishRoundedIcon /> */}
             <ModalFilePicker 
                 open={chooseFileModalOpen} 
-                projectId={projectId} 
+                projects_id={projects_id} 
                 closeModal={()=> setChooseFileModalOpen(false) }
                 onPick={(file)=> handleFilePick(file,payload) }/>
             <ModalDeleteConfirm
                 open={deleteConfirmOpen}
                 handleClose={() => setDeleteConfirmOpen(false)}
                 handleDelete={() => {
-                    payload = { id: toBeDeletedFile, taskId: taskId, projectId: projectId, listId: listId }
+                    payload = { id: toBeDeletedFile, tasks_id: tasks_id, projects_id: projects_id, lists_id: lists_id }
                     deleteFile(payload);
                     setDeleteConfirmOpen(false)
                 }} />

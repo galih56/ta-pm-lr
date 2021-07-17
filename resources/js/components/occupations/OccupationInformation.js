@@ -45,7 +45,6 @@ export default function OccupationInformation() {
         axios.get(url)
             .then((result) => {
                 console.log('occupation tree',result.data)
-                console.log(result.data);
                 // setTree(result.data)
             }).catch((error) => {
                 const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
@@ -95,7 +94,7 @@ export default function OccupationInformation() {
                 <ModalCreateOccupation
                     open={modalCreateOpen}
                     closeModal={() =>  setModalCreateOpen(false)}
-                    onCreate={setData}
+                    onCreate={(newItem)=>setData([...data,newItem])}
                 />
                 {showModalDetailOccupation()}
             </React.Suspense>

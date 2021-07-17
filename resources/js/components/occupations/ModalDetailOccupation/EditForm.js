@@ -16,12 +16,12 @@ const OpenEditForm = ({ isEdit, data, setData }) => {
                     style={{ width: '100%' }}
                     variant={'standard'}
                 />
-                    <OccupationSearchBar
-                        label={"Search lower occupations"}
-                        onChange={(value) => setData({ ...data, children: value })}
-                        exceptedData={[data]}
-                        defaultValue={data.children}
-                    /> 
+                <OccupationSearchBar
+                    label={"Search lower occupations"}
+                    onChange={(value) => setData({ ...data, children: value })}
+                    exceptedData={[data]}
+                    defaultValue={data.children}
+                /> 
             </Grid>
         )
     } else {

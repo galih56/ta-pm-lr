@@ -134,7 +134,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                         <CircularProgress disableShrink={false} style={{margin:'1em'}}/>
                     </Grid>):<></>}
                 <Grid item lg={6} md={6} sm={12} xs={12} align="center" alignContent="center">
-                    <Button component="a"href={meeting.googleCalendarInfo.hangoutLink} target="_blank" >
+                    <Button component="a"href={JSON.parse(meeting.googleCalendarInfo).hangoutLink} target="_blank" >
                         Join video meeting
                         <Icon icon={googleMeet} height="20px" style={{marginLeft:'0.6em'}}/>
                     </Button>

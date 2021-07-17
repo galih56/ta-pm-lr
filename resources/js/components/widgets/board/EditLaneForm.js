@@ -226,6 +226,8 @@ const EditLaneForm = (props) => {
                             setNewTask={setNewCard}
                             handleAddNewTask={handleAddCard}
                             detailProject={detailProject}
+                            minDate={laneDetail.start}
+                            maxDate={laneDetail.end}
                             isSubtask={false}
                         />
                     </TabPanel>

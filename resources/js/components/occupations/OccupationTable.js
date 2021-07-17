@@ -116,9 +116,7 @@ export default function EnhancedTable(props) {
                                     <TableRow hover key={row.id}>
                                         <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}
                                             onClick={() => handleModalOpen({
-                                                occupation: {
-                                                    ...row,
-                                                },
+                                                occupation: row,
                                                 open: true
                                             })}>
                                             {row.name}

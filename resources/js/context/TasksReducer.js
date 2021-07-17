@@ -25,7 +25,7 @@ const storeDetailSubtask = (payload) => {
             column.cards = column.cards.map((card) => {
                 if (card.id == payload.parent_task_id) {
                     card.cards=card.cards.map((subtask)=>{
-                        if(subtask.id=payload.id) return payload
+                        if(subtask.id==payload.id){ return payload;}
                         return subtask;
                     })
                 }
@@ -81,8 +81,6 @@ const createNewTask = (payload) => {
 
 const removeTask = (payload) => {
     var user = JSON.parse(localStorage.getItem('user'));
-
-    console.log('removing-task',payload);
     const newProjects = user.projects.map((project) => {
         project.columns = project.columns.map(column => {
                 column.cards = column.cards.filter(card => {

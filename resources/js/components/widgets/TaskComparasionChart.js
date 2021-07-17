@@ -15,9 +15,9 @@ const TaskComparasionChart = ({tasks,deadlineKey}) => {
     for (let i = 0; i < tasks.length; i++) {
       const task = tasks[i];
       labels.push(task.title);
+      console.log(task);
       estimations.push(task[deadlineKey]);
       realizations.push(task['actual_'+deadlineKey]);
-      console.log(task[deadlineKey],deadlineKey)
     }
     var datasets=[
         {
@@ -31,7 +31,6 @@ const TaskComparasionChart = ({tasks,deadlineKey}) => {
           backgroundColor: 'rgb(54, 162, 235)',
         },
     ];
-    console.log(estimations,realizations)
     setData({labels:labels,datasets:datasets})
   }
 
@@ -51,6 +50,15 @@ const TaskComparasionChart = ({tasks,deadlineKey}) => {
                   }
               }
           }
+      },
+      tooltips: {
+        enabled: true,
+        callbacks: {
+          label: function(tooltipItem, data) {
+            console.log(tooltipItem,data);
+            return ' tes ';
+          }
+        }
       },
       responsive:true,
       maintainAspectRatio : false

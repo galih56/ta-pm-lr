@@ -18,7 +18,7 @@ class ProjectController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['index','update','store','destroy']]); 
     }
 
     public function index()
@@ -81,15 +81,22 @@ class ProjectController extends Controller
 
     public function show($id)
     {
-        $project=Project::with(['columns.cards'=>function($q1){
+        $project=Project::with(['columns'=>function($q1){
                             return $q1->orderBy('start','ASC')
-                                    ->with(['cards'=>function($q2){
-                                        return $q2->orderBy('start','ASC');
-                                    }]);
+                                        ->with(['cards'=>function($q2){
+                                            return $q2->orderBy('start','ASC')->with('taskMembers')
+                                                ->with('tags.tag')
+                                                ->with(['cards'=>function($q3){
+                                                    return $q3->orderBy('start','ASC')->with('taskMembers')
+                                                                ->with('tags.tag');
+                                            }]);
+                                        }]);
+                                   
                         }])
                         ->with('members.role')->with('members.user')
                         ->with('meetings')
                         ->findOrFail($id)->toArray();
+
 
         $members=$project['members'];
         $project_members=[];
@@ -104,6 +111,7 @@ class ProjectController extends Controller
             $project_members[]=$member;
         }
         $project['members']=$project_members;
+        
         
         return response()->json($project);
     }

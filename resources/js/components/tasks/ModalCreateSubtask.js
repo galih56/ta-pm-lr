@@ -32,14 +32,6 @@ const DialogActions = withStyles((theme) => ({
     root: { margin: 0, padding: theme.spacing(1) },
 }))(MuiDialogActions);
 
-const useStyles = makeStyles((theme) => ({
-    root: { display: 'flex', flexWrap: 'wrap' },
-    margin: { margin: theme.spacing(1) },
-    formControl: { minWidth: 120, },
-    selectEmpty: { marginTop: theme.spacing(2), },
-}));
-
-
 export default function ModalCreateSubtask({open,handleClose,children}) {
     return (
         <Dialog aria-labelledby="Create a subtask" open={open}>

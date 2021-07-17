@@ -145,34 +145,6 @@ const DetailProject = (props) => {
         }
     }
 
-    const getGanttDataSource=()=>{
-        console.log('gantt datasource update')
-        var data=[];
-        var columns=detailProject.columns;
-        for (let i = 0; i < columns.length; i++) {
-            columns[i].isManual=false;
-            var column=columns[i];
-            var new_column={...column,cards:[]};
-            for (let j = 0; j < column.cards.length; j++) {
-                column.cards[j].realization=false;
-                column.cards[j].isManual=true;
-                var task=column.cards[j];
-                var task_realization={...task,title:`Realisasi ${task.title}`,start:task.actual_start,end:task.actual_end,realization:true,cards:[]};
-                for (let k = 0; k < task.cards.length; k++) {
-                    column.cards[j].cards[k].realization=false;
-                    column.cards[j].cards[k].isManual=true;
-                    var subtask=task.cards[k];
-                    var subtask_realization={...subtask,title:`Realisasi ${subtask.title}`, start:subtask.actual_start,end:subtask.actual_end,realization:true};
-                    task_realization.cards.push(subtask_realization);
-                }
-                task.cards.unshift(task_realization)
-                new_column.cards.push(task);
-                // new_column.cards.push(task_realization);
-            }
-            data[i]=new_column;
-        }
-        return data;
-    }
     useEffect(() => {
         const query = new URLSearchParams(props.location.search);
         const paramTaskId = query.get('tasks_id');
@@ -300,7 +272,7 @@ const DetailProject = (props) => {
                                         <Grid container >   
                                             <CustomBreadCrumbs projectName={detailProject.title} tabName="Gantt"/>
                                             <Grid item xl={12} md={12} sm={12} xs={12} >
-                                                <GanttChart detailProject={{...detailProject,columns:getGanttDataSource()}} handleDetailTaskOpen={handleDetailTaskOpen} />
+                                                <GanttChart detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen} />
                                             </Grid>
                                         </Grid>
                                     </TabPanel>
@@ -335,6 +307,14 @@ const DetailProject = (props) => {
                                         <Grid container >   
                                             <CustomBreadCrumbs projectName={detailProject.title} tabName="Meeting" style={{marginTop:'1em'}}/>
                                             <Grid item xl={12} md={12} sm={12} xs={12} >
+                                                {(global.state.occupation?.name.toLowerCase()=='manager' ||global.state.occupation?.name.toLowerCase()=='project manager' )?(
+                                                        <Button
+                                                            variant="contained"
+                                                            color="primary"
+                                                            onClick={()=>handleModalCreateMeeting(true)}
+                                                            style={{ marginBottom: '1em' }}
+                                                            startIcon={<AddIcon />}> Add new meeting </Button>
+                                                    ):<></>}
                                                 <Calendar detailProject={detailProject} handleDetailMeetingOpen={handleDetailMeetingOpen} />
                                             </Grid>
                                         </Grid>
@@ -375,14 +355,22 @@ const DetailProject = (props) => {
                     </Switch>
                     <ModalCreateList
                         handleStoreList={handleStoreList}
-                        refreshDetailProject={getDetailProject}
+                        detailProject={{ 
+                            id:detailProject.id,
+                            start:detailProject.start,
+                            end:detailProject.end
+                        }} 
                         projects_id={params.id}
                         open={showModalCreateList}
                         handleOpen={()=>handleModalCreateList(true)}
                         handleClose={()=>handleModalCreateList(false)} />
                     <ModalCreateMeeting
-                        refreshDetailProject={getDetailProject}
                         projects_id={params.id}
+                        detailProject={{ 
+                            id:detailProject.id,
+                            start:detailProject.start,
+                            end:detailProject.end
+                        }} 
                         open={showModalCreateMeeting}
                         handleOpen={()=>handleModalCreateMeeting(true)}
                         handleClose={()=>handleModalCreateMeeting(false)} />

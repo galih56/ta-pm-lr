@@ -41,8 +41,8 @@ const MemberList=({isEdit,data,setData,detailProject})=>{
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.post(url, body)
             .then((result) => {
-                const payload = { projectId: data.projectId, listId: data.listId, data: data };
                 setData({...data,members:[...data.members,...result.data]});
+                const payload = { projects_id: data.projects_id, lists_id: data.lists_id, data: data };
                 global.dispatch({ type: 'store-detail-task', payload: payload });
                 handleSnackbar(`Data has been updated`, 'success');
             }).catch((error) => {
@@ -57,14 +57,13 @@ const MemberList=({isEdit,data,setData,detailProject})=>{
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.delete(url, {id:user.task_member_id})
             .then((result) => {
-                const payload = { projectId: data.projectId, listId: data.listId, data: data };
-                setData({...data,complete:result.data.complete})
-                global.dispatch({ type: 'store-detail-task', payload: payload });
                 var newMemberList=members.filter(function(member){
                     if(member.task_member_id!=user.task_member_id) return member;
                 });
                 setMembers(newMemberList);
                 setData({...data,members:newMemberList});
+                const payload = { projects_id: data.projects_id, lists_id: data.lists_id, data: data };
+                global.dispatch({ type: 'store-detail-task', payload: payload });
                 handleSnackbar(`Data has been updated`, 'success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }

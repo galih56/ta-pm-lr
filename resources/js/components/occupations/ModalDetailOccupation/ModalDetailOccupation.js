@@ -77,7 +77,6 @@ export default function ModalDetailOccupation(props) {
 
     const deleteOccupation = () => {
         if (window.navigator.onLine) {
-            
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             const url = process.env.MIX_BACK_END_BASE_URL + `occupations/${data.id}`;

@@ -8,7 +8,6 @@ import UserContext from '../../../context/UserContext';
 import moment from 'moment';
 import axios from 'axios';
 import Chip from '@material-ui/core/Chip';
-// import SaveIcon from '@material-ui/icons/Save';
 
 const useStyles = makeStyles((theme) => ({
     textfield: { marginTop: theme.spacing(1), width: '100%' },
@@ -22,11 +21,10 @@ const OpenEditForm = ({ isEdit, data, setData }) => {
     let global = useContext(UserContext);
 
     const getOccupations = () => {
-        const config = { mode: 'no-cors', crossdomain: true, }
-        const url = process.env.REACT_APP_BACK_END_BASE_URL + 'occupation';
-        axios.defaults.headers.common['Authorization'] = global.state.token;
+        const url = process.env.MIX_BACK_END_BASE_URL + 'occupations';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then((result) => {
                 setOccupations(result.data);
             }).catch((error) => {

@@ -194,8 +194,16 @@ const App = () => {
                                             </>
                                         )
                                     }} />
-                                    
                                     <Route path='/teams' render={(props) => {
+                                        const { match: { path } } = props;
+                                        return (
+                                            <>
+                                                <Route path={`${path}/:id`} component={DetailTeam} />
+                                                <Route path={`${path}`} exact component={TeamList} />
+                                            </>
+                                        )
+                                    }} />
+                                    <Route path='/budget' render={(props) => {
                                         const { match: { path } } = props;
                                         return (
                                             <>

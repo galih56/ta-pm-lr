@@ -56,7 +56,6 @@ export default function ModalCreateMeeting(props) {
     var projects_id = props.projects_id;
     var closeModal = props.handleClose;
     const history = useHistory();
-    const refreshData = props.refreshDetailProject;
     const [title, setTitle] = useState('');
     const [date,setDate]=useState('');
     const [start, setStart] = useState(null);
@@ -94,7 +93,6 @@ export default function ModalCreateMeeting(props) {
         axios.post(url, body)
             .then((result) => {
                 clearState();
-                refreshData();
                 // global.dispatch({ type: 'create-new-meeting', payload: result.data });
                 handleSnackbar(`A new meeting successfuly created`, 'success');
             }).catch((error) => {

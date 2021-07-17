@@ -188,21 +188,24 @@ export default function ModalDetailTask(props) {
                 {data.title} {data.label ? `(${data.label})` : ''}
                 <br/>
                 {data.creator?<span style={{fontSize:'0.7em'}}>Created by : {data.creator.name}</span>:null}
-                <br />
-                <FormControlLabel
-                    control={<Checkbox onChange={(event) => {
-                        var progress=data.progress         
-                        if(data.cards.length<=0 && data.complete==true) progress=100 ;
-                        else if(data.cards.length<=0 && data.complete==false)progress=0 ;
-                        setData({...data,complete:event.target.checked,progress:progress});
-                        saveChanges({
-                            id:data.id, actual_start:data.actual_start, actual_end:data.actual_end,
-                            complete:event.target.checked, title:data.title, is_subtask:data.is_subtask,
-                            progress:progress
-                        });
-                    }} fontSize="small" checked={data.complete} />}
-                    label={`Complete`}
-                />
+                
+                {data.is_subtask?(<>
+                    <br />
+                    <FormControlLabel
+                        control={<Checkbox onChange={(event) => {
+                            var progress=data.progress         
+                            if(data.cards.length<=0 && data.complete==true) progress=100 ;
+                            else if(data.cards.length<=0 && data.complete==false)progress=0 ;
+                            setData({...data,complete:event.target.checked,progress:progress});
+                            saveChanges({
+                                id:data.id, actual_start:data.actual_start, actual_end:data.actual_end,
+                                complete:event.target.checked, title:data.title, is_subtask:data.is_subtask,
+                                progress:progress
+                            });
+                        }} fontSize="small" checked={data.complete} />}
+                        label={`Complete`}
+                    />
+                    </>):<></>}
                 <TaskProgress value={data.progress}></TaskProgress>
             </DialogTitle>
             <DialogContent dividers>    

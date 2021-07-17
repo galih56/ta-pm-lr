@@ -150,7 +150,7 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
                     })()}
                 </Typography>
                 <Typography variant="body1" color="textSecondary" component="p">
-                Uploaded by : {file.user_name}
+                Uploaded by : {file.user.name}
                 </Typography>
             </CardContent>
         </Card>
@@ -188,10 +188,9 @@ const Files = (props) => {
 
     const handleDelete = (id) => {
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
             const url = process.env.MIX_BACK_END_BASE_URL + 'files/' + id;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.delete(url, {}, config)
+            axios.delete(url)
                 .then((result) => {
                     const data = result.data;
                     setChoosenFileId(null)

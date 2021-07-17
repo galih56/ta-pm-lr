@@ -9,12 +9,25 @@ class OccupationController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['show','update','store','destroy']]); 
     }
 
     public function index()
     {
-        $occupations=Occupation::with('users')->get();
+        $occupations=Occupation::with('users')->with('childrenRelations.child')->get()->toArray();
+        $new_occupations=[];
+        for ($i=0; $i < count($occupations); $i++) { 
+            $occupation=$occupations[$i];
+            $children=[];
+            for ($j=0; $j < count($occupation['children_relations']); $j++) { 
+                $child=$occupation['children_relations'][$j];
+                $children[]=$child['child'];
+            }
+            unset($occupation['children_relations']);
+            $occupation['children']=$children;
+            $new_occupations[]=$occupation;
+        }
+        $occupations=$new_occupations;
         return response($occupations); 
     }
 

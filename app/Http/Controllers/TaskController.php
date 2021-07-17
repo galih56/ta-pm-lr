@@ -124,10 +124,17 @@ class TaskController extends Controller
         if($request->has('progress')) $task->progress=$request->progress;
         if($request->has('start')) $task->start=$request->start;
         if($request->has('end')) $task->end=$request->end;
+        if($task->is_subtask && $request->has('complete')) $task->complete=$request->complete;
         if($request->has('actual_start')) $task->actual_start=$request->actual_start;
         if($request->has('actual_end')) $task->actual_end=$request->actual_end;
         if($request->has('parent_task_id')) $task->parent_task_id=$request->parent_task_id;
-        if($request->has('complete')) $task->complete=$request->complete;
+        if(!$task->is_subtask && $request->has('progress')) {
+            if($request->progress>=100){
+                $task->complete=true;
+            }else{
+                $task->complete=false;
+            }
+        }
 
         if($request->has('actual_start')){
             $start = Carbon::parse($task->start)->format('Y-m-d');
@@ -256,6 +263,7 @@ class TaskController extends Controller
             $user['role']=$task_member['member']['role'];
             $user['project_members_id']=$task_member['project_members_id'];
             $user['tasks_id']=$task_member['tasks_id'];
+            $user['task_members_id']=$task_member['id'];
 
             $members[]=$user;
         }
