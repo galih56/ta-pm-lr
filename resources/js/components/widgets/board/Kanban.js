@@ -109,7 +109,14 @@ const Kanban = (props) => {
         handleDetailTaskOpen({ projects_id: detailProject.id, lists_id: laneId, tasks_id: cardId, open: true,onCardDelete:onCardDelete});
     }
     const EditLaneFormWithDetailProject=(props)=>{
-        return (<EditLaneForm detailProject={{id:detailProject.id,members:detailProject.members}} {...props}/>)
+        return (
+            <EditLaneForm detailProject={{
+                id:detailProject.id,
+                start:detailProject.start,
+                end:detailProject.end,
+                members:detailProject.members
+            }} {...props}/>
+        )
     }
    
     const [eventBus, setEventBus] = useState(undefined);

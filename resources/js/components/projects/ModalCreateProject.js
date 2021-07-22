@@ -62,6 +62,7 @@ export default function ModalCreateProject(props) {
     const { enqueueSnackbar } = useSnackbar();
 
     const [title, setTitle] = useState('');
+    const [cost, setCost] = useState('');
     const [description, setDescription] = useState('');
     const [start, setStart] = useState(null);
     const [end, setEnd] = useState(null);
@@ -84,6 +85,7 @@ export default function ModalCreateProject(props) {
             description: description,
             start: start,
             end: end,
+            cost: cost,
             project_owner:projectOwner,
             project_manager:projectManager,
             users_id: global.state.id,
@@ -132,6 +134,15 @@ export default function ModalCreateProject(props) {
                                     className={classes.textfield}
                                     onChange={(e) => setTitle(e.target.value) }
                                     style={{ width: '100%' }}
+                                />
+                            </Grid>
+                            <Grid item lg={6} md={6} sm={6} xs={12} >
+                                <TextField variant="standard"
+                                    label="Cost estimation : "
+                                    className={classes.textfield}
+                                    onChange={(e) => setCost(e.target.value) }
+                                    style={{ width: '100%' }}
+                                    type="number"
                                 />
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>

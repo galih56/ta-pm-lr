@@ -72,7 +72,7 @@ const EditLaneForm = (props) => {
     };
     const initCardState = {
         id: null, title: '', description: '', 
-        label: '', progress: 0, start: null, end: null, 
+        label: '', progress: 0, start: null, end: null, cost:'',
         tags: [], lists_id: laneId,creator:null ,members:[]
     };
     const [laneDetail, setLaneDetail] = useState(initLaneState);
@@ -227,6 +227,8 @@ const EditLaneForm = (props) => {
                             handleAddNewTask={handleAddCard}
                             detailProject={detailProject}
                             isSubtask={false}
+                            minDate={laneDetail.start}
+                            maxDate={laneDetail.end}
                         />
                     </TabPanel>
                 </DialogContent >

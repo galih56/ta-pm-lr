@@ -23,4 +23,12 @@ class ActivityLog extends Model
     public function task(){
         return $this->belongsTo(Task::class,'tasks_id');
     }
+    
+    public function list(){
+        return $this->belongsTo(TaskList::class,'lists_id');
+    }
+    
+    public function project(){
+        return $this->belongsTo(Project::class,'projects_id');
+    }
 }

@@ -43,8 +43,9 @@ function TabPanel(props) {
 const useStyles = makeStyles((theme) => (
     { root: { flexGrow: 1, backgroundColor: theme.palette.background.paper },
     tabPanel:{ 
-    padding: '0.5em',
-    minHeight:'500px !important'} 
+        padding: '0.5em',
+        minHeight:'500px !important'
+    } 
 }));
 
 const getProjectFromState = (projects, projects_id) => {
@@ -144,31 +145,23 @@ const DetailProject = (props) => {
             if(currentProject)setDetailProject(currentProject);
         }
     }
-
-    const getGanttDataSource=()=>{
-        var data=[];
-        var columns=detailProject.columns;
-        for (let i = 0; i < columns.length; i++) {
-            var column=columns[i];
-            var new_column={...column,cards:[]};
-            for (let j = 0; j < column.cards.length; j++) {
-                column.cards[j].realization=false;
-                var task=column.cards[j];
-                var task_realization={...task,title:`Realisasi ${task.title}`,start:task.actual_start,end:task.actual_end,realization:true,cards:[]};
-                for (let k = 0; k < task.cards.length; k++) {
-                    column.cards[j].cards[k].realization=false;
-                    var subtask=task.cards[k];
-                    var subtask_realization={...subtask,title:`Realisasi ${subtask.title}`, start:subtask.actual_start,end:subtask.actual_end,realization:true};
-                    task_realization.cards.push(subtask_realization);
+    useEffect(()=>{ 
+        const getUserMemberRole=()=>{
+            var user=null;
+            for (let i = 0; i < detailProject.members.length; i++) {
+                const member = detailProject.members[i];
+                if(member.id==global.state.id){
+                    user=member;
+                    break;
                 }
-                task.cards.unshift(task_realization)
-                new_column.cards.push(task);
-                // new_column.cards.push(task_realization);
             }
-            data[i]=new_column;
+            if(user){
+                global.dispatch({type:'store-project-member-role',payload:user.role})
+            }
         }
-        return data;
-    }
+        getUserMemberRole();
+    },[detailProject.members]);
+
     useEffect(() => {
         const query = new URLSearchParams(props.location.search);
         const paramTaskId = query.get('tasks_id');
@@ -187,7 +180,6 @@ const DetailProject = (props) => {
 
     const handleModalCreateList = (open) => setShowModalCreateList(open);
     const handleModalCreateMeeting = (open) => setShowModalCreateMeeting(open);
-
     const handleChange = (event, newValue) => setTabState(newValue);
 
     const handleDetailTaskOpen = (taskInfo) => {
@@ -209,7 +201,6 @@ const DetailProject = (props) => {
                     closeModalDetailTask={() => {
                         handleDetailTaskOpen(clickedTaskInitialState)
                     }}
-                    refreshDetailProject={getDetailProject}
                     detailProject={{
                         id:detailProject.id,
                         members:detailProject.members,
@@ -230,7 +221,6 @@ const DetailProject = (props) => {
                         meeting:clickedMeetingInitialState, 
                         open: false 
                     })}
-                    refreshDetailProject={getDetailProject}
                     detailProject={detailProject}
                     initialState={clickedMeeting} 
                     />
@@ -296,7 +286,7 @@ const DetailProject = (props) => {
                                         <Grid container >   
                                             <CustomBreadCrumbs projectName={detailProject.title} tabName="Gantt"/>
                                             <Grid item xl={12} md={12} sm={12} xs={12} >
-                                                <GanttChart detailProject={{...detailProject,columns:getGanttDataSource()}} handleDetailTaskOpen={handleDetailTaskOpen} />
+                                                <GanttChart detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen} />
                                             </Grid>
                                         </Grid>
                                     </TabPanel>
@@ -331,6 +321,7 @@ const DetailProject = (props) => {
                                         <Grid container >   
                                             <CustomBreadCrumbs projectName={detailProject.title} tabName="Meeting" style={{marginTop:'1em'}}/>
                                             <Grid item xl={12} md={12} sm={12} xs={12} >
+                                                <Button  variant="contained" color="primary" onClick={()=>handleModalCreateMeeting(true)}>Add new meeting</Button>
                                                 <Calendar detailProject={detailProject} handleDetailMeetingOpen={handleDetailMeetingOpen} />
                                             </Grid>
                                         </Grid>
@@ -371,16 +362,18 @@ const DetailProject = (props) => {
                     </Switch>
                     <ModalCreateList
                         handleStoreList={handleStoreList}
-                        refreshDetailProject={getDetailProject}
                         projects_id={params.id}
                         open={showModalCreateList}
-                        handleOpen={()=>handleModalCreateList(true)}
                         handleClose={()=>handleModalCreateList(false)} />
                     <ModalCreateMeeting
-                        refreshDetailProject={getDetailProject}
+                        detailProject={{
+                            id:detailProject.id,
+                            members:detailProject.members,
+                            start:detailProject.start,
+                            end:detailProject.end
+                        }}
                         projects_id={params.id}
                         open={showModalCreateMeeting}
-                        handleOpen={()=>handleModalCreateMeeting(true)}
                         handleClose={()=>handleModalCreateMeeting(false)} />
                     {showModalDetailTask()}
                     {showModalDetailMeeting()}

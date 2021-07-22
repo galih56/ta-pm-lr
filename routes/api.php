@@ -8,10 +8,15 @@ Route::post('/login','App\Http\Controllers\UserController@login');
 Route::post('/logout','App\Http\Controllers\UserController@logout');
 
 Route::resource('lists', 'App\Http\Controllers\ListController');
+Route::post('lists/{id}/extend-deadline', 'App\Http\Controllers\ListController@extendDeadline');
+Route::post('lists/{id}/approve-extend', 'App\Http\Controllers\ListController@approveExtend');
 Route::resource('tasks', 'App\Http\Controllers\TaskController');
+Route::post('tasks/{id}/extend-deadline', 'App\Http\Controllers\TaskController@extendDeadline');
+Route::post('tasks/{id}/approve-extend', 'App\Http\Controllers\TaskController@approveExtend');
 Route::resource('task-members', 'App\Http\Controllers\TaskMemberController');
 Route::resource('task-attachments', 'App\Http\Controllers\TaskAttachmentController');
 Route::resource('files', 'App\Http\Controllers\FileController');
+Route::get('files/{id}/download', 'App\Http\Controllers\FileController@download');
 Route::resource('meetings', 'App\Http\Controllers\MeetingController');
 Route::resource('meeting-members', 'App\Http\Controllers\MeetingMemberController');
 Route::resource('member-roles', 'App\Http\Controllers\MemberRoleController');
@@ -35,6 +40,8 @@ Route::group(['prefix'=>'users'],function(){
 
 Route::get('projects-overview','App\Http\Controllers\ProjectController@getoverallProjectReports');
 Route::resource('projects', 'App\Http\Controllers\ProjectController');
+Route::post('projects/{id}/extend-deadline', 'App\Http\Controllers\ProjectController@extendDeadline');
+Route::post('projects/{id}/approve-extend', 'App\Http\Controllers\ProjectController@approveExtend');
 Route::group(['prefix'=>'projects'],function(){
     Route::get('/{id}/reports','App\Http\Controllers\ProjectController@getReports');
     Route::get('/{id}/tasks','App\Http\Controllers\ProjectController@getTasks');
@@ -52,6 +59,7 @@ Route::resource('project-members', 'App\Http\Controllers\ProjectMemberController
 Route::group(['prefix'=>'project-members'],function(){
     Route::get('/{id}/tasks','App\Http\Controllers\ProjectMemberController@getTasks');
 });
+Route::resource('approvals', 'App\Http\Controllers\ApprovalController');
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();

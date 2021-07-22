@@ -61,7 +61,6 @@ export default function ModalCreateList(props) {
     var projects_id = props.projects_id;
     var closeModal = props.handleClose;
     const history = useHistory();
-    const refreshData = props.refreshDetailProject;
     const [title, setTitle] = useState('');
     const [start, setStart] = useState(null);
     const [end, setEnd] = useState(null);
@@ -87,7 +86,6 @@ export default function ModalCreateList(props) {
             .then((result) => {
                 setTitle('');
                 closeModal();
-                refreshData();
                 global.dispatch({ type: 'create-new-list', payload: result.data });
                 snackbar(`A new list successfully created`, 'success');
             }).catch((error) => {

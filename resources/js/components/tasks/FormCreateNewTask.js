@@ -12,7 +12,7 @@ import UserSearchBar from '../widgets/UserSearchBar';
 import moment from 'moment';
 import UserContext from './../../context/UserContext';
 
-const FormCreateNewTask=({classes,newTask,setNewTask,handleAddNewTask,detailProject,isSubtask})=>{
+const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSubtask,minDate,maxDate})=>{
     const global=useContext(UserContext);
     const handleTagChanges = (tags) => setNewTask({ ...newTask, tags: tags });
     const [dateRange, setDateRange] = useState([null, null]);
@@ -27,7 +27,7 @@ const FormCreateNewTask=({classes,newTask,setNewTask,handleAddNewTask,detailProj
                 e.preventDefault(); 
                 handleAddNewTask();
             }} >
-            <Grid item lg={12} md={12} sm={12} xs={12}>
+            <Grid item lg={6} md={6} sm={6} xs={12}>
                 <TextField
                     label="Title : "
                     onChange={ (e) => setNewTask({ ...newTask, title: e.target.value })}
@@ -37,13 +37,25 @@ const FormCreateNewTask=({classes,newTask,setNewTask,handleAddNewTask,detailProj
                     required
                 />
             </Grid>
+            <Grid item lg={6} md={6} sm={6} xs={12}>
+                <TextField
+                    label="Estimation cost : "
+                    onChange={ (e) => setNewTask({ ...newTask, cost: e.target.value })}
+                    placeholder={"Rp."}
+                    style={{ width: '100%' }}
+                    variant="standard" 
+                    required
+                />
+            </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12} container>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                     <MobileDateRangePicker
-                         required
-                         startText="Start : "
+                        required
+                        startText="Start : "
                         endText="End : "
                         value={dateRange}
+                        minDate={minDate}
+                        maxDate={maxDate}
                         onChange={(newValue) => {
                             var start= newValue[0];
                             var end= newValue[1];

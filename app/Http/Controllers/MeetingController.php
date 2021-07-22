@@ -9,7 +9,7 @@ class MeetingController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['index','update','store','destroy']]); 
     }
 
     public function index()
@@ -40,8 +40,8 @@ class MeetingController extends Controller
     {
         $meeting=Meeting::with('creator')->with('project')->with('meeting_members.user')->findOrFail($id)->toArray();
         $members=[];
-        for ($i=0; $i < count($meeting->meeting_members); $i++) { 
-            $meeting_member=$meeting->meeting_members[$i];
+        for ($i=0; $i < count($meeting['meeting_members']); $i++) { 
+            $meeting_member=$meeting['meeting_members'][$i];
             $user=  $meeting_member['user'];
             $user['meetings_id']=$meeting_member['meetings_id'];
             $members[]=$user;

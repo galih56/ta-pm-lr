@@ -29,4 +29,12 @@ class TaskList extends Model
     public function project(){
         return $this->belongsTo(Project::class,'projects_id');
     }
+
+    public function approvals(){
+        return $this->hasMany(Approval::class,'lists_id');
+    }
+    
+    public function logs(){
+        return $this->hasMany(ActivityLog::class,'lists_id');
+    }
 }

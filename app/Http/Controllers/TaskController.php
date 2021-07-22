@@ -9,6 +9,9 @@ use App\Models\Tag;
 use App\Models\TasksHasTags;
 use App\Models\TaskMember;
 use App\Models\ProjectMember;
+use App\Models\Approval;
+use App\Models\ActivityLog;
+use App\Models\User;
 use Carbon\Carbon;
 
 class TaskController extends Controller
@@ -46,6 +49,7 @@ class TaskController extends Controller
         $task=new Task();
         $task->title=$request->title;
         $task->description=$request->description;
+        $task->cost=$request->cost;
         $task->start=$request->start;
         $task->end=$request->end;
         
@@ -122,6 +126,7 @@ class TaskController extends Controller
         if($request->has('description')) $task->description=$request->description;
         if($request->has('lists_id')) $task->lists_id=$request->lists_id;
         if($request->has('progress')) $task->progress=$request->progress;
+        if($request->has('actual_cost')) $task->actual_cost=$request->actual_cost;
         if($request->has('start')) $task->start=$request->start;
         if($request->has('end')) $task->end=$request->end;
         if($request->has('actual_start')) $task->actual_start=$request->actual_start;
@@ -135,7 +140,6 @@ class TaskController extends Controller
             if($actual_start<$start) $task->start_label='Mulai lebih cepat';
             if($actual_start>$start) $task->start_label='Mulai terlambat';
             if($actual_start==$start) $task->start_label='Mulai tepat waktu';
-            // dd($task->start,$request->actual_start,$start,$actual_start,$task->start_label,'($actual_start<$start)',($actual_start<$start),'($actual_start>$start)',($actual_start>$start),'($actual_start==$start)',($actual_start==$start));
         }
         
         if($request->has('actual_end')){
@@ -169,7 +173,7 @@ class TaskController extends Controller
         $task=Task::findOrFail($id);
         
         $task=Task::with('creator')->with('cards')->with('logs')->with('comments.creator')
-                    ->with('list')->with('taskMembers.member.role')->with('taskMembers.user')
+                    ->with('list')->with('members.member.role')->with('members.user')
                     ->with('tags.tag')->findOrFail($id)->toArray();
 
         $task['attachments']=$this->getAttachments($id);
@@ -226,6 +230,58 @@ class TaskController extends Controller
         return response()->json($taks,200);
     }
 
+    public function extendDeadline(Request $request,$id){
+        $request->validate([
+            'users_id'=>'required',
+            'new_deadline'=>'required'
+        ]);
+
+        $task=Task::findOrFail($id);
+        $user=User::findOrFail($request->users_id);
+        if($task->old_deadline) {
+            $task->end=$request->new_deadline;
+        }else{
+            $task->old_deadline=$task->start;
+            $task->end=$request->new_deadline;
+        }
+        $task->extended="Waiting for approval";
+        $task->save();
+
+        $new_approval=new Approval();
+        $new_approval->tasks_id=$task->id;
+        $new_approval->users_id=$user->id;
+        $new_approval->description=$request->description;
+        $new_approval->status="Waiting for approval";
+        $new_approval->title="Extend task deadline";
+        $new_approval->save();
+
+        $task=$this->getDetailTask($task->id);
+        return response()->json($task);
+    } 
+
+    public function approveExtend(Request $request,$id){
+        $request->validate([
+            'approvals_id'=>'required'
+        ]);
+        
+        $task=Task::findOrFail($id);
+        $user=User::findOrFail($request->users_id);
+        if($task->old_deadline) {
+            $task->end=$request->new_deadline;
+        }else{
+            $task->old_deadline=$task->start;
+            $task->end=$request->new_deadline;
+        }
+        $task->extended=$request->status; //approved or not approved
+        $task->save();
+
+        $new_approval=Approval::findOrFail($request->approvals_id);
+        $new_approval->status=$request->status;
+        $new_approval->save();
+
+        $task=$this->getDetailTask($task->id);
+    }
+
     function getTagsFromTask($task){
         $tag_relations=$task['tags'];
         $tags=[];
@@ -249,7 +305,7 @@ class TaskController extends Controller
 
     function getTaskMembers($task){
         $members=[];
-        $task_members=$task['task_members'];
+        $task_members=$task['members'];
         for ($i=0; $i < count($task_members); $i++) { 
             $task_member=$task_members[$i];
             $user=$task_member['user'];

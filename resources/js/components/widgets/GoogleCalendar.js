@@ -12,8 +12,6 @@ import googleCalendar from '@iconify-icons/logos/google-calendar';
 
 
 const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
-    const [user, setUser] = useState(null);
-    const [calendar,setCalendar]=useState(null);
     const [loading, setLoading]=useState(false);
     const global=useContext(UserContext);
     const { enqueueSnackbar } = useSnackbar();
@@ -126,7 +124,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
         });
     }
 
-    if(meeting.googleCalendarInfo){
+    if(meeting.google_calendar_info){
         return (
             <>
                 {loading?(
@@ -134,7 +132,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                         <CircularProgress disableShrink={false} style={{margin:'1em'}}/>
                     </Grid>):<></>}
                 <Grid item lg={6} md={6} sm={12} xs={12} align="center" alignContent="center">
-                    <Button component="a"href={meeting.googleCalendarInfo.hangoutLink} target="_blank" >
+                    <Button component="a"href={meeting.google_calendar_info.hangoutLink} target="_blank" >
                         Join video meeting
                         <Icon icon={googleMeet} height="20px" style={{marginLeft:'0.6em'}}/>
                     </Button>
@@ -156,7 +154,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                                     if(calendarWithEmailAsId){
                                         //cek apa ada calendar dengan id email terautentikasi
                                         if(calendarWithProjectName){
-                                            deleteEvent(calendarWithProjectName.id,meeting.googleCalendarInfo.id);
+                                            deleteEvent(calendarWithProjectName.id,meeting.google_calendar_info.id);
                                             setLoading(false);
                                         }
                                     }
@@ -165,7 +163,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                                     }
                                 });
                             });
-                            saveChanges({googleCalendarInfo:null});
+                            saveChanges({google_calendar_info:null});
                         });
                     }}> 
                         Disconnect from google calendar 
@@ -190,6 +188,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                             scope: "https://www.googleapis.com/auth/calendar",
                             response_type: 'id_token permission code'
                         }, async function(response) {
+                            console.log(response);
                             setLoading(true)
                             if (response.error) return;
                             getCalendar(function(calendars){

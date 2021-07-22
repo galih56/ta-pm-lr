@@ -101,6 +101,14 @@ class FileController extends Controller
         return response()->json($file);
     }
 
+    public function download($id){
+        $file=File::with('user')->findOrFail($id);
+        $pathToFile = public_path($file->path);
+        $getContent = file_get_contents($pathToFile); // Here cURL can be use.
+        file_put_contents( $pathToFile, $getContent ); 
+        return response()->download($pathToFile, $file->name); 
+    }
+
     public function edit($id)
     {
         abort(404);

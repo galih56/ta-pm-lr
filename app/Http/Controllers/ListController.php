@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Approval;
 use App\Models\TaskList;
 
 class ListController extends Controller
@@ -60,4 +61,13 @@ class ListController extends Controller
         $list=TaskList::findOrFail($id);
         return response()->json($list->delete(),200);
     }
+    
+    public function extendDeadline(Request $request){
+
+    } 
+
+    public function approveExtend(Request $request){
+
+    }
+
 }

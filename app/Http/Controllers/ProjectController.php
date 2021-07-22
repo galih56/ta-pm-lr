@@ -11,6 +11,7 @@ use App\Models\Team;
 use App\Models\Task;
 use App\Models\Meeting;
 use App\Models\TaskAttachment;
+use App\Models\Approval;
 use App\Models\GithubRepository;
 use DB;
 
@@ -18,7 +19,7 @@ class ProjectController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['index','update','store','destroy']]); 
     }
 
     public function index()
@@ -39,6 +40,7 @@ class ProjectController extends Controller
         $project->description=$request->description;
         $project->start=$request->start;
         $project->end=$request->end;
+        $project->cost=$request->cost;
         $project->save();
 
         $inserted_members=[];
@@ -84,10 +86,10 @@ class ProjectController extends Controller
         $project=Project::with(['columns.cards'=>function($q1){
                             return $q1->orderBy('start','ASC')
                                     ->with(['cards'=>function($q2){
-                                        return $q2->orderBy('start','ASC');
-                                    }]);
+                                        return $q2->orderBy('start','ASC')->with('members.user.occupation')->with('members.member.role');
+                                    }])->with('members.user')->with('members.member.role');
                         }])
-                        ->with('members.role')->with('members.user')
+                        ->with('members.role')->with('members.user.occupation')
                         ->with('meetings')
                         ->findOrFail($id)->toArray();
 
@@ -95,16 +97,16 @@ class ProjectController extends Controller
         $project_members=[];
         for ($i=0; $i < count($members); $i++) { 
             $member=$members[$i];
+            $project_members_id=$member['id'];
             $role=$member['role'];
             $user=$member['user'];
             $projects_id=$member['projects_id'];
             $member=$user;
             $member['role']=$role;
-            $member['project_members_id']=$projects_id;
+            $member['project_members_id']=$project_members_id;
             $project_members[]=$member;
         }
         $project['members']=$project_members;
-        
         return response()->json($project);
     }
 
@@ -405,4 +407,13 @@ class ProjectController extends Controller
         }
         return response()->json($data);
     }
+    
+    public function extendDeadline(Request $request){
+
+    } 
+
+    public function approveExtend(Request $request){
+
+    }
+
 }

@@ -14,6 +14,7 @@ import UserSearchbar from './../widgets/UserSearchBar';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import TimePicker from '@material-ui/lab/TimePicker';
+import DatePicker from '@material-ui/lab/DatePicker';
 import moment from 'moment';
 import Alert from '@material-ui/core/Alert';
 
@@ -52,11 +53,9 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ModalCreateMeeting(props) {
     const classes = useStyles();
-    var open = props.open;
-    var projects_id = props.projects_id;
+    var {open,projects_id,detailProject} = props;
     var closeModal = props.handleClose;
     const history = useHistory();
-    const refreshData = props.refreshDetailProject;
     const [title, setTitle] = useState('');
     const [date,setDate]=useState('');
     const [start, setStart] = useState(null);
@@ -87,6 +86,7 @@ export default function ModalCreateMeeting(props) {
             title: title,  start:datetime_start,  end:datetime_end,  projects_id: projects_id,  
             members: members,  users_id: global.state.id
         }
+        
         if (!window.navigator.onLine)  handleSnackbar(`You are currently offline`, 'warning');
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -94,8 +94,7 @@ export default function ModalCreateMeeting(props) {
         axios.post(url, body)
             .then((result) => {
                 clearState();
-                refreshData();
-                // global.dispatch({ type: 'create-new-meeting', payload: result.data });
+                global.dispatch({ type: 'create-new-meeting', payload: result.data });
                 handleSnackbar(`A new meeting successfuly created`, 'success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
@@ -106,7 +105,10 @@ export default function ModalCreateMeeting(props) {
     const checkIfAuthenticated = () => {
         if (global.state.authenticated === true) {
             return (
-                <React.Fragment>
+                <form  onSubmit={(e) => { 
+                    e.preventDefault(); 
+                    submitData();
+                }} >
                     <DialogContent dividers >
                         <Grid container spacing={2} style={{ paddingLeft: 3, paddingRight: 3 }} >
                             <Grid item lg={12} md={12} sm={12} xs={12} >
@@ -122,16 +124,16 @@ export default function ModalCreateMeeting(props) {
                             <Grid item container spacing={2} lg={12} md={12} sm={12} xs={12} >
                                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                                     <Grid item lg={6} md={6} sm={12} xs={12} >
-                                        <TextField
-                                            onChange={(value)=>setDate(value.target.value)}
+                                        <DatePicker
+                                            onChange={(value)=>{setDate(value)}}
                                             style={{width:'100%'}}
                                             label="Date"
-                                            type="date"
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
                                             variant="standard"
+                                            minDate={detailProject.start}
+                                            maxDate={detailProject.end}
+                                            value={date}
                                             required
+                                            renderInput={(props)=><TextField {...props} variant="standard"/>}
                                         />
                                     </Grid> 
                                     <Grid item container spacing={2}  lg={6} md={6} sm={12} xs={12} >
@@ -150,29 +152,29 @@ export default function ModalCreateMeeting(props) {
                                         </Grid> 
                                         <Grid item lg={6} md={6} sm={6} xs={6} >
                                             <TimePicker
-                                                    value={end}
-                                                    label="End"
-                                                    variant="standard"
-                                                    onChange={value=>setEnd(value)}
-                                                    InputLabelProps={{ shrink: true }}
-                                                    inputProps={{  step: 300 }}
-                                                    renderInput={(params) => <TextField {...params}  variant={'standard'}/>}
-                                                    ampm={false}
-                                                    required
-                                                />
+                                                value={end}
+                                                label="End"
+                                                variant="standard"
+                                                onChange={value=>setEnd(value)}
+                                                InputLabelProps={{ shrink: true }}
+                                                inputProps={{  step: 300 }}
+                                                renderInput={(params) => <TextField {...params}  variant={'standard'}/>}
+                                                ampm={false}
+                                                required
+                                            />
                                         </Grid> 
                                     </Grid>
                                 </LocalizationProvider>
                             </Grid> 
                             <Grid item  lg={12} md={12} sm={12} xs={12} >
-                                <UserSearchbar onChange={(value) => setMembers(value)} exceptedUsers={[]}/>
+                                <UserSearchbar detailProject={detailProject} onChange={(value) => setMembers(value)} exceptedUsers={[]}/>
                             </Grid>
                         </Grid>
                     </DialogContent>
                     <DialogActions>
                         <Button type={'submit'} color="primary">Create</Button>
                     </DialogActions>
-                </React.Fragment>
+                </form>
             )
         } else {
             return (
@@ -183,11 +185,7 @@ export default function ModalCreateMeeting(props) {
         }
     }
     return (
-        <Dialog aria-labelledby="Create a meeting" open={open} component="form" 
-                onSubmit={(e) => { 
-                    e.preventDefault(); 
-                    submitData();
-                }}>
+        <Dialog aria-labelledby="Create a meeting" open={open}>
             <DialogTitle onClose={
                 () => {
                     closeModal(false);

@@ -6,7 +6,8 @@ import Layout from "./layout/Layout";
 import UserContext, {
     initState, resetState, getAuthDataFromStorage,
     storeAuthData, runDelayedHTTPRequest, logout,
-    storeGoogleAuth, storeGithubAuth, removeGithubAuth
+    storeGoogleAuth, storeGithubAuth, removeGithubAuth,
+    storeProjectMemberRole,removeProjectMemberRole
 } from './context/UserContext';
 import { createNewList, removeList, updateList } from './context/ListsReducer';
 import { createNewMeeting, storeDetailMeeting, removeMeeting, updateMeeting } from './context/MeetingsReducer';
@@ -134,6 +135,10 @@ const reducer = (state, action) => {
             return runDelayedHTTPRequest(state);
         case 'check-authentication':
             return checkAuthentication(payload, state);
+        case 'store-project-member-role':
+            return storeProjectMemberRole(payload, state);
+        case 'remove-project-member-role':
+            return removeProjectMemberRole(payload, state);
         default:
             console.log('Default switch : ',action,state);
     }

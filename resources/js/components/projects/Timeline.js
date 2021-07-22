@@ -21,7 +21,6 @@ import EditLaneForm from './../widgets/board/EditLaneForm'
 import ModalDetailTask from '../tasks/modalDetailTask/ModalDetailTask';
 
 const headCells = [
-    { id: 'checkbox', align: 'left', label: '' },
     { id: 'Title', align: 'left', label: 'Title' },
     { id: 'PIC', align: 'left', label: 'PIC' },
     { id: 'Start', align: 'left',  label: 'Start' },
@@ -30,7 +29,6 @@ const headCells = [
     { id: 'Realisasi Start', align: 'left',  label: 'Realisasi Start' },
     { id: 'Realisasi End', align: 'left',  label: 'Realisasi End' },
     { id: 'Work days', align: 'right', label: 'Work days' },
-    { id: 'Progress', align: 'right', label: 'Progress' },
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -44,11 +42,10 @@ const useStyles = makeStyles((theme) => ({
     sortSpan: visuallyHidden,
 }));
 
-function EnhancedTableHead({extraCells}) {
+function EnhancedTableHead() {
     return (
         <TableHead>
             <TableRow>
-                {extraCells}
                 <TableCell></TableCell>
                 {headCells.map((headCell) => (
                     <TableCell
@@ -190,7 +187,6 @@ export default function EnhancedTable(props) {
         <>
             <TableContainer  className={classes.table}>
                 <Table size={'small'} >
-                    {/* <EnhancedTableHead classes={classes}  /> */}
                     <TableBody>
                         {rows.map((row, index) => {
                             return (
@@ -212,7 +208,12 @@ export default function EnhancedTable(props) {
             {(selectedList.id && openEditList)?(
                 <EditLaneForm 
                     laneId={selectedList.id}
-                    detailProject={{id:detailProject.id,members:detailProject.members}} 
+                    minDate={selectedList.start}
+                    maxDate={selectedList.end}
+                    detailProject={{
+                        id:detailProject.id,
+                        members:detailProject.members
+                    }} 
                     open={openEditList}
                     onCancel={()=>setOpenEditList(false)}
                     onAdd={(newTask)=>{
@@ -228,7 +229,7 @@ export default function EnhancedTable(props) {
 
 function Row(props) {
     const { data, handleDetailTaskOpen,classes,onClick } = props;
-    const [openCollapsible, setOpenCollapsible] = useState(false);
+    const [openCollapsible, setOpenCollapsible] = useState(true);
     let global = useContext(UserContext);
     const { enqueueSnackbar } = useSnackbar();
     const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
@@ -297,7 +298,6 @@ const TableTasks=({tasks,classes,handleCompleteTask,handleDetailTaskOpen})=>{
             <TableBody>
                 {rows?rows.map((task)=>{
                     return(
-                    <>
                         <TaskRow 
                             key={task.id}
                             data={task} 
@@ -305,7 +305,6 @@ const TableTasks=({tasks,classes,handleCompleteTask,handleDetailTaskOpen})=>{
                             handleCompleteTask={handleCompleteTask}
                             handleDetailTaskOpen={handleDetailTaskOpen}
                             />
-                    </>
                     )
                 }):<></>}
             </TableBody>
@@ -319,22 +318,15 @@ const TaskRow=({data,classes,handleCompleteTask,handleDetailTaskOpen})=>{
             <TableRow hover key={data.id} >
                 <TableCell>
                     <IconButton size="small" onClick={() =>setOpenCollapsible(!openCollapsible)} > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton>
-                        
-                </TableCell>
-                <TableCell pading="checkbox">
-                    <Checkbox
-                        onChange={(event)=> handleCompleteTask(data,event)}
-                        checked={data.complete}
-                    />
                 </TableCell>
                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}
                     onClick={()=>handleDetailTaskOpen({task:data,open:true})} > 
-                    {data.title}
+                    {data.title} ({data.progress}%)
                 </TableCell>
                 <TableCell>
                     {data.members?data.members.map((member,i)=>{
                             return (
-                                <span>{member.role?.name}</span>
+                                <span key={i}>{member.role?member.role?.name:member.member?.role.name}</span>
                             )
                         }):<></>}
                 </TableCell>
@@ -357,9 +349,6 @@ const TaskRow=({data,classes,handleCompleteTask,handleDetailTaskOpen})=>{
                 </TableCell>
                 <TableCell align="right">
                     {(data.actual_start && data.actual_end)?Math.round(moment.duration(moment(data.actual_start).diff(moment(data.actual_end))).asDays())*(-1):''}
-                </TableCell>
-                <TableCell align="right">
-                    {data.progress}
                 </TableCell>
             </TableRow>
             <TableRow >
@@ -385,12 +374,11 @@ const TableSubtask=({tasks,classes,handleCompleteTask,handleDetailTaskOpen,proje
     return(
         <>
             <Table>
-                <EnhancedTableHead classes={classes}  />
+                <EnhancedTableHead classes={classes}/>
                 <TableBody>
                     {subtasks?subtasks.map((subtask)=>{
                         return(
                             <TableRow hover key={subtask.id} >
-                                <TableCell> </TableCell>
                                 <TableCell padding="checkbox"> 
                                     <Checkbox
                                         onChange={(event)=>{
@@ -406,12 +394,12 @@ const TableSubtask=({tasks,classes,handleCompleteTask,handleDetailTaskOpen,proje
                                         })
                                     }}
                                 > 
-                                    {subtask.title}
+                                    {subtask.title} ({subtask.progress}%)
                                 </TableCell>
                                 <TableCell>
                                     {subtask.members?subtask.members.map((member,i)=>{
                                         return (
-                                            <span key={i}>{member.role?member.role.name:''}</span>
+                                            <span key={i}>{member.role?member.role?.name:member.member?.role.name}</span>
                                         )
                                     }):<></>}
                                 </TableCell>
@@ -434,9 +422,6 @@ const TableSubtask=({tasks,classes,handleCompleteTask,handleDetailTaskOpen,proje
                                 </TableCell>
                                 <TableCell align="right">
                                     {(subtask.actual_start && subtask.actual_end)?Math.round(moment.duration(moment(subtask.actual_start).diff(moment(subtask.actual_end))).asDays())*(-1):''}
-                                </TableCell>
-                                <TableCell align="right">
-                                    {subtask.progress}
                                 </TableCell>
                             </TableRow>
                         )

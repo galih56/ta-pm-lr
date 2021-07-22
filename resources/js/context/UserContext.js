@@ -8,6 +8,7 @@ const initState = {
     githubAuth:{
         code:'',  authenticated:false,  access_token:'',  scope:null
     }, 
+    current_project_member_role:null
 };
 
 const getAuthDataFromStorage = () => {
@@ -39,10 +40,23 @@ const storeGoogleAuth = (payload, state) => {
     return data
 }
 
-
 const storeGithubAuth = (payload, state) => {
     var user = JSON.parse(localStorage.getItem('user'));
     user.githubAuth = payload;
+    localStorage.setItem("user", JSON.stringify(user));
+    return user;
+}
+
+const storeProjectMemberRole = (payload, state) => {
+    var user = JSON.parse(localStorage.getItem('user'));
+    user.current_project_member_role = payload;
+    localStorage.setItem("user", JSON.stringify(user));
+    return user;
+}
+
+const removeProjectMemberRole = (payload, state) => {
+    var user = JSON.parse(localStorage.getItem('user'));
+    user.current_project_member_role = null;
     localStorage.setItem("user", JSON.stringify(user));
     return user;
 }
@@ -90,4 +104,6 @@ const runDelayedHTTPRequest = () => {
 const context = createContext();
 export default context;
 export { initState, resetState, getAuthDataFromStorage, storeAuthData, logout,
-    runDelayedHTTPRequest, storeGoogleAuth,storeGithubAuth ,removeGithubAuth};
+    runDelayedHTTPRequest, storeGoogleAuth,storeGithubAuth ,removeGithubAuth,
+    storeProjectMemberRole,removeProjectMemberRole
+};
