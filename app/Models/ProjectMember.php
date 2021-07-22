@@ -32,13 +32,4 @@ class ProjectMember extends Model
     public function role(){
         return $this->belongsTo(MemberRole::class,'roles_id');
     }
-
-    public function verifyMemberAndRole(){
-        
-        $project_member=$this::where('projects_id','=',$request->projects_id)->where('users_id','=',$request->creator)->with('role')->first();
-        dd($project_member);
-        if(!$project_member ){
-            return response()->json(["error"=>"User id : $request->creator is not registered in the project $request->projects_id"],403);
-        }
-    }
 }

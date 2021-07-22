@@ -41,14 +41,6 @@ const HandlePreviewIconDZ = (fileObject, classes) => {
     }
 }
 
-function getBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
-    });
-  }
 
 const Attachments = (props) => {
     const classes = useStyles();
@@ -84,29 +76,18 @@ const Attachments = (props) => {
         } else return (<></>)
     }
     
-    const onUploadFiles = async (attachments, payload) => {
+    const onUploadFiles = async (files, payload) => {
         if (!window.navigator.onLine) {
             snackbar(`You are currently offline`, 'warning');
         } else {
-            attachments=attachments.map(async (attachment) => {
-                var name=attachment.name; 
-                var size=attachment.size;
-                var type=attachment.type;
-                var base64=await getBase64(attachment);
-                return {
-                    name:name, size:size, type:type, base64:base64
-                };
+            let fd = new FormData();
+            fd.append('tasks_id',payload.taskId);
+            fd.append('users_id',global.state.id);
+            fd.append('source','upload');
+            files.map((file) => {
+                fd.append('file[]',file);
             });
-            attachments=await Promise.all(attachments);
-    
-            var body={
-                taskId:payload.taskId,
-                userId:global.state.id,
-                source:'upload',
-                files:attachments
-            }
-            handleAddAttachment(body,  payload)
-            
+            handleAddAttachment(fd,  payload)
         }
     }
     
@@ -115,10 +96,10 @@ const Attachments = (props) => {
             snackbar(`You are currently offline`, 'warning');
         } else {
             var body={
-                taskId:payload.taskId,
-                userId:global.state.id,
+                tasks_id:payload.taskId,
+                users_id:global.state.id,
                 source:'pick',
-                fileId:file.id
+                files_id:file.id
             }
             handleAddAttachment(body, payload);
         }
@@ -134,7 +115,6 @@ const Attachments = (props) => {
             setData([...data, ...payload.data]);
             setChooseFileModalOpen(false);
             global.dispatch({ type: 'create-new-attachments', payload: payload })
-            console.log(data,detailTask.attachments,payload)
         }).catch((error) => {
             const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
             global.dispatch({ type: 'handle-fetch-error', payload: payload });
@@ -178,8 +158,10 @@ const Attachments = (props) => {
                     </IconButton>
                     <GoogleDriveButton payload={payload} snackbar={snackbar}></GoogleDriveButton>
                     <DropzoneDialog
-                        cancelButtonText={"Cancel"} submitButtonText={"Submit"}
-                        maxFileSize={10000000} open={uploadModalOpen}
+                        cancelButtonText={"Cancel"} 
+                        submitButtonText={"Submit"}
+                        maxFileSize={10000000} 
+                        open={uploadModalOpen}
                         onClose={() => setUploadModalOpen(false)}
                         onSave={(files) => { onUploadFiles(files, payload) }}
                         showFileNamesInPreview={true}

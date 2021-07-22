@@ -17,6 +17,7 @@ import TaskProgress from './TaskProgress';
 import EditForm from './EditForm';
 import 'fontsource-roboto';
 import { useSnackbar } from 'notistack';
+import moment from 'moment';
 
 // https://stackoverflow.com/questions/35352638/react-how-to-get-parameter-value-from-query-string
 const styles = (theme) => ({
@@ -67,7 +68,7 @@ export default function ModalDetailTask(props) {
         id: tasks_id, projects_id: '', lists_id: null, list:null,
         title: '', description: '', label: '', complete: false, progress: 0,
         start:null,end:null,actual_start:null, actual_end:null, start_label:'',end_label:'',
-        tags: [], members: [], parent_task_id:'', cards: [], logs: [], 
+        tags: [], members: [], parent_task_id:'', cards: [], logs: [], cost:'',actual_cost:'',
         comments: [], attachments: [],creator:null,is_subtask:false
     });
     const [detailProject,setDetailProject]=useState({
@@ -136,7 +137,7 @@ export default function ModalDetailTask(props) {
     const saveChanges = (body) => {
         if(!body) body= {
             id:data.id,actual_start:data.actual_start, actual_end:data.actual_end,
-            complete:data.complete, title:data.title, is_subtask:data.is_subtask, 
+            complete:data.complete, title:data.title, actual_cost:data.actual_cost, is_subtask:data.is_subtask, 
             progress: data.progress, parent_task_id:data.parent_task_id,
             projects_id:props.detailProject.id, users_id:global.state.id
         }
@@ -189,20 +190,25 @@ export default function ModalDetailTask(props) {
                 <br/>
                 {data.creator?<span style={{fontSize:'0.7em'}}>Created by : {data.creator.name}</span>:null}
                 <br />
-                <FormControlLabel
-                    control={<Checkbox onChange={(event) => {
-                        var progress=data.progress         
-                        if(data.cards.length<=0 && data.complete==true) progress=100 ;
-                        else if(data.cards.length<=0 && data.complete==false)progress=0 ;
-                        setData({...data,complete:event.target.checked,progress:progress});
-                        saveChanges({
-                            id:data.id, actual_start:data.actual_start, actual_end:data.actual_end,
-                            complete:event.target.checked, title:data.title, is_subtask:data.is_subtask,
-                            progress:progress
-                        });
-                    }} fontSize="small" checked={data.complete} />}
-                    label={`Complete`}
-                />
+               
+                {
+                    (data.is_subtask)?(              
+                        <FormControlLabel
+                            control={<Checkbox onChange={(event) => {
+                                var progress=data.progress         
+                                if(data.cards.length<=0 && data.complete==true) progress=100 ;
+                                else if(data.cards.length<=0 && data.complete==false)progress=0 ;
+                                setData({...data,complete:event.target.checked,progress:progress});
+                                saveChanges({
+                                    id:data.id, actual_start:data.actual_start, actual_end:data.actual_end,
+                                    complete:event.target.checked, title:data.title, is_subtask:data.is_subtask,
+                                    progress:progress
+                                });
+                            }} fontSize="small" checked={data.complete} />}
+                            label={`Complete`}
+                        />
+                    ):(<></>)
+                }
                 <TaskProgress value={data.progress}></TaskProgress>
             </DialogTitle>
             <DialogContent dividers>    

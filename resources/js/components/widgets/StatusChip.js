@@ -30,7 +30,7 @@ function StatusChip({ status }) {
         label={label}
         avatar={(
           label.toLowerCase() === "mulai lebih cepat" || 
-          label.toLowerCase() === "selesai lebih cepat" ) && <DoneIcon style={{ color: "white" }} />}
+          label.toLowerCase() === "selesai lebih cepat" )? <DoneIcon style={{ color: "white" }} />:<></>}
         style={{ backgroundColor: colorForStatus(label)[600], color: "white",fontSize:'1em' }}
       />
     );

@@ -41,4 +41,12 @@ class Project extends Model
     public function teams(){
         return $this->hasMany(TeamsHasProjects::class,'projects_id');
     }
+    
+    public function approvals(){
+        return $this->hasMany(Approval::class,'lists_id');
+    }
+    
+    public function logs(){
+        return $this->hasMany(ActivityLog::class,'projects_id');
+    }
 }

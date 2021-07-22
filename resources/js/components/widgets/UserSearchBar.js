@@ -79,7 +79,7 @@ export default function UserSearchbar(props) {
             renderInput={(params) => <TextField {...params} label={inputLabel?inputLabel:"Search Users"} variant="standard"/>}
             onChange={(event, options) => handleValueChanges(options)}
             renderTags={(values, getTagProps) => values.map((option, index) =>{
-                return(<Chip variant="outlined" label={option.name} {...getTagProps({ index })} /> )
+                return(<Chip key={index} variant="outlined" label={option.name} {...getTagProps({ index })} /> )
             })}
         />
     );

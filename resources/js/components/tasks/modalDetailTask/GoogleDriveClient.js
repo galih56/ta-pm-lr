@@ -11,8 +11,8 @@ const GoogleDriveButton = (props) => {
     const global = useContext(UserContext);
     const payload = props.payload;
 
-    var developerKey = process.env.REACT_APP_GOOGLE_API_KEY;
-    var clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+    var developerKey = process.env.MIX_GOOGLE_API_KEY;
+    var clientId = process.env.MIX_GOOGLE_CLIENT_ID;
     var appId = "tugas-akhir-288302";
     var scope = ['https://www.googleapis.com/auth/drive.readonly'];
 
@@ -47,7 +47,7 @@ const GoogleDriveButton = (props) => {
             if (!window.navigator.onLine) handleSnackbar(`You are currently offline`, 'warning');
 
             const config ={ headers: { 'X-Authorization':`Bearer ${global.state.token}`, 'Content-Type': 'application/json'  } }
-            const url = process.env.REACT_APP_BACK_END_BASE_URL + 'task-attachments/';
+            const url = process.env.MIX_BACK_END_BASE_URL + 'task-attachments/';
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.post(url, body, config)

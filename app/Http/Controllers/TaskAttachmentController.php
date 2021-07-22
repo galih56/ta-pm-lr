@@ -35,14 +35,13 @@ class TaskAttachmentController extends Controller
         $saved_files=[];
         $tasks_id=$request->tasks_id;
         $users_id=$request->users_id;
-
         if($source=='upload'){
             foreach ($request->file('file') as $uploaded_file) {
                 $file = new File();
                 $namafile=$uploaded_file->getClientOriginalName();
-                $uploaded_file->move(public_path('files/task-'.$id),$namafile);
+                $uploaded_file->move(public_path('files/task-'.$tasks_id),$namafile);
                 $file->name = $namafile;
-                $file->path = 'files/task-'.$id.'/'.$namafile;
+                $file->path = 'files/task-'.$tasks_id.'/'.$namafile;
                 $file->source = 'upload';
                 $file->users_id=$request->users_id;
                 $file->save();
@@ -126,7 +125,7 @@ class TaskAttachmentController extends Controller
 
     public function destroy($id)
     {
-        $attachment= Attachment::findOrFail($id);
-        return response()->json($attachment->save());
+        $attachment= TaskAttachment::findOrFail($id);
+        return response()->json($attachment->delete());
     }
 }
