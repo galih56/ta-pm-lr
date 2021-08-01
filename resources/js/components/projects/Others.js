@@ -17,7 +17,7 @@ const Others = ({detailProject,handleDetailTaskOpen}) => {
                 </Grid>
                 <Grid item xl={12} md={12} sm={12} xs={12} >
                     <Overview detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen}/>
-                </Grid>
+                </Grid> 
                 <Grid item xl={7} md={7} sm={12} xs={12} >
                     <MemberList 
                         projects_id={detailProject.id} 

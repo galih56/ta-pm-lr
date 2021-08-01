@@ -103,43 +103,49 @@ const MemberList=({isEdit,data,setData,detailProject})=>{
             <List>
                 {members.map((member)=>{
                     return(
-                        <>
-                            <ListItem alignItems="flex-start" key={member.id} >
-                                <ListItemAvatar>
-                                    {member.profilePicturePath?
-                                    <Avatar alt={"Photo profile " + member.name} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
-                                    <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name.charAt(0).toUpperCase()}</Avatar>}
-                                </ListItemAvatar>
-                                <ListItemText
-                                    primary={member.name}
-                                    secondary={
-                                        <>
-                                            <Typography
-                                                component="span"
-                                                variant="body2"
-                                                className={classes.inline}
-                                                color="textPrimary"
-                                            >
-                                                {member.role.name}
-                                            </Typography>
-                                            <br/>
-                                            {member.email}
-                                        </>
-                                    }
-
-                                />
-                                {isEdit?(<ListItemSecondaryAction>
-                                    <IconButton edge="end" aria-label="Remove" onClick={()=>removeMember(member)}>
-                                        <CancelIcon />
-                                    </IconButton>
-                                </ListItemSecondaryAction>):<></>}
-                            </ListItem>
-                            <Divider variant="inset" component="li" />
-                        </>
+                        <CustomListItem key={member.id} classes={classes} isEdit={isEdit} member={member}/>
                     )
                 })}
             </List>
 
+        </>
+    )
+}
+
+const CustomListItem=({classes,isEdit,member})=>{
+    return(
+        <>
+            <ListItem alignItems="flex-start" >
+                <ListItemAvatar>
+                    {member.profile_picture_path?
+                    <Avatar alt={"Photo profile " + member.name} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
+                    <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name.charAt(0).toUpperCase()}</Avatar>}
+                </ListItemAvatar>
+                <ListItemText
+                    primary={member.name}
+                    secondary={
+                        <>
+                            <Typography
+                                component="span"
+                                variant="body2"
+                                className={classes.inline}
+                                color="textPrimary"
+                            >
+                                {member.role.name}
+                            </Typography>
+                            <br/>
+                            {member.email}
+                        </>
+                    }
+
+                />
+                {isEdit?(<ListItemSecondaryAction>
+                    <IconButton edge="end" aria-label="Remove" onClick={()=>removeMember(member)}>
+                        <CancelIcon />
+                    </IconButton>
+                </ListItemSecondaryAction>):<></>}
+            </ListItem>
+            <Divider variant="inset" component="li" />
         </>
     )
 }

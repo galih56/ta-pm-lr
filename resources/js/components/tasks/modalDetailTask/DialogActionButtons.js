@@ -18,7 +18,7 @@ const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteTask, del
                 <ModalDeleteConfirm
                     open={deleteConfirmOpen}
                     handleDelete={() => { deleteTask(); setDeleteConfirmOpen(false); closeModal(); }}
-                    handleClose={() => { setDeleteConfirmOpen(false); closeModal(); }}>
+                    handleClose={() => { setDeleteConfirmOpen(false);}}>
                 </ModalDeleteConfirm>
             </React.Fragment>
         )

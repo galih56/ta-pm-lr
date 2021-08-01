@@ -14,7 +14,7 @@ import moment from 'moment';
 const Kanban = (props) => {
     const global = useContext(UserContext);
     const [board, setBoard] = useState({ lanes: [] });
-    const {detailProject,refreshDetailProject,handleDetailTaskOpen} = props;
+    const {detailProject,handleDetailTaskOpen} = props;
     const { enqueueSnackbar } = useSnackbar();
     const handleSnackbar = useCallback((message, variant) => enqueueSnackbar(message, { variant }));
     const history = useHistory();
@@ -54,7 +54,6 @@ const Kanban = (props) => {
                     newCard={...newCard,...result.data}
                     global.dispatch({ type: 'create-new-task', payload: newCard })
                     handleSnackbar(`A new card successfuly created`, 'success');
-                    refreshDetailProject()
                 }).catch(error => {
                     const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
                     global.dispatch({ type: 'handle-fetch-error', payload: payload });
@@ -106,7 +105,7 @@ const Kanban = (props) => {
                 });
     }
     const onCardClick = (cardId, metadata,laneId) =>{ 
-        handleDetailTaskOpen({ projects_id: detailProject.id, lists_id: laneId, tasks_id: cardId, open: true,onCardDelete:onCardDelete});
+        handleDetailTaskOpen({ projects_id: detailProject.id, lists_id: laneId, tasks_id: cardId, open: true,onTaskDelete:onCardDelete});
     }
     const EditLaneFormWithDetailProject=(props)=>{
         return (

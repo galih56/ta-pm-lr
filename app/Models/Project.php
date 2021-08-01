@@ -18,6 +18,14 @@ class Project extends Model
         'start', 'end'
     ];
 
+    public static function boot() {
+        parent::boot();
+
+        static::deleting(function($project) { 
+             $project->members()->delete();
+        });
+    }
+
     public function members(){
         return $this->hasMany(ProjectMember::class,'projects_id');
     }

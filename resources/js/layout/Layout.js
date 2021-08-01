@@ -1,8 +1,8 @@
 import React, { useState, useContext, useEffect, memo } from 'react';
 import clsx from 'clsx'; import 'fontsource-roboto';
 import Footer from './Footer'; import UserMenu from './auth/UserMenu';
-import { BrowserRouter as Router } from "react-router-dom";
-import { MainListItems, SecondaryListItems } from './NavItems';
+import { BrowserRouter as Router, useLocation } from "react-router-dom";
+import { MainListItems, RestrictedAccessMenu } from './NavItems';
 import AppBar from '@material-ui/core/AppBar';
 import List from '@material-ui/core/List';
 import Badge from '@material-ui/core/Badge';
@@ -28,14 +28,14 @@ const Layout = (props) => {
     const windowWidth = window.innerWidth;
     const [drawerOpen, setDrawerOpen] = useState(true);
     const global = useContext(UserContext);
+    
+    const handleDrawerOpen = () => setDrawerOpen(true);
+    const handleDrawerClose = () => setDrawerOpen(false);
 
     useEffect(() => {
         if (windowWidth <= 765) handleDrawerClose();
         global.dispatch({ type: 'remember-authentication' });
-    }, [])
-    
-    const handleDrawerOpen = () => setDrawerOpen(true);
-    const handleDrawerClose = () => setDrawerOpen(false);
+    }, []);
 
     return (
         <div className={classes.root}>
@@ -82,7 +82,7 @@ const Layout = (props) => {
                     </List>
                     <Divider />
                     <List component="nav">
-                        <SecondaryListItems />
+                        <RestrictedAccessMenu />
                     </List>
                 </Drawer>
                 <main className={classes.content}>
@@ -99,6 +99,6 @@ const Layout = (props) => {
     )
 };
 
-export default memo(Layout);
+export default Layout;
 
 

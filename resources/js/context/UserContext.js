@@ -8,7 +8,7 @@ const initState = {
     githubAuth:{
         code:'',  authenticated:false,  access_token:'',  scope:null
     }, 
-    current_project_member_role:null
+    current_project_member_role:null,
 };
 
 const getAuthDataFromStorage = () => {

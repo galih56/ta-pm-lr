@@ -46,7 +46,8 @@ const Home = (props) => {
         if(global.state.occupation?.name.toLowerCase()=='system administrator' 
             || global.state.occupation?.name.toLowerCase()=='ceo'
             || global.state.occupation?.name.toLowerCase()=='manager'
-            || global.state.occupation?.name.toLowerCase()=='project manager'){
+            || global.state.occupation?.name.toLowerCase()=='project manager'
+            || global.state.occupation?.name.toLowerCase()=='bendahara'){
             url = process.env.MIX_BACK_END_BASE_URL + 'projects';
         }else{
             url = process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';

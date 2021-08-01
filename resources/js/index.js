@@ -1,6 +1,6 @@
-import React, { useReducer } from 'react';
+import React, { useReducer, lazy } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch, Redirect, useLocation } from "react-router-dom";
 import 'fontsource-roboto';
 import Layout from "./layout/Layout";
 import UserContext, {
@@ -23,15 +23,17 @@ import MomentUtils from '@date-io/moment';
 import { LinearProgress } from '@material-ui/core/';
 import './index.css';
 
-const Home = React.lazy(() => import("./layout/Home"));
-const TeamList = React.lazy(() => import("./components/teams/TeamList"));
-const DetailProject = React.lazy(() => import("./components/projects/DetailProject"));
-const ProjectReports = React.lazy(() => import("./components/reports/ProjectList"));
-const DetailProjectReports = React.lazy(() => import("./components/reports/DetailProject"));
-const DetailTeam = React.lazy(() => import("./components/teams/DetailTeam"));
-const TaskList = React.lazy(() => import("./components/tasks/TaskList"));
-const UserInformation = React.lazy(() => import("./components/users/UserInformation"));
-const ModalAuthentication = React.lazy(() => import("./layout/auth/ModalAuthentication"));
+const Home = lazy(() => import("./layout/Home"));
+const DetailProject = lazy(() => import("./components/projects/DetailProject"));
+const ProjectReports = lazy(() => import("./components/reports/ProjectList"));
+const DetailProjectReports = lazy(() => import("./components/reports/DetailProject"));
+const TeamList = lazy(() => import("./components/teams/TeamList"));
+const DetailTeam = lazy(() => import("./components/teams/DetailTeam"));
+const ApprovalTable = lazy(() => import("./components/approvals/ApprovalTable"));
+const DetailApproval = lazy(() => import("./components/approvals/DetailApproval"));
+const TaskList = lazy(() => import("./components/tasks/TaskList"));
+const UserInformation = lazy(() => import("./components/users/UserInformation"));
+const ModalAuthentication = lazy(() => import("./layout/auth/ModalAuthentication"));
 
 const checkAuthentication = (payload, state) => {
     const { history } = payload;
@@ -166,6 +168,7 @@ function RemoveTrailingSlashes({ path }) {
 
 const App = () => {
     const [state, dispatch] = useReducer(reducer, initState);
+
     return (
         <UserContext.Provider value={{ state, dispatch }}>
             <SnackbarProvider maxSnack={5}>
@@ -199,13 +202,21 @@ const App = () => {
                                             </>
                                         )
                                     }} />
-                                    
                                     <Route path='/teams' render={(props) => {
                                         const { match: { path } } = props;
                                         return (
                                             <>
                                                 <Route path={`${path}/:id`} component={DetailTeam} />
                                                 <Route path={`${path}`} exact component={TeamList} />
+                                            </>
+                                        )
+                                    }} />
+                                    <Route path='/approvals' render={(props) => {
+                                        const { match: { path } } = props;
+                                        return (
+                                            <>
+                                                <Route path={`${path}/:id`} component={DetailApproval} />
+                                                <Route path={`${path}`} exact component={ApprovalTable} />
                                             </>
                                         )
                                     }} />

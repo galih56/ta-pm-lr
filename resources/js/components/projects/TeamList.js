@@ -102,7 +102,7 @@ export default function TeamList(props) {
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                 <Typography variant="h6">Teams </Typography>
             </Grid>
-            <Grid xl={12} lg={12} md={12} sm={12} xs={12}>
+            <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                 <form onSubmit={(e)=>{
                     e.preventDefault();
                     addNewTeams(newTeams);
@@ -127,7 +127,7 @@ export default function TeamList(props) {
                     <Button type="submit"variant="contained" color="primary" style={{marginTop:'0.3em'}}>Add </Button>
                 </form>
             </Grid>
-            <Grid xl={12} lg={12} md={12} sm={12} xs={12}>
+            <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                 <List component="nav" aria-label="teams">
                     {teams.map((team)=>{
                         return(
@@ -141,11 +141,11 @@ export default function TeamList(props) {
 }
 
 
-const CustomListItem=({team,deleteTeam})=>{
+const CustomListItem=React.memo(({team,deleteTeam})=>{
     const [open,setOpen]=useState(false)
     return(
         <>
-            <ListItem key={team.id} style={{backgroundColor:'#e3e3e3'}}>
+            <ListItem style={{backgroundColor:'#e3e3e3'}}>
                 <ListItemText primary={`${team.name}`} />
                 <ListItemSecondaryAction>
                     <IconButton edge="end" aria-label="members" onClick={()=>setOpen(!open)}>
@@ -159,7 +159,7 @@ const CustomListItem=({team,deleteTeam})=>{
             <Collapse in={open} timeout="auto" unmountOnExit>
                 <List component="div" disablePadding>
                     {team.members.map((member)=>(
-                        <ListItem style={{paddingLeft:'0.5em'}}>
+                        <ListItem style={{paddingLeft:'0.5em'}} key={member.id}>
                             <ListItemText primary={member.name}/>
                         </ListItem>
                     ))}
@@ -167,4 +167,4 @@ const CustomListItem=({team,deleteTeam})=>{
             </Collapse>
         </>
     )
-}
+})

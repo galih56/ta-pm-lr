@@ -26,6 +26,7 @@ function StatusChip({ status }) {
     
     return (
       <Chip
+        component="div"
         size="small"
         label={label}
         avatar={(

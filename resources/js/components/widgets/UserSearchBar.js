@@ -28,9 +28,9 @@ export default function UserSearchbar(props) {
     }
 
     useEffect(() => {
-        if(detailProject) setUsers(detailProject.members);
+        if(detailProject.members) setUsers(detailProject.members);
         else getUsers();
-    }, []);
+    }, [detailProject.members]);
 
     function checkExistingMember(id, arr=[]) {
         var exists = false;

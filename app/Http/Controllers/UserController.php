@@ -177,8 +177,19 @@ class UserController extends Controller
             ], 401);
         }
 
-        $token = $user->createToken('myapptoken')->plainTextToken;
+        $token = $user->createToken('myapptoken')->plainTextToken;        
+        $project_members=ProjectMember::selectRaw('roles_id , count(roles_id)')->where('users_id',1)->groupBy('roles_id')->with('role')->get();
+        $user=$user->toArray();
 
+          
+        /*
+            access levels
+            1. system administrator, ceo
+            2. project owner
+            3. project manager
+            4. client
+        */
+        
         $response = [
             'user' => $user,
             'token' => "Bearer $token",

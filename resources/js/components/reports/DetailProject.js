@@ -1,12 +1,8 @@
 import React, { useState, useEffect, useContext, lazy, Suspense, useCallback } from 'react';
-import { Link, useHistory, Switch, Route, BrowserRouter as Router, useLocation, withRouter } from "react-router-dom";
-import Paper from '@material-ui/core/Paper';
+import { Link, BrowserRouter as Router } from "react-router-dom";
 import Typography from '@material-ui/core/Typography';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import Box from '@material-ui/core/Box';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import ModalDetailTask from '../tasks/modalDetailTask/ModalDetailTask';
