@@ -82,7 +82,7 @@ export default function ModalCreateList(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + 'lists/';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, body, config)
+        axios.post(url, body)
             .then((result) => {
                 setTitle('');
                 closeModal();

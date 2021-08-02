@@ -230,7 +230,13 @@ const DetailProject = (props) => {
                                                 
                                             </Grid>
                                             <Timeline 
-                                                detailProject={{id:detailProject.id,start:detailProject.start,end:detailProject.end,actual_start:detailProject.actual_start,actual_end:detailProject.actual_end}}
+                                                detailProject={{
+                                                    id:detailProject.id,
+                                                    start:detailProject.start,end:detailProject.end,
+                                                    actual_start:detailProject.actual_start,
+                                                    actual_end:detailProject.actual_end,
+                                                    members:detailProject.members
+                                                }}
                                                 data={detailProject.columns} 
                                                 handleDetailTaskOpen={handleDetailTaskOpen}
                                             />

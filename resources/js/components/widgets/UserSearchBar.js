@@ -19,7 +19,6 @@ export default function UserSearchbar(props) {
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
-                console.log('getUsers : ',result.data);
                 setUsers(result.data);
             }).catch((error) => {
                 const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
@@ -28,19 +27,17 @@ export default function UserSearchbar(props) {
     }
 
     useEffect(() => {
-        if(detailProject.members) setUsers(detailProject.members);
+        if(detailProject?.members) setUsers(detailProject.members);
         else getUsers();
-    }, [detailProject.members]);
+    }, [detailProject?.members]);
 
     function checkExistingMember(id, arr=[]) {
         var exists = false;
         try {  
             for (let i = 0; i < arr.length; i++) {
                 const item = arr[i];
-                if('user' in item) {
-                    if (id == item.user.id){ exists = true;  break; }
-                }
-                if (id == item.id){ exists = true;  break;}
+                if (id == item?.user?.id){ exists = true;  break; }
+                if (id == item?.id){ exists = true;  break;}
             }
         } catch (error) {
             console.log('checkExistingMember => usersearchbar',error)
@@ -51,8 +48,8 @@ export default function UserSearchbar(props) {
     useEffect(() => {
         var filteredOptions = users.filter((option) => { 
             if (!checkExistingMember(option.id, exceptedUsers)
-                && !('administrator sistem'.includes(option.name.toLowerCase()) 
-                || 'ceo'.includes(option.name.toLowerCase()))) return option;
+                || !('administrator sistem'.includes(option.name.toLowerCase()) 
+                || !'ceo'.includes(option.name.toLowerCase()))) return option;
         });
         filteredOptions = filteredOptions.map((option) => {
             const firstLetter = option.name[0].toUpperCase();
@@ -71,7 +68,9 @@ export default function UserSearchbar(props) {
                 var label='';
                 if('role' in option &&  typeof option.role=='object') label= `${option.name} (${option.role.name})`;
                 if('occupation' in option && typeof option.occupation=='object') label= `${option.name} (${option.occupation.name})`; 
-                if(!('role' in option) && !('occupation' in option)) label= `${option.name} (${option.email})`;
+                if(!('role' in option) && !('occupation' in option)){ 
+                    label= `${option.name} (${option.email})`;
+                }
                 return label;
                }
             }

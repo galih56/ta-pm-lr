@@ -29,9 +29,31 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
     const [dateRange, setDateRange] = useState([null, null]);
     const [showExtendDeadlineForm,setShowExtendDeadlineForm]=useState(false);
     const global = useContext(UserContext);
+    const [exceptedUsers,setExceptedUsers]=useState([]);
     
+    const checkLoggedInUserProjectMember=()=>{
+        var logged_in_user={
+            id:global.state.id,
+            name:global.state.name,
+            username:global.state.username,
+            email:global.state.email,
+            current_project_member_role:global.state.current_project_member_role
+        }
+        var registered=false
+        for (let i = 0; i < detailProject.members.length; i++) {
+            const member = detailProject.members[i];
+            if(member.id==logged_in_user.id){ registered=true; }
+        }
+        
+        var users=[];
+        if(!registered){
+            users=[ logged_in_user ];
+            setExceptedUsers(users);
+        }
+    }
     useEffect(()=>{    
         getProgress();
+        checkLoggedInUserProjectMember();
     },[data.cards])
 
     if (isEdit) {

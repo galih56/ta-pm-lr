@@ -97,14 +97,34 @@ class TaskController extends Controller
             for ($i=0; $i < count($members); $i++) { 
                 $member=$members[$i];
                 if($request->users_id!=$member['id']){
-                    $task_member=new TaskMember();
-                    $task_member->tasks_id=$task->id;
-                    $task_member->users_id=$member['id'];
-                    $task_member->project_members_id=$member['project_members_id'];
-                    $task_member->save();
+                    if(array_key_exists('project_members_id', $member)){
+                        $task_member=new TaskMember();
+                        $task_member->tasks_id=$task->id;
+                        $task_member->users_id=$member['id'];
+                        $task_member->project_members_id=$member['project_members_id'];
+                        $task_member->save();
+                    }else{
+                        $check_member=ProjectMember::where('users_id',$member['id'])
+                                        ->where('projects_id',$request->projects_id)
+                                        ->first();
+                        if($check_member){
+                            $task_member=new TaskMember();
+                            $task_member->tasks_id=$task->id;
+                            $task_member->users_id=$member['id'];
+                            $task_member->project_members_id=$check_member;
+                            $task_member->save();
+                        }
+                        // else{
+                        //     $projet_member=ProjectMember::create([
+                        //         'users_id'=>$member['id'];
+                        //     ])
+                        // }
+
+                    }
                 }
             }
         }
+        $task=$this->getDetailTask($task->id);
         return response()->json($task);
     }
 

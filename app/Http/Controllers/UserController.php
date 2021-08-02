@@ -20,16 +20,17 @@ class UserController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['show','update','store','destroy']]); 
     }
 
     public function index()
     {
         $users=User::with('occupation')
                     ->with('asMember.project')->get()->toArray();
-        
+
         for ($i=0; $i < count($users); $i++) { 
             $as_member=$users[$i]['as_member'];
+            $users[$i]['project_members_id']=$as_member['id'];
             for ($j=0; $j < count($as_member); $j++) { 
                 if($as_member[$j]['project']) $users[$i]['projects'][]=$as_member[$j]['project'];
             }

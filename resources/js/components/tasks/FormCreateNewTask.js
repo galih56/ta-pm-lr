@@ -16,9 +16,32 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSu
     const global=useContext(UserContext);
     const handleTagChanges = (tags) => setNewTask({ ...newTask, tags: tags });
     const [dateRange, setDateRange] = useState([null, null]);
-    
+    const [exceptedUsers,setExceptedUsers]=useState([]);
+
     useEffect(()=>{
         setNewTask({...newTask,is_subtask:isSubtask});
+        const checkLoggedInUserProjectMember=()=>{
+            var logged_in_user={
+                id:global.state.id,
+                name:global.state.name,
+                username:global.state.username,
+                email:global.state.email,
+                current_project_member_role:global.state.current_project_member_role
+            }
+            var registered=false
+            for (let i = 0; i < detailProject.members.length; i++) {
+                const member = detailProject.members[i];
+                if(member.id==logged_in_user.id){ registered=true; }
+            }
+            
+            var users=[];
+            if(!registered){
+                users=[ logged_in_user ];
+                setExceptedUsers(users);
+            }
+            console.log({registered,users,exceptedUsers});
+        }
+        checkLoggedInUserProjectMember();
     },[]);
     
     return (
@@ -38,14 +61,16 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSu
                 />
             </Grid>
             <Grid item lg={6} md={6} sm={6} xs={12}>
-                <TextField
-                    label="Estimation cost : "
-                    onChange={ (e) => setNewTask({ ...newTask, cost: e.target.value })}
-                    placeholder={"Rp."}
-                    style={{ width: '100%' }}
-                    variant="standard" 
-                    required
-                />
+                {(isSubtask)?
+                    <TextField
+                        label="Estimation cost : "
+                        onChange={ (e) => setNewTask({ ...newTask, cost: e.target.value })}
+                        placeholder={"Rp."}
+                        style={{ width: '100%' }}
+                        variant="standard" 
+                        required
+                    />:<></>}
+                
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12} container>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -82,12 +107,7 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSu
             <Grid item lg={12} md={12} sm={12} xs={12}>
                 <UserSearchBar 
                     detailProject={detailProject}
-                    exceptedUsers={[ {
-                        id:global.state.id,
-                        name:global.state.name,
-                        username:global.state.username,
-                        email:global.state.email
-                    }]} 
+                    exceptedUsers={exceptedUsers} 
                     onChange={(users)=>{
                         setNewTask({...newTask,members:[...users]});
                     }}

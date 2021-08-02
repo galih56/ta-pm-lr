@@ -38,18 +38,22 @@ const TaskRow=({data,classes,handleCompleteTask,handleDetailTaskOpen,headCells, 
     useEffect(()=>{
         const getProgress=()=>{
             if(!data.is_subtask){
-                if(data.cards.length>0){
-                    var valuePerSubtask=100/data.cards.length;
-                    var completeSubtaskCounter=0;
-                    for (let i = 0; i < data.cards.length; i++) {
-                        const subtask = data.cards[i];
-                        if(subtask.complete)completeSubtaskCounter++;
-                    }
-                    var finalValue=completeSubtaskCounter*valuePerSubtask;
-                    setProgress(finalValue);
-                }else{
-                    if(data.complete) setProgress(100);
-                    else setProgress(0);
+                try {
+                    if(data.cards.length>0){
+                        var valuePerSubtask=100/data.cards.length;
+                        var completeSubtaskCounter=0;
+                        for (let i = 0; i < data.cards.length; i++) {
+                            const subtask = data.cards[i];
+                            if(subtask.complete)completeSubtaskCounter++;
+                        }
+                        var finalValue=completeSubtaskCounter*valuePerSubtask;
+                        setProgress(finalValue);
+                    }else{
+                        if(data.complete) setProgress(100);
+                        else setProgress(0);
+                    }  
+                } catch (error) {
+                    console.log(error,data);
                 }
             }
         }
