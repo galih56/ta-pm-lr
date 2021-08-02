@@ -61,14 +61,13 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSu
                 />
             </Grid>
             <Grid item lg={6} md={6} sm={6} xs={12}>
-                {(isSubtask)?
+                {(!isSubtask)?
                     <TextField
                         label="Estimation cost : "
                         onChange={ (e) => setNewTask({ ...newTask, cost: e.target.value })}
                         placeholder={"Rp."}
                         style={{ width: '100%' }}
                         variant="standard" 
-                        required
                     />:<></>}
                 
             </Grid>

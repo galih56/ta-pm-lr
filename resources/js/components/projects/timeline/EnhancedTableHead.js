@@ -8,6 +8,7 @@ function EnhancedTableHead({headCells}) {
         <TableHead>
             <TableRow>
                 <TableCell></TableCell>
+                <TableCell></TableCell>
                 {headCells.map((headCell) => (
                     <TableCell
                         key={headCell.id}

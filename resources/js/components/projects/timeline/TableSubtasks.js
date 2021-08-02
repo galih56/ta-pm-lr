@@ -37,6 +37,8 @@ const TableSubtask=({tasks,classes,handleCompleteTask,handleDetailTaskOpen,headC
                                 <TableCell padding="checkbox"></TableCell>
                                 <TableCell padding="checkbox"></TableCell>
                                 <TableCell padding="checkbox"></TableCell>
+                                <TableCell padding="checkbox"></TableCell>
+                                <TableCell padding="checkbox"></TableCell>
                                 <TableCell padding="checkbox"> 
                                     <Checkbox
                                         onChange={(event)=>{
@@ -84,7 +86,7 @@ const TableSubtask=({tasks,classes,handleCompleteTask,handleDetailTaskOpen,headC
                                         }}
                                         onClose={handlePopoverClose}
                                     >
-                                        <Typography>{memberOnHover?.user?.name}</Typography>
+                                        <Typography>{(memberOnHover?.user?.name)?memberOnHover?.user?.name:memberOnHover?.user?.username}</Typography>
                                     </Popover>):<></>}
                                 </TableCell>
                                 <TableCell align="left">

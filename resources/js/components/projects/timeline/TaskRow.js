@@ -111,7 +111,7 @@ const TaskRow=({data,classes,handleCompleteTask,handleDetailTaskOpen,headCells, 
                             }}
                             onClose={handlePopoverClose}
                         >
-                            <Typography>{memberOnHover?.user?.name}</Typography>
+                            <Typography>{(memberOnHover?.user?.name)?memberOnHover?.user?.name:memberOnHover?.user?.username}</Typography>
                         </Popover>):<></>}
                 </TableCell>
                 <TableCell align="left">
