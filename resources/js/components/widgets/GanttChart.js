@@ -1,22 +1,20 @@
-import { GanttComponent,Inject,Toolbar,Selection,Sort,VirtualScroll,Edit,ContextMenu,ColumnsDirective, ColumnDirective} from '@syncfusion/ej2-react-gantt';
+import { GanttComponent,Inject,Toolbar,VirtualScroll,ColumnsDirective, ColumnDirective} from '@syncfusion/ej2-react-gantt';
 import './../../assets/css/syncfusion-gantt.css';
 import * as React from 'react';
-import moment from 'moment';
-import UserContext from './../../context/UserContext';
-import axios from 'axios';
 
 class GanttChart extends React.Component {
-    static contextType = UserContext
+    
     constructor(props) {
         super(props);
         this.taskFields = {
             id: 'id', name: 'title', startDate: 'start', endDate:'end',
             duration: 'duration', progress: 'progress', child: 'cards',
-            manual: 'isManual'
+            dependency  : 'predecessor', manual: 'isManual'
         };
         this.splitterSettings = {
             position: "23%"
         };
+        this.GridRefresh = false;  // Prevent the Grid refresh in react state change
         this.labelSettings = {
             taskLabel: 'title'
         };
@@ -54,7 +52,7 @@ class GanttChart extends React.Component {
                         title:``,
                         subtitle:`Realisasi ${subtask.title}` ,
                         start : subtask.actual_start, end : subtask.actual_end,
-                        realization:true
+                        predecessor:`${task.id}SS`, realization:true
                     };
                     if(subtask.complete)completeSubtaskCounter++;
                     new_subtasks.push(subtask);
@@ -70,12 +68,15 @@ class GanttChart extends React.Component {
         }
         this.setState({dataSource:data});
     }
-
+    shouldComponentUpdate() {
+      if (this.GridRefresh)
+        return false;
+      return true;
+    }
     componentDidMount() {
         setTimeout(()=>{
             this.getGanttDataSource();
             this.ganttInstance.fitToProject();
-            // this.setState({dataSource:this.props.detailProject.columns});
         },500)
     }
 
@@ -83,7 +84,6 @@ class GanttChart extends React.Component {
         if (prevProps.detailProject.columns !== this.props.detailProject.columns) {    
             setTimeout(()=>{
                 this.getGanttDataSource();
-                // this.setState({dataSource:this.props.detailProject.columns});
             },500);
         }
     }
@@ -178,6 +178,12 @@ class GanttChart extends React.Component {
         }
     }
 
+    actionBegin(args) {
+        if (args.requestType === 'paging') {
+            this.GridRefresh = false;
+            this.setState({ currentpage: args.currentPage });
+        }
+    }
     render() {
         return(
             <GanttComponent 
@@ -196,6 +202,7 @@ class GanttChart extends React.Component {
                 enableVirtualization={true}
                 taskMode="Custom"
                 ref={gantt => this.ganttInstance = gantt}
+                actionBegin={this.actionBegin.bind(this)}
             >
                 <Inject services={[Toolbar,VirtualScroll ]}/>
                 <ColumnsDirective>

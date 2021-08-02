@@ -9,17 +9,17 @@ import UserContext from '../../context/UserContext';
 import Button from '@material-ui/core/Button';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
-import BarChart from './../widgets/BarChart';
+import CostumedChart from '../widgets/CustomedChart';
 import axios from 'axios';
 
 const ProjectList = (props) => {
     const global = useContext(UserContext);
     let history = useHistory();
     const [projects,setProjects]=useState([]);
-    const [completeTasks,setCompleteTasks]=useState({complete:[],incomplete:[]});
+    const [data,setData]=useState({complete:[],incomplete:[]});
     
     useEffect(()=>{
-        setCompleteTasks(getCompleteTasksForChart(projects));
+        setData(getCompleteTasksForChart(projects));
     },[projects])
 
     const getProjects = () => {
@@ -75,9 +75,47 @@ const ProjectList = (props) => {
                     }
                 )
             }
-             <Grid lg={12} md={12} sm={12} xs={12} item>
-                <BarChart data={completeTasks} prop1={'complete'} prop2={'incomplete'}/>
+            
+            <Grid lg={12} md={12} sm={12} xs={12} item>
+                <CostumedChart titleX="Projects" 
+                    prop1={"complete"} prop2={"incomplete"}
+                    contentFormatter={ ( e )=> {
+                        var dp1=e.entries[0].dataPoint
+                        var dp2=e.entries[1].dataPoint
+                        return`
+                        <div>
+                            ${dp1.label}
+                            Complete Tasks :  ${dp1.y}
+                            Incomplete Tasks :  ${dp2.y}
+                        </div>`
+                    }}
+                    data={[{
+                            name: `Complete `,
+                            showInLegend: true,
+                            dataPoints: data.complete
+                        },
+                        {
+                            name: `Incomplete `,
+                            showInLegend: true,
+                            dataPoints: data.incomplete
+                        }]}/>
             </Grid >
+             {/* <Grid lg={12} md={12} sm={12} xs={12} item>
+                    <BarChart datasets={[
+                         {
+                            type: 'bar',
+                            label: 'Complete',
+                            data: data.complete,
+                            backgroundColor: 'rgb(67, 160, 71)',
+                        },
+                        {
+                            type: 'bar',
+                            label: 'Incomplete',
+                            data: data.incomplete,
+                            backgroundColor: 'rgb(229, 57, 53)',
+                        },
+                    ]}/>
+            </Grid > */}
         </Grid >
     );
 }

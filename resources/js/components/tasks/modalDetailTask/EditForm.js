@@ -1,6 +1,6 @@
 
 import 'fontsource-roboto';
-import React,{useState,useEffect} from 'react';
+import React,{useState,useEffect,useContext} from 'react';
 import moment from 'moment';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -10,24 +10,50 @@ import Typography from '@material-ui/core/Typography';
 import Attachments from './Attachments';
 import Subtasks from './Subtask/Subtasks';
 import MemberList from './MemberList';
+import ExtendDeadlineForm from './../../widgets/ExtendDeadlineForm';
 import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import DateRangeDelimiter from '@material-ui/lab/DateRangeDelimiter';
 import SelectTag from '../../widgets/SelectTag';
 import StatusChip from './../../widgets/StatusChip';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
+import UserContext from '../../../context/UserContext';
 
+const useStyles = makeStyles((theme) => ({
+    textfield: { marginTop: theme.spacing(1), width: '100%' },
+    textField: { marginLeft: theme.spacing(1), marginRight: theme.spacing(1), },
+}));
 
 const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUpdate,onTaskDelete }) => {
-    const [dateRange, setDateRange] = useState([null, null]);
-    const useStyles = makeStyles((theme) => ({
-        textfield: { marginTop: theme.spacing(1), width: '100%' },
-        textField: { marginLeft: theme.spacing(1), marginRight: theme.spacing(1), },
-    }));
     const classes = useStyles();
+    const [dateRange, setDateRange] = useState([null, null]);
+    const [showExtendDeadlineForm,setShowExtendDeadlineForm]=useState(false);
+    const global = useContext(UserContext);
+    const [exceptedUsers,setExceptedUsers]=useState([]);
     
+    const checkLoggedInUserProjectMember=()=>{
+        var logged_in_user={
+            id:global.state.id,
+            name:global.state.name,
+            username:global.state.username,
+            email:global.state.email,
+            current_project_member_role:global.state.current_project_member_role
+        }
+        var registered=false
+        for (let i = 0; i < detailProject.members.length; i++) {
+            const member = detailProject.members[i];
+            if(member.id==logged_in_user.id){ registered=true; }
+        }
+        
+        var users=[];
+        if(!registered){
+            users=[ logged_in_user ];
+            setExceptedUsers(users);
+        }
+    }
     useEffect(()=>{    
         getProgress();
+        checkLoggedInUserProjectMember();
     },[data.cards])
 
     if (isEdit) {
@@ -40,19 +66,19 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                         onChange={(e) => {
                             setData({ ...data, title: e.target.value })
                         }}
-                        style={{ width: '100%' }}
+                        className={classes.textfield}
                     />
                 </Grid>
                 <Grid item lg={7} md={7} sm={7} xs={12} container>
                     <Grid item lg={12} md={12} sm={12} xs={12}>
                         <Typography style={{ whiteSpace: 'noWrap'}}>Estimation start/end at : {data.start ? moment(data.start).format('DD MMMM YYYY') : ''} - {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}</Typography> 
-                        <Button variant="contained" color="primary">Edit deadline</Button>
+                        <Button variant="contained" color="primary" onClick={()=>setShowExtendDeadlineForm(true)}>Extend deadline</Button>
                     </Grid>
                     <Grid item lg={12} md={12} sm={12} xs={12}>
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                             <MobileDateRangePicker
-                                startText="Start : "
-                                endText="End : "
+                                startText="Realization start at : "
+                                endText="end at : "
                                 value={dateRange}
                                 onChange={(newValue) => {
                                     setDateRange(newValue)
@@ -82,15 +108,16 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                 {!data.is_subtask?(
                 <Grid item lg={5} md={5} sm={5} xs={12}>
                     <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>Cost estimation/realization : {data.cost?data.cost:'...'}/{data.actual_cost?data.actual_cost:'...'}</Typography>    
-                    <TextField variant="standard"
-                        label="Actual cost : "
-                        type="number"
-                        defaultValue={data.actual_cost}
-                        onChange={(e) => {
-                            setData({ ...data, actual_cost: e.target.value })
-                        }}
-                        style={{ width: '80%' }}
-                    />
+                    {( global.state.occupation?.name?.toLowerCase().includes('bendahara') )?(
+                        <TextField variant="standard"
+                            label="Actual cost : "
+                            type="number"
+                            defaultValue={data.actual_cost}
+                            onChange={(e) => {
+                                setData({ ...data, actual_cost: e.target.value })
+                            }}
+                            className={classes.textfield}
+                        />):<></>}
                 </Grid>):<></>}
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <Typography>Attachments : </Typography>
@@ -131,6 +158,14 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <MemberList detailProject={detailProject} data={data} setData={setData} isEdit={isEdit}/>
                 </Grid>
+                
+                <ExtendDeadlineForm 
+                    open={showExtendDeadlineForm} 
+                    handleClose={()=>setShowExtendDeadlineForm(false)}
+                    data={data} 
+                    setData={setData} 
+                    detailProject={detailProject}
+                    />
             </Grid>
         )
     } else {
@@ -141,8 +176,8 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                     <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>End : {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}</Typography>
                 </Grid>
                 <Grid item lg={6} md={6} sm={6} xs={12} >
-                    <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>Actual Start : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''}<StatusChip status={data.start_label}/></Typography>
-                    <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>Actual End : {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}<StatusChip status={data.end_label}/></Typography>
+                    <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }} component="div">Actual Start : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''}<StatusChip status={data.start_label}/></Typography>
+                    <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }} component="div">Actual End : {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}<StatusChip status={data.end_label}/></Typography>
                 </Grid>
                 {!data.is_subtask?(
                     <Grid item lg={12} md={12} sm={12} xs={12} >
@@ -180,6 +215,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <MemberList detailProject={detailProject} data={data} setData={setData} isEdit={isEdit}/>
                 </Grid>
+                
             </Grid>
         )
     }

@@ -13,18 +13,8 @@ import UserContext from './../../context/UserContext';
 import 'fontsource-roboto';
 import axios from 'axios';
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        display: 'flex',
-        margin: '1em',
-    },
-    margin: {
-        margin: theme.spacing(1),
-    },
-}));
 
 export default function DetailTeam(props) {
-    const classes = useStyles();
     const global=useContext(UserContext);
     const [isEditing, setIsEditing] = useState(false);
     const [data, setData] = useState({

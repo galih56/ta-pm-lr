@@ -17,7 +17,7 @@ const CustomCard = (props) => {
     let location = useLocation();
     let pathname = location.pathname;
     let searchParams = new URLSearchParams(location.search);
-    searchParams.set('task_id', id);
+    searchParams.set('tasks_id', id);
 
     return (
             <MovableCardWrapper

@@ -17,6 +17,14 @@ class ProjectMember extends Model
         'projects_id',
     ];
 
+    public static function boot() {
+        parent::boot();
+
+        static::deleting(function($project_member) { 
+             $project_member->taskMembers()->delete();
+        });
+    }
+
     public function user(){
         return $this->belongsTo(User::class,'users_id');
     }

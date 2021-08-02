@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext,useCallback } from 'react';
+import {useLocation} from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -13,7 +14,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Grid from '@material-ui/core/Grid';
-import ModalCreateSubtask from '../../ModalCreateSubtask';
+import ModalCreateSubtask from './ModalCreateSubtask';
 import FormCreateNewTask from '../../FormCreateNewTask';
 import CancelRoundedIcon from '@material-ui/icons/CancelRounded';
 import UserContext from '../../../../context/UserContext';
@@ -25,15 +26,12 @@ import axios from 'axios';
 const useStyles = makeStyles((theme) => ({
     root: { width: '100%', backgroundColor: theme.palette.background.paper, },
 }));
-const Subtasks = (props) => {
+const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDelete,isEdit}) => {
     const global = useContext(UserContext);
-    var isEditing = props.isEdit;
+    var isEditing = isEdit;
     const classes = useStyles();
-    const parent_task_id = props.detailTask.id;
-    const {detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDelete}=props;
-    const [detailTaskOpen, setDetailTaskOpen] = useState(false);
-    const [clickedTask, setClickedTask] = useState(clickedTaskInitialState);
-        
+    const parent_task_id = detailTask.id;
+    
     var clickedTaskInitialState={
         id: '', projects_id: '', lists_id: null, list:null,
         title: '', description: '', label: '', complete: false, progress: 0,
@@ -50,7 +48,8 @@ const Subtasks = (props) => {
         isSubtask:true, parent_task_id:parent_task_id
     }
 
-
+    const [detailTaskOpen, setDetailTaskOpen] = useState(false);
+    const [clickedTask, setClickedTask] = useState(clickedTaskInitialState);
     const [data, setData] = useState([]);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [showCreateSubtaskForm, setShowCreateSubtaskForm] = useState(false);
@@ -58,11 +57,21 @@ const Subtasks = (props) => {
     
     const { enqueueSnackbar } = useSnackbar();
     const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
+    const location=useLocation();
     
     useEffect(() => {
-        setData(props.detailTask.cards);
-    }, [props.detailTask]);
+        setData(detailTask.cards);
+    }, [detailTask]);
 
+    /*
+    useEffect(() => {
+        const query = new URLSearchParams(location.search);
+        const paramTaskId = query.get('subtasks_id');
+        console.log(paramTaskId);
+        if (paramTaskId) handleDetailTaskOpen({ task:{...clickedTask, id: paramTaskId}, open: true });
+    }, []);
+    */
+   
     const handleAddNewTask=()=>{
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -144,6 +153,8 @@ const Subtasks = (props) => {
                                         handleAddNewTask={handleAddNewTask}
                                         detailProject={detailProject}
                                         isSubtask={true}
+                                        minDate={detailTask.start}
+                                        maxDate={detailTask.end}
                                     />
                                 </ModalCreateSubtask>
                             )
@@ -157,7 +168,7 @@ const Subtasks = (props) => {
     const handleDetailTaskOpen = (taskInfo) => {
         const {task, open } = taskInfo;
         setDetailTaskOpen(open);
-        setClickedTask({ ...task,tasks_id:task.id });
+        setClickedTask({ ...task });
     };
 
     const showModalDetailTask = useCallback(() => {

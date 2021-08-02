@@ -1,11 +1,10 @@
 import React,{useState,useEffect,useMemo} from 'react';
 import { Bar } from 'react-chartjs-2';
-import axios from 'axios';
-import Grid from '@material-ui/core/Typography';
 import Typography from '@material-ui/core/Typography';
+import CustomedChart from './CustomedChart';
 
 const GroupedTasksChart = ({groupedTasks}) => {  
-  const [datasets,setDatasets]=useState({labels:[], datasets:[]});  
+  const [data,setData]=useState([]);  
 
   const options = useMemo(
     () => [
@@ -28,26 +27,22 @@ const GroupedTasksChart = ({groupedTasks}) => {
     var labels=[ 'Lebih cepat','Tepat waktu','Terlambat','Belum dilaksanakan','Belum selesai'];
     var datasets=[
         {
-            type: 'bar',
-            label: 'Start',
-            data: [ groupedTasks.mulai_cepat, groupedTasks.mulai_tepat_waktu, groupedTasks.mulai_telat, groupedTasks.belum_dilaksanakan, 0 ],
-            backgroundColor: 'rgb(255, 99, 132)',
+            name: `Started `,
+            showInLegend: true,
+            dataPoints: [ {y:groupedTasks.mulai_cepat, label:'Lebih cepat'}, {y:groupedTasks.mulai_tepat_waktu, label:'Tepat waktu'}, {y:groupedTasks.mulai_telat, label:'Terlambat'}, {y:groupedTasks.belum_dilaksanakan, label:'Belum dilaksanakan'}, {y:groupedTasks.belum_selesai, label:'Belum selesai'} ]
         },
         {
-            type: 'bar',
-            label: 'End',                
-            data: [ groupedTasks.selesai_cepat, groupedTasks.selesai_tepat_waktu, groupedTasks.selesai_telat, 0, groupedTasks.belum_selesai ],
-            backgroundColor: 'rgb(54, 162, 235)',
+            name: `Finished `,
+            showInLegend: true,
+            dataPoints:[ {y:groupedTasks.selesai_cepat, label:'Lebih cepat'}, {y:groupedTasks.selesai_tepat_waktu, label:'Tepat waktu'},{ y:groupedTasks.selesai_telat, label:'Terlambat'},  {y:groupedTasks.belum_dilaksanakan, label:'Belum dilaksanakan'}, {y:groupedTasks.belum_selesai, label:'Belum selesai'} ]
         },
     ];
-    setDatasets({
-        labels:labels, 
-        datasets:datasets});
+    
+    setData(datasets);
   },[groupedTasks])
 
   return(
     <>
-      <Grid item xl={6} md={6} sm={6} xs={12} >
         <table>
             <tbody>
                 <tr>
@@ -113,11 +108,20 @@ const GroupedTasksChart = ({groupedTasks}) => {
                 </tr>
             </tbody>
         </table>
-    </Grid>
-
-    <Grid item xl={6} md={6} sm={6} xs={12} >    
-      <Bar data={datasets} options={options} />
-    </Grid>
+        
+        <CustomedChart titleX="Projects" 
+                prop1={"Tasks"}
+                contentFormatter={ ( e )=> {
+                    var dp1=e.entries[0].dataPoint
+                    var dp2=e.entries[1].dataPoint
+                    return`
+                    <div>
+                        ${dp1.label}
+                        Started : ${dp2.y}
+                        Finished : ${dp1.y}
+                    </div>`
+                }}
+                data={data}/>
   </>
 )};
 

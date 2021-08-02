@@ -1,4 +1,6 @@
-import React, { useEffect, useContext, useState } from 'react';
+import React, { useEffect, useContext, useState} from 'react';
+import axios from 'axios';
+import moment from 'moment';
 import { useHistory } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
@@ -12,11 +14,10 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import UserContext from '../../context/UserContext';
 import { useSnackbar } from 'notistack';
-import axios from 'axios';
-import moment from 'moment';
 import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
+import ExtendDeadlineForm from './../widgets/ExtendDeadlineForm';
 
 const ProjectInfo = (props) => {
     const global = useContext(UserContext);
@@ -28,6 +29,7 @@ const ProjectInfo = (props) => {
         createdAt: '', updatedAt: '', start:null, end:null,
         actualStart: null,actualEnd: null 
     });
+    const [showExtendDeadlineForm,setShowExtendDeadlineForm]=useState(false);
     
     useEffect(() => {
         setDetailProject(props.detailProject);
@@ -57,13 +59,13 @@ const ProjectInfo = (props) => {
         }
     }
 
-    const handleRemoveProject = (projects_id) => {      
-        const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${projects_id}`;
+    const handleRemoveProject = () => {      
+        const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.delete(url, {}, {})
             .then((result) => {
-                global.dispatch({ type: 'remove-project', payload: projects_id });
+                global.dispatch({ type: 'remove-project', payload: detailProject.id });
                 handleSnackbar(`Data has been deleted successfuly`, 'success');
                 history.push('/');
             }).catch((error) => {
@@ -76,7 +78,7 @@ const ProjectInfo = (props) => {
         if (isEdit) {
             return (
                 <React.Fragment>
-                    <Grid item xl={5} md={5} sm={5} xs={12} style={{ padding: '1em' }}>
+                    <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>
                         <TextField
                             label="Title : "
                             value={detailProject.title}
@@ -87,7 +89,13 @@ const ProjectInfo = (props) => {
                             variant="standard" 
                         />
                     </Grid>
-                    <Grid item lg={7} md={7} sm={7} xs={12}>
+                    <Grid item lg={12} md={12} sm={12} xs={12}  style={{ padding: '1em' }}>
+                        <Typography style={{ whiteSpace: 'noWrap'}} component="div">
+                            Estimation start/end at : {detailProject.start ? moment(detailProject.start).format('DD MMMM YYYY') : ''} - {detailProject.end ? moment(detailProject.end).format('DD MMMM YYYY') : ''}
+                            <Button variant="contained" color="primary" onClick={()=>setShowExtendDeadlineForm(true)} style={{ margin: '1em' }}>Extend deadline</Button>
+                        </Typography> 
+                    </Grid>
+                    <Grid item lg={12} md={12} sm={12} xs={12} style={{padding:'1em'}}>
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                             <MobileDateRangePicker
                                 required
@@ -131,7 +139,7 @@ const ProjectInfo = (props) => {
                         alignItems="baseline"
                     >
                         <Button onClick={() => { setIsEditing(false) }} style={{ marginRight: '1.5em' }}>Cancel</Button>
-                        <Button variant="contained" color="primary" onClick={() => saveChanges()} style={{ marginRight: '3em' }}> Save </Button>
+                        <Button variant="contained" color="primary" onClick={saveChanges} style={{ marginRight: '3em' }}> Save </Button>
                     </Grid>
                     <Grid item container xl={4} md={4} sm={4} xs={4} style={{ padding: '1em' }}
                         justify="flex-end"
@@ -139,6 +147,11 @@ const ProjectInfo = (props) => {
                     >
                         <Button variant="contained" color="secondary" onClick={() => setDeleteConfirmOpen(true)} > Delete </Button>
                     </Grid>
+                    <ExtendDeadlineForm 
+                        open={showExtendDeadlineForm} 
+                        handleClose={()=>setShowExtendDeadlineForm(false)}
+                        detailProject={detailProject}
+                        />
                 </React.Fragment>
             )
         } else {
@@ -171,6 +184,7 @@ const ProjectInfo = (props) => {
             )
         }
     }
+    
     return (
         <>
             <Grid container>
@@ -179,16 +193,15 @@ const ProjectInfo = (props) => {
             <DeleteConfirmDialog
                 open={deleteConfirmOpen}
                 handleClose={() => { setDeleteConfirmOpen(false); }}
-                handleConfirm={() => handleRemoveProject(detailProject.id)}></DeleteConfirmDialog>
+                handleConfirm={handleRemoveProject}></DeleteConfirmDialog>
         </ >
     )
 }
 
-const DeleteConfirmDialog = (props) => {
+const DeleteConfirmDialog =(props) => {
     const open = props.open;
     const handleClose = props.handleClose;
     const handleConfirm = props.handleConfirm;
-    const global = useContext(UserContext);
     return (
         <Dialog
             open={open}
@@ -205,4 +218,5 @@ const DeleteConfirmDialog = (props) => {
         </Dialog>
     );
 }
+
 export default ProjectInfo

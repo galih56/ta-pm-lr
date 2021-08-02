@@ -97,14 +97,34 @@ class TaskController extends Controller
             for ($i=0; $i < count($members); $i++) { 
                 $member=$members[$i];
                 if($request->users_id!=$member['id']){
-                    $task_member=new TaskMember();
-                    $task_member->tasks_id=$task->id;
-                    $task_member->users_id=$member['id'];
-                    $task_member->project_members_id=$member['project_members_id'];
-                    $task_member->save();
+                    if(array_key_exists('project_members_id', $member)){
+                        $task_member=new TaskMember();
+                        $task_member->tasks_id=$task->id;
+                        $task_member->users_id=$member['id'];
+                        $task_member->project_members_id=$member['project_members_id'];
+                        $task_member->save();
+                    }else{
+                        $check_member=ProjectMember::where('users_id',$member['id'])
+                                        ->where('projects_id',$request->projects_id)
+                                        ->first();
+                        if($check_member){
+                            $task_member=new TaskMember();
+                            $task_member->tasks_id=$task->id;
+                            $task_member->users_id=$member['id'];
+                            $task_member->project_members_id=$check_member;
+                            $task_member->save();
+                        }
+                        // else{
+                        //     $projet_member=ProjectMember::create([
+                        //         'users_id'=>$member['id'];
+                        //     ])
+                        // }
+
+                    }
                 }
             }
         }
+        $task=$this->getDetailTask($task->id);
         return response()->json($task);
     }
 
@@ -159,6 +179,21 @@ class TaskController extends Controller
         }
 
         $task->save();
+        
+        if($task->is_subtask){
+            $parent_task=Task::with('cards')->findOrFail($task->parent_task_id);
+            
+            $valuePerSubtask=100/count($parent_task->cards);
+            $completeSubtaskCounter=0;
+            for ($i = 0; $i < count($parent_task->cards); $i++) {
+                $subtask = $parent_task->cards[$i];
+                if($subtask->complete){ $completeSubtaskCounter++; }
+            }
+            $progress=$completeSubtaskCounter*$valuePerSubtask;
+            $parent_task->progress=$progress;
+            $parent_task->save();
+        }
+        
         $task=$this->getDetailTask($task->id);
         return response()->json($task);
     }
@@ -174,7 +209,10 @@ class TaskController extends Controller
         
         $task=Task::with('creator')->with('cards')->with('logs')->with('comments.creator')
                     ->with('list')->with('members.member.role')->with('members.user')
-                    ->with('tags.tag')->findOrFail($id)->toArray();
+                    ->with('tags.tag')
+                    ->with(['parentTask'=>function($q){
+                        return $q->select('id','start','end','old_deadline','actual_start','actual_end','created_at','updated_at');
+                    }])->findOrFail($id)->toArray();
 
         $task['attachments']=$this->getAttachments($id);
         $task['tags']=$this->getTagsFromTask($task);
@@ -230,58 +268,6 @@ class TaskController extends Controller
         return response()->json($taks,200);
     }
 
-    public function extendDeadline(Request $request,$id){
-        $request->validate([
-            'users_id'=>'required',
-            'new_deadline'=>'required'
-        ]);
-
-        $task=Task::findOrFail($id);
-        $user=User::findOrFail($request->users_id);
-        if($task->old_deadline) {
-            $task->end=$request->new_deadline;
-        }else{
-            $task->old_deadline=$task->start;
-            $task->end=$request->new_deadline;
-        }
-        $task->extended="Waiting for approval";
-        $task->save();
-
-        $new_approval=new Approval();
-        $new_approval->tasks_id=$task->id;
-        $new_approval->users_id=$user->id;
-        $new_approval->description=$request->description;
-        $new_approval->status="Waiting for approval";
-        $new_approval->title="Extend task deadline";
-        $new_approval->save();
-
-        $task=$this->getDetailTask($task->id);
-        return response()->json($task);
-    } 
-
-    public function approveExtend(Request $request,$id){
-        $request->validate([
-            'approvals_id'=>'required'
-        ]);
-        
-        $task=Task::findOrFail($id);
-        $user=User::findOrFail($request->users_id);
-        if($task->old_deadline) {
-            $task->end=$request->new_deadline;
-        }else{
-            $task->old_deadline=$task->start;
-            $task->end=$request->new_deadline;
-        }
-        $task->extended=$request->status; //approved or not approved
-        $task->save();
-
-        $new_approval=Approval::findOrFail($request->approvals_id);
-        $new_approval->status=$request->status;
-        $new_approval->save();
-
-        $task=$this->getDetailTask($task->id);
-    }
-
     function getTagsFromTask($task){
         $tag_relations=$task['tags'];
         $tags=[];
@@ -309,7 +295,8 @@ class TaskController extends Controller
         for ($i=0; $i < count($task_members); $i++) { 
             $task_member=$task_members[$i];
             $user=$task_member['user'];
-            $user['role']=$task_member['member']['role'];
+            if($task_member['member']) $user['role']=$task_member['member']['role'];
+            else $user['role']=['id'=>'','name'=>''];
             $user['project_members_id']=$task_member['project_members_id'];
             $user['tasks_id']=$task_member['tasks_id'];
 
@@ -317,4 +304,33 @@ class TaskController extends Controller
         }
         return $members;
     }
+    
+    public function extendDeadline(Request $request,$id){
+        $request->validate([
+            'users_id'=>'required',
+            'new_deadline'=>'required'
+        ]);
+        $user=User::findOrFail($request->users_id);
+        $task=Task::with('list.project')->with('parentTask')->findOrFail($id);
+        
+        $new_approval=new Approval();
+        $new_approval->tasks_id=$task->id;
+        if($task->is_subtask){
+            $new_approval->parent_task_id=$task->parentTask->id;
+            $new_approval->lists_id=$task->parentTask->list->id;
+            $new_approval->projects_id=$task->parentTask->list->project->id;
+        }else{
+            $new_approval->lists_id=$task->list->id;
+            $new_approval->projects_id=$task->list->project->id;
+        }
+        $new_approval->users_id=$request->users_id;
+        $new_approval->new_deadline=$request->new_deadline;
+        $new_approval->description=$request->description;
+        $new_approval->status="Waiting for confirmation";
+        $new_approval->title="Task deadline extension request from ".$user->name ;
+        $new_approval->save();
+
+        $task=$this->getDetailTask($task->id);
+        return response()->json($task);
+    } 
 }

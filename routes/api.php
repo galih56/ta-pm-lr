@@ -9,10 +9,8 @@ Route::post('/logout','App\Http\Controllers\UserController@logout');
 
 Route::resource('lists', 'App\Http\Controllers\ListController');
 Route::post('lists/{id}/extend-deadline', 'App\Http\Controllers\ListController@extendDeadline');
-Route::post('lists/{id}/approve-extend', 'App\Http\Controllers\ListController@approveExtend');
 Route::resource('tasks', 'App\Http\Controllers\TaskController');
 Route::post('tasks/{id}/extend-deadline', 'App\Http\Controllers\TaskController@extendDeadline');
-Route::post('tasks/{id}/approve-extend', 'App\Http\Controllers\TaskController@approveExtend');
 Route::resource('task-members', 'App\Http\Controllers\TaskMemberController');
 Route::resource('task-attachments', 'App\Http\Controllers\TaskAttachmentController');
 Route::resource('files', 'App\Http\Controllers\FileController');
@@ -41,7 +39,6 @@ Route::group(['prefix'=>'users'],function(){
 Route::get('projects-overview','App\Http\Controllers\ProjectController@getoverallProjectReports');
 Route::resource('projects', 'App\Http\Controllers\ProjectController');
 Route::post('projects/{id}/extend-deadline', 'App\Http\Controllers\ProjectController@extendDeadline');
-Route::post('projects/{id}/approve-extend', 'App\Http\Controllers\ProjectController@approveExtend');
 Route::group(['prefix'=>'projects'],function(){
     Route::get('/{id}/reports','App\Http\Controllers\ProjectController@getReports');
     Route::get('/{id}/tasks','App\Http\Controllers\ProjectController@getTasks');

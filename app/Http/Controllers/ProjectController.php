@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Project;
+use App\Models\User;
 use App\Models\ProjectMember;
 use App\Models\TeamsHasProjects;
 use App\Models\File;
@@ -19,7 +20,7 @@ class ProjectController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['index','update','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['update','store','destroy']]); 
     }
 
     public function index()
@@ -246,18 +247,20 @@ class ProjectController extends Controller
                             ->get();
         return response()->json($meetings);
     }
+    
+    // ->orWhereIn('t.parent_task_id',function($query) use($id){
+    //     return $query->select('t1.id')
+    //                 ->from('tasks AS t1')
+    //                 ->leftJoin('lists AS l1','t1.lists_id','=','l1.id')
+    //                 ->where('l1.projects_id','=',$id);
+    //})
 
     public function getReports($id){
         $tasks=Task::selectRaw('t.*,t.parent_task_id AS parentTask,l.projects_id')
                         ->from('tasks AS t')
                         ->leftJoin('lists AS l','t.lists_id','=','l.id')
                         ->where('l.projects_id','=',$id)
-                        ->orWhereIn('t.parent_task_id',function($query) use($id){
-                            return $query->select('t1.id')
-                                        ->from('tasks AS t1')
-                                        ->leftJoin('lists AS l1','t1.lists_id','=','l1.id')
-                                        ->where('l1.projects_id','=',$id);
-                        })->orderBy('t.start','ASC')->get($id);
+                        ->orderBy('t.start','ASC')->get($id);
 
         $mulai_cepat=[];
         $selesai_cepat=[];
@@ -408,12 +411,22 @@ class ProjectController extends Controller
         return response()->json($data);
     }
     
-    public function extendDeadline(Request $request){
-
+    public function extendDeadline(Request $request,$id){
+        $request->validate([
+            'users_id'=>'required',
+            'new_deadline'=>'required'
+        ]);
+        $user=User::findOrFail($request->users_id);
+        $project=Project::findOrFail($id);
+        
+        $new_approval=new Approval();
+        $new_approval->projects_id=$project->id;
+        $new_approval->users_id=$request->users_id;
+        $new_approval->new_deadline=$request->new_deadline;
+        $new_approval->description=$request->description;
+        $new_approval->status="Waiting for confirmation";
+        $new_approval->title="Project deadline extension request from ".$user->name ;
+        $new_approval->save();
+        return response()->json($project);
     } 
-
-    public function approveExtend(Request $request){
-
-    }
-
 }
