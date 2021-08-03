@@ -6,7 +6,7 @@ import Button from '@material-ui/core/Button';
 import LinearProgress from '@material-ui/core/Button';
 import ModalDetailOccupation from './ModalDetailOccupation/ModalDetailOccupation';
 
-const OccupationTree = React.lazy(() => import("./OccupationTree"));
+// const OccupationTree = React.lazy(() => import("./OccupationTree"));
 const OccupationTable = React.lazy(() => import("./OccupationTable"));
 
 export default function OccupationInformation() {
@@ -44,7 +44,6 @@ export default function OccupationInformation() {
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
-                console.log('occupation tree',result.data)
                 console.log(result.data);
                 // setTree(result.data)
             }).catch((error) => {
@@ -89,7 +88,7 @@ export default function OccupationInformation() {
     return (
         <>
             <React.Suspense fallback={<LinearProgress />}>
-                <OccupationTree data={tree} modalOpen={handleModalOpen} />
+                {/* <OccupationTree data={tree} modalOpen={handleModalOpen} /> */}
                 <Button variant="contained" onClick={() => setModalCreateOpen(true)}>+ Add</Button>
                 <OccupationTable data={data} onUpdate={handleOccupationUpdate} onDelete={handleOccupationDelete} modalOpen={handleModalOpen} />
                 <ModalCreateOccupation
