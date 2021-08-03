@@ -1,5 +1,4 @@
 import React,{useState,useEffect,useMemo} from 'react';
-import { Bar } from 'react-chartjs-2';
 import Typography from '@material-ui/core/Typography';
 import CustomedChart from './CustomedChart';
 
