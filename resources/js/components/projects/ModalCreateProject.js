@@ -114,8 +114,8 @@ export default function ModalCreateProject(props) {
                         global.dispatch({ type: 'create-new-project', payload: result.data })
                         setTitle('');
                         setDescription('');
-                        handleSnackbar(`A new project successfuly created`, 'success');
                         closeModal();
+                        handleSnackbar(`A new project successfuly created`, 'success');
                     }
                     else {
                         handleSnackbar(`Error : status ${result.status}`, 'warning');

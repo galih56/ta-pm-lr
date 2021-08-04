@@ -86,9 +86,9 @@ export default function ModalCreateMember(props) {
                 .then((result) => {
                     // global.dispatch({ type: 'create-new-member', payload: result.data });
                     onCreate(result.data)
-                    handleSnackbar(`New members successfuly created`, 'success');
                     setNewMembers([]);
                     closeModal();
+                    handleSnackbar(`New members successfuly created`, 'success');
                 }).catch((error) => {
                     const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
                     global.dispatch({ type: 'handle-fetch-error', payload: payload });

@@ -88,8 +88,8 @@ export default function ModalDetailMeeting(props) {
             try {
                 axios.patch(url, body)
                     .then((result) => {
-                        handleSnackbar(`Data has been updated`, 'success');
                         setData(result.data);
+                        handleSnackbar(`Data has been updated`, 'success');
                     }).catch((error) => {
                         const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
                         global.dispatch({ type: 'handle-fetch-error', payload: payload });

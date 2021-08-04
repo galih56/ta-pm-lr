@@ -145,10 +145,10 @@ const DetailProject = (props) => {
             });
             
         if (!window.navigator.onLine) {
-            handleSnackbar(`You're currently offline. Please check your internet connection.`, 'warning');
             const currentProject=getProjectFromState(global.state.projects, params.id);
             getUserMemberRole(currentProject)
             if(currentProject)setDetailProject(currentProject);
+            handleSnackbar(`You're currently offline. Please check your internet connection.`, 'warning');
         }
     }
 

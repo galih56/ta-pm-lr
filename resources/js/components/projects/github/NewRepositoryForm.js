@@ -28,9 +28,9 @@ const NewRepositoryForm=({projects_id,onSave})=>{
         axios.post(url,body)
         .then(result => {
             onSave(result.data)
-            snackbar(`Data was added successfuly`, 'success'); 
             setUsernameOwner(''); 
             setRepositoryName('');
+            snackbar(`Data was added successfuly`, 'success'); 
         }).catch((error) => {
             const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: history }
             global.dispatch({ type: 'handle-fetch-error', payload: payload });
