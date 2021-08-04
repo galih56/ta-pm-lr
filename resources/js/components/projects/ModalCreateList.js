@@ -1,7 +1,8 @@
 import React, { useEffect, useContext, useState } from 'react';
 import 'fontsource-roboto';
 import axios from 'axios';
-import { withStyles, makeStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/styles/withStyles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
@@ -15,7 +16,7 @@ import MuiDialogActions from '@material-ui/core/DialogActions';
 import { useHistory } from 'react-router-dom';
 import UserContext from '../../context/UserContext';
 import CloseIcon from '@material-ui/icons/Close';
-import Alert from '@material-ui/lab/Alert';
+import Alert from '@material-ui/core/Alert';
 import { useSnackbar } from 'notistack';
 import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
@@ -30,9 +31,13 @@ const styles = (theme) => ({
 const DialogTitle = withStyles(styles)((props) => {
     const { children, classes, onClose, ...other } = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
+        <MuiDialogTitle className={classes.root} {...other}>
             <Typography variant="h6">{children}</Typography>
-            <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+            <IconButton
+                aria-label="close"
+                className={classes.closeButton}
+                onClick={onClose}
+                size="large">
                 <CloseIcon />
             </IconButton>
         </MuiDialogTitle>

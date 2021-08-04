@@ -1,7 +1,7 @@
 
 import 'fontsource-roboto';
 import React, { useEffect, useContext, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import { Grid, TextField, Typography, Avatar, Select, FormControl, MenuItem, FormControlLabel, InputLabel, Checkbox } from '@material-ui/core/';
 import DoneIcon from '@material-ui/icons/Done';
 import UserContext from '../../../context/UserContext';

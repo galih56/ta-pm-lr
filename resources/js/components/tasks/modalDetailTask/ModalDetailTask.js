@@ -3,7 +3,7 @@ import axios from 'axios';
 import React, { useEffect, useContext, useState, useCallback } from 'react';
 import { useHistory } from "react-router-dom";
 import UserContext from '../../../context/UserContext';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/styles/withStyles';
 import Dialog from '@material-ui/core/Dialog';
 import Typography from '@material-ui/core/Typography';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -32,7 +32,11 @@ const DialogTitle = withStyles(styles)((props) => {
         <MuiDialogTitle className={classes.root} {...other} component="div">
             <span>{children}</span>
             {onClose ? (
-                <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+                <IconButton
+                    aria-label="close"
+                    className={classes.closeButton}
+                    onClick={onClose}
+                    size="large">
                     <CloseIcon />
                 </IconButton>
             ) : null}

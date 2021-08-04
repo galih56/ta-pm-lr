@@ -51,7 +51,7 @@ function OccupationSearchBar(props) {
         })
         setOptions(filteredOptions.map((option) => {
             const firstLetter = option.name[0].toUpperCase();
-            return { firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter, ...option }
+            return { firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter, ...option };
         }));
     }, [data]);
 
@@ -66,7 +66,7 @@ function OccupationSearchBar(props) {
             onChange={(event, options) => handleValueChanges(options)}
             defaultValue={defaultValue.map((option) => {
                 const firstLetter = option.name[0].toUpperCase();
-                return { firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter, ...option }
+                return { firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter, ...option };
             })}
             renderTags={(value, getTagProps) => {
                 return (

@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import UserContext from '../../../context/UserContext';
-import {  makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableContainer from '@material-ui/core/TableContainer';
 import axios from 'axios';
-import { visuallyHidden } from '@material-ui/utils';
 import { useSnackbar } from 'notistack';
 import EditLaneForm from '../../widgets/board/EditLaneForm'
 import Row from './Row';
@@ -21,26 +20,7 @@ const headCells = [
     { id: 'Work days', align: 'right', label: 'Work days' },
 ];
 
-const useStyles = makeStyles((theme) => ({
-    root: { width: '100%', padding: '1em' },
-    table: {
-        minWidth: 2000,
-    },
-    tableCellTitle:{
-        minWidth:200
-    },
-    sortSpan: visuallyHidden,
-    popover: {
-      pointerEvents: 'none',
-      zIndex:'1200'
-    },
-    paper: {
-      padding: theme.spacing(1),
-    },
-}));
-
 function Timeline(props) {
-    const classes = useStyles();
     const projects_id = props.projects_id;
     const handleDetailTaskOpen=props.handleDetailTaskOpen;
     const [detailProject,setDetailProject]=useState(props.detailProject);
@@ -128,14 +108,13 @@ function Timeline(props) {
 
     return (
         <>
-            <TableContainer  className={classes.table}>
+            <TableContainer  style={{ minWidth: 1800}}>         
                 <Table size={'small'} >
                     <TableBody>
                         {rows.map((row) => {
                             return (
                                 <Row 
                                     key={row.id} 
-                                    classes={classes} 
                                     data={row} 
                                     handleDetailTaskOpen={handleDetailTaskOpen} 
                                     projects_id={projects_id}

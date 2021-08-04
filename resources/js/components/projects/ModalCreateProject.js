@@ -2,8 +2,9 @@ import React, { useEffect, useContext,useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import 'fontsource-roboto';
 import axios from 'axios';
-import Alert from '@material-ui/lab/Alert';
-import { withStyles, makeStyles } from '@material-ui/core/styles';
+import Alert from '@material-ui/core/Alert';
+import withStyles from '@material-ui/styles/withStyles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -23,18 +24,23 @@ import { useSnackbar } from 'notistack';
 import moment from 'moment';
 import UserSearchBar from './../widgets/UserSearchBar'
 
-const styles = (theme) => ({
+const styles = (theme) => {
+    return({
     root: { margin: 0, padding: theme.spacing(2) },
     closeButton: { position: 'absolute !important', right: theme.spacing(1), top: theme.spacing(1), color: theme.palette.grey[500], },
-});
+})};
 
 const DialogTitle = withStyles(styles)((props) => {
     const { children, classes, onClose, ...other } = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
+        <MuiDialogTitle className={classes.root} {...other}>
             <Typography variant="h6">{children}</Typography>
             {onClose ? (
-                <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+                <IconButton
+                    aria-label="close"
+                    className={classes.closeButton}
+                    onClick={onClose}
+                    size="large">
                     <CloseIcon />
                 </IconButton>
             ) : null}
@@ -50,10 +56,12 @@ const DialogActions = withStyles((theme) => ({
     root: { margin: 0, padding: theme.spacing(1) },
 }))(MuiDialogActions);
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles((theme) => {
+    console.log(theme)
+    return({
     root: { display: 'flex', flexWrap: 'wrap' },
     margin: { margin: theme.spacing(1) },
-}));
+})});
 
 export default function ModalCreateProject(props) {
     const classes = useStyles();

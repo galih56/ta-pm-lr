@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -50,7 +50,7 @@ const headCells = [
 
 const useStyles = makeStyles((theme) => ({
     root: { width: '100%', },
-    paper: { width: '100%', marginBottom: theme.spacing(2), },
+    paper: { width: '100%', },
     sortSpan: visuallyHidden,
 }));
 

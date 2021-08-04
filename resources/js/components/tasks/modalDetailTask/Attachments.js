@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext, memo } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
 import IconButton from '@material-ui/core/IconButton';
-import { DropzoneDialog } from 'material-ui-dropzone';
+// import { DropzoneDialog } from 'material-ui-dropzone';
 import DescriptionIcon from '@material-ui/icons/Description';
 import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf';
 import AttachFileIcon from '@material-ui/icons/AttachFile';
@@ -66,13 +66,17 @@ const Attachments = (props) => {
     const showDeleteButton = (isEdit, itemId) => {
         if (isEdit) {
             return (
-                <IconButton edge="end" aria-label="Delete" onClick={() => { 
-                    setDeleteConfirmOpen(true); 
-                    setToBeDeletedFile(itemId) 
-                }}>
+                <IconButton
+                    edge="end"
+                    aria-label="Delete"
+                    onClick={() => { 
+                        setDeleteConfirmOpen(true); 
+                        setToBeDeletedFile(itemId) 
+                    }}
+                    size="large">
                     <DeleteIcon fontSize="small" />
                 </IconButton >
-            )
+            );
         } else return (<></>)
     }
     
@@ -148,16 +152,20 @@ const Attachments = (props) => {
             return (
                 <ListItem button>
                     <ListItemText primary={`Add new attachment`} />
-                    <IconButton edge="end" aria-label="Choose existing file" onClick={()=>{
-                        setChooseFileModalOpen(true)
-                    }}>
+                    <IconButton
+                        edge="end"
+                        aria-label="Choose existing file"
+                        onClick={()=>{
+                            setChooseFileModalOpen(true)
+                        }}
+                        size="large">
                         <AttachFileIcon/>
                     </IconButton>
-                    <IconButton edge="end" aria-label="Add new attachment" onClick={() => { setUploadModalOpen(true) }}>
+                    {/* <IconButton edge="end" aria-label="Add new attachment" onClick={() => { setUploadModalOpen(true) }}>
                         <PublishRoundedIcon />
-                    </IconButton>
+                    </IconButton> */}
                     <GoogleDriveButton payload={payload} snackbar={snackbar}></GoogleDriveButton>
-                    <DropzoneDialog
+                    {/* <DropzoneDialog
                         cancelButtonText={"Cancel"} 
                         submitButtonText={"Submit"}
                         maxFileSize={10000000} 
@@ -167,45 +175,47 @@ const Attachments = (props) => {
                         showFileNamesInPreview={true}
                         getPreviewIcon={HandlePreviewIconDZ}
                         showAlerts={false}
-                    />
+                    /> */}
                 </ListItem>
-            )
+            );
         } else return (<></>)
     }
-    return (
-        <>
-            <List className={classes.root}>
-                {showEditButtons()}
-                {data.map((item) => {
-                    return (
-                        <ListItem key={item.id} style={{ width: '100%' }}>
-                            <ListItemText primary={`${item.name}`} />
-                            <ListItemSecondaryAction>
-                                <IconButton component="a" target="_blank" href={item.source=='upload'?`${process.env.MIX_BACK_END_BASE_URL}files/${item.files_id}/download`:item.path}>
-                                    <GetAppIcon fontSize="small" />
-                                </IconButton >
-                                {showDeleteButton(isEditing, item.id)}
-                            </ListItemSecondaryAction>
-                        </ListItem>
-                    );
-                })}
-            </List>                        
-            {/* <PublishRoundedIcon /> */}
-            <ModalFilePicker 
-                open={chooseFileModalOpen} 
-                projectId={projectId} 
-                closeModal={()=> setChooseFileModalOpen(false) }
-                onPick={(file)=> handleFilePick(file,payload) }/>
-            <ModalDeleteConfirm
-                open={deleteConfirmOpen}
-                handleClose={() => setDeleteConfirmOpen(false)}
-                handleDelete={() => {
-                    payload = { id: toBeDeletedFile, taskId: taskId, projectId: projectId, listId: listId }
-                    deleteFile(payload);
-                    setDeleteConfirmOpen(false)
-                }} />
-        </>
-    );
+    return <>
+        <List className={classes.root}>
+            {showEditButtons()}
+            {data.map((item) => {
+                return (
+                    <ListItem key={item.id} style={{ width: '100%' }}>
+                        <ListItemText primary={`${item.name}`} />
+                        <ListItemSecondaryAction>
+                            <IconButton
+                                component="a"
+                                target="_blank"
+                                href={item.source=='upload'?`${process.env.MIX_BACK_END_BASE_URL}files/${item.files_id}/download`:item.path}
+                                size="large">
+                                <GetAppIcon fontSize="small" />
+                            </IconButton >
+                            {showDeleteButton(isEditing, item.id)}
+                        </ListItemSecondaryAction>
+                    </ListItem>
+                );
+            })}
+        </List>                        
+        {/* <PublishRoundedIcon /> */}
+        <ModalFilePicker 
+            open={chooseFileModalOpen} 
+            projectId={projectId} 
+            closeModal={()=> setChooseFileModalOpen(false) }
+            onPick={(file)=> handleFilePick(file,payload) }/>
+        <ModalDeleteConfirm
+            open={deleteConfirmOpen}
+            handleClose={() => setDeleteConfirmOpen(false)}
+            handleDelete={() => {
+                payload = { id: toBeDeletedFile, taskId: taskId, projectId: projectId, listId: listId }
+                deleteFile(payload);
+                setDeleteConfirmOpen(false)
+            }} />
+    </>;
 }
 
 export default memo(Attachments);

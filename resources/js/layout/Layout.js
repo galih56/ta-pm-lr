@@ -17,7 +17,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'; 
 import NotificationsIcon from '@material-ui/icons/Notifications'; 
 import MenuIcon from '@material-ui/icons/Menu';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import styleConfig from './Theme';
 import UserContext from '../context/UserContext';
 

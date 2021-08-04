@@ -6,7 +6,7 @@ import StarIcon from '@material-ui/icons/Star';
 import moment from 'moment';
 import Chip from '@material-ui/core/Chip';
 import { Grid } from '@material-ui/core/';
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import Timeline from '@material-ui/lab/Timeline';
 import TimelineItem from '@material-ui/lab/TimelineItem';
 import TimelineSeparator from '@material-ui/lab/TimelineSeparator';

@@ -8,7 +8,7 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import TaskTable from '../components/tasks/TaskTable';
 import ProjectList from '../components/projects/ProjectList';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/styles';
 import UserContext from './../context/UserContext';
 import axios from 'axios';
 import styleConfig from './Theme';

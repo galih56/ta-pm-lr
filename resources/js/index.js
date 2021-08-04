@@ -1,6 +1,7 @@
 import React, { useReducer, lazy } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch, Redirect, useLocation } from "react-router-dom";
+import { ThemeProvider, createTheme } from '@material-ui/core/styles';
 import 'fontsource-roboto';
 import Layout from "./layout/Layout";
 import UserContext, {
@@ -18,7 +19,6 @@ import {
     createNewAttachments, removeAttachment
 } from './context/TasksReducer';
 import { SnackbarProvider } from 'notistack';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
 import { LinearProgress } from '@material-ui/core/';
 import './index.css';
@@ -147,32 +147,31 @@ const reducer = (state, action) => {
 }
 
 function RemoveTrailingSlashes({ path }) {
-    return (
-        <>
-            {/* https://github.com/ReactTraining/react-router/issues/4841#issuecomment-523625186 */}
-            {/* Removes trailing slashes */}
-            <Route path={`/${path}*(/+)`} exact strict ><Redirect to={`/${path}`} /></Route>
-            {/* Removes duplicate slashes in the middle of the URL */}
-            <Route
-                path={`/${path}(.*//+.*)`}
-                exact
-                strict
-                render={({ match }) => (
-                    <Redirect to={`/${match.params.url.replace(/\/\/+/, "/")}`} />
-                )}
-            />
+    return <>
+        {/* https://github.com/ReactTraining/react-router/issues/4841#issuecomment-523625186 */}
+        {/* Removes trailing slashes */}
+        <Route path={`/${path}*(/+)`} exact strict ><Redirect to={`/${path}`} /></Route>
+        {/* Removes duplicate slashes in the middle of the URL */}
+        <Route
+            path={`/${path}(.*//+.*)`}
+            exact
+            strict
+            render={({ match }) => (
+                <Redirect to={`/${match.params.url.replace(/\/\/+/, "/")}`} />
+            )}
+        />
 
-        </>
-    )
+    </>;
 }
 
+const theme = createTheme();
 const App = () => {
     const [state, dispatch] = useReducer(reducer, initState);
 
     return (
         <UserContext.Provider value={{ state, dispatch }}>
             <SnackbarProvider maxSnack={5}>
-                <MuiPickersUtilsProvider utils={MomentUtils}>
+                <ThemeProvider theme={theme}>
                     <Router>
                         <Layout>
                             <React.Suspense fallback={<LinearProgress />}>
@@ -224,7 +223,7 @@ const App = () => {
                             </React.Suspense>
                         </Layout>
                     </Router>
-                </MuiPickersUtilsProvider>
+                </ThemeProvider>
             </SnackbarProvider>
         </UserContext.Provider>
 

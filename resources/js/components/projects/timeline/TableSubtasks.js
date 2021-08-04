@@ -9,7 +9,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Popover from '@material-ui/core/Popover';
 import Typography from '@material-ui/core/Typography';
 
-const TableSubtask=({tasks,classes,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
+const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
     const [subtasks,setSubtasks]=useState([])
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [openPopOver, setOpenPopOver] = React.useState(null);
@@ -72,8 +72,10 @@ const TableSubtask=({tasks,classes,handleCompleteTask,handleDetailTaskOpen,headC
                                         )
                                     }):<></>}
                                     {(openPopOver)?(<Popover
-                                        className={classes.popover}
-                                        classes={{ paper: classes.paper }}
+                                        style={ {
+                                            pointerEvents: 'none',
+                                            zIndex:'1200'
+                                          }}
                                         open={openPopOver}
                                         anchorEl={anchorEl}
                                         anchorOrigin={{
