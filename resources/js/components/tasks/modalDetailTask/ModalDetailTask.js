@@ -168,8 +168,8 @@ export default function ModalDetailTask(props) {
                 setData(result);
                 if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
                 else  global.dispatch({ type: 'store-detail-task', payload: result });
-                snackbar(`Data has been updated`, 'success');
                 if(onTaskUpdate) onTaskUpdate(result);
+                snackbar(`Data has been updated`, 'success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: history }
                 global.dispatch({ type: 'handle-fetch-error', payload: payload });
@@ -183,10 +183,10 @@ export default function ModalDetailTask(props) {
         axios.delete(url).then((result) => {
                 if(data.is_subtask) global.dispatch({ type: 'remove-subtask', payload: data });
                 else  global.dispatch({ type: 'remove-task', payload: data });
-                snackbar(`Data has been deleted`, 'success');
                 removeTaskIdQueryString(history)
                 if(props.onDelete)props.onDelete(data.list,id)
                 if(onTaskDelete)onTaskDelete(data)
+                snackbar(`Data has been deleted`, 'success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: history }
                 global.dispatch({ type: 'handle-fetch-error', payload: payload });

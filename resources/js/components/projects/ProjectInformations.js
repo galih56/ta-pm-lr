@@ -46,8 +46,8 @@ const ProjectInfo = (props) => {
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.patch(url, detailProject, config)
             .then((result) => {
-                handleSnackbar(`Data has been changed`, 'success');
                 setIsEditing(false)
+                handleSnackbar(`Data has been changed`, 'success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
                 global.dispatch({ type: 'handle-fetch-error', payload: payload });
@@ -66,8 +66,8 @@ const ProjectInfo = (props) => {
         axios.delete(url, {}, {})
             .then((result) => {
                 global.dispatch({ type: 'remove-project', payload: detailProject.id });
-                handleSnackbar(`Data has been deleted successfuly`, 'success');
                 history.push('/');
+                handleSnackbar(`Data has been deleted successfuly`, 'success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
                 global.dispatch({ type: 'handle-fetch-error', payload: payload });

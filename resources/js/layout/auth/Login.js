@@ -42,8 +42,8 @@ const SignIn = (props) => {
                         // Request made and server responded
                         switch (error.response.status) {
                             case 401:
-                                handleSnackbar(`Wrong Credentials`, 'warning');
                                 setWrongCredentialAlert(true);
+                                handleSnackbar(`Wrong Credentials`, 'warning');
                                 break;
                             default:
                                 handleSnackbar(`Server Error : ${error.response.statusText} (${error.response.status})`, 'error');

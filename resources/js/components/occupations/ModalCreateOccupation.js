@@ -74,9 +74,9 @@ export default function ModalCreateOccupation(props) {
                 .then((result) => {
                     setName('');
                     setChildren([]);
-                    handleSnackbar(`A new occupation successfully created`, 'success');
-                    closeModal();
                     props.onCreate(result.data);
+                    closeModal();
+                    handleSnackbar(`A new occupation successfully created`, 'success');
                 }).catch((error) => {
                     const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
                     global.dispatch({ type: 'handle-fetch-error', payload: payload });

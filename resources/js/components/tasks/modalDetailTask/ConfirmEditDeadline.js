@@ -46,8 +46,8 @@ export default function ModalConfirmEditDeadline({open,handleClose,data,setData}
                 setData(result);
                 if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
                 else  global.dispatch({ type: 'store-detail-task', payload: result });
-                handleSnackbar(`Data has been updated`, 'success');
                 if(onTaskUpdate) onTaskUpdate(result);
+                handleSnackbar(`Data has been updated`, 'success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
                 global.dispatch({ type: 'handle-fetch-error', payload: payload });

@@ -70,9 +70,9 @@ export default function ModalCreateRole(props) {
         axios.post(url, body)
             .then((result) => {
                 setName('');
-                handleSnackbar(`A new role successfully created`, 'success');
                 closeModal();
                 props.onCreate(result.data);
+                handleSnackbar(`A new role successfully created`, 'success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
                 global.dispatch({ type: 'handle-fetch-error', payload: payload });

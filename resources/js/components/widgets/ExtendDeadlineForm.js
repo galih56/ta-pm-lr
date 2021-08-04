@@ -77,8 +77,8 @@ export default function ModalExtendDeadline({open,handleClose,data,setData,detai
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.post(url,body)
             .then((result) => {
-                snackbar('Request sent successfuly','success');
                 handleClose();
+                snackbar('Request sent successfuly','success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
                 global.dispatch({ type: 'handle-fetch-error', payload: payload });

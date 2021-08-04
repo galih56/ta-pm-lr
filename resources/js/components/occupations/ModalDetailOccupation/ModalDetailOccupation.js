@@ -70,8 +70,8 @@ export default function ModalDetailOccupation(props) {
             const url = process.env.MIX_BACK_END_BASE_URL + `occupations/${props.initialState.id}`;
             axios.patch(url, body, config)
                 .then((result) => {
-                    handleSnackbar(`Data has been updated`, 'success');
                     props.onUpdate(result.data);
+                    handleSnackbar(`Data has been updated`, 'success');
                 }).catch((error) => {
                     const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
                     global.dispatch({ type: 'handle-fetch-error', payload: payload });
@@ -87,8 +87,8 @@ export default function ModalDetailOccupation(props) {
             const url = process.env.MIX_BACK_END_BASE_URL + `occupations/${data.id}`;
             axios.delete(url)
                 .then((result) => {
-                    handleSnackbar(`Data has been deleted`, 'success');
                     props.onDelete(data);
+                    handleSnackbar(`Data has been deleted`, 'success');
                 }).catch((error) => {
                     const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
                     global.dispatch({ type: 'handle-fetch-error', payload: payload });
