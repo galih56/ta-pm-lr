@@ -49,14 +49,16 @@ const storeGithubAuth = (payload, state) => {
 
 const storeProjectMemberRole = (payload, state) => {
     var user = JSON.parse(localStorage.getItem('user'));
-    if(typeof user=='object'){ user.current_project_member_role = payload; }
+    console.log('storeProjectMemberRole : ',payload,state)
+    if(user){ user.current_project_member_role = payload; }
     localStorage.setItem("user", JSON.stringify(user));
     return user;
 }
 
 const removeProjectMemberRole = (payload, state) => {
     var user = JSON.parse(localStorage.getItem('user'));
-    if(!(typeof user=='object')){ user.current_project_member_role = null; }
+    console.log('removeProject : ',payload,state)
+    if(user){ user.current_project_member_role = null; }
     localStorage.setItem("user", JSON.stringify(user));
     return user;
 }
