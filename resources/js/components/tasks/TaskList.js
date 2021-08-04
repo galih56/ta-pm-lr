@@ -130,17 +130,17 @@ const TaskList = (props) => {
                                 </TableCell>
                                 <TableCell>
                                     {task.start ? moment(task.start).format('DD MMM YYYY') : ''} - {task.end ? moment(task.end).format('DD MMM YYYY') : ''}
-                                    {(task.actualStart && task.actualEnd)?(
+                                    {(task.actual_start && task.actual_end)?(
                                         <>
                                             <br/>
                                             Actual start/end : 
-                                            {task.actualStart ? moment(task.actualStart).format('DD MMM YYYY') : ''} - {task.actualEnd ? moment(task.actualEnd).format('DD MMM YYYY') : ''}
+                                            {task.actual_start ? moment(task.actual_start).format('DD MMM YYYY') : ''} - {task.actual_end ? moment(task.actual_end).format('DD MMM YYYY') : ''}
                                         </>
                                     ):''}
                                     
                                 </TableCell>
                                 <TableCell>
-                                    {(typeof task.creator =='object')?task.creator.name:'-'}
+                                    {(task?.creator)?task?.creator?.name:'-'}
                                 </TableCell>
                             </TableRow>
                         ))}

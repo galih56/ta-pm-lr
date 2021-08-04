@@ -177,10 +177,9 @@ const Files = (props) => {
         if (window.navigator.onLine) {
             const url = process.env.MIX_BACK_END_BASE_URL + 'projects/' + projects_id + '/files';
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.get(url, {}, {})
+            axios.get(url)
                 .then((result) => {
                     const data = result.data;
-                    console.log('chooseFile : ',data)
                     setFiles(data);
                 }).catch((error) => {
                     const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
@@ -193,10 +192,9 @@ const Files = (props) => {
 
     const handleDelete = (id) => {
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
             const url = process.env.MIX_BACK_END_BASE_URL + 'files/' + id;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.delete(url, {}, config)
+            axios.delete(url)
                 .then((result) => {
                     const data = result.data;
                     setChoosenFileId(null)

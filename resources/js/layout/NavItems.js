@@ -47,6 +47,7 @@ export const RestrictedAccessMenu = () => {
             var remove_member_role=true;
             if((current_route=='projects'  && id)) remove_member_role=false;
             if(current_route=='approvals')  remove_member_role=false;
+            console.log(current_route,id,remove_member_role);
             if(remove_member_role) global.dispatch({type:'remove-project-member-role'});
         }
         checkCurrentProjectMemberRole(history.location);
@@ -68,10 +69,10 @@ export const RestrictedAccessMenu = () => {
     useEffect(()=>{
         const occupation=global.state.occupation;
         const current_project_member_role=global.state.current_project_member_role;
-        if(occupation?.name.toLowerCase().includes('system administrator') || occupation?.name.toLowerCase().includes('ceo')) setIsFirstLevel(true);
+        if(occupation?.name?.toLowerCase().includes('system administrator') || occupation?.name?.toLowerCase().includes('ceo')) setIsFirstLevel(true);
         else setIsFirstLevel(false);
-        if( current_project_member_role?.name.toLowerCase().includes('project owner')) setIsSecondLevel(true); else setIsSecondLevel(false);
-        if(current_project_member_role?.name.toLowerCase().includes('project manager')) setIsThirdLevel(true); else setIsThirdLevel(false);
+        if( current_project_member_role?.name?.toLowerCase().includes('project owner')) setIsSecondLevel(true); else setIsSecondLevel(false);
+        if(current_project_member_role?.name?.toLowerCase().includes('project manager')) setIsThirdLevel(true); else setIsThirdLevel(false);
     },[global.state.occupation,global.state.current_project_member_role]);
 
 

@@ -20,10 +20,10 @@ const OpenEditForm = ({ isEdit, data, setData}) => {
     const global = useContext(UserContext);
 
     const getRoles = () => {
-        const config = { mode: 'no-cors', crossdomain: true, }
-        const url = process.env.MIX_BACK_END_BASE_URL + 'memberrole';
+        const url = process.env.MIX_BACK_END_BASE_URL + 'member-roles';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then((result) => {
                 setRoles(result.data);
             }).catch((error) => {
