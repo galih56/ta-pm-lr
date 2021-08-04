@@ -32,9 +32,9 @@ class ProjectMemberController extends Controller
             for ($i=0; $i < count($new_members); $i++) { 
                 $new_member=$new_members[$i];
                 $project_member=new ProjectMember();
-                $project_member->users_id=$new_member->id;
-                $project_member->projects_id=$new_member->projects_id;
-                $project_member->roles_id=$new_member->roles_id;
+                $project_member->users_id=$new_member['id'];
+                $project_member->projects_id=$request->projects_id;
+                $project_member->roles_id=$request->roles_id;
                 $project_member->save();
 
                 $inserted_members[]=$project_member->id;
@@ -69,10 +69,11 @@ class ProjectMemberController extends Controller
     {
         $project_member=ProjectMember::findOrFail($id);
         if($request->has('roles_id')) $project_member->roles_id=$request->roles_id;
+        if($request->has('role')) $project_member->roles_id=$request->role['id'];
         $project_member->save();
-
+        
         $project_member=$this->getDetailProjectMember($id);
-        return $project_member;
+        return response()->json($project_member);
     }
 
     public function destroy($id)
@@ -81,7 +82,7 @@ class ProjectMemberController extends Controller
         return response()->json($project_member->delete());
     }
 
-    function getTasks($id){
+    public function getTasks($id){
         $task_members=TaskMember::where('project_members_id','=',$id)
                                 ->with('task.creator',function($q){
                                     return $q->select('id','name','email')->with('occupation',function($q2){
@@ -109,7 +110,8 @@ class ProjectMemberController extends Controller
         }
         $user=$member['user'];
         $user['tasks']=$tasks;
-        $user['project_members_id']=$member['project']['id'];
+        $user['project_members_id']=$member['id'];
+        $user['projects_id']=$member['project']['id'];
         $user['role']=$member['role'];
         return $user;
 

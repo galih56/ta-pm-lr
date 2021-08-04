@@ -146,8 +146,8 @@ const EditLaneForm = (props) => {
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.patch(url, body)
                 .then((result) => {
-                    handleSnackbar(`Data has been updated`, 'success');
                     global.dispatch({ type: 'update-list', payload: body });
+                    handleSnackbar(`Data has been updated`, 'success');
                 }).catch((error) => {
                     const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
                     global.dispatch({ type: 'handle-fetch-error', payload: payload });    
@@ -166,9 +166,9 @@ const EditLaneForm = (props) => {
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.delete(url, { id: laneDetail.id })
             .then((result) => {
-                handleSnackbar(`Data has been deleted`, 'success');
                 setModalOpen(false);
                 onCancel();
+                handleSnackbar(`Data has been deleted`, 'success');
             }).catch((error) => console.log(error));
         } else {
             handleSnackbar(`You are currently offline`, 'warning');

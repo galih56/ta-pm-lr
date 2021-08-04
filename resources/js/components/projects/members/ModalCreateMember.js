@@ -78,7 +78,7 @@ export default function ModalCreateMember(props) {
         else setShowAlert(false);
         
         if (!showAlert) {
-            const body = { projects_id: projects_id, members: newMembers, roleId: selectedRole }
+            const body = { projects_id: projects_id, members: newMembers, roles_id: selectedRole }
             const url = process.env.MIX_BACK_END_BASE_URL + 'project-members/';
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -86,9 +86,9 @@ export default function ModalCreateMember(props) {
                 .then((result) => {
                     // global.dispatch({ type: 'create-new-member', payload: result.data });
                     onCreate(result.data)
-                    handleSnackbar(`New members successfuly created`, 'success');
                     setNewMembers([]);
                     closeModal();
+                    handleSnackbar(`New members successfuly created`, 'success');
                 }).catch((error) => {
                     const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
                     global.dispatch({ type: 'handle-fetch-error', payload: payload });

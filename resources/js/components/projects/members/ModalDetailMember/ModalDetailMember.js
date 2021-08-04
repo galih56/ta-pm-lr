@@ -63,7 +63,7 @@ export default function ModalDetailMember(props) {
     const [data, setData] = useState({
         id: null, 
         name: '', email: '', phone_number: '',  last_login: '', occupation: null, profilePicture: '' ,
-        project_member_id:null,
+        project_members_id:null,
         role:{ id:null, name:'' },
         tasks:[]
     });
@@ -76,11 +76,11 @@ export default function ModalDetailMember(props) {
 
     useEffect(() => {
         setData(props.initialState);
-        getTasks(props.initialState.project_member_id)
+        getTasks(props.initialState.tasks)
     }, [props.initialState.id]);
 
     const getTasks = (id) => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'project-members/' + id + '/tasks';
+        const url = `${process.env.MIX_BACK_END_BASE_URL}project-members/${props.initialState.id}/tasks`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
@@ -94,25 +94,23 @@ export default function ModalDetailMember(props) {
     
     const saveChanges = () => {
         let body = data;
-        if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL + `project-members/${props.initialState.id}`;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.patch(url, body, config)
-                .then(result => {
-                    setData(result.data);
-                    props.onUpdate(result.data);
-                    handleSnackbar(`Data has been updated`, 'success');
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                });
-        }
+        const url = process.env.MIX_BACK_END_BASE_URL + `project-members/${props.initialState.project_members_id}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.patch(url, body)
+            .then(result => {
+                setData(result.data);
+                props.onUpdate(result.data);
+                handleSnackbar(`Data has been updated`, 'success');
+            }).catch((error) => {
+                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
+                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            });
     }
 
     const deleteMember = () => {
         if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL + `project-members/${data.id}`;
+            const url = process.env.MIX_BACK_END_BASE_URL + `project-members/${data.project_members_id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.delete(url)

@@ -136,9 +136,9 @@ const Attachments = (props) => {
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.delete(url)
                 .then((result) => {
-                    snackbar(`Data has been deleted`, 'success');
                     setDeleteConfirmOpen(false);
                     global.dispatch({ type: 'remove-attachment', payload: payload });
+                    snackbar(`Data has been deleted`, 'success');
                 }).catch((error) => {
                     const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
                     global.dispatch({ type: 'handle-fetch-error', payload: payload });

@@ -113,6 +113,7 @@ const DetailProject = (props) => {
 
     const getUserMemberRole=(project)=>{
         var user=null;
+        console.log('getUserMemberRole : ',project.members);
         const members=project.members;
         if(typeof members !== 'undefined'){
             for (let i = 0; i < members.length; i++) {
@@ -124,6 +125,8 @@ const DetailProject = (props) => {
             }
             if(user){
                 var role={...user.role,project: { id: project.id,  title: project.title }}
+                console.log('getUserMemberRole : ',role);
+
                 global.dispatch({type:'store-project-member-role',payload:role})
             }
         }
@@ -145,10 +148,10 @@ const DetailProject = (props) => {
             });
             
         if (!window.navigator.onLine) {
-            handleSnackbar(`You're currently offline. Please check your internet connection.`, 'warning');
             const currentProject=getProjectFromState(global.state.projects, params.id);
             getUserMemberRole(currentProject)
             if(currentProject)setDetailProject(currentProject);
+            handleSnackbar(`You're currently offline. Please check your internet connection.`, 'warning');
         }
     }
 
