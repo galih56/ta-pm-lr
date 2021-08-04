@@ -73,9 +73,15 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
     if (file.source == 'upload') file_url += file.path
     if (file.source == 'google-drive') file_url = file.path;
 
+   
     var srcCardMedia = null;
-    srcCardMedia = file.type.split('/');
-    switch (srcCardMedia[0]) {
+    var file_type='';
+    if(file.type){
+        srcCardMedia = file.type.split('/');
+        file_type=srcCardMedia[0];
+    }
+    
+    switch (file_type) {
         case 'image':
             srcCardMedia = MultipleImagesIcon;
             if (file.source == 'upload' || file.source == 'google-drive') srcCardMedia = file_url;
@@ -100,6 +106,7 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
             srcCardMedia = FilesIcon;
             break;
     }
+    
     return (
         <Card className={classes.root}>
             <CardHeader
@@ -110,8 +117,8 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
                     <IconButton onClick={handleClick} size="large">
                         <MoreVertIcon />
                     </IconButton>
-                }
-                title={trimString(file.file_name)}
+                }                
+                title={file.file_name?trimString(file.file_name):''}
                 subheader={moment(file.createdAt).format('MMMM Do YYYY, h:mm a')}
             />
             <Popover

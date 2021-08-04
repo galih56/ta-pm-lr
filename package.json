@@ -50,7 +50,7 @@
         "material-ui-dropzone": "^3.5.0",
         "moment": "^2.29.1",
         "mui-rte": "^1.29.0",
-        "notistack": "^2.0.1-alpha.1",
+        "notistack": "^2.0.1-alpha.4",
         "react-drive": "^1.0.1",
         "react-github-login": "^1.0.3",
         "react-google-calendar-api": "^1.4.0",
