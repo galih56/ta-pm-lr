@@ -1,7 +1,7 @@
 
 import 'fontsource-roboto';
 import React, { useEffect, useContext, useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import UserContext from '../../../../context/UserContext';
 import { Grid, Typography, Avatar } from '@material-ui/core/';
 import moment from 'moment';

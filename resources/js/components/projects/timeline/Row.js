@@ -11,7 +11,7 @@ import IconButton from '@material-ui/core/IconButton';
 import axios from 'axios';
 
 function Row(props) {
-    const { data, handleDetailTaskOpen,classes,onClick,headCells, onTaskUpdate, onTaskDelete } = props;
+    const { data, handleDetailTaskOpen,onClick,headCells, onTaskUpdate, onTaskDelete } = props;
     const [openCollapsible, setOpenCollapsible] = useState(true);
     let global = useContext(UserContext);
     const { enqueueSnackbar } = useSnackbar();
@@ -58,7 +58,6 @@ function Row(props) {
                         <TableTasks
                             headCells={headCells}
                             tasks={data.cards} 
-                            classes={classes} 
                             handleCompleteTask={handleCompleteTask}
                             handleDetailTaskOpen={handleDetailTaskOpen}
                             onTaskUpdate={onTaskUpdate}

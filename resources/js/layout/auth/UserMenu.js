@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Link, useHistory } from "react-router-dom";
 import { Menu, MenuItem, IconButton, Badge, ListItemText } from '@material-ui/core/';
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/styles';
 import UserContext from '../../context/UserContext';
 import PersonIcon from '@material-ui/icons/Person';
 import LogoutConfirmDialog from './LogoutConfirmDialog';
@@ -17,17 +17,6 @@ const StyledMenu = withStyles({
         {...props}
     />
 ));
-
-const StyledMenuItem = withStyles((theme) => ({
-    root: {
-        '&:focus': {
-            backgroundColor: theme.palette.primary.main,
-            '& .MuiListItemIcon-root, & .MuiListItemText-primary': {
-                color: theme.palette.common.white,
-            },
-        },
-    },
-}))(MenuItem);
 
 const UserMenu = (props) => {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -62,7 +51,7 @@ const UserMenu = (props) => {
                             if (global.state.authenticated) {
                                 return (
                                     <React.Fragment>
-                                        <StyledMenuItem>
+                                        <MenuItem>
                                             <ListItemText>
                                                 {global.state.name}
                                                 <br />
@@ -74,21 +63,21 @@ const UserMenu = (props) => {
                                                     </>
                                                 ):<></>}
                                             </ListItemText>
-                                        </StyledMenuItem>
-                                        <StyledMenuItem onClick={() => { setLogoutDialog(true); }}>
+                                        </MenuItem>
+                                        <MenuItem onClick={() => { setLogoutDialog(true); }}>
                                             <ListItemText primary="Logout" />
-                                        </StyledMenuItem>
+                                        </MenuItem>
                                         <LogoutConfirmDialog open={openLogoutDialog} handleDialogClose={handleLogoutDialogClose} handleHistory={handleHistory} />
                                     </React.Fragment>
                                 )
                             } else {
                                 return (
                                     <React.Fragment>
-                                        <StyledMenuItem>
+                                        <MenuItem>
                                             <Link to='/auth' >
                                                 <ListItemText primary="Login/Register" />
                                             </Link>
-                                        </StyledMenuItem>
+                                        </MenuItem>
                                     </React.Fragment>
                                 )
                             }

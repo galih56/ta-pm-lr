@@ -14,7 +14,7 @@ import { useSnackbar } from 'notistack';
 import axios from 'axios';
 import Chip from '@material-ui/core/Chip';
 import Button from '@material-ui/core/Button';
-import Autocomplete from '@material-ui/lab/Autocomplete';
+import Autocomplete from '@material-ui/core/Autocomplete';
 import PeopleIcon from '@material-ui/icons/People';
 import TextField from '@material-ui/core/TextField';
 
@@ -143,28 +143,30 @@ export default function TeamList(props) {
 
 const CustomListItem=React.memo(({team,deleteTeam})=>{
     const [open,setOpen]=useState(false)
-    return(
-        <>
-            <ListItem style={{backgroundColor:'#e3e3e3'}}>
-                <ListItemText primary={`${team.name}`} />
-                <ListItemSecondaryAction>
-                    <IconButton edge="end" aria-label="members" onClick={()=>setOpen(!open)}>
-                        <PeopleIcon />
-                    </IconButton>
-                    <IconButton edge="end" aria-label="delete" onClick={()=>deleteTeam(team)}>
-                        <CancelIcon />
-                    </IconButton>
-                </ListItemSecondaryAction>
-            </ListItem>
-            <Collapse in={open} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                    {team.members.map((member)=>(
-                        <ListItem style={{paddingLeft:'0.5em'}} key={member.id}>
-                            <ListItemText primary={member.name}/>
-                        </ListItem>
-                    ))}
-                </List>
-            </Collapse>
-        </>
-    )
+    return <>
+        <ListItem style={{backgroundColor:'#e3e3e3'}}>
+            <ListItemText primary={`${team.name}`} />
+            <ListItemSecondaryAction>
+                <IconButton edge="end" aria-label="members" onClick={()=>setOpen(!open)} size="large">
+                    <PeopleIcon />
+                </IconButton>
+                <IconButton
+                    edge="end"
+                    aria-label="delete"
+                    onClick={()=>deleteTeam(team)}
+                    size="large">
+                    <CancelIcon />
+                </IconButton>
+            </ListItemSecondaryAction>
+        </ListItem>
+        <Collapse in={open} timeout="auto" unmountOnExit>
+            <List component="div" disablePadding>
+                {team.members.map((member)=>(
+                    <ListItem style={{paddingLeft:'0.5em'}} key={member.id}>
+                        <ListItemText primary={member.name}/>
+                    </ListItem>
+                ))}
+            </List>
+        </Collapse>
+    </>;
 })

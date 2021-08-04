@@ -30,7 +30,6 @@ class UserController extends Controller
 
         for ($i=0; $i < count($users); $i++) { 
             $as_member=$users[$i]['as_member'];
-            $users[$i]['project_members_id']=$as_member['id'];
             for ($j=0; $j < count($as_member); $j++) { 
                 if($as_member[$j]['project']) $users[$i]['projects'][]=$as_member[$j]['project'];
             }

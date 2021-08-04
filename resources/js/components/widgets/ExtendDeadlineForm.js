@@ -4,7 +4,7 @@ import moment from 'moment';
 import React, { useContext,useState } from 'react';
 import UserContext from '../../context/UserContext';
 import SendIcon from '@material-ui/icons/Send';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/styles/withStyles';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
@@ -27,9 +27,13 @@ const styles = (theme) => ({
 const DialogTitle = withStyles(styles)((props) => {
     const { children, classes, onClose, ...other } = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
+        <MuiDialogTitle className={classes.root} {...other}>
             <Typography variant="h6">{children}</Typography>
-            <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+            <IconButton
+                aria-label="close"
+                className={classes.closeButton}
+                onClick={onClose}
+                size="large">
                 <CloseIcon />
             </IconButton>
         </MuiDialogTitle>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext,useCallback } from 'react';
 import {useLocation} from 'react-router-dom';
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
@@ -193,7 +193,10 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
         if (isEdit) {
             return (
                 <React.Fragment>
-                    <IconButton aria-label="Delete" onClick={() => setDeleteConfirmOpen(true)}>
+                    <IconButton
+                        aria-label="Delete"
+                        onClick={() => setDeleteConfirmOpen(true)}
+                        size="large">
                         <CancelRoundedIcon fontSize="small" />
                     </IconButton>
                     <DeleteConfirmDialog
@@ -201,7 +204,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                         handleClose={() => setDeleteConfirmOpen(false)}
                         handleConfirm={() => {handleRemoveSubtask(subtask);setDeleteConfirmOpen(false)}}></DeleteConfirmDialog>
                 </React.Fragment>
-            )
+            );
         }
     }
 

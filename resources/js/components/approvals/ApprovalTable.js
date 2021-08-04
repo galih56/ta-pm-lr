@@ -4,7 +4,7 @@ import UserContext from '../../context/UserContext';
 import moment from 'moment';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Table from '@material-ui/core/Table';
@@ -52,7 +52,7 @@ const headCells = [
 
 const useStyles = makeStyles((theme) => ({
     root: { width: '100%', paddingLeft: '1em', paddingTop: '1em' },
-    paper: { width: '100%', marginBottom: theme.spacing(2), },
+    paper: { width: '100%'},
     sortSpan: visuallyHidden,
 }));
 
@@ -151,7 +151,7 @@ export default function EnhancedTable() {
                 <Paper>
                     <div className={classes.root}>
                         <TableContainer>
-                            <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} padding="default" >
+                            <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} padding="normal" >
                                 <EnhancedTableHead classes={classes} order={order} orderBy={orderBy}
                                     onRequestSort={handleRequestSort}
                                     rowCount={rows.length}

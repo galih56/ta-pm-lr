@@ -135,14 +135,14 @@ const ProjectInfo = (props) => {
                             }} />
                     </Grid>
                     <Grid item container xl={8} md={8} sm={8} xs={8} style={{ padding: '1em' }}
-                        justify="flex-start"
+                        justifyContent="flex-start"
                         alignItems="baseline"
                     >
                         <Button onClick={() => { setIsEditing(false) }} style={{ marginRight: '1.5em' }}>Cancel</Button>
                         <Button variant="contained" color="primary" onClick={saveChanges} style={{ marginRight: '3em' }}> Save </Button>
                     </Grid>
                     <Grid item container xl={4} md={4} sm={4} xs={4} style={{ padding: '1em' }}
-                        justify="flex-end"
+                        justifyContent="flex-end"
                         alignItems="baseline"
                     >
                         <Button variant="contained" color="secondary" onClick={() => setDeleteConfirmOpen(true)} > Delete </Button>
@@ -153,7 +153,7 @@ const ProjectInfo = (props) => {
                         detailProject={detailProject}
                         />
                 </React.Fragment>
-            )
+            );
         } else {
             return (
                 <React.Fragment>

@@ -9,7 +9,6 @@ import Box from '@material-ui/core/Box';
 import ModalDetailTask from '../tasks/modalDetailTask/ModalDetailTask';
 import BreadCrumbs from './BreadCrumbs';
 import LinearProgress from '@material-ui/core/LinearProgress';
-import { makeStyles } from '@material-ui/core/styles';
 import UserContext from '../../context/UserContext';
 import AddIcon from '@material-ui/icons/Add';
 import { useSnackbar } from 'notistack';
@@ -37,11 +36,6 @@ function TabPanel(props) {
         </Box>
     );
 }
-
-const useStyles = makeStyles((theme) => (
-    { root: { flexGrow: 1, backgroundColor: theme.palette.background.paper },
-    tabPanel:{  padding: '0.5em', minHeight:'500px !important' } 
-}));
 
 const getProjectFromState = (projects, projects_id) => {
     var data = null;
@@ -102,7 +96,6 @@ const clickedMeetingInitialState={
 };
 
 const DetailProject = (props) => {
-    const classes = useStyles();
     const { enqueueSnackbar } = useSnackbar();
     let global = useContext(UserContext);
     let history = useHistory();
@@ -193,175 +186,173 @@ const DetailProject = (props) => {
 
     return (
         <Router>
-            <div className={classes.root}>
-                <Paper>
-                    <Tabs
-                        value={tabState}
-                        onChange={handleChange} >
-                        <Tab component={Link} label="Timeline" to={`timeline`} />
-                        <Tab component={Link} label="Gantt" to={`gantt`} />
-                        <Tab component={Link} label="Board" to={`board`} />
-                        <Tab component={Link} label="Meeting" to={`meeting`} />
-                        <Tab component={Link} label="Files" to={`files`} />
-                        <Tab component={Link} label="Others" to={`others`} />
-                    </Tabs>
-                </Paper>
-                <Suspense fallback={<LinearProgress />}>
-                    <Switch>
-                        <Route
-                            path={"/projects/:id/timeline"}
-                            render={() => {
-                                return (
-                                    <TabPanel
-                                        value={tabState}
-                                        index={0}
-                                        className={classes.tabPanel}>
-                                        <Grid container >   
-                                            <BreadCrumbs projectName={detailProject.title} tabName="Timeline" style={{marginTop:'1em'}}/>
-                                            <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                                                {(global.state.occupation?.name.toLowerCase()=='manager' ||global.state.occupation?.name.toLowerCase()=='project manager' )?(
-                                                    <Button
-                                                        variant="contained"
-                                                        color="primary"
-                                                        onClick={()=>handleModalCreateList(true)}
-                                                        style={{ marginBottom: '1em' }}
-                                                        startIcon={<AddIcon />}> Add new list </Button>
-                                                ):<></>}
-                                                
-                                            </Grid>
-                                            <Timeline 
-                                                detailProject={{
-                                                    id:detailProject.id,
-                                                    start:detailProject.start,end:detailProject.end,
-                                                    actual_start:detailProject.actual_start,
-                                                    actual_end:detailProject.actual_end,
-                                                    members:detailProject.members
-                                                }}
-                                                data={detailProject.columns} 
-                                                handleDetailTaskOpen={handleDetailTaskOpen}
-                                            />
+            <Paper>
+                <Tabs
+                    value={tabState}
+                    onChange={handleChange} >
+                    <Tab component={Link} label="Timeline" to={`timeline`} />
+                    <Tab component={Link} label="Gantt" to={`gantt`} />
+                    <Tab component={Link} label="Board" to={`board`} />
+                    <Tab component={Link} label="Meeting" to={`meeting`} />
+                    <Tab component={Link} label="Files" to={`files`} />
+                    <Tab component={Link} label="Others" to={`others`} />
+                </Tabs>
+            </Paper>
+            <Suspense fallback={<LinearProgress />}>
+                <Switch>
+                    <Route
+                        path={"/projects/:id/timeline"}
+                        render={() => {
+                            return (
+                                <TabPanel
+                                    value={tabState}
+                                    index={0}
+                                    style={{  padding: '0.5em', minHeight:'500px !important' } }>
+                                    <Grid container >   
+                                        <BreadCrumbs projectName={detailProject.title} tabName="Timeline" style={{marginTop:'1em'}}/>
+                                        <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
+                                            {(global.state.occupation?.name.toLowerCase()=='manager' ||global.state.occupation?.name.toLowerCase()=='project manager' )?(
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
+                                                    onClick={()=>handleModalCreateList(true)}
+                                                    style={{ marginBottom: '1em' }}
+                                                    startIcon={<AddIcon />}> Add new list </Button>
+                                            ):<></>}
+                                            
                                         </Grid>
-                                    </TabPanel>
-                                )
-                            }} />
-                        <Route
-                            path={`/projects/:id/gantt`}
-                            render={() => {
-                                return (
-                                    <TabPanel
-                                        value={tabState}
-                                        index={1}
-                                        className={classes.tabPanel}>
-                                        <Grid container >   
-                                            <BreadCrumbs projectName={detailProject.title} tabName="Gantt"/>
-                                            <Grid item xl={12} md={12} sm={12} xs={12} >
-                                                <GanttChart detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen} />
-                                            </Grid>
+                                        <Timeline 
+                                            detailProject={{
+                                                id:detailProject.id,
+                                                start:detailProject.start,end:detailProject.end,
+                                                actual_start:detailProject.actual_start,
+                                                actual_end:detailProject.actual_end,
+                                                members:detailProject.members
+                                            }}
+                                            data={detailProject.columns} 
+                                            handleDetailTaskOpen={handleDetailTaskOpen}
+                                        />
+                                    </Grid>
+                                </TabPanel>
+                            )
+                        }} />
+                    <Route
+                        path={`/projects/:id/gantt`}
+                        render={() => {
+                            return (
+                                <TabPanel
+                                    value={tabState}
+                                    index={1}
+                                    style={{  padding: '0.5em', minHeight:'500px !important' } }>
+                                    <Grid container >   
+                                        <BreadCrumbs projectName={detailProject.title} tabName="Gantt"/>
+                                        <Grid item xl={12} md={12} sm={12} xs={12} >
+                                            <GanttChart detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen} />
                                         </Grid>
-                                    </TabPanel>
-                                )
-                            }} />
-                        <Route
-                            path={`/projects/:id/board`}
-                            render={() => {
-                                return (
-                                    <TabPanel
-                                        value={tabState}
-                                        index={2}
-                                        className={classes.tabPanel}
-                                    >
-                                        <Grid container>
-                                            <BreadCrumbs projectName={detailProject.title} tabName="Board"/>
-                                            <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                                                <Board detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen}/>
-                                            </Grid>
+                                    </Grid>
+                                </TabPanel>
+                            )
+                        }} />
+                    <Route
+                        path={`/projects/:id/board`}
+                        render={() => {
+                            return (
+                                <TabPanel
+                                    value={tabState}
+                                    index={2}
+                                    className={{  padding: '0.5em', minHeight:'500px !important' } }
+                                >
+                                    <Grid container>
+                                        <BreadCrumbs projectName={detailProject.title} tabName="Board"/>
+                                        <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
+                                            <Board detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen}/>
                                         </Grid>
-                                    </TabPanel>
-                                )
-                            }} />
-                        <Route
-                            path={"/projects/:id/meeting"}
-                            render={() => {
-                                return (
-                                    <TabPanel
-                                        value={tabState}
-                                        index={3}
-                                        className={classes.tabPanel}>
-                                        <Grid container >   
-                                            <BreadCrumbs projectName={detailProject.title} tabName="Meeting" style={{marginTop:'1em'}}/>
-                                            <Grid item xl={12} md={12} sm={12} xs={12} >
-                                                <Button  variant="contained" color="primary" onClick={()=>handleModalCreateMeeting(true)}>Add new meeting</Button>
-                                                <Calendar detailProject={detailProject} handleDetailMeetingOpen={handleDetailMeetingOpen} />
-                                            </Grid>
+                                    </Grid>
+                                </TabPanel>
+                            )
+                        }} />
+                    <Route
+                        path={"/projects/:id/meeting"}
+                        render={() => {
+                            return (
+                                <TabPanel
+                                    value={tabState}
+                                    index={3}
+                                    style={{  padding: '0.5em', minHeight:'500px !important' } }>
+                                    <Grid container >   
+                                        <BreadCrumbs projectName={detailProject.title} tabName="Meeting" style={{marginTop:'1em'}}/>
+                                        <Grid item xl={12} md={12} sm={12} xs={12} >
+                                            <Button  variant="contained" color="primary" onClick={()=>handleModalCreateMeeting(true)}>Add new meeting</Button>
+                                            <Calendar detailProject={detailProject} handleDetailMeetingOpen={handleDetailMeetingOpen} />
                                         </Grid>
-                                    </TabPanel>
-                                )
-                            }} />
-                        <Route
-                            path={"/projects/:id/files"}
-                            render={() => {
-                                return (
-                                    <TabPanel
-                                        value={tabState}
-                                        index={4}
-                                        className={classes.tabPanel}>
-                                        <Grid container >   
-                                            <BreadCrumbs projectName={detailProject.title} tabName="Files" style={{marginTop:'1em'}}/>
-                                            <Grid item xl={12} md={12} sm={12} xs={12} >
-                                                <Files projects_id={detailProject.id} handleDetailTaskOpen={handleDetailTaskOpen} />
-                                            </Grid>
+                                    </Grid>
+                                </TabPanel>
+                            )
+                        }} />
+                    <Route
+                        path={"/projects/:id/files"}
+                        render={() => {
+                            return (
+                                <TabPanel
+                                    value={tabState}
+                                    index={4}
+                                    style={{  padding: '0.5em', minHeight:'500px !important' } }>
+                                    <Grid container >   
+                                        <BreadCrumbs projectName={detailProject.title} tabName="Files" style={{marginTop:'1em'}}/>
+                                        <Grid item xl={12} md={12} sm={12} xs={12} >
+                                            <Files projects_id={detailProject.id} handleDetailTaskOpen={handleDetailTaskOpen} />
                                         </Grid>
-                                    </TabPanel>
-                                )
-                            }} />
-                        <Route
-                            path={"/projects/:id/others"}
-                            render={() => {
-                                return (
-                                    <TabPanel
-                                        value={tabState}
-                                        index={5}
-                                        className={classes.tabPanel}>
-                                        <BreadCrumbs projectName={detailProject.title} tabName="Others" style={{marginTop:'1em'}}/>
-                                        <Others detailProject={detailProject}   handleDetailTaskOpen={handleDetailTaskOpen}/>
-                                    </TabPanel>
-                                )
-                            }} />
-                    </Switch>
-                    <ModalCreateList
-                        projects_id={params.id}
-                        open={showModalCreateList}
-                        handleClose={()=>handleModalCreateList(false)} />
-                    <ModalCreateMeeting
+                                    </Grid>
+                                </TabPanel>
+                            )
+                        }} />
+                    <Route
+                        path={"/projects/:id/others"}
+                        render={() => {
+                            return (
+                                <TabPanel
+                                    value={tabState}
+                                    index={5}
+                                    style={{  padding: '0.5em', minHeight:'500px !important' } }>
+                                    <BreadCrumbs projectName={detailProject.title} tabName="Others" style={{marginTop:'1em'}}/>
+                                    <Others detailProject={detailProject}   handleDetailTaskOpen={handleDetailTaskOpen}/>
+                                </TabPanel>
+                            )
+                        }} />
+                </Switch>
+                <ModalCreateList
+                    projects_id={params.id}
+                    open={showModalCreateList}
+                    handleClose={()=>handleModalCreateList(false)} />
+                <ModalCreateMeeting
+                    detailProject={{
+                        id:detailProject.id,
+                        members:detailProject.members,
+                        start:detailProject.start,
+                        end:detailProject.end
+                    }}
+                    projects_id={params.id}
+                    open={showModalCreateMeeting}
+                    handleClose={()=>handleModalCreateMeeting(false)} />
+                        
+                {(clickedTask.id && detailTaskOpen == true)?(
+                    <ModalDetailTask
+                        open={detailTaskOpen}
+                        closeModalDetailTask={() => {
+                            handleDetailTaskOpen({task :clickedTaskInitialState,open:false})
+                        }}
+                        projects_id={detailProject.id}
                         detailProject={{
                             id:detailProject.id,
+                            start:detailProject.start,end:detailProject.end,
                             members:detailProject.members,
-                            start:detailProject.start,
-                            end:detailProject.end
                         }}
-                        projects_id={params.id}
-                        open={showModalCreateMeeting}
-                        handleClose={()=>handleModalCreateMeeting(false)} />
-                            
-                    {(clickedTask.id && detailTaskOpen == true)?(
-                        <ModalDetailTask
-                            open={detailTaskOpen}
-                            closeModalDetailTask={() => {
-                                handleDetailTaskOpen({task :clickedTaskInitialState,open:false})
-                            }}
-                            projects_id={detailProject.id}
-                            detailProject={{
-                                id:detailProject.id,
-                                start:detailProject.start,end:detailProject.end,
-                                members:detailProject.members,
-                            }}
-                            initialState={clickedTask} 
-                            onTaskUpdate={clickedTask.onTaskUpdate}
-                            onTaskDelete={clickedTask.onTaskDelete}
-                            />
-                    ):<></>}
-                </Suspense>
-            </div>
+                        initialState={clickedTask} 
+                        onTaskUpdate={clickedTask.onTaskUpdate}
+                        onTaskDelete={clickedTask.onTaskDelete}
+                        />
+                ):<></>}
+            </Suspense>
         </Router>
     );
         

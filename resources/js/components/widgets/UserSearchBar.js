@@ -48,12 +48,13 @@ export default function UserSearchbar(props) {
     useEffect(() => {
         var filteredOptions = users.filter((option) => { 
             if (!checkExistingMember(option.id, exceptedUsers)
-                || !('administrator sistem'.includes(option.name.toLowerCase()) 
-                || !'ceo'.includes(option.name.toLowerCase()))) return option;
+                || !'administrator sistem'.includes(option.name.toLowerCase()) 
+                || !'system administrator'.includes(option.name.toLowerCase()) 
+                || !'ceo'.includes(option.name.toLowerCase())) return option;
         });
         filteredOptions = filteredOptions.map((option) => {
             const firstLetter = option.name[0].toUpperCase();
-            return { firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter, ...option }
+            return { firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter, ...option };
         });
         setOptions(filteredOptions);
     }, [users]);

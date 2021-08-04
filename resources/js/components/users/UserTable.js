@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import {
     Table, TableBody, TableCell, TableContainer, TablePagination,
     TableHead, TableRow, TableSortLabel, Paper, Chip
@@ -166,7 +166,7 @@ export default function EnhancedTable() {
     return (
         <div className={classes.root}>
             <TableContainer>
-                <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} padding="default" >
+                <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} padding="normal" >
                     <EnhancedTableHead classes={classes} order={order} orderBy={orderBy}
                         onRequestSort={handleRequestSort}
                         rowCount={rows.length}

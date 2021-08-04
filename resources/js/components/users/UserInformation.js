@@ -5,7 +5,7 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import UserTable from './UserTable';
 import OccupationInformation from './../occupations/OccupationInformation';
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import styleConfig from '../../layout/Theme';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';

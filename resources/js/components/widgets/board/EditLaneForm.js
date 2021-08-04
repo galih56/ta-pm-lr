@@ -9,12 +9,13 @@ import TextField from '@material-ui/core/TextField';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Box from '@material-ui/core/Box';
-import { withStyles, makeStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/styles/withStyles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import UserContext from '../../../context/UserContext';
 import CloseIcon from '@material-ui/icons/Close';
-import Alert from '@material-ui/lab/Alert';
+import Alert from '@material-ui/core/Alert';
 import { useSnackbar } from 'notistack';
 import axios from 'axios';
 import FormCreateNewTask from './../../tasks/FormCreateNewTask';
@@ -40,9 +41,13 @@ function TabPanel(props) {
 const DialogTitle = withStyles(styles)((props) => {
     const { children, classes, onClose, ...other } = props;
     return (
-        <MuiDialogTitle disableTypography className={classes.root} {...other}>
+        <MuiDialogTitle className={classes.root} {...other}>
             <Typography variant="h6">{children}</Typography>
-            <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+            <IconButton
+                aria-label="close"
+                className={classes.closeButton}
+                onClick={onClose}
+                size="large">
                 <CloseIcon />
             </IconButton>
         </MuiDialogTitle>

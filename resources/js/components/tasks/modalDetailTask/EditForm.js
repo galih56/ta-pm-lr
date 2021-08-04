@@ -2,7 +2,7 @@
 import 'fontsource-roboto';
 import React,{useState,useEffect,useContext} from 'react';
 import moment from 'moment';
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
@@ -12,7 +12,6 @@ import Subtasks from './Subtask/Subtasks';
 import MemberList from './MemberList';
 import ExtendDeadlineForm from './../../widgets/ExtendDeadlineForm';
 import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
-import DateRangeDelimiter from '@material-ui/lab/DateRangeDelimiter';
 import SelectTag from '../../widgets/SelectTag';
 import StatusChip from './../../widgets/StatusChip';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
@@ -97,7 +96,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                                 renderInput={(startProps, endProps) => (
                                     <React.Fragment>
                                         <TextField {...startProps} variant="standard"/>
-                                        <DateRangeDelimiter style={{margin:'1em'}}> to </DateRangeDelimiter>
+                                        <span style={{margin:'1em'}}> to </span>
                                         <TextField {...endProps}  variant="standard"/>
                                     </React.Fragment>
                                 )}

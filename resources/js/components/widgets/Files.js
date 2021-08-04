@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext,memo } from 'react';
 import UserContext from './../../context/UserContext';
 import { Link, useLocation } from 'react-router-dom';
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import Card from '@material-ui/core/Card';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -107,7 +107,7 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
                     <Avatar aria-label="recipe" className={classes.avatar}> {file.user.name.charAt(0).toUpperCase()} </Avatar>
                 }
                 action={
-                    <IconButton onClick={handleClick}>
+                    <IconButton onClick={handleClick} size="large">
                         <MoreVertIcon />
                     </IconButton>
                 }
@@ -154,7 +154,7 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
                 </Typography>
             </CardContent>
         </Card>
-    )
+    );
 }
 const Files = (props) => {
     let global = useContext(UserContext);

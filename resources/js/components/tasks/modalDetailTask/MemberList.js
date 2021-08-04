@@ -12,7 +12,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import UserContext from '../../../context/UserContext';
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import UserSearchBar from '../../widgets/UserSearchBar';
 import axios from 'axios';
 import {useSnackbar} from 'notistack'
@@ -113,40 +113,42 @@ const MemberList=({isEdit,data,setData,detailProject})=>{
 }
 
 const CustomListItem=({classes,isEdit,member})=>{
-    return(
-        <>
-            <ListItem alignItems="flex-start" >
-                <ListItemAvatar>
-                    {member.profile_picture_path?
-                    <Avatar alt={"Photo profile " + member.name} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
-                    <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name.charAt(0).toUpperCase()}</Avatar>}
-                </ListItemAvatar>
-                <ListItemText
-                    primary={member.name}
-                    secondary={
-                        <>
-                            <Typography
-                                component="span"
-                                variant="body2"
-                                className={classes.inline}
-                                color="textPrimary"
-                            >
-                                {member.role.name}
-                            </Typography>
-                            <br/>
-                            {member.email}
-                        </>
-                    }
+    return <>
+        <ListItem alignItems="flex-start" >
+            <ListItemAvatar>
+                {member.profile_picture_path?
+                <Avatar alt={"Photo profile " + member.name} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
+                <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name.charAt(0).toUpperCase()}</Avatar>}
+            </ListItemAvatar>
+            <ListItemText
+                primary={member.name}
+                secondary={
+                    <>
+                        <Typography
+                            component="span"
+                            variant="body2"
+                            className={classes.inline}
+                            color="textPrimary"
+                        >
+                            {member.role.name}
+                        </Typography>
+                        <br/>
+                        {member.email}
+                    </>
+                }
 
-                />
-                {isEdit?(<ListItemSecondaryAction>
-                    <IconButton edge="end" aria-label="Remove" onClick={()=>removeMember(member)}>
-                        <CancelIcon />
-                    </IconButton>
-                </ListItemSecondaryAction>):<></>}
-            </ListItem>
-            <Divider variant="inset" component="li" />
-        </>
-    )
+            />
+            {isEdit?(<ListItemSecondaryAction>
+                <IconButton
+                    edge="end"
+                    aria-label="Remove"
+                    onClick={()=>removeMember(member)}
+                    size="large">
+                    <CancelIcon />
+                </IconButton>
+            </ListItemSecondaryAction>):<></>}
+        </ListItem>
+        <Divider variant="inset" component="li" />
+    </>;
 }
 export default MemberList;

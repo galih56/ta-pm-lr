@@ -57,62 +57,62 @@ const RepositoryList=({projects_id})=>{
         getRepositories();
     },[projects_id]);
     
-    return (
-        <>
-            <Grid container>
-                <Grid item xl={12} md={12} sm={12} xs={12} style={{paddingLeft:'1em',paddingBottom:'0.5em'}}>
-                    <Typography variant="h6" align="left" > <Icon icon={githubIcon} /> Github Repositories</Typography>
-                    <GithubLoginButton/>
-                    <br/>
-                    <Typography variant="body2">Login with github account to get repository informations</Typography>
-                   
-                </Grid>
-                <Grid item xl={12} md={12} sm={12} xs={12} style={{paddingLeft:'1em'}} > 
-                    <NewRepositoryForm projects_id={projects_id}
-                        onSave={(newRepo)=>{
-                            setRepos([...repos,newRepo]);
-                        }}/>
-                </Grid>
-                <Grid item xl={12} md={12} sm={12} xs={12} >
-                    <List component="nav" aria-label="repository list">
-                        {
-                            repos.map((repo)=>{
-                                return(
-                                    <ListItem key={repo.id} style={ {cursor: 'pointer' }}
-                                            onClick={()=>{
-                                                setClickedRepo({
-                                                    owner_name:repo.owner_name,
-                                                    repository_name:repo.repository_name,
-                                                    open:true
-                                                })
-                                            }} >
-                                        <ListItemText primary={`${repo.owner_name}/${repo.repository_name}`} />
-                                        <ListItemSecondaryAction>
-                                        <IconButton 
-                                            onClick={()=>{
-                                            deleteRepository(repo.id) 
-                                            }} 
-                                            edge="start" aria-label={`remove repository ${repo.owner_name}/${repo.repository_name}`}>
-                                            <DeleteIcon />
-                                        </IconButton>
-                                        </ListItemSecondaryAction>
-                                    </ListItem>
-                                )
-                            })
-                        }
-                    
-                    </List>
-                    <ModalRepositoryInformation initialState={clickedRepo} handleClose={()=>{
-                        setClickedRepo({
-                            owner_name:'',
-                            repository_name:'',
-                            open:false
-                        })
-                    }}/>
-                </Grid>
+    return <>
+        <Grid container>
+            <Grid item xl={12} md={12} sm={12} xs={12} style={{paddingLeft:'1em',paddingBottom:'0.5em'}}>
+                <Typography variant="h6" align="left" > <Icon icon={githubIcon} /> Github Repositories</Typography>
+                <GithubLoginButton/>
+                <br/>
+                <Typography variant="body2">Login with github account to get repository informations</Typography>
+               
             </Grid>
-        </>
-    )
+            <Grid item xl={12} md={12} sm={12} xs={12} style={{paddingLeft:'1em'}} > 
+                <NewRepositoryForm projects_id={projects_id}
+                    onSave={(newRepo)=>{
+                        setRepos([...repos,newRepo]);
+                    }}/>
+            </Grid>
+            <Grid item xl={12} md={12} sm={12} xs={12} >
+                <List component="nav" aria-label="repository list">
+                    {
+                        repos.map((repo)=>{
+                            return (
+                                <ListItem key={repo.id} style={ {cursor: 'pointer' }}
+                                        onClick={()=>{
+                                            setClickedRepo({
+                                                owner_name:repo.owner_name,
+                                                repository_name:repo.repository_name,
+                                                open:true
+                                            })
+                                        }} >
+                                    <ListItemText primary={`${repo.owner_name}/${repo.repository_name}`} />
+                                    <ListItemSecondaryAction>
+                                    <IconButton
+                                        onClick={()=>{
+                                        deleteRepository(repo.id) 
+                                        }}
+                                        edge="start"
+                                        aria-label={`remove repository ${repo.owner_name}/${repo.repository_name}`}
+                                        size="large">
+                                        <DeleteIcon />
+                                    </IconButton>
+                                    </ListItemSecondaryAction>
+                                </ListItem>
+                            );
+                        })
+                    }
+                
+                </List>
+                <ModalRepositoryInformation initialState={clickedRepo} handleClose={()=>{
+                    setClickedRepo({
+                        owner_name:'',
+                        repository_name:'',
+                        open:false
+                    })
+                }}/>
+            </Grid>
+        </Grid>
+    </>;
 }
 
 export default RepositoryList;

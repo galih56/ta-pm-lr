@@ -13,7 +13,7 @@ import Popover from '@material-ui/core/Popover';
 import Typography from '@material-ui/core/Typography';
 import Checkbox from '@material-ui/core/Checkbox';
 
-const TaskRow=({data,classes,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
+const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
     const [openCollapsible, setOpenCollapsible] = useState(false);
     const [progress, setProgress] = useState(0);
 
@@ -97,8 +97,7 @@ const TaskRow=({data,classes,handleCompleteTask,handleDetailTaskOpen,headCells, 
                         }):<></>}
                         
                         {(openPopOver)?(<Popover
-                            className={classes.popover}
-                            classes={{ paper: classes.paper }}
+                            style={{ pointerEvents: 'none', zIndex:'1200' }}
                             open={openPopOver}
                             anchorEl={anchorEl}
                             anchorOrigin={{
@@ -141,7 +140,6 @@ const TaskRow=({data,classes,handleCompleteTask,handleDetailTaskOpen,headCells, 
                         <TableSubtask 
                             tasks={data.cards} 
                             headCells={headCells}
-                            classes={classes} 
                             handleCompleteTask={handleCompleteTask}
                             handleDetailTaskOpen={handleDetailTaskOpen}
                             onTaskUpdate={onTaskUpdate}

@@ -2,7 +2,7 @@ import 'fontsource-roboto';
 import React, { useEffect, useContext, useState } from 'react';
 import { useHistory } from "react-router-dom";
 import UserContext from '../../../context/UserContext';
-import { withStyles } from '@material-ui/core/styles';
+import withStyles from '@material-ui/styles/withStyles';
 import { Dialog, IconButton, Typography } from '@material-ui/core/';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
@@ -25,7 +25,11 @@ const DialogTitle = withStyles(styles)((props) => {
         <MuiDialogTitle className={classes.root} {...other}>
             <Typography  variant="h6">{children}</Typography>
             {onClose ? (
-                <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+                <IconButton
+                    aria-label="close"
+                    className={classes.closeButton}
+                    onClick={onClose}
+                    size="large">
                     <CloseIcon />
                 </IconButton>
             ) : null}

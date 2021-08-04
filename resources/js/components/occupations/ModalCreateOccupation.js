@@ -2,8 +2,9 @@ import React, { useState, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import 'fontsource-roboto';
 import axios from 'axios';
-import Alert from '@material-ui/lab/Alert';
-import { withStyles, makeStyles } from '@material-ui/core/styles';
+import Alert from '@material-ui/core/Alert';
+import withStyles from '@material-ui/styles/withStyles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import { Grid, Button, Dialog, IconButton, TextField } from '@material-ui/core/';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
@@ -24,7 +25,11 @@ const DialogTitle = withStyles(styles)((props) => {
         <MuiDialogTitle className={classes.root} {...other}>
             <span style={{ marginRight: '2em' }}>{children}</span>
             {onClose ? (
-                <IconButton aria-label="close" className={classes.closeButton} onClick={onClose}>
+                <IconButton
+                    aria-label="close"
+                    className={classes.closeButton}
+                    onClick={onClose}
+                    size="large">
                     <CloseIcon />
                 </IconButton>
             ) : null

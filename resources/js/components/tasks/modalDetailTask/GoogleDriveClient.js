@@ -81,11 +81,11 @@ const GoogleDriveButton = (props) => {
                 viewId={'DOCS'}
                 createPicker={createPicker}
         >
-                <IconButton>
+                <IconButton size="large">
                     <Icon icon={googleDrive} />
                 </IconButton>
             </GooglePicker>
         </React.Fragment>
-    )
+    );
 }
 export default memo(GoogleDriveButton);

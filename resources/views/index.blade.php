@@ -22,9 +22,5 @@
 
 
     <!-- React JS -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
-  <script async defer src="https://apis.google.com/js/api.js"
-    onload="this.onload=function(){};handleClientLoad()"
-    onreadystatechange="if (this.readyState === 'complete') this.onload()">
-  </script>
+    <script  src="{{ asset('js/app.js') }}" defer></script>
 </html>
