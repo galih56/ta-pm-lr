@@ -6,12 +6,10 @@ import axios from 'axios'
 import { useSnackbar } from 'notistack';
 import UserContext from './../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
-import { Dialog, IconButton, Typography, } from '@material-ui/core/';
+import { Dialog, IconButton, Typography } from '@material-ui/core/';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
 import CloseIcon from '@material-ui/icons/Close';
-import UserSearchBar from './../widgets/UserSearchBar';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },
@@ -38,15 +36,13 @@ const DialogContent = withStyles((theme) => ({
     root: { padding: theme.spacing(2) },
 }))(MuiDialogContent);
 
-const DialogActions = withStyles((theme) => ({
-    root: { margin: 0, padding: theme.spacing(1) },
-}))(MuiDialogActions);
-
-const FormCreateTeam=({open,handleClose,onCreate})=>{
+const FormCreateClient=({open,handleClose,onCreate})=>{
     const global=useContext(UserContext);
     const [name,setName]=useState('');
     const [description,setDescription]=useState('');
-    const [users,setUsers]=useState([]);
+    const [city,setCity]=useState('');
+    const [phoneNumber,setPhoneNumber]=useState('');
+    const [institution,setInstitution]=useState('');
     const { enqueueSnackbar } = useSnackbar();
     const snackbar = (message, variant) =>  enqueueSnackbar(message, { variant });
 
@@ -54,17 +50,19 @@ const FormCreateTeam=({open,handleClose,onCreate})=>{
         const body = {
             name: name,
             description: description,
-            users: users
+            city: city,
+            institution: institution,
+            phone_number:phoneNumber,
         }
         
-        const url = process.env.MIX_BACK_END_BASE_URL + 'teams';
+        const url = process.env.MIX_BACK_END_BASE_URL + 'clients';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.post(url, body)
             .then((result) => {
                 onCreate(result.data);
                 handleClose();
-                snackbar(`A new team successfully created`, 'success');
+                snackbar(`A new client successfully created`, 'success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
                 global.dispatch({ type: 'handle-fetch-error', payload: payload });
@@ -72,32 +70,53 @@ const FormCreateTeam=({open,handleClose,onCreate})=>{
     }
 
     return(
-        <Dialog aria-labelledby="Create a subtask" open={open}>
+        <Dialog aria-labelledby="Create a client" open={open}>
             <DialogTitle onClose={
                 () => {
                     handleClose();
-                }} > Create a new team </DialogTitle>
+                }} > Create a new client </DialogTitle>
             <DialogContent dividers>
                 <form onSubmit={(e)=>{
                         e.preventDefault();
                         formCreateOnSubmit();
                     }}>
-                    <Grid  container spacing={2}>
+                    <Grid container spacing={2}>
                         <Grid lg={12} md={12} sm={12} xs={12} item>
                             <TextField variant="standard"
                                 label="Name : "
                                 onChange={(e) => setName(e.target.value)}
-                                style={{ width: '100%' }}
+                                placeholder={"PIC's name"}
+                                fullWidth
+                                required
+                            />
+                        </Grid>     
+                        <Grid lg={12} md={12} sm={12} xs={12} item>
+                            <TextField variant="standard"
+                                label="City : "
+                                onChange={(e) => setCity(e.target.value)}
+                                fullWidth
                                 required
                             />
                         </Grid>
                         <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <UserSearchBar 
-                                exceptedUsers={[]} 
-                                onChange={(values)=>{
-                                    setUsers(values.map((value)=>value.id));
-                                }}
-                                userOnly={true}
+                            <TextField 
+                                variant="standard"
+                                label="Institution : "
+                                onChange={(e) => setInstitution(e.target.value)}
+                                fullWidth
+                                required
+                            />
+                        </Grid>
+                        <Grid lg={12} md={12} sm={12} xs={12} item>
+                            <TextField
+                                variant="standard"
+                                required
+                                fullWidth
+                                label="Phone Number"
+                                name="phoneNumber"
+                                value={phoneNumber}
+                                type="tel"
+                                onChange={(e) => setPhoneNumber(e.target.value) }
                             />
                         </Grid>
                         <Grid lg={12} md={12} sm={12} xs={12} item>
@@ -105,8 +124,7 @@ const FormCreateTeam=({open,handleClose,onCreate})=>{
                                 label="Description : "
                                 onChange={(e) => setDescription(e.target.value) }
                                 multiline
-                                style={{ width: '100%' }}
-                                required
+                                fullWidth
                                 rows={4}
                             />
                         </Grid>
@@ -120,4 +138,4 @@ const FormCreateTeam=({open,handleClose,onCreate})=>{
     )
 }
 
-export default FormCreateTeam;
+export default FormCreateClient;

@@ -1,4 +1,4 @@
-import {useState,useContext,useEffect} from 'react';
+import React,{useState,useContext,useEffect} from 'react';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import Divider from '@material-ui/core/Divider';
@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
     },
     photoProfileBg: { backgroundColor: '#616161' }
 }));
-const MemberList=({isEdit,data,setData,detailProject})=>{
+const MemberList=({isEdit,data,setData,detailProject,exceptedUsers})=>{
     const global = useContext(UserContext);
     const [members,setMembers]=useState([]);
     const [newMembers,setNewMembers]=useState([])
@@ -83,10 +83,11 @@ const MemberList=({isEdit,data,setData,detailProject})=>{
                  <Grid item lg={12} md={12} sm={12} xs={12}>
                     <UserSearchBar 
                         detailProject={detailProject}
-                        exceptedUsers={[...data.members,data.creator]} 
+                        exceptedUsers={[...exceptedUsers,data.creator]} 
                         onChange={(users)=>{
                             setNewMembers(users);
                         }}
+                        userOnly={true}
                     />
                  </Grid>
                  <Grid item lg={12} md={12} sm={12} xs={12}>
@@ -113,12 +114,12 @@ const MemberList=({isEdit,data,setData,detailProject})=>{
 }
 
 const CustomListItem=({classes,isEdit,member})=>{
-    return <>
+    return <React.Fragment key={member.id}>
         <ListItem alignItems="flex-start" >
             <ListItemAvatar>
                 {member.profile_picture_path?
                 <Avatar alt={"Photo profile " + member.name} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
-                <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name.charAt(0).toUpperCase()}</Avatar>}
+                <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name?.charAt(0).toUpperCase()}</Avatar>}
             </ListItemAvatar>
             <ListItemText
                 primary={member.name}
@@ -149,6 +150,6 @@ const CustomListItem=({classes,isEdit,member})=>{
             </ListItemSecondaryAction>):<></>}
         </ListItem>
         <Divider variant="inset" component="li" />
-    </>;
+    </React.Fragment>;
 }
 export default MemberList;

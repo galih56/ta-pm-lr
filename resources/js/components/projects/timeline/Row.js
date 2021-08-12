@@ -18,8 +18,8 @@ function Row(props) {
     const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     const handleCompleteTask = (task,event) => {
-        const body = { ...task, complete: event.target.checked };
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${task.id}`;
+        const body = { complete: event.target.checked };
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${task.id}/complete`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.patch(url, body)
@@ -53,7 +53,7 @@ function Row(props) {
                 <TableCell> </TableCell>
             </TableRow>
             <TableRow >
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={headCells.length+1}>
+                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={headCells.length+2}>
                     <Collapse in={openCollapsible} timeout="auto">
                         <TableTasks
                             headCells={headCells}

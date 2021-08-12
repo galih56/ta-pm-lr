@@ -109,7 +109,7 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
         <Card className={classes.root}>
             <CardHeader
                 avatar={
-                    <Avatar aria-label="recipe" className={classes.avatar}> {file.user.name.charAt(0).toUpperCase()} </Avatar>
+                    <Avatar aria-label="recipe" className={classes.avatar}> {file.user.name?.charAt(0).toUpperCase()} </Avatar>
                 }
                 action={
                     <IconButton onClick={handleClick} size="large">

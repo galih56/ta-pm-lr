@@ -176,7 +176,7 @@ const ModalConfirm = (props) => {
         <Dialog open={open} onClose={handleClose} >
             <DialogTitle>Are you sure?</DialogTitle>
             <DialogContent>
-                <DialogContentText>This action will be saved permanently</DialogContentText>
+                <DialogContentText>The data will be saved permanently</DialogContentText>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose}>Cancel</Button>

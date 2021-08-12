@@ -11,10 +11,11 @@ import SelectTag from './../widgets/SelectTag';
 import UserSearchBar from '../widgets/UserSearchBar';
 import moment from 'moment';
 import UserContext from './../../context/UserContext';
+import { parseISO } from 'date-fns'; 
 
 const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSubtask,minDate,maxDate})=>{
     const global=useContext(UserContext);
-    const handleTagChanges = (tags) => setNewTask({ ...newTask, tags: tags });
+    // const handleTagChanges = (tags) => setNewTask({ ...newTask, tags: tags });
     const [dateRange, setDateRange] = useState([null, null]);
     const [exceptedUsers,setExceptedUsers]=useState([]);
 
@@ -78,20 +79,16 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSu
                         startText="Start : "
                         endText="End : "
                         value={dateRange}
-                        minDate={minDate}
-                        maxDate={maxDate}
+                        minDate={minDate?parseISO(minDate):null}
+                        maxDate={maxDate?parseISO(maxDate):null}
                         onChange={(newValue) => {
-                            var start= newValue[0];
-                            var end= newValue[1];
-                            setDateRange(newValue);
-                            if(start){
-                                start=moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss'); 
-                                setNewTask({ ...newTask,start : start })
+                            if(newValue[0]){
+                                setNewTask({...newTask, start:moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss')})
                             }
-                            if(end){ 
-                                end=moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss');
-                                setNewTask({ ...newTask,end : end })
+                            if(newValue[1]){ 
+                                setNewTask({...newTask, end:moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss')})
                             }
+                            setDateRange([newValue[0],newValue[1]]);
                         }}
                         renderInput={(startProps, endProps) => (
                         <>
@@ -112,9 +109,9 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSu
                     }}
                 />
             </Grid>
-            <Grid item lg={12} md={12} sm={12} xs={12}>
+            {/* <Grid item lg={12} md={12} sm={12} xs={12}>
                 <SelectTag onChange={handleTagChanges} isEdit={true} defaultValue={[]}/>
-            </Grid>
+            </Grid> */}
             <Grid item lg={12} md={12} sm={12} xs={12}>
                 <Typography>Description : </Typography>
                 <TextField 

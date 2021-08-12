@@ -20,12 +20,14 @@ const storeDetailTask = (payload) => {
 
 const storeDetailSubtask = (payload) => {
     var user = JSON.parse(localStorage.getItem('user'));
+    console.log(payload);
     const newProjects = user.projects.map((project) => {
         project.columns = project.columns.map(column => {
             column.cards = column.cards.map((card) => {
                 if (card.id == payload.parent_task_id) {
                     card.cards=card.cards.map((subtask)=>{
-                        if(subtask.id=payload.id){ return payload}
+                        console.log(subtask.title,subtask.id,payload.id,subtask.id==payload.id);
+                        if(subtask.id==payload.id){ return payload}
                         return subtask;
                     })
                 }

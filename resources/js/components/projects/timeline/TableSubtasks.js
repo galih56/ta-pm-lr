@@ -8,6 +8,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Popover from '@material-ui/core/Popover';
 import Typography from '@material-ui/core/Typography';
+import EnhancedTableHead from './EnhancedTableHead';
 
 const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
     const [subtasks,setSubtasks]=useState([])
@@ -30,22 +31,14 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
     return(
         <>
             <Table size={'small'}>
+                <EnhancedTableHead headCells={headCells} tablesubtasks={true} extraHeadCells={<TableCell></TableCell>}/>
                 <TableBody>
                     {subtasks?subtasks.map((subtask)=>{
                         return(
                             <TableRow hover key={subtask.id} >
                                 <TableCell padding="checkbox"></TableCell>
                                 <TableCell padding="checkbox"></TableCell>
-                                <TableCell padding="checkbox"></TableCell>
-                                <TableCell padding="checkbox"></TableCell>
-                                <TableCell padding="checkbox"></TableCell>
                                 <TableCell padding="checkbox"> 
-                                    <Checkbox
-                                        onChange={(event)=>{
-                                            handleCompleteTask(subtask,event)
-                                        }}
-                                        checked={subtask.complete}
-                                    />
                                 </TableCell>
                                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}
                                     onClick={()=>{
@@ -58,7 +51,15 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
                                         })
                                     }}
                                 > 
-                                    {subtask.title}
+                                
+                                <Checkbox
+                                        onChange={(event)=>{
+                                            handleCompleteTask(subtask,event)
+                                        }}
+                                        checked={subtask.complete}
+                                    />
+                                
+                                {subtask.title}
                                 </TableCell>
                                 <TableCell>
                                     {subtask.members?subtask.members.map((member,i)=>{

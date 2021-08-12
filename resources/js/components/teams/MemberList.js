@@ -49,7 +49,7 @@ const MemberList = ({teamId,data}) => {
                             {(member.profilePicturePath && member.name)?(
                             <ListItemAvatar>
                                     <Avatar alt={"Photo profile " + member.name} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
-                                    <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name.charAt(0).toUpperCase()}</Avatar>
+                                    <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name?.charAt(0).toUpperCase()}</Avatar>
                             </ListItemAvatar>):<></>}
                             <ListItemText
                                 primary={member.name} 

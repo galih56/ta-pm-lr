@@ -7,9 +7,10 @@ import UserContext from '../../context/UserContext';
 
 
 export default function UserSearchbar(props) {
-    const { detailProject, exceptedUsers,onChange,inputLabel } = props;
+    const { detailProject, exceptedUsers,exceptedClients,onChange,inputLabel,clientOnly,userOnly } = props;
     const handleValueChanges = onChange;
     const [users, setUsers] = useState([]);
+    const [clients, setClients] = useState([]);
     const [options, setOptions] = useState([]);
     let global = useContext(UserContext);
 
@@ -25,11 +26,37 @@ export default function UserSearchbar(props) {
                 global.dispatch({ type: 'handle-fetch-error', payload: payload });
             });
     }
+    
+    const getClients = () => {
+        const url = process.env.MIX_BACK_END_BASE_URL + 'clients';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.get(url)
+            .then((result) => {
+                setClients(result.data);
+            }).catch((error) => {
+                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
+                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            });
+    }
 
     useEffect(() => {
-        if(detailProject?.members) setUsers(detailProject.members);
-        else getUsers();
-    }, [detailProject?.members]);
+        if(detailProject?.members?.length) setUsers(detailProject.members);
+        if(detailProject?.clients?.length) setClients(detailProject.clients);
+        if(!detailProject?.members?.length && !detailProject?.members?.length) {
+            if(!clientOnly && !userOnly){
+                getClients()
+                getUsers();
+            }
+            if(clientOnly && !userOnly){
+                getClients()
+            }
+            
+            if(!clientOnly && userOnly){
+                getUsers()
+            }
+        }
+    }, [detailProject?.members,detailProject?.clients]);
 
     function checkExistingMember(id, arr=[]) {
         var exists = false;
@@ -46,18 +73,34 @@ export default function UserSearchbar(props) {
     }
 
     useEffect(() => {
-        var filteredOptions = users.filter((option) => { 
-            if (!checkExistingMember(option.id, exceptedUsers)
-                || !'administrator sistem'.includes(option.name.toLowerCase()) 
-                || !'system administrator'.includes(option.name.toLowerCase()) 
-                || !'ceo'.includes(option.name.toLowerCase())) return option;
+        var filteredUsers = users.filter((option) => { 
+            if (!(checkExistingMember(option.id, exceptedUsers)
+                || option.occupation?.name?.toLowerCase().includes('administrator') 
+                || option.occupation?.name?.toLowerCase().includes('ceo'))){ 
+                    return option;
+                }
         });
-        filteredOptions = filteredOptions.map((option) => {
+
+        filteredUsers = filteredUsers.map((option) => {
             const firstLetter = option.name[0].toUpperCase();
+            option.is_user=true;
+            option.is_client=false;
             return { firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter, ...option };
         });
-        setOptions(filteredOptions);
-    }, [users]);
+
+        var filteredClients = clients.filter((option) => { 
+            if (!checkExistingMember(option.id, exceptedClients)){ 
+                    return option;
+                }
+        });
+        filteredClients = filteredClients.map((option) => {
+            var firstLetter = option.name[0].toUpperCase();
+            option.is_user=false;
+            option.is_client=true;
+            return { firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter, ...option };
+        });
+        setOptions([...filteredUsers,...filteredClients]);
+    }, [users,clients]);
 
     return (
         <Autocomplete
@@ -67,15 +110,20 @@ export default function UserSearchbar(props) {
             groupBy={(option) => option.firstLetter}
             getOptionLabel={(option) => {
                 var label='';
-                if('role' in option &&  typeof option.role=='object') label= `${option.name} (${option.role.name})`;
-                if('occupation' in option && typeof option.occupation=='object') label= `${option.name} (${option.occupation.name})`; 
-                if(!('role' in option) && !('occupation' in option)){ 
-                    label= `${option.name} (${option.email})`;
+                if(option.is_user){
+                    if(option?.role) label= `${option.name} (${option.role.name})`;
+                    if(option?.occupation) label= `${option.name} (${option.occupation.name})`; 
+                    if(!option.role && !option.occupation){ 
+                        label= `${option.name} (${option.email})`;
+                    }
+                }
+                if(option.is_client){
+                    label= `${option.name} (${option.institution})`;
                 }
                 return label;
                }
             }
-            style={{ width: '100%' }}
+            fullWidth
             renderInput={(params) => <TextField {...params} label={inputLabel?inputLabel:"Search Users"} variant="standard"/>}
             onChange={(event, options) => handleValueChanges(options)}
             renderTags={(values, getTagProps) => values.map((option, index) =>{

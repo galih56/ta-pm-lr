@@ -18,6 +18,7 @@ import MobileDatePicker from '@material-ui/lab/MobileDatePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import { useSnackbar } from 'notistack';
+import { parseISO } from 'date-fns'; 
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },
@@ -44,17 +45,18 @@ const DialogContent = withStyles((theme) => ({
     root: { padding: theme.spacing(2) },
 }))(MuiDialogContent);
 
-export default function ModalExtendDeadline({open,handleClose,data,setData,detailProject}) {
+export default function ModalExtendDeadline({open,handleClose,task,detailProject}) {
     const global=useContext(UserContext);
     const { enqueueSnackbar } = useSnackbar();
     const snackbar = (message, variant) => enqueueSnackbar(message, { variant });
     const [newDeadline,setNewDeadline]=useState(null);
     const [description,setDescription]=useState("");
-    var minDate='';
-    if(data){
-        minDate=data.is_subtask?data.parent_task.start:data.start;
+    var minDate=null;
+    if(task){
+        minDate=task.is_subtask?task.parent_task.start:task.start;
+        minDate=parseISO(moment(minDate).format('YYYY-MM-DD HH:mm:ss'));
     }else{
-        minDate=detailProject.start;
+        minDate=parseISO(moment(detailProject.start).format('YYYY-MM-DD HH:mm:ss'));
     }
     
     const handleSubmit=(e)=>{
@@ -62,11 +64,11 @@ export default function ModalExtendDeadline({open,handleClose,data,setData,detai
         var body=null;
         var url=null; 
 
-        if(data){    
+        if(task){    
             body={ projects_id:detailProject.id, users_id:global.state.id, 
-                old_deadline:data.end,  new_deadline:newDeadline, description:description
+                old_deadline:task.end,  new_deadline:newDeadline, description:description
             }
-            url = `${process.env.MIX_BACK_END_BASE_URL}tasks/${data.id}/extend-deadline`;
+            url = `${process.env.MIX_BACK_END_BASE_URL}tasks/${task.id}/extend-deadline`;
         }else{
             body={ projects_id:detailProject.id, users_id:global.state.id, 
                 old_deadline:detailProject.end,  new_deadline:newDeadline, description:description
@@ -95,14 +97,14 @@ export default function ModalExtendDeadline({open,handleClose,data,setData,detai
                 <form onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
                         <Grid item lg={12} md={12} sm={12} xs={12}>
-                            <Typography>Current deadline {data?moment(data.end).format('DD MMMM YYYY'):moment(detailProject.end).format('DD MMMM YYYY')}</Typography>
+                            <Typography>Current deadline {task?moment(task.end).format('DD MMMM YYYY'):moment(detailProject.end).format('DD MMMM YYYY')}</Typography>
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
                                 <MobileDatePicker 
                                     label="New deadline"
-                                    value={newDeadline}
-                                    minDate={minDate}
-                                    maxDate={(data)?detailProject.end:null}
-                                    onChange={(value)=> setNewDeadline(moment(value).format('YYYY-MM-DD HH:mm:ss'))}
+                                    value={null}
+                                    minDate={parseISO(minDate)}
+                                    maxDate={(task)?parseISO(detailProject.end):null}
+                                    onChange={(value)=> setNewDeadline(parseISO(moment(value).format('YYYY-MM-DD HH:mm:ss')))}
                                     renderInput={(params)=><TextField {...params} variant="standard" style={{width:'100%'}}/>}
                                 />
                             </LocalizationProvider>

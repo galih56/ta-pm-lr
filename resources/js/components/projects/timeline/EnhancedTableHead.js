@@ -3,12 +3,13 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 
-function EnhancedTableHead({headCells}) {
+function EnhancedTableHead({headCells,extraHeadCells,tablesubtasks}) {
     return (
-        <TableHead>
+        <TableHead style={{display:((tablesubtasks)?'none':'table-header-group')}}>
             <TableRow>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
+                {extraHeadCells?extraHeadCells:<></>}
+                <TableCell  padding="checkbox"></TableCell>
+                <TableCell  padding="checkbox"></TableCell>
                 {headCells.map((headCell) => (
                     <TableCell
                         key={headCell.id}

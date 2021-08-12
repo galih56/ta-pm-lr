@@ -18,6 +18,7 @@ import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import ExtendDeadlineForm from './../widgets/ExtendDeadlineForm';
+import { parseISO } from 'date-fns'; 
 
 const ProjectInfo = (props) => {
     const global = useContext(UserContext);
@@ -103,17 +104,13 @@ const ProjectInfo = (props) => {
                                 endText="Actual End : "
                                 value={dateRange}
                                 onChange={(newValue) => {
-                                    var start= newValue[0];
-                                    var end= newValue[1];
-                                    setDateRange(newValue)
-                                    if(start){
-                                        start=moment(newValue[0]).format('YYYY-MM-DD'); 
-                                        setDetailProject({ ...detailProject, actualStart : start })
+                                    if(newValue[0]){
+                                        setStart(moment(start).format('YYYY-MM-DD HH:mm:ss'))
                                     }
-                                    if(end){ 
-                                        end=moment(newValue[1]).format('YYYY-MM-DD');
-                                        setDetailProject({ ...detailProject, actualEnd : end })
+                                    if(newValue[1]){ 
+                                        setEnd(moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss'))
                                     }
+                                    setDateRange([newValue[0],newValue[1]]);
                                 }}
                                 renderInput={(startProps, endProps) => (
                                 <>

@@ -3,8 +3,9 @@ import React, { useEffect, useContext, useState, useCallback } from 'react';
 import { useHistory } from "react-router-dom";
 import UserContext from '../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
-import makeStyles from '@material-ui/styles/makeStyles';
-import { Dialog, IconButton, Typography, Checkbox, FormControlLabel } from '@material-ui/core/';
+import Dialog from '@material-ui/core/Dialog';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
@@ -47,15 +48,15 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 export default function ModalDetailUser(props) {
-    const open = props.open;
-    const closeModal = props.closeModal;
+    const {open,closeModal,asProfile}=props;
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const global = useContext(UserContext);
     const history = useHistory();
     const [data, setData] = useState({
-        id: null, name: '', email: '', phone_number: '', last_login: '', occupation: null, profilePicture: ''
+        id: null, name: '', email: '', phone_number: '', last_login: '', occupation: null, occupations_id:'',profilePicture: ''
     });
     const [isEditing, setIsEditing] = useState(false);
+    const [deletable, setDeletable] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
 
     const { enqueueSnackbar } = useSnackbar();
@@ -63,14 +64,22 @@ export default function ModalDetailUser(props) {
 
     useEffect(() => {
         setData(props.initialState);
+        
+        if(!global.state.occupation?.name?.toLowerCase().includes('administrator')
+            ||global.state.id==props.initialState.id){
+            setDeletable(false);
+        }else{
+            setDeletable(true);
+        }
     }, [props.initialState.id]);
 
     const saveChanges = () => {
         let body = {
             id: data.id, name: data.name, email: data.email, 
             phone_number: data.phone_number,
-            occupation: data.occupation, profilePicture: ''
+            occupations_id: data.occupations_id, profile_picture_path: ''
         };
+        console.log(body)
         if (window.navigator.onLine) {
             const url = process.env.MIX_BACK_END_BASE_URL + `users/${props.initialState.id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
@@ -112,11 +121,12 @@ export default function ModalDetailUser(props) {
             maxWidth={'lg'} fullwidth={"true"}>
             <DialogTitle onClose={closeModal}>User information</DialogTitle>
             <DialogContent dividers>
-                <EditForm isEdit={isEditing} data={data} setData={setData}> </EditForm>
+                <EditForm isEdit={isEditing} data={data} setData={setData} asProfile={asProfile}/>
             </DialogContent>
             <DialogActions>
                 <DialogActionButtons
                     isEdit={isEditing}
+                    deletable={deletable}
                     saveChanges={saveChanges}
                     setEditMode={handleEditingMode}
                     deleteUser={deleteUser}

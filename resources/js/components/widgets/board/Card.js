@@ -45,7 +45,7 @@ const CustomCard = (props) => {
                                 </span>
                                ):<></>}
                             </div>
-                            {tags && (
+                            {/* {tags && (
                                 <div
                                     style={{
                                         borderTop: '1px solid #eee', paddingTop: 6, display: 'flex',
@@ -56,7 +56,7 @@ const CustomCard = (props) => {
                                         <Tag key={tag.id} {...tag} />
                                     ))}
                                 </div>
-                            )}
+                            )} */}
                         </div>
                 </Link>
             </MovableCardWrapper>

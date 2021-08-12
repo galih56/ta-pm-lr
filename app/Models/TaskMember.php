@@ -17,6 +17,7 @@ class TaskMember extends Model
         'project_members_id',
         'tasks_id',
         'users_id',
+        'clients_id'
     ];
 
     public function member(){
@@ -25,6 +26,10 @@ class TaskMember extends Model
 
     public function user(){
         return $this->belongsTo(User::class,'users_id');
+    }
+
+    public function client(){
+        return $this->belongsTo(Client::class,'clients_id');
     }
 
     public function task(){

@@ -2,9 +2,9 @@
 import 'fontsource-roboto';
 import React, { memo } from 'react';
 import ModalDeleteConfirm from './ModalDeleteConfirm';
-import { Button } from '@material-ui/core/';
+import Button from '@material-ui/core/Button';
 
-const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteUser, deleteConfirmOpen, setDeleteConfirmOpen, closeModal }) => {
+const dialogActionButtons = ({ isEdit, deletable,saveChanges, setEditMode, deleteUser, deleteConfirmOpen, setDeleteConfirmOpen, closeModal }) => {
     if (isEdit) {
         return (
             <React.Fragment>
@@ -12,14 +12,20 @@ const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteUser, del
                 <Button onClick={
                     () => { saveChanges(); setEditMode(false); }
                 } variant="contained" color="primary"> Save</Button>
-                <Button onClick={
-                    () => { setDeleteConfirmOpen(true); }
-                } variant="contained" color="secondary">Delete</Button>
-                <ModalDeleteConfirm
-                    open={deleteConfirmOpen}
-                    handleDelete={() => { deleteUser(); setDeleteConfirmOpen(false); closeModal(); }}
-                    handleClose={() => { setDeleteConfirmOpen(false); closeModal(); }}>
-                </ModalDeleteConfirm>
+                {(deletable)?(
+                    <React.Fragment>
+                        <Button onClick={
+                            () => { setDeleteConfirmOpen(true); }
+                        } variant="contained" color="secondary">Delete</Button>
+                        <ModalDeleteConfirm
+                            open={deleteConfirmOpen}
+                            handleDelete={() => { deleteUser(); setDeleteConfirmOpen(false); closeModal(); }}
+                            handleClose={() => { setDeleteConfirmOpen(false); closeModal(); }}>
+                        </ModalDeleteConfirm>
+                    </React.Fragment>
+
+                ):<></>}
+               
             </React.Fragment>
         )
     } else {

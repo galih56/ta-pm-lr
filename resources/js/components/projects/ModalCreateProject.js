@@ -23,6 +23,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { useSnackbar } from 'notistack';
 import moment from 'moment';
 import UserSearchBar from './../widgets/UserSearchBar'
+import { parseISO } from 'date-fns'; 
 
 const styles = (theme) => {
     return({
@@ -161,17 +162,13 @@ export default function ModalCreateProject(props) {
                                         endText="End : "
                                         value={dateRange}
                                         onChange={(newValue) => {
-                                            var start= newValue[0];
-                                            var end= newValue[1];
-                                            setDateRange(newValue)
-                                            if(start){
-                                                start=moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss'); 
-                                                setStart(moment(start).format('YYYY-MM-DD HH:mm:ss'))
+                                            if(newValue[0]){
+                                                setStart(moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss'))
                                             }
-                                            if(end){ 
-                                                end=moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss');
-                                                setEnd(moment(end).format('YYYY-MM-DD HH:mm:ss'))
+                                            if(newValue[1]){ 
+                                                setEnd(moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss'))
                                             }
+                                            setDateRange([newValue[0],newValue[1]]);
                                         }}
                                         renderInput={(startProps, endProps) => (
                                         <>
@@ -184,10 +181,14 @@ export default function ModalCreateProject(props) {
                                 </LocalizationProvider> 
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <UserSearchBar required={true} inputLabel={"Project Owner"}onChange={(values)=>setProjectOwner(values.map((value)=>value.id))}/>
+                                <UserSearchBar required={true} userOnly={true}
+                                                inputLabel={"Project Owner"}
+                                                onChange={(values)=>setProjectOwner(values.map((value)=>value.id))}/>
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <UserSearchBar required={true} inputLabel={"Project Manager"}onChange={(values)=>setProjectManager(values.map((value)=>value.id))}/>
+                                <UserSearchBar required={true} userOnly={true}
+                                                inputLabel={"Project Manager"}
+                                                onChange={(values)=>setProjectManager(values.map((value)=>value.id))}/>
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
                                 <TextField variant="standard"

@@ -1,5 +1,4 @@
 import React,{useState,useEffect,useContext} from 'react';
-import {Link} from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import List from '@material-ui/core/List';
@@ -143,7 +142,7 @@ export default function TeamList(props) {
 
 const CustomListItem=React.memo(({team,deleteTeam})=>{
     const [open,setOpen]=useState(false)
-    return <>
+    return <React.Fragment>
         <ListItem style={{backgroundColor:'#e3e3e3'}}>
             <ListItemText primary={`${team.name}`} />
             <ListItemSecondaryAction>
@@ -168,5 +167,5 @@ const CustomListItem=React.memo(({team,deleteTeam})=>{
                 ))}
             </List>
         </Collapse>
-    </>;
+    </React.Fragment>;
 })

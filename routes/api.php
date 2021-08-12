@@ -7,10 +7,13 @@ Route::post('/register','App\Http\Controllers\UserController@register');
 Route::post('/login','App\Http\Controllers\UserController@login');
 Route::post('/logout','App\Http\Controllers\UserController@logout');
 
+Route::resource('clients', 'App\Http\Controllers\ClientController');
 Route::resource('lists', 'App\Http\Controllers\ListController');
 Route::post('lists/{id}/extend-deadline', 'App\Http\Controllers\ListController@extendDeadline');
 Route::resource('tasks', 'App\Http\Controllers\TaskController');
 Route::post('tasks/{id}/extend-deadline', 'App\Http\Controllers\TaskController@extendDeadline');
+Route::patch('tasks/{id}/start', 'App\Http\Controllers\TaskController@startTask');
+Route::patch('tasks/{id}/complete', 'App\Http\Controllers\TaskController@updateComplete');
 Route::resource('task-members', 'App\Http\Controllers\TaskMemberController');
 Route::resource('task-attachments', 'App\Http\Controllers\TaskAttachmentController');
 Route::resource('files', 'App\Http\Controllers\FileController');

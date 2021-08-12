@@ -13,6 +13,7 @@ use App\Models\Task;
 use App\Models\Meeting;
 use App\Models\TaskAttachment;
 use App\Models\Approval;
+use App\Models\Client;
 use App\Models\GithubRepository;
 use DB;
 
@@ -65,11 +66,11 @@ class ProjectController extends Controller
         if($project_managers){
             
             for ($i=0; $i < count($project_managers); $i++) { 
-                $po=$project_managers[$i];
+                $pm=$project_managers[$i];
                 $new_pm=new ProjectMember();
                 $new_pm->projects_id=$project->id;
-                if(gettype($po)=='object') $new_pm->users_id=$po->id;
-                if(gettype($po)=='string' || gettype($po)=='integer' ) $new_pm->users_id=$po;
+                if(gettype($pm)=='object') $new_pm->users_id=$pm->id;
+                if(gettype($pm)=='string' || gettype($pm)=='integer' ) $new_pm->users_id=$pm;
                 $new_pm->roles_id=2;
                 $new_pm->save();
                 
@@ -104,10 +105,24 @@ class ProjectController extends Controller
             $projects_id=$member['projects_id'];
             $member=$user;
             $member['role']=$role;
+            $member['is_user']=true;
+            $member['is_client']=false;
             $member['project_members_id']=$project_members_id;
             $project_members[]=$member;
         }
         $project['members']=$project_members;
+
+        $clients=Client::from('clients as c')
+                        ->join('clients_has_projects as cp','c.id','=','cp.clients_id')
+                        ->where('cp.projects_id','=',$id)->get()->toArray();
+
+        $project_clients=[];
+        for ($i=0; $i < count($clients); $i++) { 
+            $client=$clients[$i];
+            $client['is_user']=false;
+            $client['is_client']=true;
+        }
+        $project['clients']=$project_clients;
         return response()->json($project);
     }
 
@@ -200,7 +215,40 @@ class ProjectController extends Controller
         return response()->json($members);
     }
 
-    public function addTeams(Request $request,$id){
+    public function addClients(Request $request,$id){
+        $project=Project::findOrFail($id);
+
+        $new_clients=$request->clients;
+        $inserted_clients=[];
+        for ($i=0; $i < $new_clients; $i++) { 
+            $new_client=$new_clients[$i];
+            $client_has_project=new  ClientsHasProjects();
+            $client_has_project->projects_id=$id;
+            if(gettype($new_client)=='object') $client_has_project->clients_id=$new_client->id;
+            else $client_has_project->clients_id=$new_client;
+            $client_has_project->save();
+
+            $inserted_clients[]=$client_has_project->id;
+        }
+
+        $clients=Client::from('clients AS t')
+                        ->join('clients_has_projects AS tp','t.id','=','tp.clients_id')
+                        ->whereIn('tp.projects_id','=',$inserted_clients)
+                        ->get();
+        
+        return response()->json($clients);
+    }
+
+    public function removeClients(Request $request,$id,$clients_id){
+        $project=Project::findOrFail($id);
+        $clients_has_projects=ClientsHasProjects::where('projects_id','=',$id)->where('clients_id','=',$clients_id)->get();
+        for ($i=0; $i < count($clients_has_projects); $i++) { 
+            $clients_has_projects[$i]->delete();
+        }
+        return response()->json("",200);
+    }
+
+    public function addTeam(Request $request,$id){
         $project=Project::findOrFail($id);
 
         $new_teams=$request->teams;

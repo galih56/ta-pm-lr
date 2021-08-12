@@ -113,7 +113,6 @@ const DetailProject = (props) => {
 
     const getUserMemberRole=(project)=>{
         var user=null;
-        console.log('getUserMemberRole : ',project.members);
         const members=project.members;
         if(typeof members !== 'undefined'){
             for (let i = 0; i < members.length; i++) {
@@ -125,8 +124,6 @@ const DetailProject = (props) => {
             }
             if(user){
                 var role={...user.role,project: { id: project.id,  title: project.title }}
-                console.log('getUserMemberRole : ',role);
-
                 global.dispatch({type:'store-project-member-role',payload:role})
             }
         }
@@ -214,7 +211,9 @@ const DetailProject = (props) => {
                                     <Grid container >   
                                         <BreadCrumbs projectName={detailProject.title} tabName="Timeline" style={{marginTop:'1em'}}/>
                                         <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                                            {(global.state.occupation?.name.toLowerCase()=='manager' ||global.state.occupation?.name.toLowerCase()=='project manager' )?(
+                                            {(global.state.occupation?.name?.toLowerCase().includes('manager')
+                                                ||global.state.occupation?.name.toLowerCase().includes('administrator')
+                                                ||global.state.current_project_member_role?.name.toLowerCase().includes('project manager') )?(
                                                 <Button
                                                     variant="contained"
                                                     color="primary"
@@ -250,7 +249,7 @@ const DetailProject = (props) => {
                                     <Grid container >   
                                         <BreadCrumbs projectName={detailProject.title} tabName="Gantt"/>
                                         <Grid item xl={12} md={12} sm={12} xs={12} >
-                                            <GanttChart detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen} />
+                                            <GanttChart projects_id={detailProject.id}lists={detailProject.columns} handleDetailTaskOpen={handleDetailTaskOpen} />
                                         </Grid>
                                     </Grid>
                                 </TabPanel>
@@ -326,7 +325,9 @@ const DetailProject = (props) => {
                 <ModalCreateList
                     projects_id={params.id}
                     open={showModalCreateList}
-                    handleClose={()=>handleModalCreateList(false)} />
+                    closeModal={()=>handleModalCreateList(false)} 
+                    detailProject={{id:detailProject.id,start:detailProject.start,end:detailProject.end}}
+                    />
                 <ModalCreateMeeting
                     detailProject={{
                         id:detailProject.id,

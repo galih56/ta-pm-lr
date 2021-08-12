@@ -18,6 +18,7 @@ import TimePicker from '@material-ui/lab/TimePicker';
 import DatePicker from '@material-ui/lab/DatePicker';
 import moment from 'moment';
 import Alert from '@material-ui/core/Alert';
+import { parseISO } from 'date-fns'; 
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },
@@ -134,9 +135,9 @@ export default function ModalCreateMeeting(props) {
                                             style={{width:'100%'}}
                                             label="Date"
                                             variant="standard"
-                                            minDate={detailProject.start}
-                                            maxDate={detailProject.end}
-                                            value={date}
+                                            minDate={parseISO(detailProject.start)}
+                                            maxDate={parseISO(detailProject.end)}
+                                            value={parseISO(date)}
                                             required
                                             renderInput={(props)=><TextField {...props} variant="standard"/>}
                                         />
@@ -172,7 +173,10 @@ export default function ModalCreateMeeting(props) {
                                 </LocalizationProvider>
                             </Grid> 
                             <Grid item  lg={12} md={12} sm={12} xs={12} >
-                                <UserSearchbar detailProject={detailProject} onChange={(value) => setMembers(value)} exceptedUsers={[]}/>
+                                <UserSearchbar detailProject={detailProject} 
+                                                onChange={(value) => setMembers(value)} 
+                                                exceptedUsers={[]} 
+                                                userOnly={true}/>
                             </Grid>
                         </Grid>
                     </DialogContent>

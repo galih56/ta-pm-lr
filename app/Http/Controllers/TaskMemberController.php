@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TaskMember;
+use App\Models\User;
 
 class TaskMemberController extends Controller
 {
@@ -36,6 +37,7 @@ class TaskMemberController extends Controller
         }
 
         for ($i=0; $i < count($inserted_members); $i++) { 
+            return response()->json($inserted_members[$i]);
             $user=User::find('id',$inserted_members[$i]->users_id)->toArray();
             if($user){
                 $user['task_members_id']=$inserted_members[$i]->id;
