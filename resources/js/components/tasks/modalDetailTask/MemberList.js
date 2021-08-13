@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
     },
     photoProfileBg: { backgroundColor: '#616161' }
 }));
-const MemberList=({isEdit,data,setData,detailProject,exceptedUsers})=>{
+const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
     const global = useContext(UserContext);
     const [members,setMembers]=useState([]);
     const [newMembers,setNewMembers]=useState([])
@@ -32,6 +32,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedUsers})=>{
     const classes = useStyles();
     
     useEffect(()=>{
+        console.log('memberlist',data.members);
         setMembers(data.members?data.members:[]);
     },[data.members])
 
@@ -41,9 +42,10 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedUsers})=>{
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.post(url, body)
             .then((result) => {
-                const payload = { projectId: data.projectId, listId: data.listId, data: data };
+                const payload = { tasks_id:data.id, data: data };
                 setData({...data,members:[...data.members,...result.data]});
-                global.dispatch({ type: 'store-detail-task', payload: payload });
+                if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
+                else global.dispatch({ type: 'store-detail-task', payload: payload })
                 handleSnackbar(`Data has been updated`, 'success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
@@ -55,16 +57,16 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedUsers})=>{
         const url = process.env.MIX_BACK_END_BASE_URL + `task-members/${user.task_members_id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.delete(url, {id:user.task_member_id})
+        axios.delete(url, {id:user.task_members_id})
             .then((result) => {
-                const payload = { projectId: data.projectId, listId: data.listId, data: data };
-                setData({...data,complete:result.data.complete})
-                global.dispatch({ type: 'store-detail-task', payload: payload });
                 var newMemberList=members.filter(function(member){
-                    if(member.task_member_id!=user.task_member_id) return member;
+                    if(member.task_members_id!=user.task_members_id) return member;
                 });
                 setMembers(newMemberList);
                 setData({...data,members:newMemberList});
+                const payload = { tasks_id:data.id, data: data };
+                if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
+                else global.dispatch({ type: 'store-detail-task', payload: payload })
                 handleSnackbar(`Data has been updated`, 'success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
@@ -83,7 +85,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedUsers})=>{
                  <Grid item lg={12} md={12} sm={12} xs={12}>
                     <UserSearchBar 
                         detailProject={detailProject}
-                        exceptedUsers={[...exceptedUsers,data.creator]} 
+                        exceptedData={[...exceptedData,data.creator]} 
                         onChange={(users)=>{
                             setNewMembers(users);
                         }}
@@ -92,7 +94,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedUsers})=>{
                  </Grid>
                  <Grid item lg={12} md={12} sm={12} xs={12}>
                     <Button style={{float:'right'}} onClick={()=>{
-                        addMembers( { taskId: data.id, users:newMembers });
+                        addMembers( { tasks_id: data.id, users:newMembers });
                         }} color="primary" >Invite</Button>
                  </Grid>
             </>):(
@@ -104,7 +106,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedUsers})=>{
             <List>
                 {members.map((member)=>{
                     return(
-                        <CustomListItem key={member.id} classes={classes} isEdit={isEdit} member={member}/>
+                        <CustomListItem key={member.id} classes={classes} isEdit={isEdit} member={member} onClick={()=>removeMember(member)}/>
                     )
                 })}
             </List>
@@ -113,7 +115,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedUsers})=>{
     )
 }
 
-const CustomListItem=({classes,isEdit,member})=>{
+const CustomListItem=({classes,isEdit,member,onClick})=>{
     return <React.Fragment key={member.id}>
         <ListItem alignItems="flex-start" >
             <ListItemAvatar>
@@ -122,7 +124,7 @@ const CustomListItem=({classes,isEdit,member})=>{
                 <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name?.charAt(0).toUpperCase()}</Avatar>}
             </ListItemAvatar>
             <ListItemText
-                primary={member.name}
+                primary={member.is_client?`${member.name} (Client)`:member.name}
                 secondary={
                     <>
                         <Typography
@@ -131,10 +133,10 @@ const CustomListItem=({classes,isEdit,member})=>{
                             className={classes.inline}
                             color="textPrimary"
                         >
-                            {member.role.name}
+                            {member.is_user?member.role?.name:member.institution}
                         </Typography>
                         <br/>
-                        {member.email}
+                        {member.email?member.email:member.phone_number}
                     </>
                 }
 
@@ -143,7 +145,7 @@ const CustomListItem=({classes,isEdit,member})=>{
                 <IconButton
                     edge="end"
                     aria-label="Remove"
-                    onClick={()=>removeMember(member)}
+                    onClick={onClick}
                     size="large">
                     <CancelIcon />
                 </IconButton>

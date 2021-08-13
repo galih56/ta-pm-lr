@@ -79,7 +79,7 @@ export default function ModalDetailTask(props) {
         comments: [], attachments: [],creator:null,is_subtask:false
     });
     const [detailProject,setDetailProject]=useState({
-        id:'',title:'',members:[],columns:[]
+        id:'',title:'',members:[],clients:[],columns:[]
     })
     const [isEditing, setIsEditing] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
@@ -110,20 +110,23 @@ export default function ModalDetailTask(props) {
     useEffect(()=>{
         if(props.detailProject?.id)setDetailProject(props.detailProject)
         else {
+            var body={projects_id:detailProject.id,users_id:global.state.id}
+                var url =`${process.env.MIX_BACK_END_BASE_URL}projects/`;
             if(data.list){
-                var body={projects_id:detailProject.id,users_id:global.state.id}
-                const url = process.env.MIX_BACK_END_BASE_URL + 'projects/' + data.list.project;
-                axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+                 url+= data.list.project;
+            }else if(data.is_subtask){
+                url+=data.parent_task.list.project;
+            }
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
                 axios.defaults.headers.post['Content-Type'] = 'application/json';
                 axios.get(url,body)
                     .then((result) => {
                         var newDP=result.data
-                        setDetailProject({id:newDP.id,members:newDP.members})
+                        setDetailProject({id:newDP.id,members:newDP.members,clients:newDP.clients})
                     }).catch((error) => {
                         const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
                         global.dispatch({ type: 'handle-fetch-error', payload: payload });
                     });
-            }
         }
     },[props.detailproject])
 
@@ -157,7 +160,7 @@ export default function ModalDetailTask(props) {
             .then((result) => {
                 var result=result.data;
                 setData(result);
-                if(task.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
                 else global.dispatch({ type: 'store-detail-task', payload: result });
                 handleSnackbar(`Data has been updated`, 'success');
             }).catch((error) => {
@@ -175,7 +178,7 @@ export default function ModalDetailTask(props) {
             .then((result) => {
                 var result=result.data;
                 setData(result);
-                if(task.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
                 else global.dispatch({ type: 'store-detail-task', payload: result });
                 handleSnackbar(`Data has been updated`, 'success');
             }).catch((error) => {

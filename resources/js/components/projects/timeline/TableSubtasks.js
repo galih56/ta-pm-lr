@@ -63,34 +63,38 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
                                 </TableCell>
                                 <TableCell>
                                     {subtask.members?subtask.members.map((member,i)=>{
-                                        return (
-                                                <span key={i}
-                                                onMouseEnter={(event)=>handlePopoverOpen(event,member)}
-                                                onMouseLeave={handlePopoverClose}>
-                                                    {member.role?member.role?.name:member.member?.role.name}
+                                            return (
+                                                <span 
+                                                    key={i}
+                                                    onMouseEnter={(event)=>handlePopoverOpen(event,member)}
+                                                    onMouseLeave={handlePopoverClose}>
+                                                    {member.project_client?.client? 
+                                                        `Client ${`(${member.project_client?.client?.institution})`}`:
+                                                        member.member?.role?.name}
                                                 </span>
-                                            
-                                        )
-                                    }):<></>}
-                                    {(openPopOver)?(<Popover
-                                        style={ {
-                                            pointerEvents: 'none',
-                                            zIndex:'1200'
-                                          }}
-                                        open={openPopOver}
-                                        anchorEl={anchorEl}
-                                        anchorOrigin={{
-                                            vertical: 'bottom',
-                                            horizontal: 'center',
-                                        }}
-                                        transformOrigin={{
-                                            vertical: 'top',
-                                            horizontal: 'center',
-                                        }}
-                                        onClose={handlePopoverClose}
-                                    >
-                                        <Typography>{(memberOnHover?.user?.name)?memberOnHover?.user?.name:memberOnHover?.user?.username}</Typography>
-                                    </Popover>):<></>}
+                                            )
+                                        }):<></>}
+                                        
+                                        {(openPopOver)?(<Popover
+                                            style={{ pointerEvents: 'none', zIndex:'1200',padding:'1em' }}
+                                            open={openPopOver}
+                                            anchorEl={anchorEl}
+                                            anchorOrigin={{
+                                                vertical: 'bottom',
+                                                horizontal: 'center',
+                                            }}
+                                            transformOrigin={{
+                                                vertical: 'top',
+                                                horizontal: 'center',
+                                            }}
+                                            onClose={handlePopoverClose}
+                                        >
+                                            <Typography>
+                                                {(memberOnHover?.project_client?.client)?
+                                                    memberOnHover?.project_client?.client?.name :
+                                                    memberOnHover?.user?.username}
+                                            </Typography>
+                                        </Popover>):<></>}
                                 </TableCell>
                                 <TableCell align="left">
                                     {subtask.start ? moment(subtask.start).format('DD MMMM YYYY') : ''}

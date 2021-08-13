@@ -25,7 +25,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
     const [dateRange, setDateRange] = useState([null, null]);
     const [showExtendDeadlineForm,setShowExtendDeadlineForm]=useState(false);
     const global = useContext(UserContext);
-    const [exceptedUsers,setExceptedUsers]=useState([]);
+    const [exceptedData,setExceptedData]=useState([]);
     const checkLoggedInUserProjectMember=()=>{
         var logged_in_user={
             id:global.state.id,
@@ -40,16 +40,18 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
             if(member.id==logged_in_user.id){ registered=true; }
         }
         
-        var users=[];
         if(!registered){
-            users=[ logged_in_user ];
-            setExceptedUsers(users);
+            setExceptedData([...data.members,logged_in_user]);
         }
+
     }
     useEffect(()=>{    
         getProgress();
+    },[data.cards]);
+
+    useEffect(()=>{
         checkLoggedInUserProjectMember();
-    },[data.cards])
+    },[data.members,data.cards])
 
     if (isEdit) {
         return (
@@ -127,7 +129,9 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                         }} />
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12}>
-                    <MemberList detailProject={detailProject} exceptedUsers={exceptedUsers} data={data} setData={setData} isEdit={isEdit}/>
+                    <MemberList detailProject={detailProject} 
+                        exceptedData={exceptedData} 
+                        data={data} setData={setData} isEdit={isEdit}/>
                 </Grid>
                 
                 <ExtendDeadlineForm 

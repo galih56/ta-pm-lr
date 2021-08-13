@@ -271,6 +271,7 @@ class TaskController extends Controller
         
         $task=Task::with('creator')->with('cards')->with('logs')->with('comments.creator')
                     ->with('list')->with('members.member.role')->with('members.user')
+                    ->with('members.project_client.client')
                     ->with('tags.tag')
                     ->with(['parentTask'=>function($q){
                         return $q->select('id','start','end','old_deadline','actual_start','actual_end','created_at','updated_at');
@@ -350,19 +351,40 @@ class TaskController extends Controller
                             ->where('ta.tasks_id','=',$tasks_id)->with('user')->get()->toArray();
         return $attachments;
     }
-
+    public function getMembers($id){
+        $task=Task::with('members.user')->with('members.member.role')
+                    ->with('members.project_client.client')->findOrFail($id)->toArray();
+        $members=$this->getTaskMembers($task);
+        return response()->json($members);
+    }
     function getTaskMembers($task){
         $members=[];
         $task_members=$task['members'];
         for ($i=0; $i < count($task_members); $i++) { 
             $task_member=$task_members[$i];
-            $user=$task_member['user'];
-            if($task_member['member']) $user['role']=$task_member['member']['role'];
-            else $user['role']=['id'=>'','name'=>''];
-            $user['project_members_id']=$task_member['project_members_id'];
-            $user['tasks_id']=$task_member['tasks_id'];
+            if($task_member['user']){
+                $user=$task_member['user'];
+                if($task_member['member']) $user['role']=$task_member['member']['role'];
+                else $user['role']=['id'=>'','name'=>''];
+                $user['project_members_id']=$task_member['project_members_id'];
+                $user['tasks_id']=$task_member['tasks_id'];
+                $user['task_members_id']=$task_member['id'];
+                $user['is_user']=true;
+                $user['is_client']=false;
+                $members[]=$user;
+            }
+            if($task_member['project_client']){
+                $client=[];
+                $client=$task_member['project_client']['client'];
+                $client['project_clients_id']=$task_member['project_client']['id'];
+                $client['clients_id']=$task_member['project_client']['client']['id'];
+                $client['tasks_id']=$task_member['tasks_id'];
+                $client['task_members_id']=$task_member['id'];
+                $client['is_client']=true;
+                $client['is_user']=false;
+                $members[]=$client;
+            }
 
-            $members[]=$user;
         }
         return $members;
     }

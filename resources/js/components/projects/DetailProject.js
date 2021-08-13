@@ -101,7 +101,11 @@ const DetailProject = (props) => {
     let history = useHistory();
     let location = useLocation();
     const { match: { params } } = props;
-    const [detailProject, setDetailProject] = useState({ id: null, title: null, description: null, columns: [], members: [], createdAt: '', updatedAt: '' });
+    const [detailProject, setDetailProject] = useState({ 
+        id: null, title: null, description: null, 
+        columns: [], members: [], clients:[],
+        createdAt: '', updatedAt: '' 
+    });
     const [showModalCreateList, setShowModalCreateList] = useState(false);
     const [showModalCreateMeeting, setShowModalCreateMeeting] = useState(false);
     const [tabState, setTabState] = useState(getCurrentTabIndex(location, history, params.id));
@@ -249,7 +253,7 @@ const DetailProject = (props) => {
                                     <Grid container >   
                                         <BreadCrumbs projectName={detailProject.title} tabName="Gantt"/>
                                         <Grid item xl={12} md={12} sm={12} xs={12} >
-                                            <GanttChart projects_id={detailProject.id}lists={detailProject.columns} handleDetailTaskOpen={handleDetailTaskOpen} />
+                                            <GanttChart projects_id={detailProject.id} lists={detailProject.columns} handleDetailTaskOpen={handleDetailTaskOpen} />
                                         </Grid>
                                     </Grid>
                                 </TabPanel>
@@ -350,6 +354,7 @@ const DetailProject = (props) => {
                             id:detailProject.id,
                             start:detailProject.start,end:detailProject.end,
                             members:detailProject.members,
+                            clients:detailProject.clients,
                         }}
                         initialState={clickedTask} 
                         onTaskUpdate={clickedTask.onTaskUpdate}

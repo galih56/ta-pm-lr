@@ -11,6 +11,7 @@ Route::resource('clients', 'App\Http\Controllers\ClientController');
 Route::resource('lists', 'App\Http\Controllers\ListController');
 Route::post('lists/{id}/extend-deadline', 'App\Http\Controllers\ListController@extendDeadline');
 Route::resource('tasks', 'App\Http\Controllers\TaskController');
+Route::get('tasks/{id}/members', 'App\Http\Controllers\TaskController@getMembers');
 Route::post('tasks/{id}/extend-deadline', 'App\Http\Controllers\TaskController@extendDeadline');
 Route::patch('tasks/{id}/start', 'App\Http\Controllers\TaskController@startTask');
 Route::patch('tasks/{id}/complete', 'App\Http\Controllers\TaskController@updateComplete');
@@ -41,11 +42,14 @@ Route::group(['prefix'=>'users'],function(){
 
 Route::get('projects-overview','App\Http\Controllers\ProjectController@getoverallProjectReports');
 Route::resource('projects', 'App\Http\Controllers\ProjectController');
-Route::post('projects/{id}/extend-deadline', 'App\Http\Controllers\ProjectController@extendDeadline');
 Route::group(['prefix'=>'projects'],function(){
+    Route::post('/{id}/extend-deadline', 'App\Http\Controllers\ProjectController@extendDeadline');
     Route::get('/{id}/reports','App\Http\Controllers\ProjectController@getReports');
     Route::get('/{id}/tasks','App\Http\Controllers\ProjectController@getTasks');
     Route::get('/{id}/meetings','App\Http\Controllers\ProjectController@getMeetings');
+    Route::get('/{id}/clients','App\Http\Controllers\ProjectController@getClients');
+    Route::post('/{id}/clients','App\Http\Controllers\ProjectController@addClients');
+    Route::delete('/{id}/clients/{clients_id}','App\Http\Controllers\ProjectController@removeClients');
     Route::get('/{id}/teams','App\Http\Controllers\ProjectController@getTeams');
     Route::post('/{id}/teams','App\Http\Controllers\ProjectController@addTeams');
     Route::delete('/{id}/teams/{teams_id}','App\Http\Controllers\ProjectController@removeTeams');

@@ -14,6 +14,7 @@ use App\Models\Meeting;
 use App\Models\TaskAttachment;
 use App\Models\Approval;
 use App\Models\Client;
+use App\Models\ClientsHasProjects;
 use App\Models\GithubRepository;
 use DB;
 
@@ -88,8 +89,14 @@ class ProjectController extends Controller
         $project=Project::with(['columns.cards'=>function($q1){
                             return $q1->orderBy('start','ASC')
                                     ->with(['cards'=>function($q2){
-                                        return $q2->orderBy('start','ASC')->with('members.user.occupation')->with('members.member.role');
-                                    }])->with('members.user')->with('members.member.role');
+                                        return $q2->orderBy('start','ASC')
+                                                    ->with('members.user.occupation')
+                                                    ->with('members.project_client.client')
+                                                    ->with('members.member.role');
+                                    }])
+                                    ->with('members.user')
+                                    ->with('members.member.role')
+                                    ->with('members.project_client.client');
                         }])
                         ->with('members.role')->with('members.user.occupation')
                         ->with('meetings')
@@ -112,15 +119,17 @@ class ProjectController extends Controller
         }
         $project['members']=$project_members;
 
-        $clients=Client::from('clients as c')
-                        ->join('clients_has_projects as cp','c.id','=','cp.clients_id')
-                        ->where('cp.projects_id','=',$id)->get()->toArray();
+        $clients=Client::select('c.*','cp.id as project_clients_id')->from('clients as c')
+                        ->join('clients_has_projects AS cp','c.id','=','cp.clients_id')
+                        ->where('cp.projects_id','=',$id)
+                        ->get()->toArray();
 
         $project_clients=[];
         for ($i=0; $i < count($clients); $i++) { 
             $client=$clients[$i];
             $client['is_user']=false;
             $client['is_client']=true;
+            $project_clients[]=$client;
         }
         $project['clients']=$project_clients;
         return response()->json($project);
@@ -177,6 +186,21 @@ class ProjectController extends Controller
         return response()->json($files);
     }
 
+    public function getClients($id){
+        $clients=Client::select('c.*','cp.id as project_clients_id')->from('clients as c')
+                        ->join('clients_has_projects AS cp','c.id','=','cp.clients_id')
+                        ->where('cp.projects_id','=',$id)
+                        ->get()->toArray();
+        $project_clients=[];
+        for ($i=0; $i < count($clients); $i++) { 
+            $client=$clients[$i];
+            $client['is_user']=false;
+            $client['is_client']=true;
+            $project_clients[]=$client;
+        }
+        return response()->json($project_clients);
+    }
+
     public function getTeams($id){
         $teams=Team::from('teams AS t')
                         ->join('teams_has_projects AS tp','t.id','=','tp.teams_id')
@@ -220,21 +244,28 @@ class ProjectController extends Controller
 
         $new_clients=$request->clients;
         $inserted_clients=[];
-        for ($i=0; $i < $new_clients; $i++) { 
-            $new_client=$new_clients[$i];
+        
+        foreach ($new_clients as $key => $new_client) {
             $client_has_project=new  ClientsHasProjects();
             $client_has_project->projects_id=$id;
             if(gettype($new_client)=='object') $client_has_project->clients_id=$new_client->id;
-            else $client_has_project->clients_id=$new_client;
+            else if(gettype($new_client)=='array'){ 
+                $client_has_project->clients_id=$new_client['id'];
+            }
             $client_has_project->save();
-
-            $inserted_clients[]=$client_has_project->id;
+            $inserted_clients[]=$client_has_project;
         }
 
-        $clients=Client::from('clients AS t')
-                        ->join('clients_has_projects AS tp','t.id','=','tp.clients_id')
-                        ->whereIn('tp.projects_id','=',$inserted_clients)
-                        ->get();
+        $clients=Client::from('clients AS c')
+                        ->join('clients_has_projects AS cp','c.id','=','cp.clients_id');
+        
+        foreach ($inserted_clients as $i => $client) {
+            $clients=$clients->where(function($query) use($client){
+                return $query->where('cp.projects_id','=',$client->projects_id)
+                                ->where('cp.clients_id','=',$client->clients_id);
+            });
+        }
+        $clients=$clients->get();
         
         return response()->json($clients);
     }
@@ -243,7 +274,11 @@ class ProjectController extends Controller
         $project=Project::findOrFail($id);
         $clients_has_projects=ClientsHasProjects::where('projects_id','=',$id)->where('clients_id','=',$clients_id)->get();
         for ($i=0; $i < count($clients_has_projects); $i++) { 
-            $clients_has_projects[$i]->delete();
+            $cp=$clients_has_projects[$i];
+            foreach ($cp->task_member as $i => $member) {
+                $member->delete();
+            }
+            $cp->delete();
         }
         return response()->json("",200);
     }
@@ -275,10 +310,8 @@ class ProjectController extends Controller
     public function removeTeams(Request $request,$id,$teams_id){
         $project=Project::findOrFail($id);
         $teams_has_projects=TeamsHasProjects::where('projects_id','=',$id)->where('teams_id','=',$teams_id)->get();
-        for ($i=0; $i < count($teams_has_projects); $i++) { 
-            $teams_has_projects[$i]->delete();
-        }
-        return response()->json("",200);
+        
+        return response()->json($teams_has_projects,200);
     }
 
     public function getMeetings(Request $request,$id){

@@ -1,14 +1,16 @@
 import React,{useState,useContext} from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import axios from 'axios'
 import { useSnackbar } from 'notistack';
-import UserContext from './../../context/UserContext';
+import UserContext from './../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
-import { Dialog, IconButton, Typography } from '@material-ui/core/';
+import Dialog from '@material-ui/core/Dialog';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
+import UserSearchBar from '../../widgets/UserSearchBar';
 import CloseIcon from '@material-ui/icons/Close';
 
 const styles = (theme) => ({
@@ -36,26 +38,19 @@ const DialogContent = withStyles((theme) => ({
     root: { padding: theme.spacing(2) },
 }))(MuiDialogContent);
 
-const FormCreateClient=({open,handleClose,onCreate})=>{
+const FormAddClient=({open,handleClose,onCreate,detailProject})=>{
     const global=useContext(UserContext);
-    const [name,setName]=useState('');
-    const [description,setDescription]=useState('');
-    const [city,setCity]=useState('');
-    const [phoneNumber,setPhoneNumber]=useState('');
-    const [institution,setInstitution]=useState('');
+    const [newClients,setNewClients]=useState('');
     const { enqueueSnackbar } = useSnackbar();
     const snackbar = (message, variant) =>  enqueueSnackbar(message, { variant });
 
     const formCreateOnSubmit=()=>{
         const body = {
-            name: name,
-            description: description,
-            city: city,
-            institution: institution,
-            phone_number:phoneNumber,
+            projects_id: detailProject.id,
+            clients: newClients,
         }
         
-        const url = process.env.MIX_BACK_END_BASE_URL + 'clients';
+        const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/clients`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.post(url, body)
@@ -70,11 +65,13 @@ const FormCreateClient=({open,handleClose,onCreate})=>{
     }
 
     return(
-        <Dialog aria-labelledby="Create a client" open={open}>
-            <DialogTitle onClose={
-                () => {
-                    handleClose();
-                }} > Create a new client </DialogTitle>
+        <Dialog aria-labelledby="Create a client" maxWidth={'lg'} fullwidth={"true"} open={open} >
+            <DialogTitle 
+                style={{ minWidth: "400px" }} 
+                onClose={
+                    () => {
+                        handleClose();
+                    }} > Add a new client </DialogTitle>
             <DialogContent dividers>
                 <form onSubmit={(e)=>{
                         e.preventDefault();
@@ -82,50 +79,13 @@ const FormCreateClient=({open,handleClose,onCreate})=>{
                     }}>
                     <Grid container spacing={2}>
                         <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <TextField variant="standard"
-                                label="Name : "
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder={"PIC's name"}
-                                fullWidth
-                                required
-                            />
-                        </Grid>     
-                        <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <TextField variant="standard"
-                                label="City : "
-                                onChange={(e) => setCity(e.target.value)}
-                                fullWidth
-                                required
-                            />
-                        </Grid>
-                        <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <TextField 
-                                variant="standard"
-                                label="Institution : "
-                                onChange={(e) => setInstitution(e.target.value)}
-                                fullWidth
-                                required
-                            />
-                        </Grid>
-                        <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <TextField
-                                variant="standard"
-                                required
-                                fullWidth
-                                label="Phone Number"
-                                name="phoneNumber"
-                                value={phoneNumber}
-                                type="tel"
-                                onChange={(e) => setPhoneNumber(e.target.value) }
-                            />
-                        </Grid>
-                        <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <TextField variant="standard"
-                                label="Description : "
-                                onChange={(e) => setDescription(e.target.value) }
-                                multiline
-                                fullWidth
-                                rows={4}
+                            <UserSearchBar 
+                                detailProject={detailProject}
+                                exceptedClients={detailProject.clients} 
+                                onChange={(clients)=>{
+                                    setNewClients(clients);
+                                }}
+                                clientOnly={true}
                             />
                         </Grid>
                         <Grid xs={12} sm={12} md={12} lg={12} lg={12} item>
@@ -138,4 +98,4 @@ const FormCreateClient=({open,handleClose,onCreate})=>{
     )
 }
 
-export default FormCreateClient;
+export default FormAddClient;

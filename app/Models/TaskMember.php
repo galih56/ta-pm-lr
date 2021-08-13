@@ -28,8 +28,8 @@ class TaskMember extends Model
         return $this->belongsTo(User::class,'users_id');
     }
 
-    public function client(){
-        return $this->belongsTo(Client::class,'clients_id');
+    public function project_client(){
+        return $this->belongsTo(ClientsHasProjects::class,'project_clients_id');
     }
 
     public function task(){

@@ -60,11 +60,11 @@ export default function TeamList(props) {
     }
 
 
-    const deleteTeam = (selectedTeam) => {
+    const deleteTeam = (selected_team_id) => {
         if (!window.navigator.onLine) {
             snackbar(`You are currently offline`, 'warning');
         }
-         const url = process.env.MIX_BACK_END_BASE_URL + `projects/${props.projects_id}/team/${selectedTeam.id}`;
+         const url = process.env.MIX_BACK_END_BASE_URL + `projects/${props.projects_id}/teams/${selected_team_id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.delete(url)
@@ -152,7 +152,7 @@ const CustomListItem=React.memo(({team,deleteTeam})=>{
                 <IconButton
                     edge="end"
                     aria-label="delete"
-                    onClick={()=>deleteTeam(team)}
+                    onClick={()=>deleteTeam(team.teams_id)}
                     size="large">
                     <CancelIcon />
                 </IconButton>
