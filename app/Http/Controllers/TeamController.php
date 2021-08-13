@@ -10,7 +10,7 @@ class TeamController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['index','update','store','destroy']]); 
     }
 
     public function index()
@@ -39,12 +39,18 @@ class TeamController extends Controller
                     ->with('projects.project')
                     ->where('id','=',$id)
                     ->firstOrFail()->toArray();
+        $members=[];
         for ($i=0; $i < count($team['members']); $i++) { 
-            $team['members'][$i]=$team['members'][$i]['user'];
+            if($team['members'][$i]['user']){
+                $members[]=$team['members'][$i]['user'];
+            }
         }
+        $projects=[];
         for ($i=0; $i < count($team['projects']); $i++) { 
-            $team['projects'][$i]=$team['projects'][$i]['project'];
+            $projects[]=$team['projects'][$i]['project'];
         }
+        $team['members']=$members;
+        $team['projects']=$projects;
         return response()->json($team);
     }
 

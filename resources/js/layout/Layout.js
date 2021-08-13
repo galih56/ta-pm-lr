@@ -20,6 +20,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import { makeStyles } from '@material-ui/styles';
 import styleConfig from './Theme';
 import UserContext from '../context/UserContext';
+import mainLogo from'./../assets/images/logo_white.png';
 
 const useStyles = makeStyles((theme) => (styleConfig(theme)));
 
@@ -41,7 +42,8 @@ const Layout = (props) => {
         <div className={classes.root}>
             <CssBaseline />
             <Router>
-                <AppBar position="absolute" className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
+                <AppBar position="absolute" 
+                    className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
                     style={{ zIndex: 701 }}>
                     <Toolbar className={classes.toolbar}>
                         <IconButton
@@ -53,7 +55,7 @@ const Layout = (props) => {
                         >
                             <MenuIcon />
                         </IconButton>
-                        <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>Pro-M</Typography>
+                        <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>ManPro</Typography>
                         {/* 
                         <IconButton color="inherit">
                             <Badge badgeContent={4} color="secondary">
@@ -72,6 +74,9 @@ const Layout = (props) => {
                     }}
                     open={drawerOpen} >
                     <div className={classes.toolbarIcon}>
+                        <div className={classes.toolbarLogo}style={{padding:'2px'}}>
+                            <img src={mainLogo} style={{maxHeight:'3em'}}/>
+                        </div>
                         <IconButton onClick={handleDrawerClose}>
                             <ChevronLeftIcon />
                         </IconButton>
@@ -88,7 +93,7 @@ const Layout = (props) => {
                 <main className={classes.content}>
                     <div className={classes.appBarSpacer} />
                     <Container maxWidth="lg" className={classes.container}>
-                        <Grid container spacing={3} style={{ marginLeft:'0.5em'}}>
+                        <Grid container spacing={3} style={{ marginLeft:'0.5em',display:'block'}}>
                             {props.children}
                             <Footer />
                         </Grid>

@@ -22,7 +22,7 @@ import moment from 'moment';
 export default function DetailApproval(props) {
     const global=useContext(UserContext);
     const [data, setData] = useState({
-        id:'', title:"", description:'', status:'',
+        id:'', title:"", description:'', status:'', old_deadline:'', new_deadline:'',
         project:{ id:'', title:'' }, task:{ id:'', title:'' }, list:{ id:'', title:'' }, 
         created_at:'', updated_at:''
     });
@@ -97,8 +97,10 @@ export default function DetailApproval(props) {
                 <Grid item xl={12} lg={12} md={12} sm={12}>
                     <Typography variant="h6" component="div"><b>{data.title}</b> </Typography>
                     <Typography variant="caption" component="div">
+                        Deadline extended ({moment(data.old_deadline).format('DD MMMM YYYY')} >>> {moment(data.new_deadline).format('DD MMMM YYYY')})
+                        <br/>
                         {data.created_at?(<span>Created at : {moment(data.created_at).format('DD MMMM YYYY')}</span>):<></>}
-                        {(data.updated_at && data.updated_at!=data.created_at)?(<span style={{marginLeft:'0.5em'}}>Updated at : {moment(data.created_at).format('DD MMMM YYYY')}</span>):<></>}
+                        {(data.updated_at && data.updated_at!=data.created_at)?(<span style={{marginLeft:'0.5em'}}>Updated at : {moment(data.updated_at).format('DD MMMM YYYY')}</span>):<></>}
                         <span style={{padding:'0.5em'}}><ApprovalStatus status={data.status}/></span>
                     </Typography>
                 </Grid>
@@ -136,6 +138,7 @@ export default function DetailApproval(props) {
                             disabled
                             style={{ minWidth: 150,marginRight:'1em'}}
                             placeholder="Confirm"
+                            variant="standard"
                         >
                             <MenuItem value={"accepted"}>Accept</MenuItem>
                             <MenuItem value={"declined"}>Decline</MenuItem>
@@ -176,7 +179,7 @@ const ModalConfirm = (props) => {
         <Dialog open={open} onClose={handleClose} >
             <DialogTitle>Are you sure?</DialogTitle>
             <DialogContent>
-                <DialogContentText>This action will be saved permanently</DialogContentText>
+                <DialogContentText>The data will be saved permanently</DialogContentText>
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose}>Cancel</Button>

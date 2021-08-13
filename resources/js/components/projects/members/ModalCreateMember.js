@@ -114,7 +114,9 @@ export default function ModalCreateMember(props) {
                                             name:global.state.name,
                                             email:global.state.email
                                         }
-                                    ]} />
+                                    ]}
+                                    userOnly={true}
+                                    />
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12} >
                                 <SelectRole onChange={(value) => setSelectedRole(value)} data={roles} />

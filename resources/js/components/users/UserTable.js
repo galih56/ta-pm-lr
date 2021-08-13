@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
-import {
-    Table, TableBody, TableCell, TableContainer, TablePagination,
-    TableHead, TableRow, TableSortLabel, Paper, Chip
-} from '@material-ui/core';
+import Button from '@material-ui/core/Button';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import TableCell from '@material-ui/core/TableCell';
+import TableContainer from '@material-ui/core/TableContainer';
+import TablePagination from '@material-ui/core/TablePagination';
+import TableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import TableSortLabel from '@material-ui/core/TableSortLabel';
+import Chip from '@material-ui/core/Chip';
 import ModalDetailUser from './ModalDetailUser/ModalDetailUser';
+import ModalCreateUser from './ModalCreateUser';
 import UserContext from '../../context/UserContext';
 import { visuallyHidden } from '@material-ui/utils';
 import moment from 'moment';
@@ -89,7 +96,7 @@ export default function EnhancedTable() {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [clickedUser, setClickedUser] = useState({ id: null, name: '', email: '' });
     const [modalOpen, setModalOpen] = useState(false);
-
+    const [modalCreateOpen,setModalCreateOpen]=useState(false);
     let global = useContext(UserContext);
 
     const getUsers = () => {
@@ -108,6 +115,9 @@ export default function EnhancedTable() {
     function handleUserUpdate(data, action) {
         var newRows = [];
         switch (action) {
+            case 'create':
+                newRows=rows;
+                newRows.push(data)
             case 'update':
                 newRows = rows.map((row => {
                     if (row.id == data.id) return data
@@ -132,18 +142,6 @@ export default function EnhancedTable() {
         setClickedUser(user);
     }
 
-    const showModalDetailUser = () => {
-        if (clickedUser.id != null && clickedUser.id !== undefined && modalOpen == true) {
-            return (
-                <ModalDetailUser
-                    open={modalOpen} id={clickedUser.id} initialState={clickedUser}
-                    closeModal={() => handleModalOpen({ user: { id: null, name: '', email: '' }, open: false })}
-                    onUpdate={handleUserUpdate}
-                />
-            )
-        }
-    }
-
     useEffect(() => {
         getUsers();
     }, []);
@@ -162,9 +160,14 @@ export default function EnhancedTable() {
     };
 
     const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
     return (
         <div className={classes.root}>
+            <Button 
+                variant="contained"
+                color="primary"
+                onClick={()=>{setModalCreateOpen(true)}}>
+                    <b style={{marginRight:'0.5em',fontStyle:'1.2em'}}>+</b> Create a new user
+            </Button>
             <TableContainer>
                 <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} padding="normal" >
                     <EnhancedTableHead classes={classes} order={order} orderBy={orderBy}
@@ -180,14 +183,6 @@ export default function EnhancedTable() {
                                         <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}
                                             onClick={() => handleModalOpen({ user: row, open: true })}>
                                             {row.name} ({row.email})
-                                            <br />
-                                            {row.verified ?
-                                                <Chip variant="outlined" size="small"
-                                                    label="Verified" deleteIcon={<DoneIcon />}
-                                                    style={{ outlineColor: '#4CAF50', color: '#4CAF50', backgroundColor: '#B9F6CA' }} /> :
-                                                <Chip variant="outlined" size="small"
-                                                    label="Unverified"
-                                                    style={{ outlineColor: '#D50000', color: '#D50000', backgroundColor: '#FFEBEE' }} />}
                                         </TableCell>
                                         <TableCell align="left">{row.occupation?.name}</TableCell>
                                         <TableCell align="right">{row.last_login ? moment(row.last_login).format('DD MMM YYYY') : ''}</TableCell>
@@ -207,7 +202,23 @@ export default function EnhancedTable() {
                 rowsPerPageOptions={[5, 10, 25]}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
-            {showModalDetailUser()}
+            
+            {(modalOpen)?(
+                <ModalDetailUser
+                    open={modalOpen} id={clickedUser.id} initialState={clickedUser}
+                    closeModal={() => handleModalOpen({ user: { id: null, name: '', email: '' }, open: false })}
+                    onUpdate={handleUserUpdate}
+                    asProfile={false}
+                />
+            ):<></>}
+            
+            {(modalCreateOpen)?(
+                <ModalCreateUser
+                    open={modalCreateOpen}
+                    closeModal={() => setModalCreateOpen(false)}
+                    onCreate={handleUserUpdate}
+                />
+            ):<></>}
         </div>
     );
 }

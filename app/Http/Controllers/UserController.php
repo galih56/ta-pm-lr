@@ -20,7 +20,7 @@ class UserController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['show','update','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['show','update','destroy']]); 
     }
 
     public function index()
@@ -40,7 +40,26 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        abort(404);
+        $fields=$request->validate([
+            'name'=>'required|string',
+            'email'=>'required|string|unique:users,email',
+            'password'=>'required|string',
+            'phone_number'=>'required|string',
+            'occupations_id'=>'required',
+        ]);
+
+        $user=User::create([
+            'name'=> $fields['name'],
+            'email'=> $fields['email'],
+            'phone_number'=> $fields['phone_number'],
+            'occupations_id'=> $fields['occupations_id'],
+            'password'=> Hash::make($fields['password']),
+            'verified'=> false,
+        ]);
+
+        $user = User::where('email', $fields['email'])->with('occupation')->first();
+
+        return response($user,201);
     }
 
     public function show($id)
@@ -70,6 +89,9 @@ class UserController extends Controller
         if($request->has('verified')) $user->verified=$request->verified;
         if($request->has('profile_picture_path')) $user->profile_picture_path=$request->profile_picture_path;
         $user->save();
+
+        
+        $user = User::where('id', $user->id)->with('occupation')->first();
         return response()->json($user);
     }
 
@@ -226,9 +248,13 @@ class UserController extends Controller
     }
 
     public function logout(Request $request){
-        auth()->user()->tokens()->delete();
+        $user=auth()->user();
+        if($user){ 
+            $user->tokens()->delete();
+        }
         return response()->json([
             'message'=>'Logged Out',
         ]);
     }
 }
+

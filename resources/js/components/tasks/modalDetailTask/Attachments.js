@@ -13,10 +13,11 @@ import PublishRoundedIcon from '@material-ui/icons/PublishRounded';
 import DeleteIcon from '@material-ui/icons/Delete';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import GoogleDriveButton from './GoogleDriveClient';
-import ModalDeleteConfirm from './ModalDeleteConfirm';
+import DialogConfirm from './DialogConfirm';
 import ModalFilePicker from './../../widgets/ModalFilePicker/ModalFilePicker';
 import UserContext from '../../../context/UserContext';
 import { useSnackbar } from 'notistack';
+import DialogContentText from '@material-ui/core/DialogContentText';
 import axios from 'axios';
 
 import PlayButtonIcon from './../../../assets/icons/play-button.svg';
@@ -207,14 +208,17 @@ const Attachments = (props) => {
             projectId={projectId} 
             closeModal={()=> setChooseFileModalOpen(false) }
             onPick={(file)=> handleFilePick(file,payload) }/>
-        <ModalDeleteConfirm
-            open={deleteConfirmOpen}
-            handleClose={() => setDeleteConfirmOpen(false)}
-            handleDelete={() => {
-                payload = { id: toBeDeletedFile, taskId: taskId, projectId: projectId, listId: listId }
-                deleteFile(payload);
-                setDeleteConfirmOpen(false)
-            }} />
+        <DialogConfirm
+                open={deleteConfirmOpen}
+                handleConfirm={() => {
+                    payload = { id: toBeDeletedFile, taskId: taskId, projectId: projectId, listId: listId }
+                    deleteFile(payload);
+                    setDeleteConfirmOpen(false)
+                }}
+                handleClose={() => { setDeleteConfirmOpen(false);}}  
+                title={"Are you sure?"}>
+                <DialogContentText>Data will be deleted permanently.</DialogContentText>
+            </DialogConfirm>
     </>;
 }
 

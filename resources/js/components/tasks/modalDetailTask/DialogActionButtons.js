@@ -1,8 +1,9 @@
 
 import 'fontsource-roboto';
 import React, { memo } from 'react';
-import ModalDeleteConfirm from './ModalDeleteConfirm';
+import DialogConfirm from './DialogConfirm';
 import { Button } from '@material-ui/core/';
+import DialogContentText from '@material-ui/core/DialogContentText';
 
 const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteTask, deleteConfirmOpen, setDeleteConfirmOpen, closeModal }) => {
     if (isEdit) {
@@ -15,11 +16,13 @@ const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteTask, del
                 <Button onClick={
                     () => { setDeleteConfirmOpen(true); }
                 } variant="contained" color="secondary">Delete</Button>
-                <ModalDeleteConfirm
+                <DialogConfirm
                     open={deleteConfirmOpen}
-                    handleDelete={() => { deleteTask(); setDeleteConfirmOpen(false); closeModal(); }}
-                    handleClose={() => { setDeleteConfirmOpen(false);}}>
-                </ModalDeleteConfirm>
+                    handleConfirm={() => { deleteTask(); setDeleteConfirmOpen(false); closeModal(); }}
+                    handleClose={() => { setDeleteConfirmOpen(false);}}  
+                    title={"Are you sure?"}>
+                    <DialogContentText>Data will be deleted permanently.</DialogContentText>
+                </DialogConfirm>
             </React.Fragment>
         )
     } else {

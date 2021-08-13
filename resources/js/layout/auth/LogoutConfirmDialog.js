@@ -18,9 +18,6 @@ export default function LogoutConfirmDialog(props) {
     const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     const handleConfirm = () => {
-        global.dispatch({ type: 'logout' });
-        history.push('/auth');
-        return;
         axios.defaults.withCredentials = true
         axios.post(process.env.MIX_BACK_END_BASE_URL + 'logout', {}, {
             headers: { 

@@ -74,6 +74,7 @@ const FormAddNewMember=({teamId,open,closeModal,onCreate})=>{
                             <UserSearchBar 
                                 exceptedUsers={[]} 
                                 onChange={(values)=> setUsers(values.map((value)=>value.id))}
+                                userOnly={true}
                             />
                         </Grid>
                         <Grid xs={12} sm={12} md={12} lg={12} lg={12} item>
