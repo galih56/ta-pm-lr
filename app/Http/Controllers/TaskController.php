@@ -146,15 +146,20 @@ class TaskController extends Controller
         if($request->has('description')) $task->description=$request->description;
         if($request->has('lists_id')) $task->lists_id=$request->lists_id;
         if($request->has('progress')) $task->progress=$request->progress;
+        if($request->has('cost')) $task->cost=$request->cost;
         if($request->has('actual_cost')) $task->actual_cost=$request->actual_cost;
         if($request->has('start')) $task->start=$request->start;
         if($request->has('end')) $task->end=$request->end;
-        if($request->has('actual_start')) $task->actual_start=$request->actual_start;
-        if($request->has('actual_end')) $task->actual_end=$request->actual_end;
+        if(($request->has('actual_start') 
+            && $request->actual_start!='Invalid date'  
+            && !empty($request->actual_start))) $task->actual_start=$request->actual_start;
+        if(($request->has('actual_end') 
+            && $request->actual_end!='Invalid date') 
+            && !empty($request->actual_end)) $task->actual_end=$request->actual_end;
         if($request->has('parent_task_id')) $task->parent_task_id=$request->parent_task_id;
         if($request->has('complete')) $task->complete=$request->complete;
 
-        if($request->has('actual_start')){
+        if(($request->has('actual_start') && $request->actual_start!='Invalid date' && !empty($request->actual_start))){
             $start = Carbon::parse($task->start)->format('Y-m-d');
             $actual_start = Carbon::parse($task->actual_start)->format('Y-m-d');
             if($actual_start<$start) $task->start_label='Mulai lebih cepat';
@@ -162,7 +167,7 @@ class TaskController extends Controller
             if($actual_start==$start) $task->start_label='Mulai tepat waktu';
         }
         
-        if($request->has('actual_end')){
+        if(($request->has('actual_end') && $request->actual_end!='Invalid date') && !empty($request->actual_end)){
             $end = Carbon::parse($task->end)->format('Y-m-d');
             $actual_end = Carbon::parse($task->actual_end)->format('Y-m-d');
             if($actual_end<$end) $task->end_label='Selesai lebih cepat';
@@ -170,7 +175,8 @@ class TaskController extends Controller
             if($actual_end==$end) $task->end_label='Selesai tepat waktu';
         }
         
-        if($request->has('actual_start') && $request->has('actual_end')){
+        if(($request->has('actual_start') && $request->actual_start!='Invalid date' && !empty($request->actual_start)) 
+                && ($request->has('actual_end') && $request->actual_end!='Invalid date') && !empty($request->actual_end)){
             $actual_start = Carbon::parse($request->actual_start);
             $actual_end = Carbon::parse($request->actual_end);
             $days= $actual_start->diffInDays($actual_end);
@@ -182,7 +188,6 @@ class TaskController extends Controller
         
         if($task->is_subtask){
             $parent_task=Task::with('cards')->findOrFail($task->parent_task_id);
-            
             $valuePerSubtask=100/count($parent_task->cards);
             $completeSubtaskCounter=0;
             for ($i = 0; $i < count($parent_task->cards); $i++) {
@@ -203,12 +208,70 @@ class TaskController extends Controller
         $task=Task::findOrFail($id);
         return response()->json($task->delete());
     }
+    public function startTask(Request $request,$id){
+        $task=Task::findOrFail($id);
+        $task->actual_start= Carbon::now()->toDateTimeString();
+
+        if($task->actual_start){
+            $start = Carbon::parse($task->start)->format('Y-m-d');
+            $actual_start = Carbon::parse($task->actual_start)->format('Y-m-d');
+            if($actual_start<$start) $task->start_label='Mulai lebih cepat';
+            if($actual_start>$start) $task->start_label='Mulai terlambat';
+            if($actual_start==$start) $task->start_label='Mulai tepat waktu';
+        }
+        $task->save();
+        $task=$this->getDetailTask($id);
+        return response()->json($task);
+    }
+    public function updateComplete(Request $request,$id){
+        
+        $task=Task::findOrFail($id);
+        if($request->has('complete')){ 
+            if($request->complete===true){
+                $current_date_time = Carbon::now()->toDateTimeString();
+                $task->actual_end=$current_date_time;
+            }else{
+
+            }
+            $task->complete=$request->complete;
+        }
+
+        if(($task->actual_start && $task->actual_start!='Invalid date' && !empty($task->actual_start))){
+            $start = Carbon::parse($task->start)->format('Y-m-d');
+            $actual_start = Carbon::parse($task->actual_start)->format('Y-m-d');
+            if($actual_start<$start) $task->start_label='Mulai lebih cepat';
+            if($actual_start>$start) $task->start_label='Mulai terlambat';
+            if($actual_start==$start) $task->start_label='Mulai tepat waktu';
+        }
+        
+        if(($task->actual_end && $task->actual_end!='Invalid date') && !empty($task->actual_end)){
+            $end = Carbon::parse($task->end)->format('Y-m-d');
+            $actual_end = Carbon::parse($task->actual_end)->format('Y-m-d');
+            if($actual_end<$end) $task->end_label='Selesai lebih cepat';
+            if($actual_end>$end) $task->end_label='Selesai terlambat';
+            if($actual_end==$end) $task->end_label='Selesai tepat waktu';
+        }
+        
+        if(($task->actual_start && $task->actual_start!='Invalid date' && !empty($task->actual_start)) 
+                && ($task->actual_end && $task->actual_end!='Invalid date') && !empty($task->actual_end)){
+            $actual_start = Carbon::parse($task->actual_start);
+            $actual_end = Carbon::parse($task->actual_end);
+            $days= $actual_start->diffInDays($actual_end);
+            $work_days= $actual_start->diffInDays($actual_end);
+            $task->work_days=$work_days;
+        }
+
+        $task->save();
+        $task=$this->getDetailTask($task->id);
+        return response()->json($task);
+    }
 
     function getDetailTask($id){
         $task=Task::findOrFail($id);
         
         $task=Task::with('creator')->with('cards')->with('logs')->with('comments.creator')
                     ->with('list')->with('members.member.role')->with('members.user')
+                    ->with('members.project_client.client')
                     ->with('tags.tag')
                     ->with(['parentTask'=>function($q){
                         return $q->select('id','start','end','old_deadline','actual_start','actual_end','created_at','updated_at');
@@ -288,19 +351,40 @@ class TaskController extends Controller
                             ->where('ta.tasks_id','=',$tasks_id)->with('user')->get()->toArray();
         return $attachments;
     }
-
+    public function getMembers($id){
+        $task=Task::with('members.user')->with('members.member.role')
+                    ->with('members.project_client.client')->findOrFail($id)->toArray();
+        $members=$this->getTaskMembers($task);
+        return response()->json($members);
+    }
     function getTaskMembers($task){
         $members=[];
         $task_members=$task['members'];
         for ($i=0; $i < count($task_members); $i++) { 
             $task_member=$task_members[$i];
-            $user=$task_member['user'];
-            if($task_member['member']) $user['role']=$task_member['member']['role'];
-            else $user['role']=['id'=>'','name'=>''];
-            $user['project_members_id']=$task_member['project_members_id'];
-            $user['tasks_id']=$task_member['tasks_id'];
+            if($task_member['user']){
+                $user=$task_member['user'];
+                if($task_member['member']) $user['role']=$task_member['member']['role'];
+                else $user['role']=['id'=>'','name'=>''];
+                $user['project_members_id']=$task_member['project_members_id'];
+                $user['tasks_id']=$task_member['tasks_id'];
+                $user['task_members_id']=$task_member['id'];
+                $user['is_user']=true;
+                $user['is_client']=false;
+                $members[]=$user;
+            }
+            if($task_member['project_client']){
+                $client=[];
+                $client=$task_member['project_client']['client'];
+                $client['project_clients_id']=$task_member['project_client']['id'];
+                $client['clients_id']=$task_member['project_client']['client']['id'];
+                $client['tasks_id']=$task_member['tasks_id'];
+                $client['task_members_id']=$task_member['id'];
+                $client['is_client']=true;
+                $client['is_user']=false;
+                $members[]=$client;
+            }
 
-            $members[]=$user;
         }
         return $members;
     }
@@ -325,6 +409,7 @@ class TaskController extends Controller
         }
         $new_approval->users_id=$request->users_id;
         $new_approval->new_deadline=$request->new_deadline;
+        $new_approval->old_deadline=$task->end;
         $new_approval->description=$request->description;
         $new_approval->status="Waiting for confirmation";
         $new_approval->title="Task deadline extension request from ".$user->name ;

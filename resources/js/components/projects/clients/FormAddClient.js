@@ -1,17 +1,17 @@
 import React,{useState,useContext} from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
 import axios from 'axios'
 import { useSnackbar } from 'notistack';
-import UserContext from './../../context/UserContext';
+import UserContext from './../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
-import { Dialog, IconButton, Typography, } from '@material-ui/core/';
+import Dialog from '@material-ui/core/Dialog';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
+import UserSearchBar from '../../widgets/UserSearchBar';
 import CloseIcon from '@material-ui/icons/Close';
-import UserSearchBar from './../widgets/UserSearchBar';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },
@@ -38,33 +38,26 @@ const DialogContent = withStyles((theme) => ({
     root: { padding: theme.spacing(2) },
 }))(MuiDialogContent);
 
-const DialogActions = withStyles((theme) => ({
-    root: { margin: 0, padding: theme.spacing(1) },
-}))(MuiDialogActions);
-
-const FormCreateTeam=({open,handleClose,onCreate})=>{
+const FormAddClient=({open,handleClose,onCreate,detailProject})=>{
     const global=useContext(UserContext);
-    const [name,setName]=useState('');
-    const [description,setDescription]=useState('');
-    const [users,setUsers]=useState([]);
+    const [newClients,setNewClients]=useState('');
     const { enqueueSnackbar } = useSnackbar();
     const snackbar = (message, variant) =>  enqueueSnackbar(message, { variant });
 
     const formCreateOnSubmit=()=>{
         const body = {
-            name: name,
-            description: description,
-            users: users
+            projects_id: detailProject.id,
+            clients: newClients,
         }
         
-        const url = process.env.MIX_BACK_END_BASE_URL + 'teams';
+        const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/clients`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.post(url, body)
             .then((result) => {
                 onCreate(result.data);
                 handleClose();
-                snackbar(`A new team successfully created`, 'success');
+                snackbar(`A new client successfully created`, 'success');
             }).catch((error) => {
                 const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
                 global.dispatch({ type: 'handle-fetch-error', payload: payload });
@@ -72,42 +65,27 @@ const FormCreateTeam=({open,handleClose,onCreate})=>{
     }
 
     return(
-        <Dialog aria-labelledby="Create a subtask" open={open}>
-            <DialogTitle onClose={
-                () => {
-                    handleClose();
-                }} > Create a new team </DialogTitle>
+        <Dialog aria-labelledby="Create a client" maxWidth={'lg'} fullwidth={"true"} open={open} >
+            <DialogTitle 
+                style={{ minWidth: "400px" }} 
+                onClose={
+                    () => {
+                        handleClose();
+                    }} > Add a new client </DialogTitle>
             <DialogContent dividers>
                 <form onSubmit={(e)=>{
                         e.preventDefault();
                         formCreateOnSubmit();
                     }}>
-                    <Grid  container spacing={2}>
-                        <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <TextField variant="standard"
-                                label="Name : "
-                                onChange={(e) => setName(e.target.value)}
-                                style={{ width: '100%' }}
-                                required
-                            />
-                        </Grid>
+                    <Grid container spacing={2}>
                         <Grid lg={12} md={12} sm={12} xs={12} item>
                             <UserSearchBar 
-                                exceptedUsers={[]} 
-                                onChange={(values)=>{
-                                    setUsers(values.map((value)=>value.id));
+                                detailProject={detailProject}
+                                exceptedClients={detailProject.clients} 
+                                onChange={(clients)=>{
+                                    setNewClients(clients);
                                 }}
-                                userOnly={true}
-                            />
-                        </Grid>
-                        <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <TextField variant="standard"
-                                label="Description : "
-                                onChange={(e) => setDescription(e.target.value) }
-                                multiline
-                                style={{ width: '100%' }}
-                                required
-                                rows={4}
+                                clientOnly={true}
                             />
                         </Grid>
                         <Grid xs={12} sm={12} md={12} lg={12} lg={12} item>
@@ -120,4 +98,4 @@ const FormCreateTeam=({open,handleClose,onCreate})=>{
     )
 }
 
-export default FormCreateTeam;
+export default FormAddClient;

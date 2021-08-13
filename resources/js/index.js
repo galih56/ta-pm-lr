@@ -1,6 +1,6 @@
 import React, { useReducer, lazy } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, Switch, Redirect, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch, Redirect, useLocation,withRouter } from "react-router-dom";
 import { ThemeProvider, createTheme } from '@material-ui/core/styles';
 import 'fontsource-roboto';
 import Layout from "./layout/Layout";
@@ -8,7 +8,7 @@ import UserContext, {
     initState, resetState, getAuthDataFromStorage,
     storeAuthData, runDelayedHTTPRequest, logout,
     storeGoogleAuth, storeGithubAuth, removeGithubAuth,
-    storeProjectMemberRole,removeProjectMemberRole
+    storeProjectMemberRole,removeProjectMemberRole,storeUserInformation
 } from './context/UserContext';
 import { createNewList, removeList, updateList } from './context/ListsReducer';
 import { createNewMeeting, storeDetailMeeting, removeMeeting, updateMeeting } from './context/MeetingsReducer';
@@ -34,6 +34,8 @@ const DetailApproval = lazy(() => import("./components/approvals/DetailApproval"
 const TaskList = lazy(() => import("./components/tasks/TaskList"));
 const UserInformation = lazy(() => import("./components/users/UserInformation"));
 const ModalAuthentication = lazy(() => import("./layout/auth/ModalAuthentication"));
+const DetailClient = lazy(() => import("./components/clients/DetailClient"));
+const ClientTable = lazy(() => import("./components/clients/ClientTable"));
 
 const checkAuthentication = (payload, state) => {
     const { history } = payload;
@@ -54,6 +56,9 @@ const handleFetchError = (payload, state) => {
             switch (error.response.status) {
                 case 401:
                     if (snackbar) snackbar(`Unauthenticated`, 'warning');
+                    break;
+                case 422:
+                    if (snackbar) snackbar(`Some required inputs are empty`, 'warning');
                     break;
                 case 409:
                     var message = '';
@@ -83,6 +88,8 @@ const reducer = (state, action) => {
             return storeAuthData(payload);
         case 'remember-authentication':
             return getAuthDataFromStorage();
+        case 'store-user-information':
+            return storeUserInformation(payload);
         case 'store-google-auth':
             return storeGoogleAuth(payload, state);
         case 'store-github-auth':
@@ -176,7 +183,6 @@ const App = () => {
                         <Layout>
                             <React.Suspense fallback={<LinearProgress />}>
                                 <Switch>
-                                    <Route path='/' exact ><Redirect to='/projects' /></Route>
                                     {/* passing props ke component melalui route gak bisa langsung, jadi harus pakai anon function ke props render yg dimiliki component Route */}
                                     <Route path="/my-tasks" render={(props) => (<TaskList {...props} ></TaskList>)} />
                                     <Route path="/users" render={(props) => (<UserInformation {...props} ></UserInformation>)} />
@@ -219,6 +225,16 @@ const App = () => {
                                             </>
                                         )
                                     }} />
+                                    <Route path='/clients' render={(props) => {
+                                        const { match: { path } } = props;
+                                        return (
+                                            <>
+                                                <Route path={`${path}/:id`} component={DetailClient} />
+                                                <Route path={`${path}`} exact component={ClientTable} />
+                                            </>
+                                        )
+                                    }} />
+                                    <Route path='/' exact ><Redirect to='/projects' /></Route>
                                 </Switch>
                             </React.Suspense>
                         </Layout>

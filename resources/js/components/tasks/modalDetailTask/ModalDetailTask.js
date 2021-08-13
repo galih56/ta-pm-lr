@@ -5,7 +5,6 @@ import { useHistory } from "react-router-dom";
 import UserContext from '../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
 import Dialog from '@material-ui/core/Dialog';
-import Typography from '@material-ui/core/Typography';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import IconButton from '@material-ui/core/IconButton';
@@ -18,8 +17,9 @@ import TaskProgress from './TaskProgress';
 import EditForm from './EditForm';
 import Chip from '@material-ui/core/Chip';
 import { useSnackbar } from 'notistack';
+import DialogContentText from '@material-ui/core/DialogContentText';
 import moment from 'moment';
-
+import DialogConfirm from './DialogConfirm';
 // https://stackoverflow.com/questions/35352638/react-how-to-get-parameter-value-from-query-string
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2), },
@@ -66,6 +66,7 @@ export default function ModalDetailTask(props) {
     const { id } = props.initialState;
     const {open,closeModalDetailTask,onTaskUpdate,onTaskDelete} = props;
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    const [startConfirmOpen, setStartConfirmOpen] = useState(false);
     const global = useContext(UserContext);
     const { enqueueSnackbar } = useSnackbar();
     const snackbar = (message, variant) => enqueueSnackbar(message, { variant });
@@ -78,7 +79,7 @@ export default function ModalDetailTask(props) {
         comments: [], attachments: [],creator:null,is_subtask:false
     });
     const [detailProject,setDetailProject]=useState({
-        id:'',title:'',members:[],columns:[]
+        id:'',title:'',members:[],clients:[],columns:[]
     })
     const [isEditing, setIsEditing] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
@@ -109,20 +110,23 @@ export default function ModalDetailTask(props) {
     useEffect(()=>{
         if(props.detailProject?.id)setDetailProject(props.detailProject)
         else {
+            var body={projects_id:detailProject.id,users_id:global.state.id}
+                var url =`${process.env.MIX_BACK_END_BASE_URL}projects/`;
             if(data.list){
-                var body={projects_id:detailProject.id,users_id:global.state.id}
-                const url = process.env.MIX_BACK_END_BASE_URL + 'projects/' + data.list.project;
-                axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+                 url+= data.list.project;
+            }else if(data.is_subtask){
+                url+=data.parent_task.list.project;
+            }
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
                 axios.defaults.headers.post['Content-Type'] = 'application/json';
                 axios.get(url,body)
                     .then((result) => {
                         var newDP=result.data
-                        setDetailProject({id:newDP.id,members:newDP.members})
+                        setDetailProject({id:newDP.id,members:newDP.members,clients:newDP.clients})
                     }).catch((error) => {
                         const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
                         global.dispatch({ type: 'handle-fetch-error', payload: payload });
                     });
-            }
         }
     },[props.detailproject])
 
@@ -146,6 +150,41 @@ export default function ModalDetailTask(props) {
                 else setData({...data,progress:0});
             }
         }
+    }
+    
+    const handleStartTask = () => {
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/start`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.patch(url)
+            .then((result) => {
+                var result=result.data;
+                setData(result);
+                if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                else global.dispatch({ type: 'store-detail-task', payload: result });
+                handleSnackbar(`Data has been updated`, 'success');
+            }).catch((error) => {
+                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
+                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            });
+    }
+
+    const handleCompleteTask = (check) => {
+        const body = { complete: check };
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/complete`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.patch(url, body)
+            .then((result) => {
+                var result=result.data;
+                setData(result);
+                if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                else global.dispatch({ type: 'store-detail-task', payload: result });
+                handleSnackbar(`Data has been updated`, 'success');
+            }).catch((error) => {
+                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
+                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            });
     }
 
     const saveChanges = (body) => {
@@ -194,69 +233,78 @@ export default function ModalDetailTask(props) {
     }
     
     return (
-        <Dialog  aria-labelledby="Modal Task Detail" open={open} style={{ zIndex: '750' }}
-            maxWidth={'lg'} fullwidth={"true"}>
-            <DialogTitle onClose={() => {
-                removeTaskIdQueryString(history)
-                closeModalDetailTask();
-            }}>
-                {data.title} {data.label ? `(${data.label})` : ''}
-                <br/>
-                {data.creator?<span style={{fontSize:'0.7em'}}>Created by : {data.creator.name}</span>:null}
-                <br />      
-                <FormControlLabel
-                    control={<Checkbox onChange={(event) => {
-                        var progress=data.progress         
-                        if(data.cards.length<=0 && data.complete==true) progress=100 ;
-                        else if(data.cards.length<=0 && data.complete==false)progress=0 ;
-                        setData({...data,complete:event.target.checked,progress:progress});
-                        saveChanges({
-                            id:data.id, actual_start:data.actual_start, actual_end:data.actual_end,
-                            complete:event.target.checked, title:data.title, is_subtask:data.is_subtask,
-                            progress:progress
-                        });
-                    }} fontSize="small" checked={data.complete} />}
-                    label={`Complete`}/>
-                {(data.cards || !data.is_subtask)?<TaskProgress value={data.progress}></TaskProgress>:<></>}
-                {data.extended?(
-                        <Chip
-                            variant="outlined"
-                            size="small"
-                            label={`Deadline extended (${moment(data.old_deadline).format('DD MMMM YYYY')} >>> ${moment(data.end).format('DD MMMM YYYY')})`}
-                            color="secondary"
-                        /> 
-                ):<></>}
-            </DialogTitle>
-            <DialogContent dividers>    
-                <EditForm
-                    isEdit={isEditing}
-                    data={data}
-                    setData={setData}
-                    detailProject={detailProject}
-                    getProgress={getProgress}
-                    onTaskUpdate={onTaskUpdate}
-                    onTaskDelete={onTaskDelete}
-                />
-                <br/>
-            </DialogContent>
-            {
-                (global.state.occupation?.name.toLowerCase().includes('manager') 
-                    || global.state.occupation?.name.toLowerCase().includes('bendahara') 
-                    || global.state.occupation?.name.toLowerCase().includes('project manager')
-                    || global.state.current_project_member_role?.name?.toLowerCase().includes('project owner'))?(                    
-                        <DialogActions>
-                            <DialogActionButtons
-                                isEdit={isEditing}
-                                saveChanges={saveChanges}
-                                setEditMode={handleEditingMode}
-                                deleteTask={deleteTask}
-                                deleteConfirmOpen={deleteConfirmOpen}
-                                setDeleteConfirmOpen={setDeleteConfirmOpen}
-                                closeModal={closeModalDetailTask}
-                            > </DialogActionButtons>
-                        </DialogActions>
-                ):<></>
-            }
-           </Dialog>
+        <>
+            <Dialog  aria-labelledby="Modal Task Detail" open={open} style={{ zIndex: '750' }}
+                maxWidth={'lg'} fullwidth={"true"}>
+                <DialogTitle onClose={() => {
+                    removeTaskIdQueryString(history)
+                    closeModalDetailTask();
+                }}>
+                    {data.title} {data.label ? `(${data.label})` : ''}
+                    <br/>
+                    {data.creator?<span style={{fontSize:'0.7em'}}>Created by : {data.creator.name}</span>:null}
+                    <br />      
+                    <FormControlLabel
+                        control={<Checkbox onChange={(event) => {
+                            var progress=data.progress         
+                            if(data.cards.length<=0 && data.complete==true) progress=100 ;
+                            else if(data.cards.length<=0 && data.complete==false)progress=0 ;
+                            setData({...data,complete:event.target.checked,progress:progress});
+                            handleCompleteTask(event.target.checked);
+                        }} fontSize="small" checked={data.complete} />}
+                        label={`Complete`}/>
+                    {(data.cards || !data.is_subtask)?<TaskProgress value={data.progress}></TaskProgress>:<></>}
+                    {data.extended?(
+                            <Chip
+                                variant="outlined"
+                                size="small"
+                                label={`Deadline extended (${moment(data.old_deadline).format('DD MMMM YYYY')} >>> ${moment(data.end).format('DD MMMM YYYY')})`}
+                                color="secondary"
+                            /> 
+                    ):<></>}
+                </DialogTitle>
+                <DialogContent dividers>    
+                    <EditForm
+                        isEdit={isEditing}
+                        data={data}
+                        setData={setData}
+                        detailProject={detailProject}
+                        getProgress={getProgress}
+                        onTaskUpdate={onTaskUpdate}
+                        onTaskDelete={onTaskDelete}
+                        setStartConfirmOpen={setStartConfirmOpen}
+                    />
+                    <br/>
+                </DialogContent>
+                {
+                    (global.state.occupation?.name.toLowerCase().includes('manager') 
+                        || global.state.occupation?.name.toLowerCase().includes('bendahara') 
+                        || global.state.occupation?.name.toLowerCase().includes('project manager')
+                        || global.state.current_project_member_role?.name?.toLowerCase().includes('project owner')
+                        || global.state.occupation?.name?.toLowerCase().includes('system administrator')
+                        || global.state.occupation?.name?.toLowerCase().includes('sistem administrator'))?(                    
+                            <DialogActions>
+                                <DialogActionButtons
+                                    isEdit={isEditing}
+                                    saveChanges={saveChanges}
+                                    setEditMode={handleEditingMode}
+                                    deleteTask={deleteTask}
+                                    deleteConfirmOpen={deleteConfirmOpen}
+                                    setDeleteConfirmOpen={setDeleteConfirmOpen}
+                                    closeModal={closeModalDetailTask}
+                                > </DialogActionButtons>
+                            </DialogActions>
+                    ):<></>
+                }
+            </Dialog>
+            
+            <DialogConfirm
+                    open={startConfirmOpen}
+                    handleConfirm={() => { handleStartTask(); setStartConfirmOpen(false); }}
+                    handleClose={() => { setStartConfirmOpen(false);}}  
+                    title={"Are you sure?"}>
+                    <DialogContentText>Data will be changed permanently</DialogContentText>
+                </DialogConfirm>
+        </>
     );
 }

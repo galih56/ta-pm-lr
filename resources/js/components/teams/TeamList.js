@@ -53,14 +53,17 @@ export default function TeamTable() {
                         <Grid item lg={12} md={12} sm={12} xs={12}>
                             <Typography variant="h5">Teams</Typography>
                             {(global.state.occupation?.name?.toLowerCase().includes('manager'))?(
+                                <>
                                     <Button onClick={()=>setOpenFormCreate(true)}>Create a new team</Button>
+                                
+                                    <FormCreateTeam 
+                                        open={openFormCreate}
+                                        handleClose={()=>setOpenFormCreate(false)}
+                                        onCreate={(newTeam)=>{
+                                            setRows([...rows,newTeam])
+                                        }}/>
+                                </>
                                 ):<></>}
-                            <FormCreateTeam 
-                                open={openFormCreate}
-                                handleClose={()=>setOpenFormCreate(false)}
-                                onCreate={(newTeam)=>{
-                                    setRows([...rows,newTeam])
-                                }}/>
                         </Grid>
                         <Grid item lg={12} md={12} sm={12} xs={12}>
                             <Table size="small">

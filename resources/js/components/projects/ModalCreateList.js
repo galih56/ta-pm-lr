@@ -22,6 +22,7 @@ import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import moment from 'moment'
+import { parseISO } from 'date-fns'; 
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },
@@ -62,9 +63,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ModalCreateList(props) {
     const classes = useStyles();
-    var open = props.open;
-    var projects_id = props.projects_id;
-    var closeModal = props.handleClose;
+    const {open,projects_id,closeModal,detailProject}=props;
     const history = useHistory();
     const [title, setTitle] = useState('');
     const [start, setStart] = useState(null);
@@ -72,25 +71,19 @@ export default function ModalCreateList(props) {
     const [dateRange, setDateRange] = useState([null, null]);
     const { enqueueSnackbar } = useSnackbar();
     const global = useContext(UserContext);
-
     const snackbar = (message, variant) =>  enqueueSnackbar(message, { variant });
 
     const submitData = () => {
         const body = {
-            title: title,
-            start: start,
-            end: end,
-            projects_id: projects_id,
-            cards: []
+            title: title, start: start, end: end,
+            projects_id: projects_id, cards: []
         }
-        
         const url = process.env.MIX_BACK_END_BASE_URL + 'lists/';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.post(url, body)
             .then((result) => {
-                setTitle('');
-                closeModal();
+                setTitle(''); closeModal();
                 global.dispatch({ type: 'create-new-list', payload: result.data });
                 snackbar(`A new list successfully created`, 'success');
             }).catch((error) => {
@@ -111,28 +104,26 @@ export default function ModalCreateList(props) {
                                     placeholder="example : List A"
                                     className={classes.textfield}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    style={{ width: '100%' }}
+                                    fullWidth
                                 />
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12} container>
                                 <LocalizationProvider dateAdapter={AdapterDateFns}>
                                     <MobileDateRangePicker
                                         required
-                                        startText="Planned to start at : "
-                                        endText="Planned to finish at : "
+                                        startText="Start at : "
+                                        endText="Finish at : "
                                         value={dateRange}
+                                        minDate={detailProject.start?parseISO(detailProject.start):null}
+                                        maxDate={detailProject.end?parseISO(detailProject.end):null}
                                         onChange={(newValue) => {
-                                            var start= newValue[0];
-                                            var end= newValue[1];
-                                            setDateRange(newValue)
-                                            if(start){
-                                                start=moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss'); 
-                                                setStart(start)
+                                            if(newValue[0]){
+                                                setStart(moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss'))
                                             }
-                                            if(end){ 
-                                                end=moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss');
-                                                setEnd(end)
+                                            if(newValue[1]){ 
+                                                setEnd(moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss'))
                                             }
+                                            setDateRange([newValue[0],newValue[1]]);
                                         }}
                                         renderInput={(startProps, endProps) => (
                                         <>

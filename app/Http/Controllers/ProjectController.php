@@ -13,6 +13,8 @@ use App\Models\Task;
 use App\Models\Meeting;
 use App\Models\TaskAttachment;
 use App\Models\Approval;
+use App\Models\Client;
+use App\Models\ClientsHasProjects;
 use App\Models\GithubRepository;
 use DB;
 
@@ -65,11 +67,11 @@ class ProjectController extends Controller
         if($project_managers){
             
             for ($i=0; $i < count($project_managers); $i++) { 
-                $po=$project_managers[$i];
+                $pm=$project_managers[$i];
                 $new_pm=new ProjectMember();
                 $new_pm->projects_id=$project->id;
-                if(gettype($po)=='object') $new_pm->users_id=$po->id;
-                if(gettype($po)=='string' || gettype($po)=='integer' ) $new_pm->users_id=$po;
+                if(gettype($pm)=='object') $new_pm->users_id=$pm->id;
+                if(gettype($pm)=='string' || gettype($pm)=='integer' ) $new_pm->users_id=$pm;
                 $new_pm->roles_id=2;
                 $new_pm->save();
                 
@@ -87,8 +89,14 @@ class ProjectController extends Controller
         $project=Project::with(['columns.cards'=>function($q1){
                             return $q1->orderBy('start','ASC')
                                     ->with(['cards'=>function($q2){
-                                        return $q2->orderBy('start','ASC')->with('members.user.occupation')->with('members.member.role');
-                                    }])->with('members.user')->with('members.member.role');
+                                        return $q2->orderBy('start','ASC')
+                                                    ->with('members.user.occupation')
+                                                    ->with('members.project_client.client')
+                                                    ->with('members.member.role');
+                                    }])
+                                    ->with('members.user')
+                                    ->with('members.member.role')
+                                    ->with('members.project_client.client');
                         }])
                         ->with('members.role')->with('members.user.occupation')
                         ->with('meetings')
@@ -104,10 +112,26 @@ class ProjectController extends Controller
             $projects_id=$member['projects_id'];
             $member=$user;
             $member['role']=$role;
+            $member['is_user']=true;
+            $member['is_client']=false;
             $member['project_members_id']=$project_members_id;
             $project_members[]=$member;
         }
         $project['members']=$project_members;
+
+        $clients=Client::select('c.*','cp.id as project_clients_id')->from('clients as c')
+                        ->join('clients_has_projects AS cp','c.id','=','cp.clients_id')
+                        ->where('cp.projects_id','=',$id)
+                        ->get()->toArray();
+
+        $project_clients=[];
+        for ($i=0; $i < count($clients); $i++) { 
+            $client=$clients[$i];
+            $client['is_user']=false;
+            $client['is_client']=true;
+            $project_clients[]=$client;
+        }
+        $project['clients']=$project_clients;
         return response()->json($project);
     }
 
@@ -162,6 +186,21 @@ class ProjectController extends Controller
         return response()->json($files);
     }
 
+    public function getClients($id){
+        $clients=Client::select('c.*','cp.id as project_clients_id')->from('clients as c')
+                        ->join('clients_has_projects AS cp','c.id','=','cp.clients_id')
+                        ->where('cp.projects_id','=',$id)
+                        ->get()->toArray();
+        $project_clients=[];
+        for ($i=0; $i < count($clients); $i++) { 
+            $client=$clients[$i];
+            $client['is_user']=false;
+            $client['is_client']=true;
+            $project_clients[]=$client;
+        }
+        return response()->json($project_clients);
+    }
+
     public function getTeams($id){
         $teams=Team::from('teams AS t')
                         ->join('teams_has_projects AS tp','t.id','=','tp.teams_id')
@@ -200,7 +239,51 @@ class ProjectController extends Controller
         return response()->json($members);
     }
 
-    public function addTeams(Request $request,$id){
+    public function addClients(Request $request,$id){
+        $project=Project::findOrFail($id);
+
+        $new_clients=$request->clients;
+        $inserted_clients=[];
+        
+        foreach ($new_clients as $key => $new_client) {
+            $client_has_project=new  ClientsHasProjects();
+            $client_has_project->projects_id=$id;
+            if(gettype($new_client)=='object') $client_has_project->clients_id=$new_client->id;
+            else if(gettype($new_client)=='array'){ 
+                $client_has_project->clients_id=$new_client['id'];
+            }
+            $client_has_project->save();
+            $inserted_clients[]=$client_has_project;
+        }
+
+        $clients=Client::from('clients AS c')
+                        ->join('clients_has_projects AS cp','c.id','=','cp.clients_id');
+        
+        foreach ($inserted_clients as $i => $client) {
+            $clients=$clients->where(function($query) use($client){
+                return $query->where('cp.projects_id','=',$client->projects_id)
+                                ->where('cp.clients_id','=',$client->clients_id);
+            });
+        }
+        $clients=$clients->get();
+        
+        return response()->json($clients);
+    }
+
+    public function removeClients(Request $request,$id,$clients_id){
+        $project=Project::findOrFail($id);
+        $clients_has_projects=ClientsHasProjects::where('projects_id','=',$id)->where('clients_id','=',$clients_id)->get();
+        for ($i=0; $i < count($clients_has_projects); $i++) { 
+            $cp=$clients_has_projects[$i];
+            foreach ($cp->task_member as $i => $member) {
+                $member->delete();
+            }
+            $cp->delete();
+        }
+        return response()->json("",200);
+    }
+
+    public function addTeam(Request $request,$id){
         $project=Project::findOrFail($id);
 
         $new_teams=$request->teams;
@@ -227,10 +310,8 @@ class ProjectController extends Controller
     public function removeTeams(Request $request,$id,$teams_id){
         $project=Project::findOrFail($id);
         $teams_has_projects=TeamsHasProjects::where('projects_id','=',$id)->where('teams_id','=',$teams_id)->get();
-        for ($i=0; $i < count($teams_has_projects); $i++) { 
-            $teams_has_projects[$i]->delete();
-        }
-        return response()->json("",200);
+        
+        return response()->json($teams_has_projects,200);
     }
 
     public function getMeetings(Request $request,$id){
@@ -423,6 +504,7 @@ class ProjectController extends Controller
         $new_approval->projects_id=$project->id;
         $new_approval->users_id=$request->users_id;
         $new_approval->new_deadline=$request->new_deadline;
+        $new_approval->old_deadline=$project->end;
         $new_approval->description=$request->description;
         $new_approval->status="Waiting for confirmation";
         $new_approval->title="Project deadline extension request from ".$user->name ;
