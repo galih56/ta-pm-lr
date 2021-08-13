@@ -73,7 +73,6 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
     if (file.source == 'upload') file_url += file.path
     if (file.source == 'google-drive') file_url = file.path;
 
-   
     var srcCardMedia = null;
     var file_type='';
     if(file.type){
@@ -106,7 +105,6 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
             srcCardMedia = FilesIcon;
             break;
     }
-    
     return (
         <Card className={classes.root}>
             <CardHeader
@@ -117,11 +115,7 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
                     <IconButton onClick={handleClick} size="large">
                         <MoreVertIcon />
                     </IconButton>
-<<<<<<< HEAD
-                }                
-=======
                 }
->>>>>>> b5fade4d291ee2c25c8d81331bfdc9c397759442
                 title={file.file_name?trimString(file.file_name):''}
                 subheader={moment(file.createdAt).format('MMMM Do YYYY, h:mm a')}
             />
