@@ -14,11 +14,9 @@ var initialStateOptions = {
         lineColor: "#6D78AD",
         labelFontColor: "#6D78AD",
         tickColor: "#6D78AD",  
-        includeZero: true,  
-        crosshair: {
-            enabled: true
-        },
+        includeZero: true, 
     },
+    
     axisY2: {
         title: ` - `,
         titleFontColor: "#51CDA0",
@@ -50,7 +48,12 @@ var initialStateOptions = {
     }]
 }
 
-const CustomedChart=({data,titleX,titleY,prop1,prop2,contentFormatter,labelXFormatter,labelYFormatter,labelY2Formatter})=> {
+const CustomedChart=({ 
+        data , titleX , titleY , prop1 , prop2,
+        contentFormatter , labelXFormatter,
+        labelYFormatter , labelY2Formatter,
+        maximumX,maximumY, stripLinesX, stripLinesY
+    })=> {
     const [options,setOptions]=useState(initialStateOptions);
     useEffect(()=>{
         var config={
@@ -72,12 +75,18 @@ const CustomedChart=({data,titleX,titleY,prop1,prop2,contentFormatter,labelXForm
                 lineColor: "#51CDA0",
                 labelFontColor: "#51CDA0",
                 tickColor: "#51CDA0", 
+                
             },
             toolTip: { shared: true },
         }
+        
         if(labelXFormatter) config.axisX.labelFormatter=labelXFormatter;
+        if(maximumX) config.axisX.maximum=maximumX;
+        if(maximumY) config.axisY.maximum=maximumY;
         if(labelYFormatter) config.axisY.labelFormatter=labelYFormatter;
         if(labelY2Formatter) config.axisY2.labelFormatter=labelY2Formatter;
+        if(stripLinesX) config.axisX.stripLines=stripLinesX;
+        if(stripLinesY) config.axisY.stripLines=stripLinesY;
         if(data)config.data=data
         if(contentFormatter)config.toolTip.contentFormatter=contentFormatter
         setOptions(config)

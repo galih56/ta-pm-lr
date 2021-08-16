@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { BrowserRouter as Router, Link, useHistory } from 'react-router-dom';
+import { BrowserRouter as Router, Link } from 'react-router-dom';
 import UserContext from '../../context/UserContext';
-import moment from 'moment';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -17,9 +17,9 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { visuallyHidden } from '@material-ui/utils';
-import ApprovalStatus from './../widgets/ApprovalStatus';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
+import FormCreateClient from './FormCreateClient';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) return -1;
@@ -45,9 +45,9 @@ function stableSort(array, comparator) {
 
 const headCells = [
     { id: 'name', align: 'left', disablePadding: true, label: 'Name' },
-    { id: 'project', align: 'left', disablePadding: false, label: 'Project' },
-    { id: 'status', align: 'left', disablePadding: false, label: 'Status' },
-    { id: 'created_at', align: 'right', disablePadding: false, label: 'Created/Updated at' },
+    { id: 'Institution', align: 'left', disablePadding: false, label: 'Institution' },
+    { id: 'City', align: 'left', disablePadding: false, label: 'City' },
+    { id: 'Contact', align: 'left', disablePadding: false, label: 'Contact' },
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -97,17 +97,17 @@ export default function EnhancedTable() {
     const [orderBy, setOrderBy] = useState('name');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [openFormCreate,setOpenFormCreate]=useState(false);
 
     let global = useContext(UserContext);
-    let history=useHistory();
 
     useEffect(() => {
-        getApprovals();
-        if(!global.state.current_project_member_role) history.push('/projects');
+        getClients();
+        if(!global.state.occupation?.name.toLowerCase().includes('administrator')) history.push('/projects');
     }, []);
 
-    const getApprovals = () => {
-        const url = `${process.env.MIX_BACK_END_BASE_URL}approvals?projects_id=${global.state.current_project_member_role?.project?.id}`;
+    const getClients = () => {
+        const url = `${process.env.MIX_BACK_END_BASE_URL}clients`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
@@ -138,17 +138,30 @@ export default function EnhancedTable() {
         <Grid container>        
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                 <Router>
-                    <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="projects">
+                    <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="clients">
                         <Button component={Link}  color="primary"
-                            to="/projects">
-                            Projects
+                            to="/Projects">
+                            projects
                         </Button>
+                        <Typography color="textPrimary">Clients</Typography>
                     </Breadcrumbs>
                 </Router>
             </Grid>
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12} >        
                 <Paper>
                     <div className={classes.root}>
+                        <Typography variant="h6">Clients</Typography>
+                        {(global.state.occupation?.name?.toLowerCase().includes('administrator'))?(
+                            <>
+                                <Button variant="contained" color="primary" onClick={()=>setOpenFormCreate(true)}><b>+</b> Create a new client</Button>
+                                <FormCreateClient
+                                    open={openFormCreate}
+                                    handleClose={()=>setOpenFormCreate(false)}
+                                    onCreate={(newClient)=>{
+                                        setRows([...rows,newClient])
+                                    }}/>
+                            </>
+                            ):<></>}
                         <TableContainer>
                             <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} padding="normal" >
                                 <EnhancedTableHead classes={classes} order={order} orderBy={orderBy}
@@ -159,36 +172,20 @@ export default function EnhancedTable() {
                                     {stableSort(rows, getComparator(order, orderBy))
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                         .map((row) => {
-                                            var maxLenght = 50;
-                                            var trimmedString = (typeof row.description =='string') ? (row.description.length > maxLenght ? row.description.substring(0, maxLenght - 3) + "..." : row.description):"";
-                                            var url=``;
-                                            if(row.task){
-                                                url=(row.parent_task_id)?
-                                                `/projects/${row.project.id}/timeline?tasks_id=${row.parent_task_id}`:
-                                                `/projects/${row.project.id}/timeline?tasks_id=${row.tasks_id}`;
-                                            }else{
-                                                url=`/projects/${row.project.id}/timeline`
-                                            }
                                             return (
                                                 <TableRow hover key={row.id}>
                                                     <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}>
-                                                        <Link to={`/approvals/${row.id}`} style={{textDecoration:'none'}}><b>{row.title}</b></Link>
-                                                        <br/>
-                                                        {trimmedString}
+                                                        <Link to={`/clients/${row.id}`} style={{textDecoration:'none'}}>
+                                                        {row.name}</Link>
                                                     </TableCell>
                                                     <TableCell align="left">
-                                                        <Link target={"_blank"}  style={{textDecoration:'none'}}
-                                                            to={url}>{row.project.title}</Link>
+                                                        {row.institution}
                                                     </TableCell>
-                                                    <TableCell align="left"><ApprovalStatus status={row.status}/></TableCell>
-                                                    <TableCell align="right">
-                                                        Created at : 
-                                                        <br/>
-                                                        {row.created_at ? moment(row.created_at).format('DD MMM YYYY') : ''}
-                                                        <br/>
-                                                        Updated at : 
-                                                        <br/>
-                                                        {row.updated_at ? moment(row.updated_at).format('DD MMM YYYY') : ''}
+                                                    <TableCell align="left">
+                                                        {row.city}
+                                                    </TableCell>
+                                                    <TableCell align="left">
+                                                        {row.phone_number}
                                                     </TableCell>
                                                 </TableRow>
                                             );

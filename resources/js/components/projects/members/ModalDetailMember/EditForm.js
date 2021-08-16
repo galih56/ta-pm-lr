@@ -40,7 +40,7 @@ const OpenEditForm = ({ isEdit, data, setData}) => {
         return (
             <Grid container spacing={2} style={{ paddingLeft: 3, paddingRight: 3 }} >
                 <Grid item lg={12} md={12} sm={12} xs={12} align="center">
-                    <Avatar alt={"Photo profile " + data.name} className={classes.photoProfileBg}>{data.name.charAt(0).toUpperCase()}</Avatar>
+                    <Avatar alt={"Photo profile " + data.name} className={classes.photoProfileBg}>{data.name?.charAt(0).toUpperCase()}</Avatar>
                     <Typography variant="h6">{data.name}</Typography>
                     <Typography variant="body2">{data.email}</Typography>
                 </Grid>
@@ -67,7 +67,7 @@ const OpenEditForm = ({ isEdit, data, setData}) => {
         return (
             <Grid container spacing={2} style={{ paddingLeft: 4, paddingRight: 4 }} >
                 <Grid item lg={12} md={12} sm={12} xs={12} align="center">
-                    <Avatar alt={"Photo profile " + data.name} className={classes.photoProfileBg}>{data.name.charAt(0).toUpperCase()}</Avatar>
+                    <Avatar alt={`Photo profile ${data.name}`} className={classes.photoProfileBg}>{data.name?.charAt(0).toUpperCase()}</Avatar>
                     <Typography variant="h6">{data.name}</Typography>
                     <Typography variant="body2">{data.email}</Typography>
                 </Grid>

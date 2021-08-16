@@ -12,7 +12,7 @@ const TableTasks=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, onTa
     },[tasks]);
     
     return(
-        <Table  style={{ minWidth: 1800}} size={'small'} >
+        <Table size={'small'} >
             <EnhancedTableHead headCells={headCells}/>
             <TableBody>
                 {rows?rows.map((task)=>{

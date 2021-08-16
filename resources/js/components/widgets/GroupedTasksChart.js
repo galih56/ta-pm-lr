@@ -26,12 +26,12 @@ const GroupedTasksChart = ({groupedTasks}) => {
     var labels=[ 'Lebih cepat','Tepat waktu','Terlambat','Belum dilaksanakan','Belum selesai'];
     var datasets=[
         {
-            name: `Started `,
+            name: `Mulai `,
             showInLegend: true,
             dataPoints: [ {y:groupedTasks.mulai_cepat, label:'Lebih cepat'}, {y:groupedTasks.mulai_tepat_waktu, label:'Tepat waktu'}, {y:groupedTasks.mulai_telat, label:'Terlambat'}, {y:groupedTasks.belum_dilaksanakan, label:'Belum dilaksanakan'}, {y:groupedTasks.belum_selesai, label:'Belum selesai'} ]
         },
         {
-            name: `Finished `,
+            name: `Selesa `,
             showInLegend: true,
             dataPoints:[ {y:groupedTasks.selesai_cepat, label:'Lebih cepat'}, {y:groupedTasks.selesai_tepat_waktu, label:'Tepat waktu'},{ y:groupedTasks.selesai_telat, label:'Terlambat'},  {y:groupedTasks.belum_dilaksanakan, label:'Belum dilaksanakan'}, {y:groupedTasks.belum_selesai, label:'Belum selesai'} ]
         },

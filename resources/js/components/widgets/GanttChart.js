@@ -24,7 +24,7 @@ class GanttChart extends React.Component {
 
     getGanttDataSource(){
         var data=[];
-        var columns=this.props.detailProject.columns;
+        var columns=this.props.lists;
         for (let i = 0; i < columns.length; i++) {
             columns[i].isManual=false;
             var column=columns[i];
@@ -81,7 +81,7 @@ class GanttChart extends React.Component {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (prevProps.detailProject.columns !== this.props.detailProject.columns) {    
+        if (prevProps.lists !== this.props.lists) {    
             setTimeout(()=>{
                 this.getGanttDataSource();
             },500);
@@ -218,20 +218,3 @@ class GanttChart extends React.Component {
 }
 
 export default GanttChart
-
-
-//warna
-//tepat waktu #1e88e5
-//Telat #e53935
-//lebih cepat #43a047
-
-
-
-// recordDoubleClick={(row)=>{
-//     if(('lists_id' in row.rowData.taskData)){
-//         this.props.handleDetailTaskOpen({
-//             open:true,
-//             tasks_id:row.rowData.taskData.id
-//         })
-//     }
-// }}

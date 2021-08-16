@@ -18,7 +18,6 @@ import Button from '@material-ui/core/Button';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import { visuallyHidden } from '@material-ui/utils';
-import { useSnackbar } from 'notistack';
 import ModalDetailMember from './ModalDetailMember/ModalDetailMember';
 import TaskList from '../../tasks/TaskList';
 import moment from 'moment';

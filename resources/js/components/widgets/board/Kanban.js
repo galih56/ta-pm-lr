@@ -105,7 +105,7 @@ const Kanban = (props) => {
                 });
     }
     const onCardClick = (cardId, metadata,laneId) =>{ 
-        handleDetailTaskOpen({ projects_id: detailProject.id, lists_id: laneId, tasks_id: cardId, open: true,onTaskDelete:onCardDelete});
+        handleDetailTaskOpen({ task : {projects_id: detailProject.id, lists_id: laneId, id: cardId, onTaskDelete:onCardDelete}, open: true});
     }
     const EditLaneFormWithDetailProject=(props)=>{
         return (

@@ -3,7 +3,8 @@ const themeConfig = (theme) => {
     return {
         root: { display: 'flex', zIndex: 500 },
         toolbar: { paddingRight: 24 },
-        toolbarIcon: { display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '0 8px', ...theme.mixins.toolbar, },
+        toolbarLogo: { display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2px',width:'100%' },
+        toolbarIcon: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px', ...theme.mixins.toolbar, },
         appBar: {
             zIndex: theme.zIndex.drawer + 5,
             transition: theme.transitions.create(['width', 'margin'], {

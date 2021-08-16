@@ -57,4 +57,8 @@ class Project extends Model
     public function logs(){
         return $this->hasMany(ActivityLog::class,'projects_id');
     }
+    
+    public function clients(){
+        return $this->hasMany(ClientsHasProjects::class,'clients_id');
+    }
 }
