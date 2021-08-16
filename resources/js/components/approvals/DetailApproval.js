@@ -2,7 +2,6 @@ import React,{useState,useContext,useEffect} from 'react';
 import UserContext from './../../context/UserContext';
 import axios from 'axios';
 import {Link, BrowserRouter as Router,useHistory} from 'react-router-dom';
-import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
@@ -18,6 +17,7 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import ApprovalStatus from './../widgets/ApprovalStatus';
 import moment from 'moment';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function DetailApproval(props) {
     const global=useContext(UserContext);
@@ -35,16 +35,21 @@ export default function DetailApproval(props) {
     }, []);
 
     const getDetailApproval=()=>{
+        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'approvals/'+params.id;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setData(result.data);
-                console.log(result.data);
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -56,12 +61,20 @@ export default function DetailApproval(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + 'approvals/'+params.id;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.patch(url,body)
-            .then((result,body) => {
-                setData(result.data);
-            }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+    
+        toast.promise(
+            axios.patch(url, body),
+            {
+                loading: 'Updating...',
+                success: (result)=>{
+                    setData(result.data);
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
     useEffect(()=>{
@@ -78,6 +91,7 @@ export default function DetailApproval(props) {
     }
     return (
         <Paper style={{ padding: '1em',width:'100%' }}>
+            <Toaster/>
             <Grid container>
                 <Grid xl={12}item lg={12} md={12} sm={12} xs={12}>
                     <Router>
@@ -97,7 +111,7 @@ export default function DetailApproval(props) {
                 <Grid item xl={12} lg={12} md={12} sm={12}>
                     <Typography variant="h6" component="div"><b>{data.title}</b> </Typography>
                     <Typography variant="caption" component="div">
-                        Deadline extended ({moment(data.old_deadline).format('DD MMMM YYYY')} >>> {moment(data.new_deadline).format('DD MMMM YYYY')})
+                        Deadline extended ({moment(data.old_deadline).format('DD MMMM YYYY')} {`>>>`} {moment(data.new_deadline).format('DD MMMM YYYY')})
                         <br/>
                         {data.created_at?(<span>Created at : {moment(data.created_at).format('DD MMMM YYYY')}</span>):<></>}
                         {(data.updated_at && data.updated_at!=data.created_at)?(<span style={{marginLeft:'0.5em'}}>Updated at : {moment(data.updated_at).format('DD MMMM YYYY')}</span>):<></>}

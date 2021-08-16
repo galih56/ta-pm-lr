@@ -2,8 +2,8 @@ import React,{useState,useContext} from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import axios from 'axios'
-import { useSnackbar } from 'notistack';
+import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 import UserContext from './../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
 import { Dialog, IconButton, Typography, } from '@material-ui/core/';
@@ -38,17 +38,11 @@ const DialogContent = withStyles((theme) => ({
     root: { padding: theme.spacing(2) },
 }))(MuiDialogContent);
 
-const DialogActions = withStyles((theme) => ({
-    root: { margin: 0, padding: theme.spacing(1) },
-}))(MuiDialogActions);
-
 const FormCreateTeam=({open,handleClose,onCreate})=>{
     const global=useContext(UserContext);
     const [name,setName]=useState('');
     const [description,setDescription]=useState('');
     const [users,setUsers]=useState([]);
-    const { enqueueSnackbar } = useSnackbar();
-    const snackbar = (message, variant) =>  enqueueSnackbar(message, { variant });
 
     const formCreateOnSubmit=()=>{
         const body = {
@@ -60,14 +54,20 @@ const FormCreateTeam=({open,handleClose,onCreate})=>{
         const url = process.env.MIX_BACK_END_BASE_URL + 'teams';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, body)
-            .then((result) => {
-                onCreate(result.data);
-                handleClose();
-                snackbar(`A new team successfully created`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.post(url, body),
+            {
+                loading: 'Creating a new team',
+                success: (result)=>{
+                    onCreate(result.data);
+                    handleClose();
+                    return <b>A new team successfuly created</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
 
@@ -82,6 +82,7 @@ const FormCreateTeam=({open,handleClose,onCreate})=>{
                         e.preventDefault();
                         formCreateOnSubmit();
                     }}>
+                    <Toaster/>
                     <Grid  container spacing={2}>
                         <Grid lg={12} md={12} sm={12} xs={12} item>
                             <TextField variant="standard"

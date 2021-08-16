@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useContext, memo } from 'react';
 import UserContext from '../../../context/UserContext';
-import { Dialog, AppBar, Toolbar, Button, Slide, IconButton } from '@material-ui/core';
+import IconButton from '@material-ui/core/IconButton';
 // import { gapi } from 'gapi-script';
 import { Icon, InlineIcon } from '@iconify/react';
 import googleDrive from '@iconify-icons/mdi/google-drive';
 import axios from 'axios';
 import GooglePicker from 'react-google-picker';
+import toast, { Toaster } from 'react-hot-toast';
+
 const GoogleDriveButton = (props) => {
-    const handleSnackbar = props.snackbar;
     const global = useContext(UserContext);
     const payload = props.payload;
 
@@ -44,25 +45,33 @@ const GoogleDriveButton = (props) => {
                 source: 'google-drive',
                 files: data.docs
             }
-            if (!window.navigator.onLine) handleSnackbar(`You are currently offline`, 'warning');
+            if (!window.navigator.onLine) toast.error(`You are currently offline`);
 
             const config ={ headers: { 'X-Authorization':`Bearer ${global.state.token}`, 'Content-Type': 'application/json'  } }
             const url = process.env.MIX_BACK_END_BASE_URL + 'task-attachments/';
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.post(url, body, config)
-                .then((result) => {
-                    Object.assign(payload, { data: result.data });
-                    global.dispatch({ type: 'create-new-attachments', payload: payload })
-                    handleSnackbar(`Data has been updated`, 'success');
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            toast.promise(
+                axios.post(url, body),
+                {
+                    loading: 'Uploadng new attachments',
+                    success: (result)=>{
+                        clearState();
+                        Object.assign(payload, { data: result.data });
+                        global.dispatch({ type: 'create-new-attachments', payload: payload })
+                        return <b>A new meeting successfuly created</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
                 });
         }
     }
     return (
         <React.Fragment>
+            <Toaster/>
             {/* <IconButton onClick={() => { loadPicker() }}>
                 <Icon icon={googleDrive} />
             </IconButton> */}

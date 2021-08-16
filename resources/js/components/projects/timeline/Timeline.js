@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import UserContext from '../../../context/UserContext';
-import makeStyles from '@material-ui/styles/makeStyles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableContainer from '@material-ui/core/TableContainer';
-import axios from 'axios';
-import { useSnackbar } from 'notistack';
 import EditLaneForm from '../../widgets/board/EditLaneForm'
+import toast, { Toaster } from 'react-hot-toast';
 import Row from './Row';
+import axios from 'axios';
 
 const headCells = [
     { id: 'Title', align: 'left', label: 'Title' },
@@ -29,8 +28,6 @@ function Timeline(props) {
     const [rows, setRows] = useState([]);
 
     let global = useContext(UserContext);
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     useEffect(() => {
         setRows(props.data);
@@ -85,30 +82,37 @@ function Timeline(props) {
             const url = process.env.MIX_BACK_END_BASE_URL + 'tasks';
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.post(url, newTask)
-                .then((result) => {
-                    newTask.id = result.data.id;
-                    newTask.projects_id = detailProject.id;
-                    newTask.lists_id = laneId;
-                    global.dispatch({ type: 'create-new-task', payload: newTask })
-                    setRows(rows.map((row)=>{
-                        if(row.id==selectedList.id) row.cards.push(newTask)
-                        return row
-                    }))
-                    handleSnackbar(`A new card successfuly created`, 'success');
-                }).catch(error => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            toast.promise(
+                axios.post(url, body),
+                {
+                    loading: 'Creating a new task',
+                    success: (result)=>{
+                        newTask.id = result.data.id;
+                        newTask.projects_id = detailProject.id;
+                        newTask.lists_id = laneId;
+                        global.dispatch({ type: 'create-new-task', payload: newTask })
+                        setRows(rows.map((row)=>{
+                            if(row.id==selectedList.id) row.cards.push(newTask)
+                            return row
+                        }))
+                        return <b>A new meeting successfuly created</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
                 });
         } else {
-            handleSnackbar(`You're currently offline. Please check your internet connection`, 'warning');
+            toast.error(`You're currently offline. Please check your internet connection`);
             global.dispatch({ type: 'create-new-task', payload: newTask });
         }
     }
 
     return (
         <>
-            <TableContainer  style={{ minWidth: 1800}}>         
+           <Toaster/> 
+           <TableContainer  style={{ minWidth: 1800}}>         
                 <Table size={'small'} >
                     <TableBody>
                         {rows.map((row) => {

@@ -1,6 +1,5 @@
 import 'fontsource-roboto';
 import React, { useEffect, useContext, useState } from 'react';
-import { useHistory } from "react-router-dom";
 import UserContext from '../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
 import { Dialog, IconButton, Typography } from '@material-ui/core/';
@@ -9,9 +8,9 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import CloseIcon from '@material-ui/icons/Close';
 import axios from 'axios';
-import { useSnackbar } from 'notistack';
 import DialogActionButtons from './DialogActionButtons';
 import EditForm from './EditForm';
+import toast, { Toaster } from 'react-hot-toast';
 
 // https://stackoverflow.com/questions/35352638/react-how-to-get-parameter-value-from-query-string
 const styles = (theme) => ({
@@ -49,16 +48,13 @@ export default function ModalDetailMeeting(props) {
     const {open,closeModal,detailProject,initialState} = props;
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const global = useContext(UserContext);
-    const history = useHistory();
     const [data, setData] = useState(initialState);
     const [isEditing, setIsEditing] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
-
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
-
+    
     const getDetailMeeting = () => {
         if (window.navigator.onLine) {
+            const toast_loading = toast.loading('Loading...');
             const url = process.env.MIX_BACK_END_BASE_URL + 'meetings/' + initialState.id;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -67,12 +63,17 @@ export default function ModalDetailMeeting(props) {
                     const data = result.data;
                     global.dispatch({ type: 'store-detail-meeting', payload: data })
                     setData(data);
+                    toast.dismiss(toast_loading);
                 }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                    toast.dismiss(toast_loading);
+                    switch(error.response.status){
+                        case 401 : toast.error(<b>Unauthenticated</b>); break;
+                        case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                        default : toast.error(<b>{error.response.statusText}</b>); break
+                    }
                 });
         } else {
-            handleSnackbar(`You're currently offline. Please check your internet connection.`, 'warning');
+            toast.error(`You're currently offline. Please check your internet connection.`);
         }
     }
     
@@ -85,18 +86,20 @@ export default function ModalDetailMeeting(props) {
             const url = process.env.MIX_BACK_END_BASE_URL + `meetings/${initialState.id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            try {
-                axios.patch(url, body)
-                    .then((result) => {
+            toast.promise(
+                axios.patch(url, body),
+                {
+                    loading: 'Updating...',
+                    success: (result)=>{
                         setData(result.data);
-                        handleSnackbar(`Data has been updated`, 'success');
-                    }).catch((error) => {
-                        const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                        global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                    });
-            } catch (error) {
-                handleSnackbar('Failed to send request', 'error');
-            }
+                        return <b>Successfully updated</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
+                });
         }
     }
 
@@ -105,21 +108,24 @@ export default function ModalDetailMeeting(props) {
             const url = process.env.MIX_BACK_END_BASE_URL + `meetings/${data.id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            try {
-                axios.delete(url, {}, config)
-                    .then((result) => {
-                        handleSnackbar(`Data has been deleted`, 'success');
-                    }).catch((error) => {
-                        const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                        global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                    });
-            } catch (error) {
-                handleSnackbar('Failed to send request', 'error')
-            }
+            toast.promise(
+                axios.delete(url),
+                {
+                    loading: 'Deleting...',
+                    success: (result)=>{
+                        return <b>Successfully deleted</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
+                });
         }
     }
     return (
         <Dialog open={open} maxWidth={'lg'} fullwidth={"true"}>
+            <Toaster/>
             <DialogTitle onClose={closeModal}>Meeting information</DialogTitle>
             <DialogContent dividers>
                 <EditForm 

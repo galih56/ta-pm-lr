@@ -18,28 +18,15 @@ export default function UserSearchbar(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + 'users';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url)
-            .then((result) => {
-                setUsers(result.data);
-            }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
-            });
+        axios.get(url).then(result => setUsers(result.data)).catch(console.log);
     }
     
     const getClients = () => {
         const url = process.env.MIX_BACK_END_BASE_URL + 'clients';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url)
-            .then((result) => {
-                setClients(result.data);
-            }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
-            });
+        axios.get(url).then(result => setClients(result.data)).catch(console.log);
     }
-
     useEffect(() => {
         if(detailProject?.members?.length) setUsers(detailProject.members);
         if(detailProject?.clients?.length) setClients(detailProject.clients);

@@ -23,6 +23,7 @@ import TaskList from '../../tasks/TaskList';
 import moment from 'moment';
 import axios from 'axios';
 import ModalCreateMember from './ModalCreateMember';
+import toast, { Toaster } from 'react-hot-toast';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) return -1;
@@ -154,10 +155,9 @@ export default function EnhancedTable(props) {
         setPage(0);
     };
 
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
     return (
         <div className={classes.root}>
+            <Toaster/>
             <Grid>
                 <Typography variant="h6">Members  <Button color="primary" component="span" onClick={() => setNewMemberOpen(true)}>+ Add new member</Button></Typography>
             </Grid>
@@ -178,11 +178,6 @@ export default function EnhancedTable(props) {
                                     <Row key={row.id} data={row} handleDetailTaskOpen={handleDetailTaskOpen} handleModalOpen={handleModalOpen} projects_id={projects_id}/>
                                 );
                             })}
-                        {emptyRows > 0 && (
-                            <TableRow style={{ height: (53) * emptyRows }} >
-                                <TableCell colSpan={6} />
-                            </TableRow>
-                        )}
                     </TableBody>
                 </Table>
             </TableContainer>
@@ -217,15 +212,21 @@ function Row(props) {
     let global = useContext(UserContext);
 
     const getTasks = (id) => {
+        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'project-members/' + id + '/tasks';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setTasks(result.data);
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 

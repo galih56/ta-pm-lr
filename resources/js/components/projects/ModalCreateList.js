@@ -17,12 +17,12 @@ import { useHistory } from 'react-router-dom';
 import UserContext from '../../context/UserContext';
 import CloseIcon from '@material-ui/icons/Close';
 import Alert from '@material-ui/core/Alert';
-import { useSnackbar } from 'notistack';
 import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import moment from 'moment'
 import { parseISO } from 'date-fns'; 
+import toast, { Toaster } from 'react-hot-toast';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },
@@ -69,9 +69,7 @@ export default function ModalCreateList(props) {
     const [start, setStart] = useState(null);
     const [end, setEnd] = useState(null);
     const [dateRange, setDateRange] = useState([null, null]);
-    const { enqueueSnackbar } = useSnackbar();
     const global = useContext(UserContext);
-    const snackbar = (message, variant) =>  enqueueSnackbar(message, { variant });
 
     const submitData = () => {
         const body = {
@@ -81,20 +79,31 @@ export default function ModalCreateList(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + 'lists/';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, body)
-            .then((result) => {
-                setTitle(''); closeModal();
-                global.dispatch({ type: 'create-new-list', payload: result.data });
-                snackbar(`A new list successfully created`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: history }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.post(url, body),
+            {
+                loading: 'Creating a new meeting schedule',
+                success: (result)=>{
+                    setTitle(''); closeModal();
+                    global.dispatch({ type: 'create-new-list', payload: result.data });
+                    return <b>A new list successfully created</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
 
-    const checkIfAuthenticated = () => {
-        if (global.state.authenticated === true) {
-            return (
+    return (
+        <Dialog aria-labelledby="Create a list" open={open}>
+            <DialogTitle onClose={
+                () => {
+                    closeModal(false);
+                }} > Create a new list </DialogTitle>
+            {(global.state.authenticated===true)?(
+                
                 <React.Fragment>
                     <DialogContent dividers>
                         <Grid container spacing={2} style={{ paddingLeft: 3, paddingRight: 3 }} >
@@ -141,24 +150,12 @@ export default function ModalCreateList(props) {
                         <Button onClick={submitData} color="primary">Create</Button>
                     </DialogActions>
                 </React.Fragment>
-            )
-        } else {
-            return (
+            ):(
                 <DialogContent dividers>
                     <Alert severity="warning">Your action requires authentication. Please sign in.</Alert>
                 </DialogContent>
-            )
-        }
-    }
-    return (
-        <Dialog aria-labelledby="Create a list" open={open}>
-            <DialogTitle onClose={
-                () => {
-                    closeModal(false);
-                }} > Create a new list </DialogTitle>
-            {
-                checkIfAuthenticated()
-            }
+            )}
+            <Toaster/>
         </Dialog>
     );
 }

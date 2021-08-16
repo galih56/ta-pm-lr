@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import UserContext from '../../../context/UserContext';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import TableTasks from './TableTasks';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
@@ -14,28 +14,33 @@ function Row(props) {
     const { data, handleDetailTaskOpen,onClick,headCells, onTaskUpdate, onTaskDelete } = props;
     const [openCollapsible, setOpenCollapsible] = useState(true);
     let global = useContext(UserContext);
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     const handleCompleteTask = (task,event) => {
         const body = { complete: event.target.checked };
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${task.id}/complete`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.patch(url, body)
-            .then((result) => {
-                var result=result.data;
-                if(task.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
-                else global.dispatch({ type: 'store-detail-task', payload: result });
-                handleSnackbar(`Data has been updated`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.patch(url, body),
+            {
+                loading: 'Updating...',
+                success: (result)=>{
+                    var result=result.data;
+                    if(task.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                    else global.dispatch({ type: 'store-detail-task', payload: result });
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
     
     return (
         <React.Fragment>
+            <Toaster/>
             <TableRow hover key={data.id} style={{ color:'#393939', backgroundColor:'#e3e3e3' }}>
                 <TableCell>
                     <IconButton size="small"

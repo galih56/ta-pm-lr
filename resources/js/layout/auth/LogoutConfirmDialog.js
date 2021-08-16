@@ -6,34 +6,41 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import axios from 'axios';
-import { useSnackbar } from 'notistack';
-
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function LogoutConfirmDialog(props) {
     const open = props.open;
     const handleClose = props.handleDialogClose;
     const global = useContext(UserContext);
     const history=useHistory();
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     const handleConfirm = () => {
-        axios.defaults.withCredentials = true
-        axios.post(process.env.MIX_BACK_END_BASE_URL + 'logout', {}, {
-            headers: { 
-                'X-Authorization':`Bearer ${global.state.token}`, 
-                'Content-Type': 'application/json' 
-            }
-         })
-            .then((result) => {
-                handleClose();
-                global.dispatch({ type: 'logout' });
-                history.push('/auth');
-            }).catch((error) => console.log(error));
+        toast.promise(
+            axios.post(process.env.MIX_BACK_END_BASE_URL + 'logout', {}, {
+                headers: { 
+                    'Authorization':`Bearer ${global.state.token}`, 
+                    'Content-Type': 'application/json' 
+                }
+             }),
+            {
+                loading: 'Logging Out',
+                success: (result)=>{
+                    handleClose();
+                    global.dispatch({ type: 'logout' });
+                    history.push('/auth');
+                    return <b>Logged Out</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                }
+            });
     }
 
     return (
         <Dialog open={open} onClose={handleClose} >
+            <Toaster/>
             <DialogTitle>Are you sure?</DialogTitle>
             <DialogActions>
                 <Button autoFocus onClick={handleClose}>Cancel</Button>

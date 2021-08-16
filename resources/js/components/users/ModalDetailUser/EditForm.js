@@ -12,6 +12,7 @@ import InputLabel from '@material-ui/core/InputLabel';
 import UserContext from '../../../context/UserContext';
 import moment from 'moment';
 import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 // import SaveIcon from '@material-ui/icons/Save';
 
 const useStyles = makeStyles((theme) => ({
@@ -26,15 +27,21 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile }) => {
     let global = useContext(UserContext);
 
     const getOccupations = () => {
+        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'occupations';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setOccupations(result.data);
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -45,11 +52,12 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile }) => {
     if (isEdit) {
         return (
             <Grid container spacing={2} style={{ paddingLeft: 4, paddingRight: 4 }} >
+                <Toaster/>
                 <Grid item lg={12} md={12} sm={12} xs={12} align="center">
                     <TextField
                         defaultValue={data.name}
                         onChange={(e) => setData({ ...data, name: e.target.value })}
-                        style={{ width: '100%' }}
+                        fullWidth
                         variant="standard"
                     />
                 </Grid>

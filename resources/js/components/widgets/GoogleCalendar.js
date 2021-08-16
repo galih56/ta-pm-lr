@@ -1,21 +1,18 @@
-import React, { useState, useEffect,useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import UserContext from '../../context/UserContext';
 import {v4 as uuidv4} from 'uuid';
 import { gapi } from 'gapi-script';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import { useSnackbar } from 'notistack';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Icon } from '@iconify/react';
 import googleMeet from '@iconify-icons/logos/google-meet';
 import googleCalendar from '@iconify-icons/logos/google-calendar';
-
+import toast, { Toaster } from 'react-hot-toast';
 
 const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
     const [loading, setLoading]=useState(false);
     const global=useContext(UserContext);
-    const { enqueueSnackbar } = useSnackbar();
-    const snackbar = (message, variant) =>  enqueueSnackbar(message, { variant });
     
     function insertEvent(calendarId,cb){
         var requestId = uuidv4();
@@ -47,7 +44,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
             });
             insertRequest.execute(function(event) {
                 if(event.error){
-                    snackbar('Failed to create google calendar event','danger')
+                    toast.error('Failed to create google calendar event')
                 }else{
                     saveChanges({googleCalendarInfo:event})
                 }
@@ -71,14 +68,14 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                     insertRequest.execute(function(response) {
                        var newCalendar= response.result;
                        insertEventCallback(newCalendar.id);
-                       snackbar('A new calendar was created on google calendar','success');
+                       toast.success('A new calendar was created on google calendar');
                     });
                 });
             }else{
                 insertEventCallback(calendarWithProjectName.id);
             }
         }else{
-            snackbar('Please choose a valid email','warning');
+            toast.error('Please choose a valid email');
         }
 
     }
@@ -111,12 +108,12 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
             var params = { calendarId: calendarId, eventId: eventId };
             var deleteRequest =gapi.client.calendar.events.delete(params, function(err) {
               if (err) { console.log('The API returned an error: ',err); return; }
-              snackbar('Event deleted.')
+              toast.success('Event deleted')
             });
             
             deleteRequest.execute(function(event) {
                 if(event.error){
-                    snackbar('Failed to delete google calendar event','danger')
+                    toast.error('Failed to delete google calendar event')
                 }else{
                     console.log('Event deleted.');
                 }
@@ -159,7 +156,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                                         }
                                     }
                                     else{
-                                        snackbar('Please choose a valid email','warning');
+                                        toast.error('Please choose a valid email');
                                     }
                                 });
                             });
@@ -180,6 +177,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                     <CircularProgress disableShrink={false} style={{margin:'1em'}}/>
                 </Grid>
                 ):<></>}
+                <Toaster/>
             <Grid item  lg={6} md={6} sm={12} xs={12} align="center" alignContent="center">
                 <Button onClick={()=>{
                     gapi.load('client:auth2', function(){

@@ -20,6 +20,7 @@ import { visuallyHidden } from '@material-ui/utils';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import FormCreateClient from './FormCreateClient';
+import toast,{Toaster} from 'react-hot-toast';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) return -1;
@@ -107,15 +108,21 @@ export default function EnhancedTable() {
     }, []);
 
     const getClients = () => {
+        const toast_loading = toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}clients`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setRows(result.data);
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -131,11 +138,10 @@ export default function EnhancedTable() {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
-
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
+    
     return (
-        <Grid container>        
+        <Grid container>  
+        <Toaster/>  
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                 <Router>
                     <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="clients">
@@ -169,7 +175,7 @@ export default function EnhancedTable() {
                                     rowCount={rows.length}
                                 />
                                 <TableBody>
-                                    {stableSort(rows, getComparator(order, orderBy))
+                                    {(rows.length>0)?stableSort(rows, getComparator(order, orderBy))
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                         .map((row) => {
                                             return (
@@ -189,8 +195,13 @@ export default function EnhancedTable() {
                                                     </TableCell>
                                                 </TableRow>
                                             );
-                                        })}
-                                    {emptyRows > 0 && (<TableRow style={{ height: (53) * emptyRows }} > <TableCell colSpan={6} /> </TableRow>)}
+                                        }):(    
+                                            <TableRow>
+                                                <TableCell  colSpan={headCells.length} align="center">
+                                                    <Typography variant="body1">There is no data to show</Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
                                 </TableBody>
                             </Table>
                         </TableContainer>

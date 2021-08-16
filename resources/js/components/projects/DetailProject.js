@@ -11,7 +11,7 @@ import BreadCrumbs from './BreadCrumbs';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import UserContext from '../../context/UserContext';
 import AddIcon from '@material-ui/icons/Add';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 
 const ModalCreateList = lazy(() => import('./ModalCreateList'));
@@ -96,7 +96,6 @@ const clickedMeetingInitialState={
 };
 
 const DetailProject = (props) => {
-    const { enqueueSnackbar } = useSnackbar();
     let global = useContext(UserContext);
     let history = useHistory();
     let location = useLocation();
@@ -111,9 +110,8 @@ const DetailProject = (props) => {
     const [tabState, setTabState] = useState(getCurrentTabIndex(location, history, params.id));
     const [clickedTask, setClickedTask] = useState(clickedTaskInitialState);
     const [detailTaskOpen,setDetailTaskOpen]=useState(false)
+    const [detailMeetingOpen,setDetailMeetingOpen]=useState(false)
     const [clickedMeeting, setClickedMeeting] = useState(clickedMeetingInitialState);
-
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     const getUserMemberRole=(project)=>{
         var user=null;
@@ -140,19 +138,22 @@ const DetailProject = (props) => {
         axios.get(url)
             .then((result) => {
                 const data = result.data;
-                global.dispatch({ type: 'store-detail-project', payload: data })
                 setDetailProject(data);
                 getUserMemberRole(data);
+                global.dispatch({ type: 'store-detail-project', payload: data });
             }).catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
             
         if (!window.navigator.onLine) {
             const currentProject=getProjectFromState(global.state.projects, params.id);
             getUserMemberRole(currentProject)
             if(currentProject)setDetailProject(currentProject);
-            handleSnackbar(`You're currently offline. Please check your internet connection.`, 'warning');
+            toast.error(`You're currently offline. Please check your internet connection.`);
         }
     }
 
@@ -361,6 +362,18 @@ const DetailProject = (props) => {
                         onTaskDelete={clickedTask.onTaskDelete}
                         />
                 ):<></>}
+                {(clickedMeeting.id && detailMeetingOpen)?
+                <ModalDetailMeeting
+                    open={detailMeetingOpen}
+                    closeModal={()=>handleDetailMeetingOpen({open:false,meeting:clickedMeetingInitialState})}
+                    detailProject={{ 
+                        id:detailProject.id,
+                        start:detailProject.start,end:detailProject.end,
+                        members:detailProject.members,
+                        clients:detailProject.clients
+                    }}
+                    initialState={clickedMeeting}
+                />:<></>}
             </Suspense>
         </Router>
     );

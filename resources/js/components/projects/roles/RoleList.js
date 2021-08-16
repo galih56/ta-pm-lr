@@ -14,10 +14,10 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import { visuallyHidden } from '@material-ui/utils';
-import { useSnackbar } from 'notistack';
-import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 import ModalCreateRole from './ModalCreateRole';
 import ModalDetailRole from './ModalDetailRole';
+import axios from 'axios';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) return -1;
@@ -95,24 +95,27 @@ export default function EnhancedTable(props) {
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
     let global = useContext(UserContext);
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     useEffect(() => {
         getRoles();
     }, []);
 
     const getRoles = () => {
-        const config = { mode: 'no-cors', crossdomain: true, }
+        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'member-roles';        
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, config)
+        axios.get(url)
             .then((result) => {
                 setRows(result.data);
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -129,11 +132,10 @@ export default function EnhancedTable(props) {
         setPage(0);
     };
 
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
     return (
         <div className={classes.root}>
             <Grid>
+                <Toaster/>
                 <Typography variant="h6">Roles  <Button color="primary" component="span" onClick={() => setNewRoleOpen(true)}>+ Add new role</Button></Typography>
             </Grid>
             <TableContainer>
@@ -146,22 +148,24 @@ export default function EnhancedTable(props) {
                         rowCount={rows.length}
                     />
                     <TableBody>
-                        {stableSort(rows, getComparator(order, orderBy))
-                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                            .map((row, index) => {
-                                return (
-                                    <TableRow key={row.id} hover onClick={()=>{
-                                        setModalDetailOpen({open:true,data:row})
-                                    }} >
-                                        <TableCell scope="row" > {row.name}</TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        {emptyRows > 0 && (
-                            <TableRow style={{ height: (53) * emptyRows }} >
-                                <TableCell colSpan={6} />
-                            </TableRow>
-                        )}
+                        {(rows.length>0)?
+                            (stableSort(rows, getComparator(order, orderBy))
+                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                .map((row, index) => {
+                                    return (
+                                        <TableRow key={row.id} hover onClick={()=>{
+                                            setModalDetailOpen({open:true,data:row})
+                                        }} >
+                                            <TableCell scope="row" > {row.name}</TableCell>
+                                        </TableRow>
+                                    );
+                                })):(    
+                                <TableRow>
+                                    <TableCell  colSpan={headCells.length} align="center">
+                                        <Typography variant="body1">There is no data to show</Typography>
+                                    </TableCell>
+                                </TableRow>
+                            )}
                     </TableBody>
                 </Table>
             </TableContainer>

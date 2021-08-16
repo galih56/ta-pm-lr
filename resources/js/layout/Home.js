@@ -12,6 +12,7 @@ import { makeStyles } from '@material-ui/styles';
 import UserContext from './../context/UserContext';
 import axios from 'axios';
 import styleConfig from './Theme';
+import toast, { Toaster } from 'react-hot-toast';
 
 const useStyles = makeStyles((theme) => (styleConfig(theme)));
 
@@ -52,14 +53,20 @@ const Home = (props) => {
         }else{
             url = process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';
         }
+        const toast_loading = toast.loading('Loading...');
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 global.dispatch({ type: 'store-projects', payload: result.data });
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -78,6 +85,7 @@ const Home = (props) => {
 
     return (
         <React.Fragment>
+            <Toaster/>
             <Grid item xs={12}>
                 <Paper className={classes.paper}>
                     <ListItem button dense font="small" onClick={handleProjectListOpen} 
