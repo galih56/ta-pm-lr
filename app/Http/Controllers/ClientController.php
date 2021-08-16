@@ -35,7 +35,10 @@ class ClientController extends Controller
 
         $client=new Client();
         if($request->has('name')) $client->name=$request->name;
-        if($request->has('description')) $client->description=$request->description;
+        if($request->has('description')) {
+            if($request->description===null) $client->description='';
+            else $client->description=$request->description;
+        }
         if($request->has('email')) $client->email=$request->email;
         if($request->has('phone_number')) $client->phone_number=$request->phone_number;
         if($request->has('city')) $client->city=$request->city;
@@ -72,7 +75,12 @@ class ClientController extends Controller
 
         $client=Client::findOrFail($id);
         $client->name=$request->name;
-        $client->description=$request->description;
+        
+        if($request->has('description')) {
+            if($request->description===null) $client->description='';
+            else $client->description=$request->description;
+        }
+        
         $client->phone_number=$request->phone_number;
         $client->city=$request->city;
         $client->institution=$request->institution;

@@ -11,10 +11,10 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import Grid from '@material-ui/core/Grid';
 import CloseIcon from '@material-ui/icons/Close';
-import axios from 'axios';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import DialogActionButtons from './DialogActionButtons';
 import EditForm from './EditForm';
+import axios from 'axios';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2), },
@@ -71,24 +71,27 @@ export default function ModalDetailMember(props) {
     const [isEditing, setIsEditing] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
 
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
-
     useEffect(() => {
         setData(props.initialState);
         getTasks(props.initialState.tasks)
     }, [props.initialState.id]);
 
     const getTasks = (id) => {
+        const toast_loading = toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}project-members/${props.initialState.id}/tasks`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setTasks(result.data);
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
     
@@ -97,14 +100,20 @@ export default function ModalDetailMember(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + `project-members/${props.initialState.project_members_id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.patch(url, body)
-            .then(result => {
-                setData(result.data);
-                props.onUpdate(result.data);
-                handleSnackbar(`Data has been updated`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.patch(url, body),
+            {
+                loading: 'Updating...',
+                success: (result)=>{
+                    setData(result.data);
+                    props.onUpdate(result.data);
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
 
@@ -113,13 +122,19 @@ export default function ModalDetailMember(props) {
             const url = process.env.MIX_BACK_END_BASE_URL + `project-members/${data.project_members_id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.delete(url)
-                .then((result) => {
-                    props.onDelete(data);
-                    handleSnackbar(`Data has been deleted`, 'success');
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            toast.promise(
+                axios.delete(url),
+                {
+                    loading: 'Deleting...',
+                    success: (result)=>{
+                        props.onDelete(data);
+                        return <b>Successfully deleted</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
                 });
         }
     }
@@ -144,6 +159,7 @@ export default function ModalDetailMember(props) {
                     closeModal={closeModal}
                 > </DialogActionButtons>
             </DialogActions>
+                    <Toaster/>
         </Dialog>
     );
 }

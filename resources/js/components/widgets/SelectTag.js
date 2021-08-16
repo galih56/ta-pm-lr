@@ -24,10 +24,7 @@ const SelectTag = (props) => {
             axios.get(url, {}, config)
                 .then(result => {
                     setData(result.data);
-                }).catch(error => {
-                    const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                });
+                }).catch(console.log);
         } else {
             const tags = JSON.parse(localStorage.getItem('tags'));
             setData(tags);

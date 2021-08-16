@@ -16,7 +16,7 @@ import GoogleDriveButton from './GoogleDriveClient';
 import DialogConfirm from './DialogConfirm';
 import ModalFilePicker from './../../widgets/ModalFilePicker/ModalFilePicker';
 import UserContext from '../../../context/UserContext';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import axios from 'axios';
 
@@ -51,14 +51,11 @@ const Attachments = (props) => {
     const [uploadModalOpen, setUploadModalOpen] = useState(false);
     const [chooseFileModalOpen, setChooseFileModalOpen] = useState(false);
     const [data, setData] = useState([]);
-    const { taskId, projectId, listId } = props;
+    const { tasks_id, projects_id, lists_id } = props;
     const global = useContext(UserContext);
     const [toBeDeletedFile, setToBeDeletedFile] = useState(null);
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    var payload = { projectId: projectId, listId: listId, taskId: taskId }
-
-    const { enqueueSnackbar } = useSnackbar();
-    const snackbar = (message, variant) => enqueueSnackbar(message, { variant });
+    var payload = { projects_id: projects_id, lists_id: lists_id, tasks_id: tasks_id }
 
     useEffect(() => {
         setData(props.detailTask.attachments);
@@ -83,10 +80,10 @@ const Attachments = (props) => {
     
     const onUploadFiles = async (files, payload) => {
         if (!window.navigator.onLine) {
-            snackbar(`You are currently offline`, 'warning');
+            toast.error(`You are currently offline`);
         } else {
             let fd = new FormData();
-            fd.append('tasks_id',payload.taskId);
+            fd.append('tasks_id',payload.tasks_id);
             fd.append('users_id',global.state.id);
             fd.append('source','upload');
             files.map((file) => {
@@ -98,10 +95,10 @@ const Attachments = (props) => {
     
     const handleFilePick = async (file,payload) => {
         if (!window.navigator.onLine) {
-            snackbar(`You are currently offline`, 'warning');
+            toast.error(`You are currently offline`);
         } else {
             var body={
-                tasks_id:payload.taskId,
+                tasks_id:payload.tasks_id,
                 users_id:global.state.id,
                 source:'pick',
                 files_id:file.id
@@ -114,16 +111,24 @@ const Attachments = (props) => {
         const url = process.env.MIX_BACK_END_BASE_URL + 'task-attachments/';
         axios.defaults.headers.post['Content-Type'] = 'multipart/form-data';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.post(url, body).then((result) => {
-            payload.data=result.data;
-            setDetailTask({...detailTask,attachments:[...detailTask.attachments, ...payload.data]});
-            setData([...data, ...payload.data]);
-            setChooseFileModalOpen(false);
-            global.dispatch({ type: 'create-new-attachments', payload: payload })
-        }).catch((error) => {
-            const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
-            global.dispatch({ type: 'handle-fetch-error', payload: payload });
-        });
+        toast.promise(
+            axios.post(url, body),
+            {
+                loading: 'Creating a new meeting schedule',
+                success: (result)=>{
+                    payload.data=result.data;
+                    setDetailTask({...detailTask,attachments:[...detailTask.attachments, ...payload.data]});
+                    setData([...data, ...payload.data]);
+                    setChooseFileModalOpen(false);
+                    global.dispatch({ type: 'create-new-attachments', payload: payload })
+                    return <b>A new meeting successfuly created</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
     }
     
     const deleteFile = (payload) => {
@@ -135,14 +140,20 @@ const Attachments = (props) => {
             const url = `${process.env.MIX_BACK_END_BASE_URL}task-attachments/${payload.id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.delete(url)
-                .then((result) => {
-                    setDeleteConfirmOpen(false);
-                    global.dispatch({ type: 'remove-attachment', payload: payload });
-                    snackbar(`Data has been deleted`, 'success');
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            toast.promise(
+                axios.delete(url),
+                {
+                    loading: 'Deleting...',
+                    success: (result)=>{
+                        setDeleteConfirmOpen(false);
+                        global.dispatch({ type: 'remove-attachment', payload: payload });
+                        return <b>Successfully deleted</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
                 });
         })
         
@@ -165,7 +176,7 @@ const Attachments = (props) => {
                     {/* <IconButton edge="end" aria-label="Add new attachment" onClick={() => { setUploadModalOpen(true) }}>
                         <PublishRoundedIcon />
                     </IconButton> */}
-                    <GoogleDriveButton payload={payload} snackbar={snackbar}></GoogleDriveButton>
+                    <GoogleDriveButton payload={payload}></GoogleDriveButton>
                     {/* <DropzoneDialog
                         cancelButtonText={"Cancel"} 
                         submitButtonText={"Submit"}
@@ -182,6 +193,7 @@ const Attachments = (props) => {
         } else return (<></>)
     }
     return <>
+        <Toaster/>
         <List className={classes.root}>
             {showEditButtons()}
             {data.map((item) => {
@@ -205,13 +217,13 @@ const Attachments = (props) => {
         {/* <PublishRoundedIcon /> */}
         <ModalFilePicker 
             open={chooseFileModalOpen} 
-            projectId={projectId} 
+            projects_id={projects_id} 
             closeModal={()=> setChooseFileModalOpen(false) }
             onPick={(file)=> handleFilePick(file,payload) }/>
         <DialogConfirm
                 open={deleteConfirmOpen}
                 handleConfirm={() => {
-                    payload = { id: toBeDeletedFile, taskId: taskId, projectId: projectId, listId: listId }
+                    payload = { id: toBeDeletedFile, tasks_id: tasks_id, projects_id: projects_id, lists_id: lists_id }
                     deleteFile(payload);
                     setDeleteConfirmOpen(false)
                 }}

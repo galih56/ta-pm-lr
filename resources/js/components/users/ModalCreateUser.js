@@ -4,7 +4,7 @@ import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Alert from '@material-ui/lab/Alert';
 import axios from 'axios';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import IconButton from '@material-ui/core/IconButton';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -60,9 +60,6 @@ const ModalCreateUser = (props) => {
     let [userExists, setUserExists] = useState(false);
     let [signUpSuccess, setSignUpSuccess] = useState(false);
     let global = useContext(UserContext);
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
-
     const getOccupations = () => {
         const url = process.env.MIX_BACK_END_BASE_URL + 'occupations';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
@@ -78,8 +75,11 @@ const ModalCreateUser = (props) => {
                 })
                 setOccupations(data);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -114,21 +114,28 @@ const ModalCreateUser = (props) => {
         else setOfflineAlert(false);
         
         const config = { mode: 'no-cors', crossdomain: true, headers: { 'Content-Type': 'application/json' } };
-        axios.post(process.env.MIX_BACK_END_BASE_URL+'users', body, config)
-            .then((result) => {
-                setSignUpSuccess(true);
-                setUserExists(false);
-                setUsername('');
-                setEmail('');
-                setPassword('');
-                setConfirmPassword('');
-                setPhoneNumber('');
-                props.onCreate(result.data,'create');
-            }).catch((error) => {
-                if (error.response) if (error.response.status === 409) setUserExists(true);
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                setSignUpSuccess(false);
+        toast.promise(
+            axios.post(process.env.MIX_BACK_END_BASE_URL+'users', body, config),
+            {
+                loading: 'Creating a new user',
+                success: (result)=>{ 
+                    setSignUpSuccess(true);
+                    setUserExists(false);
+                    setUsername('');
+                    setEmail('');
+                    setPassword('');
+                    setConfirmPassword('');
+                    setPhoneNumber('');
+                    props.onCreate(result.data,'create');
+                    return <b>A new user successfuly created</b>
+                },
+                error: (error)=>{
+                    setSignUpSuccess(false);
+                    if (error.response.status===409) setUserExists(true);
+                    if (error.response.status==401) return <b>Unauthenticated</b>;
+                    if (error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
     return (
@@ -138,6 +145,7 @@ const ModalCreateUser = (props) => {
             <DialogTitle onClose={closeModal}>User information</DialogTitle>
             <DialogContent dividers>
                 <Container component="main" >
+                    <Toaster/>
                     <CssBaseline />
                     { passwordConfirmAlert ? <Alert severity="error" > Password and confirm password does not match</Alert> : null}
                     { inputRequireAlert ? <Alert severity="error" >Please complete the form</Alert> : null}
@@ -146,7 +154,7 @@ const ModalCreateUser = (props) => {
                     { offlineAlert ? <Alert severity="warning" >You're currently offline. Please check your internet connection</Alert> : null}
                     <form style={{ textAlign: 'center' }} onSubmit={handleSubmit}>
                         <TextField
-                            variant="outlined"
+                            variant="standard"
                             margin="normal"
                             required
                             fullWidth
@@ -156,7 +164,7 @@ const ModalCreateUser = (props) => {
                             onChange={(e) => setUsername(e.target.value) }
                         />
                         <TextField
-                            variant="outlined"
+                            variant="standard"
                             margin="normal"
                             required
                             fullWidth
@@ -167,7 +175,7 @@ const ModalCreateUser = (props) => {
                             onChange={(e) => setEmail(e.target.value) }
                         />
                         <TextField
-                            variant="outlined"
+                            variant="standard"
                             margin="normal"
                             required
                             fullWidth
@@ -177,8 +185,22 @@ const ModalCreateUser = (props) => {
                             type="tel"
                             onChange={(e) => setPhoneNumber(e.target.value) }
                         />
+                        <Select 
+                            variant="standard"
+                            onChange={e => {
+                                setOccupationsId(e.target.value);
+                            }}
+                            value={occupationsId}
+                            fullWidth
+                            placeholder="Occupation"
+                        >
+                                <MenuItem>Choose occupation</MenuItem>
+                                {
+                                    occupations.map((occupation, index) =>(<MenuItem value={occupation.id} key={occupation.id}>{occupation.name}</MenuItem>))
+                                } 
+                            </Select>
                         <TextField
-                            variant="outlined"
+                            variant="standard"
                             margin="normal"
                             required
                             fullWidth
@@ -189,20 +211,8 @@ const ModalCreateUser = (props) => {
                             onChange={(e) => setPassword(e.target.value) }
                             autoComplete="current-password"
                         />
-                        <Select 
-                            variant="standard"
-                            onChange={e => {
-                                setOccupationsId(e.target.value);
-                            }}
-                            value={occupationsId}
-                            fullWidth
-                        >
-                                {
-                                    occupations.map((occupation, index) =>(<MenuItem value={occupation.id} key={occupation.id}>{occupation.name}</MenuItem>))
-                                } 
-                            </Select>
                         <TextField
-                            variant="outlined"
+                            variant="standard"
                             margin="normal"
                             required
                             fullWidth

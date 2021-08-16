@@ -144,7 +144,7 @@ gapi.client.request({
             const email = googleUser.getBasicProfile().getEmail(); 
             if(email==global.state.email){
             }else{
-                snackbar('Please use a valid email','warning')
+                toast.error('Please use a valid email')
             }
             // updateUser(googleUser);
               // const calendarId='tikustemankucing@gmail.com';

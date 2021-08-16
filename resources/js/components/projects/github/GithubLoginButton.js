@@ -3,7 +3,7 @@ import UserContext from './../../../context/UserContext'
 import { useHistory } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import axios from 'axios';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import GitHubIcon from '@material-ui/icons/GitHub';
 
 // import LoginGithub from 'react-login-github';
@@ -11,10 +11,8 @@ import GitHubIcon from '@material-ui/icons/GitHub';
 // import GitHubLogin from 'react-github-login';
 
 const GithubLoginButton=()=>{
-    const { enqueueSnackbar } = useSnackbar();
     const history = useHistory();
     const global=useContext(UserContext);
-    const snackbar = (message, variant) => enqueueSnackbar(message, { variant });
     
     const getAccessToken = () => {
         const body = {
@@ -22,18 +20,24 @@ const GithubLoginButton=()=>{
             client_secret: process.env.MIX_GITHUB_API_SECRET,
             code: global.state.githubAuth.code,
         }
-        
         const url = `${process.env.MIX_BACK_END_BASE_URL}get-github-access-token`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
+        const toast_loading = toast.loading('Loading...');
         axios.post(url, body)
             .then((result) => {
                 global.dispatch({type: 'store-github-auth',payload:{
                     code:body.code,
                     ...result.data
                 }})
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                console.log('getAccessToken : ',error)
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     };
 
@@ -69,6 +73,7 @@ const GithubLoginButton=()=>{
     
     return (
         <>
+            <Toaster/>
             {(()=>{
                 if(global.state.githubAuth.login){
                     return(

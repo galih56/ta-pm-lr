@@ -13,7 +13,18 @@ const mix = require('laravel-mix');
 
 mix.js('resources/js/app.js', 'public/js')
     .sourceMaps()
-    .react();
+    // .browserSync('http://127.0.0.1:8000')
+    .options({
+        watchOptions: {
+            ignored: /node_modules/
+        }
+    }).react();
+    
+    mix.disableNotifications();
+
+    if (mix.inProduction()) {
+        mix.version();
+    }
     // .sass('resources/sass/app.scss', 'public/css')
 
 //Install dibawah ini supaya bisa support experimental syntax jsx

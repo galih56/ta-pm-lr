@@ -1,6 +1,5 @@
 import 'fontsource-roboto';
 import React, { useEffect, useContext, useState } from 'react';
-import { useHistory } from "react-router-dom";
 import UserContext from '../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
 import { Dialog, IconButton, Typography } from '@material-ui/core/';
@@ -8,10 +7,10 @@ import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import CloseIcon from '@material-ui/icons/Close';
-import axios from 'axios';
-import { useSnackbar } from 'notistack';
 import DialogActionButtons from './DialogActionButtons';
 import EditForm from './EditForm';
+import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 
 // https://stackoverflow.com/questions/35352638/react-how-to-get-parameter-value-from-query-string
 const styles = (theme) => ({
@@ -50,13 +49,9 @@ export default function ModalDetailOccupation(props) {
     const closeModal = props.closeModal;
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const global = useContext(UserContext);
-    const history = useHistory();
     const [data, setData] = useState({ id: null, name: '', color: '', bgColor: '', parents: [], children: [], root: false, isHighlight: false });
     const [isEditing, setIsEditing] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
-
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     useEffect(() => {
         setData(props.initialState);
@@ -68,13 +63,20 @@ export default function ModalDetailOccupation(props) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             const url = process.env.MIX_BACK_END_BASE_URL + `occupations/${props.initialState.id}`;
-            axios.patch(url, body, config)
-                .then((result) => {
-                    props.onUpdate(result.data);
-                    handleSnackbar(`Data has been updated`, 'success');
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            
+            toast.promise( 
+                axios.patch(url, body),
+                {
+                    loading: 'Updating...',
+                    success: (result)=>{
+                        props.onUpdate(result.data);
+                        return <b>Successfully updated</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
                 });
         }
     }
@@ -85,13 +87,19 @@ export default function ModalDetailOccupation(props) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             const url = process.env.MIX_BACK_END_BASE_URL + `occupations/${data.id}`;
-            axios.delete(url)
-                .then((result) => {
-                    props.onDelete(data);
-                    handleSnackbar(`Data has been deleted`, 'success');
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            toast.promise(
+                axios.patch(url,data),
+                {
+                    loading: 'Deleting...',
+                    success: (result)=>{                    
+                        props.onDelete(data);
+                        return <b>Successfully deleted</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
                 });
         }
     }

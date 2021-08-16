@@ -15,7 +15,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import TextField from '@material-ui/core/TextField';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 
 export default function DetailClient(props) {
     const global=useContext(UserContext);
@@ -33,15 +33,22 @@ export default function DetailClient(props) {
     }, []);
 
     const getDetailClient=()=>{
+        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'clients/'+params.id;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
+      
         axios.get(url)
             .then((result) => {
                 setData(result.data);
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -50,12 +57,19 @@ export default function DetailClient(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + 'clients/'+params.id;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.patch(url,data)
-            .then((result) => {
-                setData(result.data);
-            }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.patch(url, data),
+            {
+                loading: 'Updating...',
+                success: (result)=>{
+                    setData(result.data);
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
     
@@ -63,16 +77,24 @@ export default function DetailClient(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + 'clients/'+params.id;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.delete(url,data)
-            .then((result) => {
-                history.push('/clients')
-            }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
-            });
+        toast.promise(
+            axios.delete(url),
+            {
+                loading: 'Deleting...',
+                success: (result)=>{
+                    history.push('/clients')
+                    return <b>Successfully deleted</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });    
     }
     return (
         <Paper style={{ padding: '1em',width:'100%' }}>
+            <Toaster/>
             <Grid container component="form" spacing={1} onSubmit={handleSubmit}>
                 <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                     <Router>

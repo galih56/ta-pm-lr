@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -10,7 +11,6 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
-import Chip from '@material-ui/core/Chip';
 import ModalDetailUser from './ModalDetailUser/ModalDetailUser';
 import ModalCreateUser from './ModalCreateUser';
 import UserContext from '../../context/UserContext';
@@ -18,6 +18,7 @@ import { visuallyHidden } from '@material-ui/utils';
 import moment from 'moment';
 import axios from 'axios';
 import DoneIcon from '@material-ui/icons/Done';
+import toast, { Toaster } from 'react-hot-toast';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) return -1;
@@ -100,15 +101,21 @@ export default function EnhancedTable() {
     let global = useContext(UserContext);
 
     const getUsers = () => {
+        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'users';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setRows(result.data);
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -159,9 +166,9 @@ export default function EnhancedTable() {
         setPage(0);
     };
 
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
     return (
         <div className={classes.root}>
+            <Toaster/>
             <Button 
                 variant="contained"
                 color="primary"
@@ -175,7 +182,7 @@ export default function EnhancedTable() {
                         rowCount={rows.length}
                     />
                     <TableBody>
-                        {stableSort(rows, getComparator(order, orderBy))
+                        {rows.length?stableSort(rows, getComparator(order, orderBy))
                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((row, index) => {
                                 return (
@@ -188,8 +195,13 @@ export default function EnhancedTable() {
                                         <TableCell align="right">{row.last_login ? moment(row.last_login).format('DD MMM YYYY') : ''}</TableCell>
                                     </TableRow>
                                 );
-                            })}
-                        {emptyRows > 0 && (<TableRow style={{ height: (53) * emptyRows }} > <TableCell colSpan={6} /> </TableRow>)}
+                            }):(
+                                <TableRow>
+                                    <TableCell  colSpan={headCells.length} align="center">
+                                        <Typography variant="body1">There is no data to show</Typography>
+                                    </TableCell>
+                                </TableRow>
+                            )}
                     </TableBody>
                 </Table>
             </TableContainer>

@@ -5,11 +5,11 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Avatar from '@material-ui/core/Avatar';
 import Container from '@material-ui/core/Container';
 import { makeStyles } from '@material-ui/styles';
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Login from './Login';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import mainLogo from'./../../assets/images/logo_white.png';
 
 const useStyles = makeStyles((theme) => ({
     root: { flexGrow: 1, backgroundColor: theme.palette.background.paper, },
@@ -48,9 +48,8 @@ const AuthPage = (props) => {
                     <Container component="main" className={classes.container} >
                         <CssBaseline />
                         <div className={classes.paper}>
-                            <Avatar className={classes.avatar}>
-                                <LockOutlinedIcon />
-                            </Avatar>
+                            <img alt="LOGIN PAGE LOGO (PT. TATACIPTA TEKNOLOGI INDONESIA)" 
+                                src={mainLogo} style={{height:'100%',width:'25%'}}/>
                             <Login classes={classes}></Login>
                         </div>
                     </Container>

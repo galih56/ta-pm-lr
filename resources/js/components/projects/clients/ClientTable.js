@@ -19,6 +19,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { visuallyHidden } from '@material-ui/utils';
 import FormAddClient from './FormAddClient';
+import toast, { Toaster } from 'react-hot-toast';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) return -1;
@@ -47,7 +48,7 @@ const headCells = [
     { id: 'Institution', align: 'left', disablePadding: false, label: 'Institution' },
     { id: 'City', align: 'left', disablePadding: false, label: 'City' },
     { id: 'Contact', align: 'left', disablePadding: false, label: 'Contact' },
-    {id:'action',align:'right',disablePadding:false,label:'Action'}
+    {id : 'action',align:'right',disablePadding:false,label:'Action'}
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -107,15 +108,21 @@ export default function EnhancedTable(props) {
     }, []);
 
     const getClients = () => {
+        const toast_loading = toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/clients`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setRows(result.data);
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }    
             });
     }
 
@@ -123,17 +130,23 @@ export default function EnhancedTable(props) {
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/clients/${clients_id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.delete(url)
-                .then((result) => {
+            toast.promise(axios.delete(url),
+            {
+                loading: 'Deleting...',
+                success: (result)=>{
                     setRows(rows.filter((row)=>{
                         if(row.id!=clients_id){
                             return row;
                         }
-                    }));
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                });
+                    }));  
+                    return <b>Successfully deleted</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
     }
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -148,11 +161,10 @@ export default function EnhancedTable(props) {
         setPage(0);
     };
 
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
     return (
         <Grid container>  
-            <Grid item xl={12} lg={12} md={12} sm={12} xs={12} >  
+            <Grid item xl={12} lg={12} md={12} sm={12} xs={12} >
+                <Toaster/>  
             {(global.state.current_project_member_role?.name?.toLowerCase().includes('manager') 
                 || global.state.current_project_member_role?.name?.toLowerCase().includes('project owner'))?(    
                     <FormAddClient
@@ -176,7 +188,7 @@ export default function EnhancedTable(props) {
                                 rowCount={rows.length}
                             />
                             <TableBody>
-                                {stableSort(rows, getComparator(order, orderBy))
+                                {(rows.length)?stableSort(rows, getComparator(order, orderBy))
                                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                     .map((row) => {
                                         console.log(row)
@@ -201,8 +213,13 @@ export default function EnhancedTable(props) {
                                                 </TableCell>
                                             </TableRow>
                                         );
-                                    })}
-                                {emptyRows > 0 && (<TableRow style={{ height: (53) * emptyRows }} > <TableCell colSpan={6} /> </TableRow>)}
+                                    }):(
+                                        <TableRow>
+                                            <TableCell align="center"  colSpan={headCells.length}>
+                                                <Typography variant="body1"><b>There is no data to show</b></Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}        
                             </TableBody>
                         </Table>
                     </TableContainer>

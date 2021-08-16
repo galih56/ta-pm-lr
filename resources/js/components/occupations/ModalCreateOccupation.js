@@ -1,18 +1,20 @@
-import React, { useState, useContext } from 'react';
-import { useHistory } from 'react-router-dom';
 import 'fontsource-roboto';
 import axios from 'axios';
-import Alert from '@material-ui/core/Alert';
+import React, { useState, useContext } from 'react';
 import withStyles from '@material-ui/styles/withStyles';
 import makeStyles from '@material-ui/styles/makeStyles';
-import { Grid, Button, Dialog, IconButton, TextField } from '@material-ui/core/';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import IconButton from '@material-ui/core/IconButton';
+import TextField from '@material-ui/core/TextField';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import UserContext from '../../context/UserContext';
 import CloseIcon from '@material-ui/icons/Close';
-import { useSnackbar } from 'notistack';
-import OccupationSearchBar from './../widgets/OccupationSearchBar';
+// import OccupationSearchBar from './../widgets/OccupationSearchBar';
+import toast, { Toaster } from 'react-hot-toast';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },
@@ -55,38 +57,45 @@ export default function ModalCreateOccupation(props) {
     const classes = useStyles();
     var open = props.open;
     var closeModal = props.closeModal;
-    const { enqueueSnackbar } = useSnackbar();
 
     const [name, setName] = useState('');
     const [children, setChildren] = useState('');
     const global = useContext(UserContext);
-    const history = useHistory();
 
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
     const submitData = () => {
         const body = { name: name, children: children }
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        if (!window.navigator.onLine) handleSnackbar(`You are currently offline`, 'warning');
+        if (!window.navigator.onLine) toast.error(`You are currently offline`);
         else {
             const url = process.env.MIX_BACK_END_BASE_URL + 'occupations';
-            axios.post(url, body)
-                .then((result) => {
-                    setName('');
-                    setChildren([]);
-                    props.onCreate(result.data);
-                    closeModal();
-                    handleSnackbar(`A new occupation successfully created`, 'success');
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            toast.promise(
+                axios.post(url, body),
+                {
+                    loading: 'Creating a new occupation',
+                    success: (result)=>{
+                        setName('');
+                        setChildren([]);
+                        props.onCreate(result.data);
+                        closeModal();
+                        return <b>A new occupation successfully created</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
                 });
         }
     }
-    const checkIfAuthenticated = () => {
-        if (global.state.authenticated === true) {
-            return (
-                <React.Fragment>
+
+    return (
+        <>
+        <Dialog aria-labelledby="Create a occupation" open={open} className={classes.dialog}
+            maxWidth={'md'} fullwidth={"true"}>
+            <DialogTitle onClose={() => closeModal()}>Create a occupation</DialogTitle>
+                {(global.state.authenticated===true)?(
+                    <>
                     <DialogContent dividers>
                         <Grid container spacing={2} style={{ paddingLeft: 3, paddingRight: 3 }} >
                             <Grid item lg={12} md={12} sm={12} xs={12} >
@@ -98,28 +107,21 @@ export default function ModalCreateOccupation(props) {
                                     onChange={(e) => setName(e.target.value)}
                                     style={{ width: '100%' }}
                                 />
-                                <OccupationSearchBar label={"Search lower occupations"} onChange={value => setChildren(value)} exceptedData={[]} defaultValue={[]} />
+                                {/* <OccupationSearchBar label={"Search lower occupations"} onChange={value => setChildren(value)} exceptedData={[]} defaultValue={[]} /> */}
                             </Grid>
                         </Grid>
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={submitData} color="primary">Create</Button>
                     </DialogActions>
-                </React.Fragment>
-            )
-        } else {
-            return (
-                <DialogContent dividers>
-                    <Alert severity="warning">Your action requires authentication. Please sign in.</Alert>
-                </DialogContent>
-            )
-        }
-    }
-    return (
-        <Dialog aria-labelledby="Create a occupation" open={open} className={classes.dialog}
-            maxWidth={'md'} fullwidth={"true"}>
-            <DialogTitle onClose={() => closeModal()}>Create a occupation</DialogTitle>
-            { checkIfAuthenticated(global, classes)}
+                </>
+                ):(
+                    <DialogContent dividers>
+                        <Alert severity="warning">Your action requires authentication. Please sign in.</Alert>
+                    </DialogContent>
+                )}
         </Dialog>
+        <Toaster/>
+        </>
     );
 }

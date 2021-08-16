@@ -20,7 +20,7 @@ import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import CloseIcon from '@material-ui/icons/Close';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import moment from 'moment';
 import UserSearchBar from './../widgets/UserSearchBar'
 import { parseISO } from 'date-fns'; 
@@ -68,7 +68,6 @@ export default function ModalCreateProject(props) {
     const classes = useStyles();
     var open = props.open;
     var closeModal = props.closeModal;
-    const { enqueueSnackbar } = useSnackbar();
 
     const [title, setTitle] = useState('');
     const [cost, setCost] = useState('');
@@ -86,7 +85,6 @@ export default function ModalCreateProject(props) {
         if (start === '') setStart(null);
     }, [end,start]);
 
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     const submitData = () => {
         const body = {
@@ -101,7 +99,7 @@ export default function ModalCreateProject(props) {
         }
 
         if (!window.navigator.onLine) {
-            handleSnackbar(`You are currently offline`, 'warning');
+            toast.error(`You are currently offline`);
         } else {
             var url = '';
             if(global.state.occupation?.name=='system administrator' || global.state.occupation?.name=='ceo') url=process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';
@@ -109,27 +107,31 @@ export default function ModalCreateProject(props) {
 
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.post(url, body)
-                .then((result) => {
-                    if (result.status === 200) {
+            toast.promise(
+                axios.post(url, body),
+                {
+                    loading: 'Creating a new meeting schedule',
+                    success: (result)=>{
                         global.dispatch({ type: 'create-new-project', payload: result.data })
                         setTitle('');
                         setDescription('');
                         closeModal();
-                        handleSnackbar(`A new project successfuly created`, 'success');
-                    }
-                    else {
-                        handleSnackbar(`Error : status ${result.status}`, 'warning');
-                    }
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                        return <b>A new meeting successfuly created</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
                 });
         }
     }
-    const checkIfAuthenticated = () => {
-        if (global.state.authenticated === true) {
-            return (
+    
+    return (
+        <Dialog aria-labelledby="Create a project" open={open}>
+            <DialogTitle onClose={
+                () => { closeModal(); }}>Create a Project</DialogTitle>
+            {(global.state.authenticated === true)?(
                 <form onSubmit={(e)=>{
                     e.preventDefault();
                     submitData()
@@ -207,22 +209,12 @@ export default function ModalCreateProject(props) {
                         <Button type="submit" color="primary">Create</Button>
                     </DialogActions>
                 </form>
-            )
-        } else {
-            return (
+            ):(
                 <DialogContent dividers>
                     <Alert severity="warning">Your action requires authentication. Please sign in.</Alert>
                 </DialogContent>
-            )
-        }
-    }
-    return (
-        <Dialog aria-labelledby="Create a project" open={open}>
-            <DialogTitle onClose={
-                () => { closeModal(); }}>Create a Project</DialogTitle>
-            {
-                checkIfAuthenticated(global, classes)
-            }
+            )}
+            <Toaster/>
         </Dialog>
     );
 }

@@ -5,6 +5,7 @@ import axios from 'axios';
 import Button from '@material-ui/core/Button';
 import LinearProgress from '@material-ui/core/Button';
 import ModalDetailOccupation from './ModalDetailOccupation/ModalDetailOccupation';
+import toast, { Toaster } from 'react-hot-toast';
 
 // const OccupationTree = React.lazy(() => import("./OccupationTree"));
 const OccupationTable = React.lazy(() => import("./OccupationTable"));
@@ -26,15 +27,21 @@ export default function OccupationInformation() {
     }
 
     const getOccupations = () => {
+        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'occupations';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setData(result.data)
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -47,14 +54,17 @@ export default function OccupationInformation() {
                 console.log(result.data);
                 // setTree(result.data)
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
     useEffect(() => {
         getOccupations();
-        getOccupationTree();
+        // getOccupationTree();
     }, []);
 
     function handleOccupationUpdate(value) {
@@ -94,9 +104,10 @@ export default function OccupationInformation() {
                 <ModalCreateOccupation
                     open={modalCreateOpen}
                     closeModal={() =>  setModalCreateOpen(false)}
-                    onCreate={setData}
+                    onCreate={(newOccupation)=>setData([...data,newOccupation])}
                 />
                 {showModalDetailOccupation()}
+                <Toaster/>
             </React.Suspense>
         </>
     )

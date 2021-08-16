@@ -4,8 +4,9 @@ import React, { useEffect, useContext, useState } from 'react';
 import makeStyles from '@material-ui/styles/makeStyles';
 import UserContext from '../../../../context/UserContext';
 import { Grid, Typography, Avatar } from '@material-ui/core/';
-import moment from 'moment';
 import SelectRole from '../../../widgets/SelectRole';
+import toast, { Toaster } from 'react-hot-toast';
+import moment from 'moment';
 import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
@@ -20,15 +21,21 @@ const OpenEditForm = ({ isEdit, data, setData}) => {
     const global = useContext(UserContext);
 
     const getRoles = () => {
+        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'member-roles';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setRoles(result.data);
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -60,6 +67,7 @@ const OpenEditForm = ({ isEdit, data, setData}) => {
                                 else alert('Role not found')
                             }
                         } defaultValue={data.role}/>
+                    <Toaster/>
                 </Grid>
             </Grid>
         )

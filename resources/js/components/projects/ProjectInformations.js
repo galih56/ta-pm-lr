@@ -13,7 +13,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import UserContext from '../../context/UserContext';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
@@ -22,7 +22,6 @@ import { parseISO } from 'date-fns';
 
 const ProjectInfo = (props) => {
     const global = useContext(UserContext);
-    const { enqueueSnackbar } = useSnackbar();
     const [isEditing, setIsEditing] = useState(false);
     const [dateRange, setDateRange] = useState([null, null]);
     const [detailProject, setDetailProject] = useState({ 
@@ -39,23 +38,27 @@ const ProjectInfo = (props) => {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     let history = useHistory();
 
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
-
     const saveChanges = () => {        
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.patch(url, detailProject, config)
-            .then((result) => {
-                setIsEditing(false)
-                handleSnackbar(`Data has been changed`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.patch(url, detailProject),
+            {
+                loading: 'Updating...',
+                success: (result)=>{
+                    setIsEditing(false)
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
 
         if (!window.navigator.onLine) {
-            handleSnackbar(`You are currently offline`, 'warning');
+            toast.error(`You are currently offline`);
             // handleStoreList(body); //Untuk offline mode
         }
     }
@@ -64,20 +67,27 @@ const ProjectInfo = (props) => {
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.delete(url, {}, {})
-            .then((result) => {
-                global.dispatch({ type: 'remove-project', payload: detailProject.id });
-                history.push('/');
-                handleSnackbar(`Data has been deleted successfuly`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.delete(url),
+            {
+                loading: 'Deleting...',
+                success: (result)=>{
+                    global.dispatch({ type: 'remove-project', payload: detailProject.id });
+                    history.push('/');
+                    return <b>Successfully deleted</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
-
-    const checkIfEditing = (isEdit) => {
-        if (isEdit) {
-            return (
+    
+    return (
+        <>
+            <Grid container>
+                {(isEdit)?(
                 <React.Fragment>
                     <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>
                         <TextField
@@ -152,9 +162,7 @@ const ProjectInfo = (props) => {
                         maxDate={null}
                         />
                 </React.Fragment>
-            );
-        } else {
-            return (
+            ):(
                 <React.Fragment>
                     <Grid item xl={6} md={6} sm={6} xs={12} style={{ padding: '1em' }}>
                         <Typography variant="h5">{detailProject.title}</Typography>
@@ -180,14 +188,8 @@ const ProjectInfo = (props) => {
                         <Button onClick={() => { setIsEditing(true) }} variant="contained" color="primary">Edit</Button>
                     </Grid>
                 </React.Fragment>
-            )
-        }
-    }
-    
-    return (
-        <>
-            <Grid container>
-                {checkIfEditing(isEditing)}
+            )}
+            <Toaster/>
             </Grid >
             <DeleteConfirmDialog
                 open={deleteConfirmOpen}
