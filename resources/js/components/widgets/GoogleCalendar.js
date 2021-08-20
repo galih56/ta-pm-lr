@@ -157,6 +157,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                                     }
                                     else{
                                         toast.error('Please choose a valid email');
+                                        setLoading(false);
                                     }
                                 });
                             });
@@ -177,7 +178,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                     <CircularProgress disableShrink={false} style={{margin:'1em'}}/>
                 </Grid>
                 ):<></>}
-                <Toaster/>
+                 
             <Grid item  lg={6} md={6} sm={12} xs={12} align="center" alignContent="center">
                 <Button onClick={()=>{
                     gapi.load('client:auth2', function(){

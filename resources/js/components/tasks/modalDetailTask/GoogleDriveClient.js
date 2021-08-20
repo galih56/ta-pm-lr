@@ -54,12 +54,12 @@ const GoogleDriveButton = (props) => {
             toast.promise(
                 axios.post(url, body),
                 {
-                    loading: 'Uploadng new attachments',
+                    loading: 'Uploading new attachments',
                     success: (result)=>{
                         clearState();
                         Object.assign(payload, { data: result.data });
                         global.dispatch({ type: 'create-new-attachments', payload: payload })
-                        return <b>A new meeting successfuly created</b>
+                        return <b>A new attachment successfuly created</b>
                     },
                     error: (error)=>{
                         if(error.response.status==401) return <b>Unauthenticated</b>;
@@ -71,7 +71,7 @@ const GoogleDriveButton = (props) => {
     }
     return (
         <React.Fragment>
-            <Toaster/>
+             
             {/* <IconButton onClick={() => { loadPicker() }}>
                 <Icon icon={googleDrive} />
             </IconButton> */}

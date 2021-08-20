@@ -125,7 +125,7 @@ export default function ModalDetailRole(props) {
                     closeModal={closeModal}
                 > </DialogActionButtons>
             </DialogActions>
-            <Toaster/>
+             
         </Dialog>
     );
 }

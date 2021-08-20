@@ -87,7 +87,7 @@ const ProjectInfo = (props) => {
     return (
         <>
             <Grid container>
-                {(isEdit)?(
+                {(isEditing)?(
                 <React.Fragment>
                     <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>
                         <TextField
@@ -189,7 +189,7 @@ const ProjectInfo = (props) => {
                     </Grid>
                 </React.Fragment>
             )}
-            <Toaster/>
+             
             </Grid >
             <DeleteConfirmDialog
                 open={deleteConfirmOpen}

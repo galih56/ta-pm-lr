@@ -73,7 +73,7 @@ const GithubLoginButton=()=>{
     
     return (
         <>
-            <Toaster/>
+             
             {(()=>{
                 if(global.state.githubAuth.login){
                     return(

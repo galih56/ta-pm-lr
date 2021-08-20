@@ -88,13 +88,8 @@ export default function ModalCreateProject(props) {
 
     const submitData = () => {
         const body = {
-            title: title,
-            description: description,
-            start: start,
-            end: end,
-            cost: cost,
-            project_owner:projectOwner,
-            project_manager:projectManager,
+            title: title, description: description, start: start, end: end, 
+            cost: cost, project_owner:projectOwner, project_manager:projectManager, 
             users_id: global.state.id,
         }
 
@@ -110,13 +105,13 @@ export default function ModalCreateProject(props) {
             toast.promise(
                 axios.post(url, body),
                 {
-                    loading: 'Creating a new meeting schedule',
+                    loading: 'Creating a new project',
                     success: (result)=>{
                         global.dispatch({ type: 'create-new-project', payload: result.data })
                         setTitle('');
                         setDescription('');
                         closeModal();
-                        return <b>A new meeting successfuly created</b>
+                        return <b>A new project successfuly created</b>
                     },
                     error: (error)=>{
                         if(error.response.status==401) return <b>Unauthenticated</b>;
@@ -214,7 +209,7 @@ export default function ModalCreateProject(props) {
                     <Alert severity="warning">Your action requires authentication. Please sign in.</Alert>
                 </DialogContent>
             )}
-            <Toaster/>
+             
         </Dialog>
     );
 }

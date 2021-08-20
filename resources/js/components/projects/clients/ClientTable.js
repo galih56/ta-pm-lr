@@ -108,16 +108,13 @@ export default function EnhancedTable(props) {
     }, []);
 
     const getClients = () => {
-        const toast_loading = toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/clients`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setRows(result.data);
-                toast.dismiss(toast_loading);
             }).catch((error) => {
-                toast.dismiss(toast_loading);
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
@@ -164,7 +161,7 @@ export default function EnhancedTable(props) {
     return (
         <Grid container>  
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12} >
-                <Toaster/>  
+                   
             {(global.state.current_project_member_role?.name?.toLowerCase().includes('manager') 
                 || global.state.current_project_member_role?.name?.toLowerCase().includes('project owner'))?(    
                     <FormAddClient
@@ -229,7 +226,7 @@ export default function EnhancedTable(props) {
                         count={rows.length}
                         rowsPerPage={rowsPerPage}
                         onPageChange={handleChangePage}
-                        rowsPerPageOptions={[5, 10, 25]}
+                        rowsPerPageOptions={[10, 20, 30]}
                         onRowsPerPageChange={handleChangeRowsPerPage}
                     />
                 </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { Link, useLocation, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Button from '@material-ui/core/Button';
@@ -90,6 +91,9 @@ function EnhancedTableHead(props) {
 
 export default function EnhancedTable() {
     const classes = useStyles();
+    let location = useLocation();
+    let history=useHistory();
+    let pathname = location.pathname;
     const [rows, setRows] = useState([]);
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('name');
@@ -100,6 +104,16 @@ export default function EnhancedTable() {
     const [modalCreateOpen,setModalCreateOpen]=useState(false);
     let global = useContext(UserContext);
 
+    const removeUserIdQueryString=()=>{
+        const queryParams = new URLSearchParams(history.location.search)
+        if (queryParams.has('users_id')) {
+            queryParams.delete('users_id');
+            history.replace({
+                search: queryParams.toString(),
+            })
+        }
+    }
+    
     const getUsers = () => {
         const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'users';
@@ -135,6 +149,7 @@ export default function EnhancedTable() {
                 newRows = rows.filter((row => {
                     if (row.id != data.id) return row
                 }));
+                removeUserIdQueryString()
                 break;
             default:
                 newRows = rows;
@@ -147,11 +162,21 @@ export default function EnhancedTable() {
         const { user, open } = data;
         setModalOpen(open);
         setClickedUser(user);
+        removeUserIdQueryString()
     }
 
     useEffect(() => {
         getUsers();
     }, []);
+
+    useEffect(()=>{
+        const query = new URLSearchParams(location.search);
+        const paramUserId = query.get('users_id');
+        if (paramUserId){ 
+            const currentUser=rows.filter((user)=>user.id==paramUserId);
+            if(currentUser.length>0) handleModalOpen({user: currentUser[0],open:true});
+        }
+    },[rows])
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -168,7 +193,7 @@ export default function EnhancedTable() {
 
     return (
         <div className={classes.root}>
-            <Toaster/>
+             
             <Button 
                 variant="contained"
                 color="primary"
@@ -185,11 +210,16 @@ export default function EnhancedTable() {
                         {rows.length?stableSort(rows, getComparator(order, orderBy))
                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((row, index) => {
+                                let searchParams = new URLSearchParams(location.search);
+                                searchParams.set('users_id', row.id);
                                 return (
                                     <TableRow hover key={row.id}>
-                                        <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}
-                                            onClick={() => handleModalOpen({ user: row, open: true })}>
-                                            {row.name} ({row.email})
+                                        <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}>
+                                            <Link to={{ pathname: pathname, search: searchParams.toString() }} 
+                                                style={{ textDecoration: 'none', color: '#393939' }} 
+                                                onClick={() => handleModalOpen({ user: row, open: true })}>
+                                                {row.name} ({row.email})
+                                            </Link>
                                         </TableCell>
                                         <TableCell align="left">{row.occupation?.name}</TableCell>
                                         <TableCell align="right">{row.last_login ? moment(row.last_login).format('DD MMM YYYY') : ''}</TableCell>
@@ -211,7 +241,7 @@ export default function EnhancedTable() {
                 count={rows.length}
                 rowsPerPage={rowsPerPage}
                 onPageChange={handleChangePage}
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPageOptions={[10, 20, 30]}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
             

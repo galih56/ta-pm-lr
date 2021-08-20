@@ -91,10 +91,10 @@ class GanttChart extends React.Component {
     TaskbarTemplate(props) {
         var taskBarStyle={};
         var progressBarStyle={};
-
+        
         if(props.taskData.realization==true){
-            taskBarStyle={ backgroundColor:'#F74D40',height: "100%" }
-            progressBarStyle={ backgroundColor:'#c0504e', width: props.ganttProperties.progressWidth + "px", height: "100%" }
+            taskBarStyle={ backgroundColor:'#43a047',height: "100%" }
+            progressBarStyle={ backgroundColor:'#1c8820', width: props.ganttProperties.progressWidth + "px", height: "100%" }
         }else{
             taskBarStyle={height: "100%" };
             progressBarStyle={
@@ -125,8 +125,8 @@ class GanttChart extends React.Component {
         var progressBarStyle={};
 
         if(props.taskData.realization==true){
-            taskBarStyle={ backgroundColor:'#F74D40',height: "100%" }
-            progressBarStyle={ backgroundColor:'#c0504e', width: props.ganttProperties.progressWidth + "px", height: "100%" }
+            taskBarStyle={ backgroundColor:'#43a047',height: "100%" }
+            progressBarStyle={ backgroundColor:'#1c8820', width: props.ganttProperties.progressWidth + "px", height: "100%" }
         }else{
             taskBarStyle={height: "100%" };
             progressBarStyle={

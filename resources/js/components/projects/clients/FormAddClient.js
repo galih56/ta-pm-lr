@@ -77,7 +77,7 @@ const FormAddClient=({open,handleClose,onCreate,detailProject})=>{
                         handleClose();
                     }} > Add a new client </DialogTitle>
             <DialogContent dividers>
-                <Toaster/>
+                 
                 <form onSubmit={(e)=>{
                         e.preventDefault();
                         formCreateOnSubmit();

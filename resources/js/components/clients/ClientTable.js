@@ -141,7 +141,7 @@ export default function EnhancedTable() {
     
     return (
         <Grid container>  
-        <Toaster/>  
+           
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                 <Router>
                     <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="clients">
@@ -211,7 +211,7 @@ export default function EnhancedTable() {
                             count={rows.length}
                             rowsPerPage={rowsPerPage}
                             onPageChange={handleChangePage}
-                            rowsPerPageOptions={[5, 10, 25]}
+                            rowsPerPageOptions={[10, 20, 30]}
                             onRowsPerPageChange={handleChangeRowsPerPage}
                         />
                     </div>

@@ -20,7 +20,12 @@ class Client extends Authenticatable
     protected $fillable = [
         'name', 'email','description', 'phone_number','city','institution', 
     ];
-
+    protected static function boot(){
+        parent::boot();
+        static::creating(function ($query) {
+            $query->description = $query->description ?? " ";
+        });
+    }
     public function projects(){
         return $this->hasMany(ClientsHasProjects::class,'clients_id');
     }

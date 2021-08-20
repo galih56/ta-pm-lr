@@ -1,28 +1,24 @@
 
 import 'fontsource-roboto';
-import React,{useState,useEffect,useContext} from 'react';
+import React,{useState,useEffect,useContext,lazy,Suspense} from 'react';
 import moment from 'moment';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import Attachments from './Attachments';
-import Subtasks from './Subtask/Subtasks';
-import MemberList from './MemberList';
-import ExtendDeadlineForm from './../../widgets/ExtendDeadlineForm';
-import SelectTag from '../../widgets/SelectTag';
-import StatusChip from './../../widgets/StatusChip';
 import UserContext from '../../../context/UserContext';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import NumberFormat from 'react-number-format';
 
-const useStyles = makeStyles((theme) => ({
-    textfield: { marginTop: theme.spacing(1), width: '100%' },
-    textField: { marginLeft: theme.spacing(1), marginRight: theme.spacing(1), },
-}));
+const Attachments = lazy(() => import('./Attachments'));
+const MemberList = lazy(() => import('./MemberList'));
+const Subtasks = lazy(() => import('./Subtasks/Subtasks'));
+const ExtendDeadlineForm = lazy(() => import('./../../widgets/ExtendDeadlineForm'));
+const SelectTag = lazy(() => import('./../../widgets/SelectTag'));
+const StatusChip = lazy(() => import('./../../widgets/StatusChip'));
 
 const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUpdate,onTaskDelete,setStartConfirmOpen }) => {
-    const classes = useStyles();
-    const [dateRange, setDateRange] = useState([null, null]);
     const [showExtendDeadlineForm,setShowExtendDeadlineForm]=useState(false);
     const global = useContext(UserContext);
     const [exceptedData,setExceptedData]=useState([]);
@@ -51,89 +47,109 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
 
     useEffect(()=>{
         checkLoggedInUserProjectMember();
-    },[data.members,data.cards])
+    },[data.members,data.cards]);
+    
+    return (
+        <Grid container spacing={2} style={{ paddingLeft: 4, paddingRight: 4 }} justifyContent="center" alignItems="center">
+            <Suspense fallback={<CircularProgress style={{marginTop:'1.5em'}} />}>
+                {(isEdit)?(
+                    <React.Fragment>
+                        <Grid item lg={12} md={12} sm={12} xs={12} >
+                            <TextField variant="standard" label="Title : " defaultValue={data.title} onChange={e =>setData({ ...data, title: e.target.value })} fullWidth />
+                        </Grid> 
+                        <Grid item lg={12} md={12} sm={12} xs={12} container spacing={2}>
+                            <Grid item lg={12} md={12} sm={12} xs={12}>
+                                <Typography style={{ whiteSpace: 'noWrap'}}>Estimation start/end at : {data.start ? moment(data.start).format('DD MMMM YYYY') : ''} - {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}</Typography> 
+                                <Button variant="contained" color="secondary" onClick={()=>setShowExtendDeadlineForm(true)}>Extend deadline</Button>
+                            </Grid>
+                            <Grid item lg={12} md={12} sm={12} xs={12}>
+                                <Typography style={{ whiteSpace: 'noWrap'}}>Realization start/end at : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''} - {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</Typography> 
+                                <Button variant="contained" 
+                                        disabled={data.actual_start?true:false}
+                                        color="primary" style={{marginRight:'0.5em'}} 
+                                        onClick={()=>setStartConfirmOpen(true)}>Start progress</Button>
+                            </Grid>
+                        </Grid>
+                        {!data.is_subtask?(
+                            <Grid item lg={12} md={12} sm={12} xs={12}>
+                                <Typography>Cost estimation/realization : 
+                                    {data.cost? <NumberFormat customInput={Typography}  style={{ whiteSpace: 'noWrap',margin:'0.4em' }} thousandSeparator={true}  displayType={'text'}  value={isNaN(data.cost)?0:Number.parseInt(data.cost)}/>:'...'}/
+                                    {data.actual_cost? <NumberFormat customInput={Typography} style={{ whiteSpace: 'noWrap',margin:'0.4em' }} thousandSeparator={true} displayType={'text'} value={isNaN(data.actual_cost)?0:Number.parseInt(data.actual_cost)} />:'...'}</Typography>
+                                    {(global.state.occupation?.name?.toLowerCase().includes('bendahara') )?(
+                                        <NumberFormat customInput={TextField} variant="standard" label="Actual cost : " type="text" value={isNaN(data.actual_cost)?0:Number.parseInt(data.actual_cost)} onValueChange={formattedValue => setData({ ...data, actual_cost: formattedValue.value })} 
+                                            fullWidth thousandSeparator={true} displayType={'input'} allowNegative={false} isNumericString={true} prefix={'Rp.'}  />):<></>}
+                            </Grid>):<></>} 
+                    </React.Fragment>
+                ):(
+                    <>
+                        <Grid item lg={6} md={6} sm={6} xs={12} >
+                            <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>Start : {data.start ? moment(data.start).format('DD MMMM YYYY') : ''}</Typography>
+                            <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>End : {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}</Typography>
+                        </Grid>
+                        <Grid item lg={6} md={6} sm={6} xs={12} >
+                            <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }} component="div">Actual Start : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''}<StatusChip status={data.start_label}/></Typography>
+                            <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }} component="div">Actual End : {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}<StatusChip status={data.end_label}/></Typography>
+                        </Grid>
+                        {!data.is_subtask?(
+                            <Grid item lg={12} md={12} sm={12} xs={12} >
+                                <Typography  style={{ whiteSpace: 'noWrap',margin:'0.4em' }} >Cost estimation/realization : 
+                                    {data.cost? <NumberFormat customInput={Typography} style={{ whiteSpace: 'noWrap',margin:'0.4em' }}thousandSeparator={true} displayType={'text'} value={isNaN(data.cost)?0:Number.parseInt(data.cost)}/>:'...'}/
+                                    {data.actual_cost? <NumberFormat customInput={Typography} style={{ whiteSpace: 'noWrap',margin:'0.4em' }}thousandSeparator={true} displayType={'text'} value={isNaN(data.actual_cost)?0:Number.parseInt(data.actual_cost)} />:'...'}
+                                </Typography>  
+                            </Grid>
+                        ):<></>}
+                    </>
+                )}
 
-    if (isEdit) {
-        return (
-            <Grid container spacing={2} style={{ paddingLeft: 4, paddingRight: 4 }} >
-                <Grid item lg={12} md={12} sm={12} xs={12} >
-                    <TextField variant="standard"
-                        label="Title : "
-                        defaultValue={data.title}
-                        onChange={(e) => {
-                            setData({ ...data, title: e.target.value })
-                        }}
-                        className={classes.textfield}
-                    />
-                </Grid>
-                <Grid item lg={7} md={7} sm={7} xs={12} container spacing={2}>
-                    <Grid item lg={12} md={12} sm={12} xs={12}>
-                        <Typography style={{ whiteSpace: 'noWrap'}}>Estimation start/end at : {data.start ? moment(data.start).format('DD MMMM YYYY') : ''} - {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}</Typography> 
-                        <Typography style={{ whiteSpace: 'noWrap'}}>Realization start/end at : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''} - {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</Typography> 
-                    </Grid>
-                    <Grid item lg={12} md={12} sm={12} xs={12}>
-                        <Button variant="contained" color="primary" style={{marginRight:'0.5em'}} onClick={()=>setStartConfirmOpen(true)}>Start progress</Button>
-                        <Button variant="contained" color="secondary" onClick={()=>setShowExtendDeadlineForm(true)}>Extend deadline</Button>
-                    </Grid>
-                </Grid>
-                {!data.is_subtask?(
-                <Grid item lg={5} md={5} sm={5} xs={12}>
-                    <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>Cost estimation/realization : {data.cost?data.cost:'...'}/{data.actual_cost?data.actual_cost:'...'}</Typography>    
-                    {( global.state.occupation?.name?.toLowerCase().includes('bendahara') )?(
-                        <TextField variant="standard"
-                            label="Actual cost : "
-                            type="number"
-                            defaultValue={data.actual_cost}
-                            onChange={(e) => {
-                                setData({ ...data, actual_cost: e.target.value })
-                            }}
-                            className={classes.textfield}
-                        />):<></>}
-                </Grid>):<></>}
+                <Grid item lg={12} md={12} sm={12} xs={12}>
+                    <SelectTag defaultValue={data.tags} onChange={(tags) => {
+                        setData({...data,tags:tags})
+                    }} isEdit={isEdit} />
+                </Grid> 
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <Typography>Attachments : </Typography>
                     <Attachments
                         detailTask={data} 
                         setDetailTask={setData} 
                         isEdit={isEdit}
-                        taskId={data.id}
-                        projectId={detailProject.id}
-                        listId={data.listId}
-                    ></Attachments>
-                </Grid>
-               {!data.is_subtask?(
-                <Grid item lg={12} md={12} sm={12} xs={12}>
-                    <Subtasks isEdit={isEdit} 
-                        detailTask={data}  
-                        setDetailTask={setData} 
-                        detailProject={detailProject} 
-                        onTaskUpdate={onTaskUpdate}
-                        onTaskDelete={onTaskDelete}
+                        tasks_id={data.id}
+                        projects_id={detailProject.id}
+                        lists_id={data.lists_id}
                     />
                 </Grid>
+                {!data.is_subtask?(
+                    <Grid item lg={12} md={12} sm={12} xs={12}>
+                        <Subtasks isEdit={isEdit} 
+                            detailTask={data}  
+                            setDetailTask={setData} 
+                            detailProject={detailProject} 
+                            onTaskUpdate={onTaskUpdate}
+                            onTaskDelete={onTaskDelete}
+                        />
+                    </Grid>
                 ):<></>}
-                {/* 
-                <Grid item lg={12} md={12} sm={12} xs={12}>
-                    <SelectTag defaultValue={data.tags} onChange={(tags) => {
-                        setData({...data,tags:tags})
-                    }} isEdit={isEdit} />
-                </Grid> 
-                */}
+            
                 <Grid item lg={12} md={12} sm={12} xs={12} >
-                    <TextField variant="standard"
-                        label="Description : "
-                        multiline rows={4}
-                        defaultValue={data.description} className={classes.textfield}
-                        onChange={(e) => {
-                            setData({ ...data, description: e.target.value })
-                        }} />
+                    {(isEdit)?(
+                        <TextField variant="standard"
+                            label="Description : "
+                            multiline rows={4}
+                            defaultValue={data.description} fullWidth
+                            onChange={(e) => {
+                                setData({ ...data, description: e.target.value })
+                            }} />
+                    ):(
+                        <>
+                            <Typography>Description : </Typography>
+                            <Typography variant="body2">{data.description}</Typography>
+                        </>
+                    )}
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <MemberList detailProject={detailProject} 
                         exceptedData={exceptedData} 
                         data={data} setData={setData} isEdit={isEdit}/>
                 </Grid>
-                
                 <ExtendDeadlineForm 
                     open={showExtendDeadlineForm} 
                     handleClose={()=>setShowExtendDeadlineForm(false)}
@@ -142,59 +158,9 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                     minDate={data.end}
                     maxDate={detailProject.end}
                     />
-            </Grid>
-        )
-    } else {
-        return (
-            <Grid container spacing={2} style={{ paddingLeft: 4, paddingRight: 4 }} >
-                <Grid item lg={6} md={6} sm={6} xs={12} >
-                    <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>Start : {data.start ? moment(data.start).format('DD MMMM YYYY') : ''}</Typography>
-                    <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>End : {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}</Typography>
-                </Grid>
-                <Grid item lg={6} md={6} sm={6} xs={12} >
-                    <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }} component="div">Actual Start : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''}<StatusChip status={data.start_label}/></Typography>
-                    <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }} component="div">Actual End : {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}<StatusChip status={data.end_label}/></Typography>
-                </Grid>
-                {!data.is_subtask?(
-                    <Grid item lg={12} md={12} sm={12} xs={12} >
-                        <Typography style={{ whiteSpace: 'noWrap',margin:'0.4em' }}>Cost estimation/realization : {data.cost?data.cost:'...'}/{data.actual_cost?data.actual_cost:'...'}</Typography>    
-                    </Grid>
-                ):<></>}
-                <Grid item lg={12} md={12} sm={12} xs={12}>
-                    <Typography>Attachments : </Typography>
-                    <Attachments
-                        detailTask={data} setDetailTask={setData} 
-                        taskId={data.id}
-                        projectId={detailProject.id}
-                        listId={data.listId}>
-                    </Attachments>
-                </Grid>
-               {!data.is_subtask?(
-                <Grid item lg={12} md={12} sm={12} xs={12}>
-                    <Subtasks  
-                        isEdit={isEdit} 
-                        detailTask={data} 
-                        setDetailTask={setData} 
-                        detailProject={detailProject} 
-                        onTaskUpdate={onTaskUpdate}
-                        onTaskDelete={onTaskDelete}
-                    />
-                </Grid>
-                ):<></>}
-                {/* <Grid item lg={12} md={12} sm={12} xs={12}>
-                    <SelectTag defaultValue={data.tags} onChange={(tags) => console.log(tags)} isEdit={isEdit}></SelectTag>
-                </Grid> */}
-                <Grid item lg={12} md={12} sm={12} xs={12}>
-                    <Typography>Description : </Typography>
-                    <Typography variant="body2">{data.description}</Typography>
-                </Grid>
-                <Grid item lg={12} md={12} sm={12} xs={12}>
-                    <MemberList detailProject={detailProject} data={data} setData={setData} isEdit={isEdit}/>
-                </Grid>
-                
-            </Grid>
-        )
-    }
+            </Suspense>
+        </Grid>
+    )
 }
 export default OpenEditForm;
 

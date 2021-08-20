@@ -168,7 +168,7 @@ export default function EnhancedTable({detailProject}) {
     return (
         <div className={classes.root}>
             <Paper className={classes.paper}>
-                <Toaster/>
+                 
                 <TableContainer>
                     <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} >
                         <EnhancedTableHead
@@ -229,7 +229,7 @@ export default function EnhancedTable({detailProject}) {
                     </Table>
                 </TableContainer>
                 <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
+                    rowsPerPageOptions={[10, 20, 30]}
                     component="div"
                     count={rows.length}
                     rowsPerPage={rowsPerPage}

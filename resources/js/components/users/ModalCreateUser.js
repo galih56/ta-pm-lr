@@ -60,6 +60,7 @@ const ModalCreateUser = (props) => {
     let [userExists, setUserExists] = useState(false);
     let [signUpSuccess, setSignUpSuccess] = useState(false);
     let global = useContext(UserContext);
+
     const getOccupations = () => {
         const url = process.env.MIX_BACK_END_BASE_URL + 'occupations';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
@@ -87,16 +88,7 @@ const ModalCreateUser = (props) => {
         getOccupations();
     }, [])
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const body = {
-            name: username,
-            password: password,
-            occupations_id: occupationsId,
-            confirmation: confirmPassword,
-            phone_number: phoneNumber,
-            email: email
-        }
+    useEffect(()=>{
         if (username.trim() === '' || password.trim() === '' || phoneNumber.trim() === '' || email.trim() === '') {
             setInputRequireAlert(true);
             return;
@@ -112,10 +104,24 @@ const ModalCreateUser = (props) => {
 
         if (!window.navigator.onLine) setOfflineAlert(true);
         else setOfflineAlert(false);
+    },[username,password,phoneNumber,email,confirmPassword])
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const body = {
+            name: username,
+            password: password,
+            occupations_id: occupationsId,
+            confirmation: confirmPassword,
+            phone_number: phoneNumber,
+            email: email
+        }
         
-        const config = { mode: 'no-cors', crossdomain: true, headers: { 'Content-Type': 'application/json' } };
+        const url=`${process.env.MIX_BACK_END_BASE_URL}users`
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
         toast.promise(
-            axios.post(process.env.MIX_BACK_END_BASE_URL+'users', body, config),
+            axios.post(url, body),
             {
                 loading: 'Creating a new user',
                 success: (result)=>{ 
@@ -145,10 +151,10 @@ const ModalCreateUser = (props) => {
             <DialogTitle onClose={closeModal}>User information</DialogTitle>
             <DialogContent dividers>
                 <Container component="main" >
-                    <Toaster/>
+                     
                     <CssBaseline />
-                    { passwordConfirmAlert ? <Alert severity="error" > Password and confirm password does not match</Alert> : null}
-                    { inputRequireAlert ? <Alert severity="error" >Please complete the form</Alert> : null}
+                    { passwordConfirmAlert ? <Alert severity="error" > Password confirmation does not match</Alert> : null}
+                    { inputRequireAlert ? <Alert severity="error" >Some fields are empty</Alert> : null}
                     { userExists ? <Alert severity="warning" >Email : <strong>{email} </strong>already in use</Alert> : null}
                     { signUpSuccess ? <Alert severity="success" ><strong>Success</strong><br />New user is now registered</Alert> : null}
                     { offlineAlert ? <Alert severity="warning" >You're currently offline. Please check your internet connection</Alert> : null}
@@ -194,11 +200,10 @@ const ModalCreateUser = (props) => {
                             fullWidth
                             placeholder="Occupation"
                         >
-                                <MenuItem>Choose occupation</MenuItem>
-                                {
-                                    occupations.map((occupation, index) =>(<MenuItem value={occupation.id} key={occupation.id}>{occupation.name}</MenuItem>))
-                                } 
-                            </Select>
+                            {
+                                occupations.map((occupation, index) =>(<MenuItem value={occupation.id} key={occupation.id}>{occupation.name}</MenuItem>))
+                            } 
+                        </Select>
                         <TextField
                             variant="standard"
                             margin="normal"

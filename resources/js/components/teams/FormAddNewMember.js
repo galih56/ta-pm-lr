@@ -68,7 +68,7 @@ const FormAddNewMember=({teamId,open,closeModal,onCreate})=>{
                     closeModal();
                 }} > Add new member </DialogTitle>
             <DialogContent dividers>
-                <Toaster/>
+                 
                 <form onSubmit={(e)=>{
                         e.preventDefault();
                         formCreateOnSubmit();

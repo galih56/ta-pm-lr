@@ -85,7 +85,7 @@ const Home = (props) => {
 
     return (
         <React.Fragment>
-            <Toaster/>
+             
             <Grid item xs={12}>
                 <Paper className={classes.paper}>
                     <ListItem button dense font="small" onClick={handleProjectListOpen} 

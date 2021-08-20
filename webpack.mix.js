@@ -19,12 +19,12 @@ mix.js('resources/js/app.js', 'public/js')
             ignored: /node_modules/
         }
     }).react();
-    
-    mix.disableNotifications();
 
-    if (mix.inProduction()) {
-        mix.version();
-    }
+mix.disableNotifications();
+
+if (mix.inProduction()) {
+    mix.version();
+}
     // .sass('resources/sass/app.scss', 'public/css')
 
 //Install dibawah ini supaya bisa support experimental syntax jsx

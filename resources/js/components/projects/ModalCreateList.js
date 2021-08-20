@@ -82,7 +82,7 @@ export default function ModalCreateList(props) {
         toast.promise(
             axios.post(url, body),
             {
-                loading: 'Creating a new meeting schedule',
+                loading: 'Creating a new list',
                 success: (result)=>{
                     setTitle(''); closeModal();
                     global.dispatch({ type: 'create-new-list', payload: result.data });
@@ -155,7 +155,7 @@ export default function ModalCreateList(props) {
                     <Alert severity="warning">Your action requires authentication. Please sign in.</Alert>
                 </DialogContent>
             )}
-            <Toaster/>
+             
         </Dialog>
     );
 }

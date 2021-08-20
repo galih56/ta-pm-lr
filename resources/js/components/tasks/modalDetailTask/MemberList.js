@@ -89,7 +89,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
         <Grid container>
          {isEdit?(
              <>
-                <Toaster/>
+                 
                  <Grid item lg={12} md={12} sm={12} xs={12} style={{marginTop:'0.5em'}}>
                     <Typography>Assigned to : </Typography>
                  </Grid>

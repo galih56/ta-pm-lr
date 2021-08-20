@@ -75,7 +75,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
         toast.promise(
             axios.post(url, body),
             {
-                loading: 'Creating a new task',
+                loading: 'Creating a new subtask',
                 success: (result)=>{
                     setShowCreateSubtaskForm(false);
                     var newData=[...data,result.data];
@@ -84,7 +84,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                     setDetailTask(newDetailTask);
                     global.dispatch({ type: 'create-new-subtask', payload: result.data })
                     if(onTaskUpdate)onTaskUpdate(newDetailTask);
-                    return <b>A new meeting successfuly created</b>
+                    return <b>A new subtask successfuly created</b>
                 },
                 error: (error)=>{
                     if(error.response.status==401) return <b>Unauthenticated</b>;

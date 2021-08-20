@@ -105,14 +105,14 @@ export default function ModalCreateRole(props) {
                     <DialogActions>
                         <Button onClick={submitData} color="primary">Create</Button>
                     </DialogActions>
-                    <Toaster/>
+                     
                 </React.Fragment>
             ):(
                 <DialogContent dividers>
                     <Alert severity="warning">Your action requires authentication. Please sign in.</Alert>
                 </DialogContent>
             )}
-            <Toaster/>
+             
         </Dialog>
     );
 }

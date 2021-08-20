@@ -13,6 +13,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import toast, { Toaster } from 'react-hot-toast';
 import DialogActionButtons from './DialogActionButtons';
 import EditForm from './EditForm';
+import axios from 'axios';
 
 // https://stackoverflow.com/questions/35352638/react-how-to-get-parameter-value-from-query-string
 const styles = (theme) => ({
@@ -125,7 +126,7 @@ export default function ModalDetailUser(props) {
             maxWidth={'lg'} fullwidth={"true"}>
             <DialogTitle onClose={closeModal}>User information</DialogTitle>
             <DialogContent dividers>
-            <Toaster/>
+                 
                 <EditForm isEdit={isEditing} data={data} setData={setData} asProfile={asProfile}/>
             </DialogContent>
             <DialogActions>

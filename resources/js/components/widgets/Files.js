@@ -238,7 +238,7 @@ const Files = (props) => {
                 open={deleteModalOpen} 
                 handleClose={handleDeleteModalClose} 
                 handleDelete={()=>handleDelete(choosenFileId)}/>
-            <Toaster/>
+             
         </Grid>
     )
 };

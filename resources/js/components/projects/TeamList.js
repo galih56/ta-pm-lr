@@ -93,7 +93,7 @@ export default function TeamList(props) {
                     loading: 'Creating a new team',
                     success: (result)=>{
                         setTeams([...teams,...result.data]);
-                        return <b>A new meeting successfuly created</b>
+                        return <b>A new team successfuly created</b>
                     },
                     error: (error)=>{
                         if(error.response.status==401) return <b>Unauthenticated</b>;

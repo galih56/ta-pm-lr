@@ -98,7 +98,7 @@ const FormAddNewProject=({teams_id,open,closeModal,onCreate})=>{
                     closeModal();
                 }} > Add a project to the team</DialogTitle>
             <DialogContent dividers>
-                <Toaster/>
+                 
                 <form onSubmit={(e)=>{
                         e.preventDefault();
                         formCreateOnSubmit();

@@ -98,7 +98,7 @@ export default function ModalExtendDeadline({open,handleClose,task,detailProject
                     handleClose();
                 }} > Extend deadline </DialogTitle>
             <DialogContent dividers>
-                <Toaster/>
+                 
                 <form onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
                         <Grid item lg={12} md={12} sm={12} xs={12}>

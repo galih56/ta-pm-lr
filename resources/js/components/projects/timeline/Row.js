@@ -11,7 +11,7 @@ import IconButton from '@material-ui/core/IconButton';
 import axios from 'axios';
 
 function Row(props) {
-    const { data, handleDetailTaskOpen,onClick,headCells, onTaskUpdate, onTaskDelete } = props;
+    const { data, handleDetailTaskOpen,onClick,headCells, onTaskUpdate, onTaskDelete,keywords } = props;
     const [openCollapsible, setOpenCollapsible] = useState(true);
     let global = useContext(UserContext);
 
@@ -40,7 +40,7 @@ function Row(props) {
     
     return (
         <React.Fragment>
-            <Toaster/>
+             
             <TableRow hover key={data.id} style={{ color:'#393939', backgroundColor:'#e3e3e3' }}>
                 <TableCell>
                     <IconButton size="small"

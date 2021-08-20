@@ -214,11 +214,10 @@ export default function EnhancedTable() {
                             count={rows.length}
                             rowsPerPage={rowsPerPage}
                             onPageChange={handleChangePage}
-                            rowsPerPageOptions={[5, 10, 25]}
+                            rowsPerPageOptions={[10, 20, 30]}
                             onRowsPerPageChange={handleChangeRowsPerPage}
                         />
                     </div>
-                    <Toaster/>
                 </Paper>
             </Grid>
         </Grid>

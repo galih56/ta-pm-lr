@@ -6,7 +6,6 @@ import Tab from '@material-ui/core/Tab';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
-import ModalDetailTask from '../tasks/modalDetailTask/ModalDetailTask';
 import BreadCrumbs from './BreadCrumbs';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import UserContext from '../../context/UserContext';
@@ -23,6 +22,7 @@ const Calendar = lazy(() => import('../widgets/Calendar'));
 const Files = lazy(() => import('../widgets/Files'));
 const Others = lazy(() => import('./Others'));
 const Timeline = lazy(() => import('./timeline/Timeline'));
+const ModalDetailTask = lazy(() => import('../tasks/modalDetailTask/ModalDetailTask'));
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -162,9 +162,7 @@ const DetailProject = (props) => {
         const paramTaskId = query.get('tasks_id');
         const paramMeetingId = query.get('meetings_id');
         if (paramTaskId) handleDetailTaskOpen({ task:{...clickedTask, id: paramTaskId}, open: true });
-        if (paramMeetingId) handleDetailMeetingOpen({ meeting:{
-            id:paramMeetingId,...clickedMeeting
-        }, open: true });
+        if (paramMeetingId) handleDetailMeetingOpen({ meeting : { id:paramMeetingId,...clickedMeeting }, open: true });
         getDetailProject();
     }, []);
 
@@ -191,6 +189,7 @@ const DetailProject = (props) => {
 
     return (
         <Router>
+             
             <Paper>
                 <Tabs
                     value={tabState}

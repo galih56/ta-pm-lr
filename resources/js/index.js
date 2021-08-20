@@ -20,6 +20,7 @@ import {
 } from './context/TasksReducer';
 import { LinearProgress } from '@material-ui/core/';
 import './index.css';
+import {Toaster} from 'react-hot-toast';
 
 const Home = lazy(() => import("./layout/Home"));
 const DetailProject = lazy(() => import("./components/projects/DetailProject"));

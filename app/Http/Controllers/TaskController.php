@@ -157,7 +157,6 @@ class TaskController extends Controller
             && $request->actual_end!='Invalid date') 
             && !empty($request->actual_end)) $task->actual_end=$request->actual_end;
         if($request->has('parent_task_id')) $task->parent_task_id=$request->parent_task_id;
-        if($request->has('complete')) $task->complete=$request->complete;
 
         if(($request->has('actual_start') && $request->actual_start!='Invalid date' && !empty($request->actual_start))){
             $start = Carbon::parse($task->start)->format('Y-m-d');
@@ -184,6 +183,16 @@ class TaskController extends Controller
             $task->work_days=$work_days;
         }
 
+        if($request->has('complete')) {
+            if($request->complete){
+                $task->complete=$request->complete;
+            }else{
+                $task->complete=$request->complete;
+                $task->actual_end=null;
+                $task->end_label='Belum selesai';
+            }
+        }
+
         $task->save();
         
         if($task->is_subtask){
@@ -199,6 +208,44 @@ class TaskController extends Controller
             $parent_task->save();
         }
         
+        if($request->has('tags')){
+            $tags=$request->tags;
+            $inserted_tags=[];
+            $tag_ids=array_filter($tags,function($tag){
+                if(array_key_exists('id',$tag)){ 
+                    return $tag; 
+                }
+            });
+            $tag_ids=array_map(function($tag){
+                return $tag['id'];
+            },$tag_ids);
+
+            $checkExistingTags=TasksHasTags::where('tasks_id',$task->id)->whereNotIn('tags_id',$tag_ids)->delete();
+            for ($i=0; $i < count($tags); $i++) { 
+                $tag=$tags[$i];
+                if(array_key_exists('inputNewTag', $tag)){
+                    $new_tag=new Tag();
+                    $new_tag->title=$tag['inputNewTag'];
+                    $new_tag->save();
+
+                    $new_tag_relation=new TasksHasTags();
+                    $new_tag_relation->tasks_id=$task->id;
+                    $new_tag_relation->tags_id=$new_tag->id;
+                    $new_tag_relation->save();
+                    $inserted_tags[]=$new_tag_relation;
+                }else{
+                    $check=TasksHasTags::where('tasks_id',$task->id)->where('tags_id',$tag['id'])->first();
+                    if(!$check){
+                        $new_tag_relation=new TasksHasTags();
+                        $new_tag_relation->tasks_id=$task->id;
+                        $new_tag_relation->tags_id=$tag['id'];
+                        $new_tag_relation->save();
+                        $inserted_tags[]=$new_tag_relation;
+                    }
+                }
+            }
+        }
+
         $task=$this->getDetailTask($task->id);
         return response()->json($task);
     }
@@ -231,7 +278,8 @@ class TaskController extends Controller
                 $current_date_time = Carbon::now()->toDateTimeString();
                 $task->actual_end=$current_date_time;
             }else{
-
+                $task->actual_end=null;
+                $task->end_label='Belum Selesai';
             }
             $task->complete=$request->complete;
         }

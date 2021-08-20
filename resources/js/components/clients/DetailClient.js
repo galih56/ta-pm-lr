@@ -55,12 +55,14 @@ export default function DetailClient(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + 'clients/'+params.id;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
+        console.log()
         toast.promise(
             axios.patch(url,data),
             {
-                loading: 'Updatng...',
+                loading: 'Updating...',
                 success: (result)=>{
                     setData(result.data);
+                    setEditing(false)
                     return <b>Successfully updated</b>
                 },
                 error: (error)=>{
@@ -92,6 +94,7 @@ export default function DetailClient(props) {
     }
     return (
         <Paper style={{ padding: '1em',width:'100%' }}>
+             
             <Grid container component="form" spacing={1} onSubmit={handleSubmit}>
                 <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                     <Router>
@@ -221,7 +224,6 @@ const ModalConfirm = (props) => {
                 <Button onClick={handleClose}>Cancel</Button>
                 <Button onClick={()=>{handleConfirm();handleClose();}} variant='contained' color="primary"> Confirm </Button>
             </DialogActions>
-            <Toaster/>
         </Dialog>
     );
 }

@@ -82,7 +82,7 @@ const FormCreateTeam=({open,handleClose,onCreate})=>{
                         e.preventDefault();
                         formCreateOnSubmit();
                     }}>
-                    <Toaster/>
+                     
                     <Grid  container spacing={2}>
                         <Grid lg={12} md={12} sm={12} xs={12} item>
                             <TextField variant="standard"

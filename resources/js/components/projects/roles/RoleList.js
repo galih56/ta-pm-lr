@@ -101,16 +101,13 @@ export default function EnhancedTable(props) {
     }, []);
 
     const getRoles = () => {
-        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'member-roles';        
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setRows(result.data);
-                toast.dismiss(toast_loading);
             }).catch((error) => {
-                toast.dismiss(toast_loading);
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
@@ -135,7 +132,7 @@ export default function EnhancedTable(props) {
     return (
         <div className={classes.root}>
             <Grid>
-                <Toaster/>
+                 
                 <Typography variant="h6">Roles  <Button color="primary" component="span" onClick={() => setNewRoleOpen(true)}>+ Add new role</Button></Typography>
             </Grid>
             <TableContainer>
@@ -170,7 +167,7 @@ export default function EnhancedTable(props) {
                 </Table>
             </TableContainer>
             <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPageOptions={[10, 20, 30]}
                 component="div"
                 count={rows.length}
                 rowsPerPage={rowsPerPage}

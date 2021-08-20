@@ -38,6 +38,7 @@ Route::group(['prefix'=>'users'],function(){
     Route::get('/{id}/meetings','App\Http\Controllers\UserController@getMeetings');
     Route::get('/{id}/tasks','App\Http\Controllers\UserController@gettasks');
     Route::post('/{id}/get-github-access-token','App\Http\Controllers\UserController@getGithubAccessToken');
+    Route::patch('/{id}/changepassword','App\Http\Controllers\UserController@changePassword');
 });
 
 Route::get('projects-overview','App\Http\Controllers\ProjectController@getoverallProjectReports');

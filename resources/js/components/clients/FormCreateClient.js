@@ -72,7 +72,7 @@ const FormCreateClient=({open,handleClose,onCreate})=>{
 
     return(
         <Dialog aria-labelledby="Create a client" open={open}>
-            <Toaster/>
+             
             <DialogTitle onClose={
                 () => {
                     handleClose();

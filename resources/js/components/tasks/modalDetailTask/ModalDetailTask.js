@@ -20,6 +20,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import moment from 'moment';
 import DialogConfirm from './DialogConfirm';
 import toast, { Toaster } from 'react-hot-toast';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 // https://stackoverflow.com/questions/35352638/react-how-to-get-parameter-value-from-query-string
 const styles = (theme) => ({
@@ -83,30 +84,25 @@ export default function ModalDetailTask(props) {
     const [isEditing, setIsEditing] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
 
-    const getDetailTask = useCallback(() => {
-        if (window.navigator.onLine) {
-            const toast_loading = toast.loading('Loading...');
-            var body={projects_id:detailProject.id,users_id:global.state.id}
-            const url = process.env.MIX_BACK_END_BASE_URL + 'tasks/' + id;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.get(url,body)
-                .then((result) => {
-                    setData({ ...data, ...result.data });
-                    const payload = { projects_id: data.projects_id, lists_id: data.lists_id, ...result.data };
-                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
-                    else global.dispatch({ type: 'store-detail-task', payload: payload })
-                    toast.dismiss(toast_loading);
-                }).catch((error) => {
-                    toast.dismiss(toast_loading);
-                    switch(error.response.status){
-                        case 401 : toast.error(<b>Unauthenticated</b>); break;
-                        case 422 : toast.error(<b>Some required inputs are empty</b>); break;
-                        default : toast.error(<b>{error.response.statusText}</b>); break
-                    }
-                });
-        } else toast.error(`You are currently offline. Couldn't retrieve related data from local storage`);
-    }, [id,props.initialState.id]);
+    const getDetailTask = () => {
+        var body={projects_id:detailProject.id,users_id:global.state.id}
+        const url = process.env.MIX_BACK_END_BASE_URL + 'tasks/' + id;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.get(url,body)
+            .then((result) => {
+                setData({ ...data, ...result.data });
+                const payload = { projects_id: data.projects_id, lists_id: data.lists_id, ...result.data };
+                if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
+                else global.dispatch({ type: 'store-detail-task', payload: payload })
+            }).catch((error) => {
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
+            });
+    }
 
     useEffect(() => {
         getDetailTask()
@@ -168,7 +164,7 @@ export default function ModalDetailTask(props) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         toast.promise(
-            axios.patch(url, body),
+            axios.patch(url),
             {
                 loading: 'Updating...',
                 success: (result)=>{
@@ -214,7 +210,7 @@ export default function ModalDetailTask(props) {
         if(!body) body= {
             id:data.id,actual_start:data.actual_start, actual_end:data.actual_end,
             complete:data.complete, title:data.title, actual_cost:data.actual_cost, is_subtask:data.is_subtask, 
-            progress: data.progress, parent_task_id:data.parent_task_id,
+            progress: data.progress, parent_task_id:data.parent_task_id, tags:data.tags,
             projects_id:props.detailProject.id, users_id:global.state.id
         }
         
@@ -299,7 +295,7 @@ export default function ModalDetailTask(props) {
                             /> 
                     ):<></>}
                 </DialogTitle>
-                <DialogContent dividers>    
+                <DialogContent dividers>  
                     <EditForm
                         isEdit={isEditing}
                         data={data}
@@ -309,7 +305,7 @@ export default function ModalDetailTask(props) {
                         onTaskUpdate={onTaskUpdate}
                         onTaskDelete={onTaskDelete}
                         setStartConfirmOpen={setStartConfirmOpen}
-                    />
+                    /> 
                     <br/>
                 </DialogContent>
                 {

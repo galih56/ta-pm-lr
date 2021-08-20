@@ -94,7 +94,7 @@ export default function DetailClient(props) {
     }
     return (
         <Paper style={{ padding: '1em',width:'100%' }}>
-            <Toaster/>
+             
             <Grid container component="form" spacing={1} onSubmit={handleSubmit}>
                 <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                     <Router>

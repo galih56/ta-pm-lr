@@ -92,8 +92,10 @@ class ProjectController extends Controller
                                         return $q2->orderBy('start','ASC')
                                                     ->with('members.user.occupation')
                                                     ->with('members.project_client.client')
-                                                    ->with('members.member.role');
+                                                    ->with('members.member.role')
+                                                    ->with('tags.tag');
                                     }])
+                                    ->with('tags.tag')
                                     ->with('members.user')
                                     ->with('members.member.role')
                                     ->with('members.project_client.client');
