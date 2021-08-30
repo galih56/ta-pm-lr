@@ -22,7 +22,7 @@ import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import moment from 'moment'
 import { parseISO } from 'date-fns'; 
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },

@@ -18,14 +18,25 @@ class Client extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email','description', 'phone_number','city','institution', 
+        'email','description','city','institution', 
     ];
+<<<<<<< Updated upstream
     protected static function boot(){
         parent::boot();
         static::creating(function ($query) {
             $query->description = $query->description ?? " ";
         });
     }
+=======
+    
+    protected static function boot(){
+        parent::boot();
+        static::creating(function ($client) {
+            $client->description = $query->description ?? " ";
+        });
+    }
+
+>>>>>>> Stashed changes
     public function projects(){
         return $this->hasMany(ClientsHasProjects::class,'clients_id');
     }

@@ -1,9 +1,12 @@
 import 'fontsource-roboto';
-import React, { memo } from 'react';
+import React, { useEffect, useContext, useState,memo } from 'react';
+import UserContext from '../../../context/UserContext';
 import ModalDeleteConfirm from './ModalDeleteConfirm';
 import { Button } from '@material-ui/core/';
 
-const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteOccupation, deleteConfirmOpen, setDeleteConfirmOpen, closeModal }) => {
+const dialogActionButtons = ({ isEdit, deletable, saveChanges, setEditMode, deleteOccupation, deleteConfirmOpen, setDeleteConfirmOpen, closeModal }) => {
+    const global = useContext(UserContext);
+    
     if (isEdit) {
         return (
             <React.Fragment>
@@ -11,14 +14,18 @@ const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteOccupatio
                 <Button onClick={
                     () => { saveChanges(); setEditMode(false); }
                 } variant="contained" color="primary"> Save</Button>
-                <Button onClick={
-                    () => { setDeleteConfirmOpen(true); }
-                } variant="contained" color="secondary">Delete</Button>
-                <ModalDeleteConfirm
-                    open={deleteConfirmOpen}
-                    handleDelete={() => { deleteOccupation(); setDeleteConfirmOpen(false); closeModal(); }}
-                    handleClose={() => { setDeleteConfirmOpen(false); closeModal(); }}>
-                </ModalDeleteConfirm>
+                {(deletable)?(
+                    <>
+                        <Button onClick={
+                            () => { setDeleteConfirmOpen(true); }
+                        } variant="contained" color="secondary">Delete</Button>
+                        <ModalDeleteConfirm
+                            open={deleteConfirmOpen}
+                            handleDelete={() => { deleteOccupation(); setDeleteConfirmOpen(false); closeModal(); }}
+                            handleClose={() => { setDeleteConfirmOpen(false); closeModal(); }}>
+                        </ModalDeleteConfirm>
+                    </>
+                    ):(null)}
             </React.Fragment>
         )
     } else {

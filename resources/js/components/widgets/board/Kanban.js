@@ -103,7 +103,8 @@ const Kanban = (props) => {
                 id:detailProject.id,
                 start:detailProject.start,
                 end:detailProject.end,
-                members:detailProject.members
+                members:detailProject.members,
+                clients:detailProject.clients
             }} {...props}/>
         )
     }
@@ -111,7 +112,6 @@ const Kanban = (props) => {
     const [eventBus, setEventBus] = useState(undefined);
 
     const onCardDelete=(lists_id,tasks_id)=>{
-        console.log(lists_id,tasks_id)
         eventBus.publish({type: 'REMOVE_CARD', laneId: listId, cardId: tasks_id});
     }
     return (

@@ -3,13 +3,12 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import axios from 'axios';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import UserContext from './../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
 import { Dialog, IconButton, Typography, } from '@material-ui/core/';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
 import CloseIcon from '@material-ui/icons/Close';
 import UserSearchBar from './../widgets/UserSearchBar';
 
@@ -107,7 +106,6 @@ const FormCreateTeam=({open,handleClose,onCreate})=>{
                                 onChange={(e) => setDescription(e.target.value) }
                                 multiline
                                 style={{ width: '100%' }}
-                                required
                                 rows={4}
                             />
                         </Grid>

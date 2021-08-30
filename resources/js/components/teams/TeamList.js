@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React,{useState,useEffect,useContext} from 'react';
 import { Link, useHistory, BrowserRouter as Router } from "react-router-dom";
 import UserContext from '../../context/UserContext';
@@ -10,10 +11,11 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
-import axios from 'axios';
 import FormCreateTeam from './FormCreateTeam';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
+import Alert from '@material-ui/core/Alert';
+import AlertTitle from '@material-ui/core/AlertTitle';
 
 export default function TeamTable() {
     const [openFormCreate,setOpenFormCreate]=useState(false);
@@ -52,7 +54,7 @@ export default function TeamTable() {
                         </Grid>
                         <Grid item lg={12} md={12} sm={12} xs={12}>
                             <Typography variant="h5">Teams</Typography>
-                            {(global.state.occupation?.name?.toLowerCase().includes('manager'))?(
+                            {([1,8,2].includes(global.state.occupation?.id))?(
                                 <>
                                     <Button onClick={()=>setOpenFormCreate(true)}>Create a new team</Button>
                                 
@@ -73,7 +75,7 @@ export default function TeamTable() {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {rows.map((row) => (
+                                    {(rows.length)?rows.map((row) => (
                                         <TableRow key={row.id} style={onHoveredStyle}>
                                             <TableCell>
                                                 <Typography variant="body2" display="block">
@@ -84,7 +86,14 @@ export default function TeamTable() {
                                                 </Typography>
                                             </TableCell>
                                         </TableRow>
-                                    ))}
+                                    )):(
+                                        <Grid item xl={12} md={12} sm={12} xs={12}>
+                                            <Alert severity="info">
+                                                <AlertTitle><b>Info</b></AlertTitle>
+                                                There is no data to show.
+                                            </Alert>
+                                        </Grid>
+                                    )}
                                 </TableBody>
                             </Table>
                         </Grid>

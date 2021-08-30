@@ -1,8 +1,8 @@
-import React,{useState,useContext} from 'react';
+import React,{useState,useContext,useEffect} from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import axios from 'axios'
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import UserContext from '../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
 import { Dialog, IconButton, Typography, } from '@material-ui/core/';
@@ -10,6 +10,7 @@ import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import CloseIcon from '@material-ui/icons/Close';
 import UserSearchBar from '../widgets/UserSearchBar';
+import SelectRole from '../widgets/SelectRole';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },
@@ -40,9 +41,33 @@ const FormAddNewMember=({teamId,open,closeModal,onCreate})=>{
     const global=useContext(UserContext);
     const [users,setUsers]=useState([]);
 
-    const formCreateOnSubmit=()=>{
-        const body = { teamId:teamId, users: users }
-        const url = process.env.MIX_BACK_END_BASE_URL + `teams/${teamId}`;
+    const [roleId,setRoleId]=useState(null);
+    const [alerts, setAlerts]=useState([]);
+    const [roles,setRoles]=useState([]);
+
+    const getRoles = () => {
+        const url = process.env.MIX_BACK_END_BASE_URL + 'member-roles';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.get(url)
+            .then(result =>{ 
+                setRoles(result.data)
+            }).catch((error) => {
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
+            });
+    }
+
+    useEffect(() => {
+        getRoles();
+    }, [open]);
+    
+    const addNewMember=()=>{
+        const body = { teams_id:teamId, users: users, roles_id:roleId }
+        const url = process.env.MIX_BACK_END_BASE_URL + `team-members`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         toast.promise(
@@ -50,7 +75,8 @@ const FormAddNewMember=({teamId,open,closeModal,onCreate})=>{
             {
                 loading: 'Creating a new member',
                 success: (result)=>{
-                    onCreate(result.data);
+                    onCreate(result.data.members);
+                    closeModal();
                     return <b>A new member successfuly created</b>
                 },
                 error: (error)=>{
@@ -59,6 +85,11 @@ const FormAddNewMember=({teamId,open,closeModal,onCreate})=>{
                     return <b>{error.response.statusText}</b>;
                 },
             });
+    }
+    const currentUser={
+        id:global.state.id,
+        username:global.state.username,
+        email:global.state.email
     }
 
     return(
@@ -71,7 +102,7 @@ const FormAddNewMember=({teamId,open,closeModal,onCreate})=>{
                  
                 <form onSubmit={(e)=>{
                         e.preventDefault();
-                        formCreateOnSubmit();
+                        addNewMember();
                     }}>
                     <Grid  container spacing={2}>
                         <Grid lg={12} md={12} sm={12} xs={12} item>
@@ -80,6 +111,9 @@ const FormAddNewMember=({teamId,open,closeModal,onCreate})=>{
                                 onChange={(values)=> setUsers(values.map((value)=>value.id))}
                                 userOnly={true}
                             />
+                        </Grid>
+                        <Grid lg={12} md={12} sm={12} xs={12} item>
+                            <SelectRole onChange={(value) => setRoleId(value)} data={roles} />
                         </Grid>
                         <Grid xs={12} sm={12} md={12} lg={12} lg={12} item>
                             <Button type="submit" variant="contained" color="primary">Add</Button>

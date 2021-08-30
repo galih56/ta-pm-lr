@@ -39,7 +39,11 @@ function Timeline(props) {
 
     const searchByKeywords=()=>{
         const toast_loading = toast.loading('Loading...');
+<<<<<<< Updated upstream
         var newRows=useMemo(props.data.filter(row => {
+=======
+        var newRows=props.data.filter(row => {
+>>>>>>> Stashed changes
             var matched=false;
             var filteredTasks=[];
             if(row.title.toLowerCase().includes(keywords.toLowerCase())){
@@ -48,6 +52,7 @@ function Timeline(props) {
             for (let i = 0; i < row.cards.length; i++) {
                 const task = row.cards[i];
                 var filteredSubtasks=[];
+<<<<<<< Updated upstream
                 for (let j = 0; j < task.cards.length; j++) {
                     const subtask = task.cards[j];
                     if(subtask.title.toLowerCase().includes(keywords.toLowerCase())){ 
@@ -55,6 +60,18 @@ function Timeline(props) {
                         matched=true;
                     }
                 }
+=======
+                if(task.cards){
+                    for (let j = 0; j < task.cards.length; j++) {
+                        const subtask = task.cards[j];
+                        if(subtask.title.toLowerCase().includes(keywords.toLowerCase())){ 
+                            filteredSubtasks.push(subtask); 
+                            matched=true;
+                        }
+                    }
+                }
+                
+>>>>>>> Stashed changes
                 if(task.title.toLowerCase().includes(keywords.toLowerCase()) || filteredSubtasks.length>0){ 
                     task.cards=filteredSubtasks;
                     filteredTasks.push(task);
@@ -65,16 +82,27 @@ function Timeline(props) {
             if(matched){
                 return row
             }
+<<<<<<< Updated upstream
         }),[detailProject.id,keywords]);
         setRows(newRows);
         toast.dismiss(toast_loading);
+=======
+        })
+        toast.dismiss(toast_loading);
+        return newRows;
+>>>>>>> Stashed changes
     }
 
     useEffect(() => {
         if(keywords){                
+<<<<<<< Updated upstream
             searchByKeywords()
             return () => total.dismiss(toast_loading);
 
+=======
+            const results= searchByKeywords()
+            setRows(results);
+>>>>>>> Stashed changes
         }else{
             setRows(props.data);
             setDetailProject(props.detailProject)    
@@ -138,7 +166,7 @@ function Timeline(props) {
                         newTask.id = result.data.id;
                         newTask.projects_id = detailProject.id;
                         newTask.lists_id = laneId;
-                        global.dispatch({ type: 'create-new-task', payload: newTask })
+                        global.dispatch({ type: 'create-new-task', payload: result.data })
                         setRows(rows.map((row)=>{
                             if(row.id==selectedList.id) row.cards.push(newTask)
                             return row
@@ -161,8 +189,14 @@ function Timeline(props) {
         <React.Fragment>
             <Grid item xl={12} md={12} sm={12} xs={12}>
                 <form onSubmit={e=>{ 
+<<<<<<< Updated upstream
                     e.preventDefault()
                     searchByKeywords();
+=======
+                    e.preventDefault();
+                    const results= searchByKeywords();
+                    setRows(results);
+>>>>>>> Stashed changes
                 }}>
                     <TextField variant="standard" style={{marginTop:'1em',marginBottom:'1em',minWidth:'300px'}}
                         InputProps={{endAdornment:<SearchIcon/>}} 
@@ -194,7 +228,14 @@ function Timeline(props) {
                 {(selectedList.id && openEditList)?(
                     <EditLaneForm 
                         laneId={selectedList.id} minDate={selectedList.start} maxDate={selectedList.end}
+<<<<<<< Updated upstream
                         detailProject={{ id:detailProject.id, members:detailProject.members }} 
+=======
+                        detailProject={{ 
+                            id:detailProject.id, start:detailProject.start, end:detailProject.end,
+                            members:detailProject.members, clients:detailProject.clients 
+                        }} 
+>>>>>>> Stashed changes
                         open={openEditList} onCancel={()=>setOpenEditList(false)}
                         onAdd={(newTask)=>{
                             onTaskNew(newTask,selectedList.id)

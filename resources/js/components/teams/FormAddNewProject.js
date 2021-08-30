@@ -45,7 +45,7 @@ const FormAddNewProject=({teams_id,open,closeModal,onCreate})=>{
 
     const getProjects = () => {
         let url =''
-        if(global.state.occupation?.name.toLowerCase()=='system administrator' || global.state.occupation?.name.toLowerCase()=='ceo') url = process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';
+        if([1,2,8].includes(global.state.occupation?.id)) url = process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';
         else url = process.env.MIX_BACK_END_BASE_URL + 'projects';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -98,7 +98,10 @@ const FormAddNewProject=({teams_id,open,closeModal,onCreate})=>{
                     closeModal();
                 }} > Add a project to the team</DialogTitle>
             <DialogContent dividers>
+<<<<<<< Updated upstream
                  
+=======
+>>>>>>> Stashed changes
                 <form onSubmit={(e)=>{
                         e.preventDefault();
                         formCreateOnSubmit();

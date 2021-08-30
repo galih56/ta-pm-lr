@@ -56,14 +56,7 @@ const Layout = (props) => {
                         <MenuIcon />
                     </IconButton>
                     <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>ManPro</Typography>
-                    {/* 
-                    <IconButton color="inherit">
-                        <Badge badgeContent={4} color="secondary">
-                            <NotificationsIcon />
-                        </Badge>
-                    </IconButton> 
-                    */}
-                    <UserMenu></UserMenu>
+                    <UserMenu/>
                 </Toolbar>
             </AppBar>
             <Drawer

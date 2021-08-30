@@ -28,7 +28,7 @@ const useStyles = makeStyles((theme) => ({
     photoProfileBg: { backgroundColor: '#616161' }
 }));
 
-const OpenEditForm = ({ isEdit, data, setData,asProfile }) => {
+const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
     const classes = useStyles();
     let global = useContext(UserContext);
     const [occupations, setOccupations] = useState([]);
@@ -46,14 +46,18 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile }) => {
         axios.get(url)
             .then((result) => {
                 var data=result.data;
+<<<<<<< Updated upstream
                 if(!global.state.occupation?.name?.toLowerCase().includes('administrator')){
                    data=data.filter(occupation=>!(occupation.name.toLowerCase().includes('administrator')))
                 }
+=======
+                data=data.filter(occupation=>(![1,2,8].includes(occupation.id)))
+>>>>>>> Stashed changes
                 setOccupations(data);
             }).catch((error) => {
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are invalid</b>); break;
                     default : toast.error(<b>{error.response.statusText}</b>); break
                 }
             });
@@ -65,7 +69,11 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile }) => {
             new_password: newPassword,
             confirm_password:confirmPassword,
         }
+<<<<<<< Updated upstream
         console.log(newPassword,confirmPassword,newPassword.trim(),confirmPassword.trim(),newPassword,confirmPassword)
+=======
+        
+>>>>>>> Stashed changes
         if (newPassword.trim() === '' || confirmPassword.trim()==='') {
             setChangePasswordInputsEmpty(true);
         }else{
@@ -101,8 +109,13 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile }) => {
     }
 
     useEffect(() => {
+        if(open===true)
         getOccupations();
+<<<<<<< Updated upstream
     }, [])
+=======
+    }, [open])
+>>>>>>> Stashed changes
     
     if (isEdit) {
         return (
@@ -134,8 +147,14 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile }) => {
                             <InputLabel>Occupations</InputLabel>
                             <Select 
                             variant="standard"
+<<<<<<< Updated upstream
                             onChange={e => {
                                 var choosenId= e.target.value
+=======
+                            disabled={!([1,2,5,8,9].includes(data.occupation?.id))}
+                            onChange={e => {
+                                var choosenId= e.target.value;
+>>>>>>> Stashed changes
                                 var choosenData= occupations.filter(item=>item.id==choosenId)
                                 if(choosenData.length>0){
                                     setData({ ...data, occupation:choosenData[0],occupations_id:choosenData[0].id });

@@ -203,12 +203,7 @@ export default function EnhancedTable({data}) {
                                                 onClick={() => {
                                                     var projects_id=(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id;
                                                     var lists_id=(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id;
-                                                    handleModalOpen({
-                                                        projects_id: projects_id,
-                                                        lists_id: lists_id,
-                                                        tasks_id: row.id,
-                                                        open: true
-                                                    });
+                                                    handleModalOpen({  projects_id: projects_id,  lists_id: lists_id,  tasks_id: row.id,  open: true });
                                                 }}>
                                                 {row.title} ({row.progress}%)
                                             </TableCell>

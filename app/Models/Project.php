@@ -23,6 +23,9 @@ class Project extends Model
 
         static::deleting(function($project) { 
              $project->members()->delete();
+             $project->clients()->delete();
+             $project->lists()->delete();
+             $project->meetings()->delete();
         });
     }
 

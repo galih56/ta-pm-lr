@@ -6,7 +6,7 @@ import { Icon, InlineIcon } from '@iconify/react';
 import googleDrive from '@iconify-icons/mdi/google-drive';
 import axios from 'axios';
 import GooglePicker from 'react-google-picker';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 const GoogleDriveButton = (props) => {
     const global = useContext(UserContext);
@@ -18,7 +18,6 @@ const GoogleDriveButton = (props) => {
     var scope = ['https://www.googleapis.com/auth/drive.readonly'];
 
     function createPicker(google, oauthToken) {
-        console.log('createPicker : ',google,oauthToken)
         if (google && oauthToken) {
             var view = new google.picker.View(google.picker.ViewId.DOCS);
             view.setMimeTypes("image/png,image/jpeg,image/jpg,application/pdf,application/zip");
@@ -45,6 +44,7 @@ const GoogleDriveButton = (props) => {
                 source: 'google-drive',
                 files: data.docs
             }
+		console.log(body,clientId)
             if (!window.navigator.onLine) toast.error(`You are currently offline`);
 
             const config ={ headers: { 'X-Authorization':`Bearer ${global.state.token}`, 'Content-Type': 'application/json'  } }
@@ -56,12 +56,12 @@ const GoogleDriveButton = (props) => {
                 {
                     loading: 'Uploading new attachments',
                     success: (result)=>{
-                        clearState();
                         Object.assign(payload, { data: result.data });
                         global.dispatch({ type: 'create-new-attachments', payload: payload })
                         return <b>A new attachment successfuly created</b>
                     },
                     error: (error)=>{
+			console.log(error)
                         if(error.response.status==401) return <b>Unauthenticated</b>;
                         if(error.response.status==422) return <b>Some required inputs are empty</b>;
                         return <b>{error.response.statusText}</b>;

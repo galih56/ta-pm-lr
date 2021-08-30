@@ -44,10 +44,8 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-    { id: 'name', align: 'left', disablePadding: true, label: 'Name' },
     { id: 'Institution', align: 'left', disablePadding: false, label: 'Institution' },
     { id: 'City', align: 'left', disablePadding: false, label: 'City' },
-    { id: 'Contact', align: 'left', disablePadding: false, label: 'Contact' },
     {id : 'action',align:'right',disablePadding:false,label:'Action'}
 ];
 
@@ -114,6 +112,10 @@ export default function EnhancedTable(props) {
         axios.get(url)
             .then((result) => {
                 setRows(result.data);
+<<<<<<< Updated upstream
+=======
+                global.dispatch({type:'store-clients-to-project',payload:{projects_id:detailProject.id,clients:result.data}})
+>>>>>>> Stashed changes
             }).catch((error) => {
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
@@ -136,6 +138,7 @@ export default function EnhancedTable(props) {
                             return row;
                         }
                     }));  
+                    global.dispatch({type:'remove-client-from-project',payload:{projects_id:detailProject.id,clients_id:clients_id}})
                     return <b>Successfully deleted</b>
                 },
                 error: (error)=>{
@@ -162,21 +165,24 @@ export default function EnhancedTable(props) {
         <Grid container>  
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12} >
                    
+<<<<<<< Updated upstream
             {(global.state.current_project_member_role?.name?.toLowerCase().includes('manager') 
                 || global.state.current_project_member_role?.name?.toLowerCase().includes('project owner'))?(    
+=======
+            {([8,1,2].includes(global.state.occupation?.id || [1,2].global.state.current_project_member_role?.id))?(    
+>>>>>>> Stashed changes
                     <FormAddClient
                         open={openFormAddClient}
                         handleClose={()=>setOpenFormAddClient(false)}
                         detailProject={detailProject}
-                        onCreate={(newClient)=>{
-                            console.log(newClient);
-                            setRows([...rows,newClient])
-                    }}/> 
+                        onCreate={newClient=>setRows([...rows,...newClient])}/> 
                 ):<></>}
                 <div className={classes.root}>
                     <Typography variant="h6">Clients</Typography>
-                    {(global.state.current_project_member_role?.name?.toLowerCase().includes('manager') || global.state.current_project_member_role?.name?.toLowerCase().includes('project owner'))?(
-                        <Button variant="contained" color="primary" onClick={()=>setOpenFormAddClient(true)}><b>+</b> Create a new client</Button>   
+                    {([8,1,2].includes(global.state.occupation?.id || [1,2].global.state.current_project_member_role?.id))?(
+                        <Button variant="contained" color="primary" onClick={()=>setOpenFormAddClient(true)}>
+                            <b>+</b> Add a client
+                        </Button>   
                         ):<></>}
                     <TableContainer>
                         <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} padding="normal" >
@@ -188,20 +194,13 @@ export default function EnhancedTable(props) {
                                 {(rows.length)?stableSort(rows, getComparator(order, orderBy))
                                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                     .map((row) => {
-                                        console.log(row)
                                         return (
                                             <TableRow hover key={row.id}>
-                                                <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}>
-                                                    {row.name}
-                                                </TableCell>
                                                 <TableCell align="left">
                                                     {row.institution}
                                                 </TableCell>
                                                 <TableCell align="left">
                                                     {row.city}
-                                                </TableCell>
-                                                <TableCell align="left">
-                                                    {row.phone_number}
                                                 </TableCell>
                                                 <TableCell align="right">
                                                     <IconButton onClick={()=>handleRemoveClient(row.id)}>

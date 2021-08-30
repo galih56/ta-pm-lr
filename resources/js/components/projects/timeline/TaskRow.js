@@ -84,8 +84,16 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
                 <TableCell>
                     {data.members?data.members.map((member,i)=>{
                             return (
+<<<<<<< Updated upstream
                                 <span key={i} onMouseEnter={(event)=>handlePopoverOpen(event,member)} onMouseLeave={handlePopoverClose}>
                                     {member.project_client?.client?`Client ${`(${member.project_client?.client?.institution})`}`:member.member?.role?.name}
+=======
+                                <span key={i} onMouseEnter={(event)=>handlePopoverOpen(event,member)} 
+                                    onMouseLeave={handlePopoverClose}  style={{margin:'1em'}}>
+                                    {member?.project_client?.client?(<Typography>{`Client ${`(${member.project_client?.client?.institution})`}`}</Typography>):null}
+                                    {member?.member?.role?<Typography>{member?.member?.role?.name}</Typography>:null}
+                                    {member?.role?<Typography>{member?.role?.name}</Typography>:null}
+>>>>>>> Stashed changes
                                 </span>
                             )
                         }):<></>}
@@ -93,6 +101,7 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
                         {(openPopOver)?(
                         <Popover style={{ pointerEvents: 'none', zIndex:'1200',padding:'1em' }} open={openPopOver} anchorEl={anchorEl} 
                                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center', }} transformOrigin={{ vertical: 'top', horizontal: 'center', }} onClose={handlePopoverClose}>
+<<<<<<< Updated upstream
                                 {(()=>{
                                     if(memberOnHover?.project_client?.client){
                                         return(<Typography>{memberOnHover?.project_client?.client?.name}</Typography>)
@@ -102,6 +111,15 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
                                         return(<Typography>{memberOnHover?.role?.name}</Typography>)
                                     }
                                 })()}
+=======
+                                <div style={{padding:'0.3em'}}>
+                                    {memberOnHover.project_client?.client?(<Typography>{`Client ${`(${memberOnHover.project_client?.client?.institution})`}`}</Typography>):null}
+                                    {memberOnHover.user?(<Typography>{memberOnHover?.user?.name}</Typography>):null}
+                                    {memberOnHover.name?(<Typography>{memberOnHover?.name}</Typography>):null}
+                                    {memberOnHover.member?.role?<Typography>{memberOnHover?.member?.role?.name}</Typography>:null}
+                                    {memberOnHover.role?<Typography>{memberOnHover?.role?.name}</Typography>:null}
+                                </div>
+>>>>>>> Stashed changes
                         </Popover>):<></>}
                 </TableCell>
                 <TableCell align="left"> {data.start ? moment(data.start).format('DD MMMM YYYY') : null} </TableCell>

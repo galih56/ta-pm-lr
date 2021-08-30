@@ -18,7 +18,11 @@ import ModalCreateSubtask from './ModalCreateSubtask';
 import FormCreateNewTask from '../../FormCreateNewTask';
 import CancelRoundedIcon from '@material-ui/icons/CancelRounded';
 import UserContext from '../../../../context/UserContext';
+<<<<<<< Updated upstream
 import toast, { Toaster } from 'react-hot-toast';
+=======
+import toast from 'react-hot-toast';
+>>>>>>> Stashed changes
 import ModalDetailTask from './../ModalDetailTask';
 import moment from 'moment';
 import axios from 'axios';
@@ -226,7 +230,10 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
 
     return (
         <React.Fragment>
+<<<<<<< Updated upstream
             <Toaster />
+=======
+>>>>>>> Stashed changes
             <Grid container>
                 <Typography>Subtasks : </Typography>
                 {buttonShowCreateSubtask(isEditing)}

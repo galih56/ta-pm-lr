@@ -38,17 +38,12 @@ const DialogContent = withStyles((theme) => ({
 
 const FormCreateClient=({open,handleClose,onCreate})=>{
     const global=useContext(UserContext);
-    const [name,setName]=useState('');
     const [description,setDescription]=useState('');
     const [city,setCity]=useState('');
-    const [phoneNumber,setPhoneNumber]=useState('');
     const [institution,setInstitution]=useState('');
 
     const formCreateOnSubmit=()=>{
-        const body = {
-            name: name, description: description,
-            city: city, institution: institution, phone_number:phoneNumber,
-        }
+        const body = { city: city, institution: institution, description: description }
         
         const url = process.env.MIX_BACK_END_BASE_URL + 'clients';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
@@ -73,33 +68,20 @@ const FormCreateClient=({open,handleClose,onCreate})=>{
     return(
         <Dialog aria-labelledby="Create a client" open={open}>
              
+<<<<<<< Updated upstream
             <DialogTitle onClose={
                 () => {
                     handleClose();
                 }} > Create a new client </DialogTitle>
+=======
+            <DialogTitle onClose={() => handleClose() } > Create a new client </DialogTitle>
+>>>>>>> Stashed changes
             <DialogContent dividers>
                 <form onSubmit={(e)=>{
                         e.preventDefault();
                         formCreateOnSubmit();
                     }}>
-                    <Grid container spacing={2}>
-                        <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <TextField variant="standard"
-                                label="Name : "
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder={"PIC's name"}
-                                fullWidth
-                                required
-                            />
-                        </Grid>     
-                        <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <TextField variant="standard"
-                                label="City : "
-                                onChange={(e) => setCity(e.target.value)}
-                                fullWidth
-                                required
-                            />
-                        </Grid>
+                    <Grid container spacing={2}>  
                         <Grid lg={12} md={12} sm={12} xs={12} item>
                             <TextField 
                                 variant="standard"
@@ -110,15 +92,11 @@ const FormCreateClient=({open,handleClose,onCreate})=>{
                             />
                         </Grid>
                         <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <TextField
-                                variant="standard"
-                                required
+                            <TextField variant="standard"
+                                label="City : "
+                                onChange={(e) => setCity(e.target.value)}
                                 fullWidth
-                                label="Phone Number"
-                                name="phoneNumber"
-                                value={phoneNumber}
-                                type="tel"
-                                onChange={(e) => setPhoneNumber(e.target.value) }
+                                required
                             />
                         </Grid>
                         <Grid lg={12} md={12} sm={12} xs={12} item>

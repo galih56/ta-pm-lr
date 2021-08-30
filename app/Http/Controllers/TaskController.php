@@ -96,34 +96,24 @@ class TaskController extends Controller
         if($members){
             for ($i=0; $i < count($members); $i++) { 
                 $member=$members[$i];
-                if($request->users_id!=$member['id']){
-                    if(array_key_exists('project_members_id', $member)){
-                        $task_member=new TaskMember();
-                        $task_member->tasks_id=$task->id;
-                        $task_member->users_id=$member['id'];
-                        $task_member->project_members_id=$member['project_members_id'];
-                        $task_member->save();
-                    }else{
-                        $check_member=ProjectMember::where('users_id',$member['id'])
-                                        ->where('projects_id',$request->projects_id)
-                                        ->first();
-                        if($check_member){
-                            $task_member=new TaskMember();
-                            $task_member->tasks_id=$task->id;
-                            $task_member->users_id=$member['id'];
-                            $task_member->project_members_id=$check_member;
-                            $task_member->save();
-                        }
-                        // else{
-                        //     $projet_member=ProjectMember::create([
-                        //         'users_id'=>$member['id'];
-                        //     ])
-                        // }
-
-                    }
+                if($member['is_client']){
+                    $task_member=new TaskMember();
+                    $task_member->tasks_id=$task->id;
+                    $task_member->project_clients_id=$member['project_clients_id'];
+                    $task_member->users_id=null;
+                    $task_member->project_members_id=null;
+                    $task_member->save();
+                }
+                if($member['is_user']){
+                    $task_member=new TaskMember();
+                    $task_member->tasks_id=$task->id;
+                    $task_member->project_clients_id=null;
+                    $task_member->users_id=$member['id'];
+                    $task_member->project_members_id=$member['project_members_id'];
+                    $task_member->save();
                 }
             }
-        }
+        } 
         $task=$this->getDetailTask($task->id);
         return response()->json($task);
     }
@@ -151,14 +141,12 @@ class TaskController extends Controller
         if($request->has('start')) $task->start=$request->start;
         if($request->has('end')) $task->end=$request->end;
         if(($request->has('actual_start') 
-            && $request->actual_start!='Invalid date'  
             && !empty($request->actual_start))) $task->actual_start=$request->actual_start;
-        if(($request->has('actual_end') 
-            && $request->actual_end!='Invalid date') 
+        if(($request->has('actual_end')) 
             && !empty($request->actual_end)) $task->actual_end=$request->actual_end;
         if($request->has('parent_task_id')) $task->parent_task_id=$request->parent_task_id;
 
-        if(($request->has('actual_start') && $request->actual_start!='Invalid date' && !empty($request->actual_start))){
+        if(($request->has('actual_start') && !empty($request->actual_start))){
             $start = Carbon::parse($task->start)->format('Y-m-d');
             $actual_start = Carbon::parse($task->actual_start)->format('Y-m-d');
             if($actual_start<$start) $task->start_label='Mulai lebih cepat';
@@ -166,7 +154,7 @@ class TaskController extends Controller
             if($actual_start==$start) $task->start_label='Mulai tepat waktu';
         }
         
-        if(($request->has('actual_end') && $request->actual_end!='Invalid date') && !empty($request->actual_end)){
+        if(($request->has('actual_end')) && !empty($request->actual_end)){
             $end = Carbon::parse($task->end)->format('Y-m-d');
             $actual_end = Carbon::parse($task->actual_end)->format('Y-m-d');
             if($actual_end<$end) $task->end_label='Selesai lebih cepat';
@@ -174,14 +162,15 @@ class TaskController extends Controller
             if($actual_end==$end) $task->end_label='Selesai tepat waktu';
         }
         
-        if(($request->has('actual_start') && $request->actual_start!='Invalid date' && !empty($request->actual_start)) 
-                && ($request->has('actual_end') && $request->actual_end!='Invalid date') && !empty($request->actual_end)){
+        if(($request->has('actual_start') && !empty($request->actual_start)) 
+                && ($request->has('actual_end')) && !empty($request->actual_end)){
             $actual_start = Carbon::parse($request->actual_start);
             $actual_end = Carbon::parse($request->actual_end);
             $days= $actual_start->diffInDays($actual_end);
             $work_days= $actual_start->diffInDays($actual_end);
             $task->work_days=$work_days;
         }
+<<<<<<< Updated upstream
 
         if($request->has('complete')) {
             if($request->complete){
@@ -193,6 +182,9 @@ class TaskController extends Controller
             }
         }
 
+=======
+        
+>>>>>>> Stashed changes
         $task->save();
         
         if($task->is_subtask){

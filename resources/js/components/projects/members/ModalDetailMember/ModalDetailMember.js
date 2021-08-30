@@ -55,7 +55,11 @@ export default function ModalDetailMember(props) {
     const global = useContext(UserContext);
 
     const [data, setData] = useState({
+<<<<<<< Updated upstream
         id: null, name: '', email: '', phone_number: '',  last_login: '', occupation: null, profilePicture: '' ,
+=======
+        id: null, name: '', email: '',  last_login: '', occupation: null, profile_picture_path: '' ,
+>>>>>>> Stashed changes
         project_members_id:null, role:{ id:null, name:'' }, tasks:[]
     });
     const [tasks,setTasks]=useState([]);

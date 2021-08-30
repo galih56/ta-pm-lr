@@ -53,8 +53,8 @@ const ModalCreateUser = (props) => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [email, setEmail] = useState('');
     const [occupationsId, setOccupationsId] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
     const [inputRequireAlert, setInputRequireAlert] = useState(false);
+    const [emailTaken, setEmailTaken] = useState(false);
     const [passwordConfirmAlert, setPasswordConfirmAlert] = useState(false);
     const [offlineAlert, setOfflineAlert] = useState(false);
     let [userExists, setUserExists] = useState(false);
@@ -68,17 +68,16 @@ const ModalCreateUser = (props) => {
         axios.get(url)
             .then((result) => {
                 var data=result.data.filter((item)=>{
-                    if(!(item.name.toLowerCase().includes('system administrator') 
-                    || item.name.toLowerCase().includes('system administrator')
-                    || item.name.toLowerCase().includes('ceo'))) {
+                    if(!(item.id==8 || item.id==1)) {
                         return item;
                     }
                 })
                 setOccupations(data);
             }).catch((error) => {
+                console.log(error);
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are invalid</b>); break;
                     default : toast.error(<b>{error.response.statusText}</b>); break
                 }
             });
@@ -88,8 +87,15 @@ const ModalCreateUser = (props) => {
         getOccupations();
     }, [])
 
+<<<<<<< Updated upstream
     useEffect(()=>{
         if (username.trim() === '' || password.trim() === '' || phoneNumber.trim() === '' || email.trim() === '') {
+=======
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        
+        if (username.trim() === '' || password.trim() === '' || email.trim() === '') {
+>>>>>>> Stashed changes
             setInputRequireAlert(true);
             return;
         } else {
@@ -117,6 +123,17 @@ const ModalCreateUser = (props) => {
             email: email
         }
         
+<<<<<<< Updated upstream
+=======
+        const body = {
+            name: username,
+            password: password,
+            occupations_id: occupationsId,
+            password_confirmation: confirmPassword,
+            email: email
+        }
+        
+>>>>>>> Stashed changes
         const url=`${process.env.MIX_BACK_END_BASE_URL}users`
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -127,19 +144,24 @@ const ModalCreateUser = (props) => {
                 success: (result)=>{ 
                     setSignUpSuccess(true);
                     setUserExists(false);
+                    setEmailTaken(false);
                     setUsername('');
                     setEmail('');
                     setPassword('');
                     setConfirmPassword('');
-                    setPhoneNumber('');
                     props.onCreate(result.data,'create');
                     return <b>A new user successfuly created</b>
                 },
                 error: (error)=>{
                     setSignUpSuccess(false);
+                    if(error.response.data.errors)
                     if (error.response.status===409) setUserExists(true);
                     if (error.response.status==401) return <b>Unauthenticated</b>;
-                    if (error.response.status==422) return <b>Some required inputs are empty</b>;
+                    if (error.response.status==422){ 
+                        if(error.response?.data?.errors?.email) setEmailTaken(true);
+                        if(error.response?.data?.errors?.password) setPasswordConfirmAlert(true);
+                        return <b>Some required inputs are invalid</b>
+                    };
                     return <b>{error.response.statusText}</b>;
                 },
             });
@@ -151,9 +173,15 @@ const ModalCreateUser = (props) => {
             <DialogTitle onClose={closeModal}>User information</DialogTitle>
             <DialogContent dividers>
                 <Container component="main" >
+<<<<<<< Updated upstream
                      
                     <CssBaseline />
                     { passwordConfirmAlert ? <Alert severity="error" > Password confirmation does not match</Alert> : null}
+=======
+                    <CssBaseline />
+                    { emailTaken ? <Alert severity="error" > The email has already been taken</Alert> : null}
+                    { passwordConfirmAlert ? <Alert severity="error" > Password confirmation doesn't match</Alert> : null}
+>>>>>>> Stashed changes
                     { inputRequireAlert ? <Alert severity="error" >Some fields are empty</Alert> : null}
                     { userExists ? <Alert severity="warning" >Email : <strong>{email} </strong>already in use</Alert> : null}
                     { signUpSuccess ? <Alert severity="success" ><strong>Success</strong><br />New user is now registered</Alert> : null}
@@ -179,17 +207,6 @@ const ModalCreateUser = (props) => {
                             value={email}
                             type="email"
                             onChange={(e) => setEmail(e.target.value) }
-                        />
-                        <TextField
-                            variant="standard"
-                            margin="normal"
-                            required
-                            fullWidth
-                            label="Phone Number"
-                            name="phoneNumber"
-                            value={phoneNumber}
-                            type="tel"
-                            onChange={(e) => setPhoneNumber(e.target.value) }
                         />
                         <Select 
                             variant="standard"

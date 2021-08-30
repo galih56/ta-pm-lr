@@ -14,7 +14,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import GoogleDriveButton from './GoogleDriveClient';
 import DialogConfirm from './DialogConfirm';
-import ModalFilePicker from './../../widgets/ModalFilePicker/ModalFilePicker';
+import ModalFilePicker from '../../widgets/files/ModalFilePicker/ModalFilePicker';
 import UserContext from '../../../context/UserContext';
 import toast, { Toaster } from 'react-hot-toast';
 import DialogContentText from '@material-ui/core/DialogContentText';

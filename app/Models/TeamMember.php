@@ -11,16 +11,17 @@ class TeamMember extends Model
 
     public $timestamps = false;
 
-    protected $fillable = [
-        'users_id',
-        'teams_id',
-    ];
-
+    protected $fillable = [  'users_id',  'teams_id',  'roles_id' ];
+    
     public function user(){
         return $this->belongsTo(User::class,'users_id');
     }
 
     public function team(){
         return $this->belongsTo(Team::class,'teams_id');
+    }
+
+    public function role(){
+        return $this->belongsTo(MemberRole::class,'roles_id');
     }
 }

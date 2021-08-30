@@ -58,10 +58,8 @@ const OpenEditForm = ({ isEdit, data, setData}) => {
                                     if(value==role.id) return role;
                                 })
                                 if(selectedRole.length){
-                                    console.log('selectedRole : ',selectedRole[0]);
                                     setData({...data,role:selectedRole[0]})
                                 }
-                                else alert('Role not found')
                             }
                         } defaultValue={data.role}/>
                      

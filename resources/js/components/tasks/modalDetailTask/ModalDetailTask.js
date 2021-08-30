@@ -75,7 +75,8 @@ export default function ModalDetailTask(props) {
         id: id, projects_id: '', lists_id: null, list:null,
         title: '', description: '', label: '', complete: false, progress: 0,
         start:null,end:null,actual_start:null, actual_end:null, start_label:'',end_label:'',
-        tags: [], members: [], parent_task_id:'',parent_task:null, cards: [], logs: [], cost:'',actual_cost:'',
+        tags: [], members: [], parent_task_id:'',parent_task:null, cards: [], logs: [], cost:'',
+        cost:'', actual_cost:'',
         comments: [], attachments: [],creator:null,is_subtask:false
     });
     const [detailProject,setDetailProject]=useState({
@@ -208,12 +209,26 @@ export default function ModalDetailTask(props) {
 
     const saveChanges = (body) => {
         if(!body) body= {
+<<<<<<< Updated upstream
             id:data.id,actual_start:data.actual_start, actual_end:data.actual_end,
             complete:data.complete, title:data.title, actual_cost:data.actual_cost, is_subtask:data.is_subtask, 
             progress: data.progress, parent_task_id:data.parent_task_id, tags:data.tags,
+=======
+            id:data.id,complete:data.complete, title:data.title, 
+            is_subtask:data.is_subtask,  progress: data.progress, parent_task_id:data.parent_task_id, tags:data.tags,
+>>>>>>> Stashed changes
             projects_id:props.detailProject.id, users_id:global.state.id
         }
-        
+        if([1,8].includes(global.state.occupation?.id)){
+            body.start=data.start;
+            body.end=data.end;
+            body.actual_start=data.actual_start;
+            body.actual_end=data.actual_end;
+        }
+        if(global.state.occupation?.id==9){
+            body.cost=data.cost;
+            body.actual_end=data.actual_end;
+        }
         if(data.cards.length<=0 && data.complete==true) body.progress=100 ;
         else if(data.cards.length<=0 && data.complete==false)body.progress=0 ;
 
@@ -265,7 +280,6 @@ export default function ModalDetailTask(props) {
     
     return (
         <>
-            <Toaster />
             <Dialog  aria-labelledby="Modal Task Detail" open={open} style={{ zIndex: '750' }}
                 maxWidth={'lg'} fullwidth={"true"}>
                 <DialogTitle onClose={() => {
@@ -309,12 +323,7 @@ export default function ModalDetailTask(props) {
                     <br/>
                 </DialogContent>
                 {
-                    (global.state.occupation?.name.toLowerCase().includes('manager') 
-                        || global.state.occupation?.name.toLowerCase().includes('bendahara') 
-                        || global.state.occupation?.name.toLowerCase().includes('project manager')
-                        || global.state.current_project_member_role?.name?.toLowerCase().includes('project owner')
-                        || global.state.occupation?.name?.toLowerCase().includes('system administrator')
-                        || global.state.occupation?.name?.toLowerCase().includes('sistem administrator'))?(                    
+                    ([1,2,5,8,9].includes(global.state.occupation?.id) || [1,2].includes(global.state.current_project_member_role?.id))?(                    
                             <DialogActions>
                                 <DialogActionButtons
                                     isEdit={isEditing}

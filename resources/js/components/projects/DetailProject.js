@@ -19,7 +19,7 @@ const ModalDetailMeeting = lazy(() => import('./../meetings/ModalDetailMeeting/M
 const Board = lazy(() => import('../widgets/board/Kanban'));
 const GanttChart = lazy(() => import('../widgets/GanttChart'));
 const Calendar = lazy(() => import('../widgets/Calendar'));
-const Files = lazy(() => import('../widgets/Files'));
+const Files = lazy(() => import('../widgets/files/Files'));
 const Others = lazy(() => import('./Others'));
 const Timeline = lazy(() => import('./timeline/Timeline'));
 const ModalDetailTask = lazy(() => import('../tasks/modalDetailTask/ModalDetailTask'));
@@ -215,9 +215,9 @@ const DetailProject = (props) => {
                                     <Grid container >   
                                         <BreadCrumbs projectName={detailProject.title} tabName="Timeline" style={{marginTop:'1em'}}/>
                                         <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                                            {(global.state.occupation?.name?.toLowerCase().includes('manager')
-                                                ||global.state.occupation?.name.toLowerCase().includes('administrator')
-                                                ||global.state.current_project_member_role?.name.toLowerCase().includes('project manager') )?(
+                                            {(global.state.occupation?.id==2
+                                                || global.state.occupation?.id==8
+                                                || global.state.current_project_member_role?.id==1)?(
                                                 <Button
                                                     variant="contained"
                                                     color="primary"
@@ -233,7 +233,8 @@ const DetailProject = (props) => {
                                                 start:detailProject.start,end:detailProject.end,
                                                 actual_start:detailProject.actual_start,
                                                 actual_end:detailProject.actual_end,
-                                                members:detailProject.members
+                                                members:detailProject.members,
+                                                clients:detailProject.clients
                                             }}
                                             data={detailProject.columns} 
                                             handleDetailTaskOpen={handleDetailTaskOpen}
@@ -330,7 +331,7 @@ const DetailProject = (props) => {
                     projects_id={params.id}
                     open={showModalCreateList}
                     closeModal={()=>handleModalCreateList(false)} 
-                    detailProject={{id:detailProject.id,start:detailProject.start,end:detailProject.end}}
+                    detailProject={{id:detailProject.id,members:detailProject.members,clients:detailProject.clients,start:detailProject.start,end:detailProject.end}}
                     />
                 <ModalCreateMeeting
                     detailProject={{

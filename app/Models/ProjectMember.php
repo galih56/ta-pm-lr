@@ -12,9 +12,9 @@ class ProjectMember extends Model
     protected $table = 'project_members';
 
     protected $fillable = [
-        'title',
         'users_id',
         'projects_id',
+        'roles_id',
     ];
 
     public static function boot() {

@@ -187,7 +187,6 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                             scope: "https://www.googleapis.com/auth/calendar",
                             response_type: 'id_token permission code'
                         }, async function(response) {
-                            console.log(response);
                             setLoading(true)
                             if (response.error) return;
                             getCalendar(function(calendars){

@@ -20,7 +20,7 @@ const ProjectList = ({teamId,data}) => {
         <React.Fragment>
             <Typography variant="h6">Projects</Typography>
             <Grid container spacing={1}>
-                {rows?rows.map((row) => (
+                {rows.length?rows.map((row) => (
                     <Grid item xl={3} md={3} sm={6} xs={6} key={row.id}>
                         <Link to={`/project/` + row.id} style={{ textDecoration: 'none' }}>
                             <Card style={{ height: '100%' }}>
@@ -31,9 +31,6 @@ const ProjectList = ({teamId,data}) => {
                                     />
                                     <CardContent>
                                         <Typography gutterBottom variant="h6" component="h5" align="left" style={{ height: '100%' }}> {row.title} </Typography>
-                                        <Typography variant="body2" color="textSecondary" component="p">
-                                            {row.description}
-                                        </Typography>
                                     </CardContent>
                                 </CardActionArea>
                             </Card>

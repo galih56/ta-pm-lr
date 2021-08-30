@@ -44,14 +44,16 @@ class UserController extends Controller
             'name'=>'required|string',
             'email'=>'required|string|unique:users,email',
             'password' => 'string|required_with:password_confirmation|same:password_confirmation',
+<<<<<<< Updated upstream
             'phone_number'=>'required|string',
+=======
+>>>>>>> Stashed changes
             'occupations_id'=>'required',
         ]);
 
         $user=User::create([
             'name'=> $fields['name'],
             'email'=> $fields['email'],
-            'phone_number'=> $fields['phone_number'],
             'occupations_id'=> $fields['occupations_id'],
             'password'=> Hash::make($fields['password']),
             'verified'=> false,
@@ -82,7 +84,6 @@ class UserController extends Controller
         $user=User::findOrFail($id);
         if($request->has('name')) $user->name=$request->name;
         if($request->has('email')) $user->email=$request->email;
-        if($request->has('phone_number')) $user->phone_number=$request->phone_number;
         if($request->has('token')) $user->token=$request->token;
         if($request->has('occupations_id')) $user->occupations_id=$request->occupations_id;
         if($request->has('last_login')) $user->last_login=$request->last_login;
@@ -206,10 +207,13 @@ class UserController extends Controller
           
         /*
             access levels
-            1. system administrator, ceo
-            2. project owner
-            3. project manager
-            4. client
+            1. system administrator (id=8), ceo/direktur (id=1)
+            3. manager (id=2)
+            4. System analyst (id=5)
+            5. bendahara (id=9)
+        
+            6. project owner (id=1)
+            7. project manager (id=2)
         */
         
         $response = [
@@ -226,13 +230,11 @@ class UserController extends Controller
             'name'=>'required|string',
             'email'=>'required|string|unique:users,email',
             'password'=>'required|string',
-            'phone_number'=>'required|string',
         ]);
 
         $user=User::create([
             'name'=> $fields['name'],
             'email'=> $fields['email'],
-            'phone_number'=> $fields['phone_number'],
             'password'=> Hash::make($fields['password']),
             'verified'=> false,
         ]);
