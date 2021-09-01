@@ -91,7 +91,7 @@ export default function DetailApproval(props) {
     }
     return (
         <Paper style={{ padding: '1em',width:'100%' }}>
-            <Toaster/>
+             
             <Grid container>
                 <Grid xl={12}item lg={12} md={12} sm={12} xs={12}>
                     <Router>

@@ -64,7 +64,7 @@ export default function ModalConfirmEditDeadline({open,handleClose,data,setData}
                 <form onSubmit={(e)=> submitApproval()}>
                    
                 </form>
-                <Toaster/>
+                 
             </DialogContent>
         </Dialog>
     );

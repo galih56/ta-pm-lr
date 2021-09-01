@@ -2,7 +2,9 @@ import 'fontsource-roboto';
 import React, { useEffect, useContext, useState } from 'react';
 import UserContext from '../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
-import { Dialog, IconButton, Typography } from '@material-ui/core/';
+import Dialog from '@material-ui/core/Dialog';
+import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
@@ -10,7 +12,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import DialogActionButtons from './DialogActionButtons';
 import EditForm from './EditForm';
 import axios from 'axios';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 // https://stackoverflow.com/questions/35352638/react-how-to-get-parameter-value-from-query-string
 const styles = (theme) => ({
@@ -88,7 +90,7 @@ export default function ModalDetailOccupation(props) {
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             const url = process.env.MIX_BACK_END_BASE_URL + `occupations/${data.id}`;
             toast.promise(
-                axios.patch(url,data),
+                axios.delete(url,data),
                 {
                     loading: 'Deleting...',
                     success: (result)=>{                    
@@ -113,12 +115,14 @@ export default function ModalDetailOccupation(props) {
             <DialogActions>
                 <DialogActionButtons
                     isEdit={isEditing}
+                    deletable={!([1, 2, 5, 8, 9].includes(data.id))}
                     saveChanges={saveChanges}
                     setEditMode={handleEditingMode}
                     deleteOccupation={deleteOccupation}
                     deleteConfirmOpen={deleteConfirmOpen}
                     setDeleteConfirmOpen={setDeleteConfirmOpen}
                     closeModal={closeModal}
+
                 > </DialogActionButtons>
             </DialogActions>
         </Dialog>

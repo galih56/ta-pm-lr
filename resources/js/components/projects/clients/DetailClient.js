@@ -20,7 +20,7 @@ import toast, { Toaster } from 'react-hot-toast';
 export default function DetailClient(props) {
     const global=useContext(UserContext);
     const [data, setData] = useState({
-        id:'', name:"", description:'',phone_number:''
+        id:'', name:"", description:''
     });
     const [editing,setEditing]=useState(false);
     const [openModalConfirm, setOpenModalConfirm]=useState(false);
@@ -28,7 +28,7 @@ export default function DetailClient(props) {
     let history=useHistory();
     
     useEffect(() => {
-        if(!global.state.occupation?.name.toLowerCase().includes('administrator')) history.push('/projects');
+        if(![1,8].includes(global.state.occupation?.id)) history.push('/projects');
         getDetailClient();
     }, []);
 
@@ -94,7 +94,7 @@ export default function DetailClient(props) {
     }
     return (
         <Paper style={{ padding: '1em',width:'100%' }}>
-            <Toaster/>
+             
             <Grid container component="form" spacing={1} onSubmit={handleSubmit}>
                 <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                     <Router>
@@ -128,24 +128,9 @@ export default function DetailClient(props) {
                 <Grid item xl={6} lg={6} md={12} sm={12}>
                     {(editing)?(
                         <TextField variant="standard"
-                            label="Phone number : "
-                            onChange={(e) => setData({...data,phone_number:e.target.value})}
-                            placeholder={"Phone number"}
-                            value={data.phone_number}
-                            fullWidth
-                            required
-                            type="tel"
-                        />
-                    ):(
-                        <Typography variant="body1" component="div"> <b>Phone number : </b> {data.phone_number}</Typography>
-                    )}
-                </Grid>
-                <Grid item xl={6} lg={6} md={12} sm={12}>
-                    {(editing)?(
-                        <TextField variant="standard"
                             label="Institution"
                             value={data.institution}
-                            onChange={(e) => setData({...data, phone_number:e.target.value})}
+                            onChange={(e) => setData({...data, institution:e.target.value})}
                             placeholder={"Institution"}
                             fullWidth
                             required

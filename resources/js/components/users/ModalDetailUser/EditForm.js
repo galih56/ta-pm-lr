@@ -12,8 +12,15 @@ import InputLabel from '@material-ui/core/InputLabel';
 import UserContext from '../../../context/UserContext';
 import moment from 'moment';
 import axios from 'axios';
+import Alert from '@material-ui/lab/Alert';
 import toast, { Toaster } from 'react-hot-toast';
 // import SaveIcon from '@material-ui/icons/Save';
+import Button from '@material-ui/core/Button';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+
 
 const useStyles = makeStyles((theme) => ({
     textfield: { marginTop: theme.spacing(1), width: '100%' },
@@ -21,38 +28,85 @@ const useStyles = makeStyles((theme) => ({
     photoProfileBg: { backgroundColor: '#616161' }
 }));
 
-const OpenEditForm = ({ isEdit, data, setData,asProfile }) => {
+const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
     const classes = useStyles();
-    const [occupations, setOccupations] = useState([]);
     let global = useContext(UserContext);
+    const [occupations, setOccupations] = useState([]);
+    const [expanded, setExpanded] = useState(false);
+    const handleChange = () => setExpanded(!expanded);
+    const [passwordConfirmAlert, setPasswordConfirmAlert] = useState(false);
+    const [changePasswordInputsEmpty, setChangePasswordInputsEmpty] = useState(false);
+    const [newPassword,setNewPassword]=useState('');
+    const [confirmPassword,setConfirmPassword]=useState('');
 
     const getOccupations = () => {
-        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'occupations';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
-                setOccupations(result.data);
-                toast.dismiss(toast_loading);
+                var data=result.data;
+                data=data.filter(occupation=>(![1,2,8].includes(occupation.id)))
+                setOccupations(data);
             }).catch((error) => {
-                toast.dismiss(toast_loading);
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are invalid</b>); break;
                     default : toast.error(<b>{error.response.statusText}</b>); break
                 }
             });
     }
 
-    useEffect(() => {
-        getOccupations();
-    }, [])
+    const sendNewPassword=(e)=>{
+        e.preventDefault();
+        const body={
+            new_password: newPassword,
+            confirm_password:confirmPassword,
+        }
+        
+        if (newPassword.trim() === '' || confirmPassword.trim()==='') {
+            setChangePasswordInputsEmpty(true);
+        }else{
+            setChangePasswordInputsEmpty(false);
+        }
+        if (newPassword === confirmPassword) {
+            setPasswordConfirmAlert(false);
+        } else {
+            setPasswordConfirmAlert(true);
+        }
+        const url=`${process.env.MIX_BACK_END_BASE_URL}users/${data.id}/changepassword`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        toast.promise(
+            axios.patch(url, body),
+            {
+                loading: `Changing ${data.name}'s password`,
+                success: (result)=>{ 
+                    setNewPassword('');
+                    setConfirmPassword('');
+                    setChangePasswordInputsEmpty(false);
+                    setPasswordConfirmAlert(false);
+                    handleChange()
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    console.log(error)
+                    if (error.response.status==401) return <b>Unauthenticated</b>;
+                    if (error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
+    }
 
+    useEffect(() => {
+        if(open===true)
+        getOccupations();
+    }, [open])
+    
     if (isEdit) {
         return (
             <Grid container spacing={2} style={{ paddingLeft: 4, paddingRight: 4 }} >
-                <Toaster/>
+                 
                 <Grid item lg={12} md={12} sm={12} xs={12} align="center">
                     <TextField
                         defaultValue={data.name}
@@ -79,19 +133,62 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile }) => {
                             <InputLabel>Occupations</InputLabel>
                             <Select 
                             variant="standard"
-                            disabled={(data.occupation?.name?.toLowerCase().includes('system administrator') 
-                                        || data.occupation?.name?.toLowerCase().includes('sistem administrator'))?true:false}
+                            disabled={!([1,2,5,8,9].includes(data.occupation?.id))}
                             onChange={e => {
-                                setData({ ...data, occupation:e.target.value,occupations_id: e.target.value.id });
+                                var choosenId= e.target.value;
+                                var choosenData= occupations.filter(item=>item.id==choosenId)
+                                if(choosenData.length>0){
+                                    setData({ ...data, occupation:choosenData[0],occupations_id:choosenData[0].id });
+                                }
                             }}
-                                defaultValue={data.occupation?.id}>
+                            
+                                defaultValue={data.occupation.id}>
                                 {
-                                    occupations.map((occupation, index) => (<MenuItem value={occupation} key={occupation.id}>{occupation.name}</MenuItem>))
+                                    occupations.map((occupation, index) => (<MenuItem value={occupation.id} key={occupation.id}>{occupation.name}</MenuItem>))
                                 } 
                             </Select>
                         </FormControl>
                     </Grid>
                 )}
+                {global.state.id==data.id  || global.state.occupation.name.toLowerCase().includes('administrator')?(
+                    <Grid item lg={12} md={12} sm={12} xs={12}>
+                        <Accordion expanded={expanded} onChange={handleChange}>
+                            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                <Typography>
+                                Change password
+                                </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <Grid container component="form" onSubmit={sendNewPassword}>
+                                    <Grid item lg={12} md={12} sm={12} xs={12}>
+                                        { passwordConfirmAlert ? <Alert severity="warning" > Password confirmation does not match</Alert> : null}
+                                        { changePasswordInputsEmpty ? <Alert severity="warning" > Some fields are empty</Alert> : null}
+                                        <TextField
+                                            label="New Password"
+                                            onChange={(e) => setNewPassword(e.target.value)}
+                                            className={classes.textfield}
+                                            fullWidth
+                                            type="password"
+                                            variant="standard"
+                                        />
+                                        <TextField
+                                                label="Confirm Password"
+                                                className={classes.textfield}
+                                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                                fullWidth
+                                                type="password"
+                                                variant="standard"
+                                            />
+                                    </Grid>
+                                    <Grid item lg={12} md={12} sm={12} xs={12} style={{marginTop:'0.5em'}}>
+                                        <Button type="submit" variant="contained" color="primary" >Change Password</Button>
+                                    </Grid>
+                                </Grid>
+                                
+                            </AccordionDetails>
+                        </Accordion> 
+                    </Grid>
+                    ):<></>}
             </Grid>
         )
     } else {
@@ -106,10 +203,11 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile }) => {
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12} align="center">
                     <Typography variant="body2">Last login : {data.last_login ? moment(data.last_login).format('DD MMM YYYY') : ''}</Typography>
-                    {data.occupation ? <Typography variant="body2">{data.occupation.name}</Typography> : <></>}
+                    {data.occupation ? <Typography variant="body2">{data.occupation?.name}</Typography> : <></>}
                 </Grid>
             </Grid>
         )
     }
 }
+
 export default OpenEditForm;

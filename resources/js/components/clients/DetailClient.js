@@ -19,7 +19,7 @@ import toast, { Toaster } from 'react-hot-toast';
 export default function DetailClient(props) {
     const global=useContext(UserContext);
     const [data, setData] = useState({
-        id:'', name:"", description:'',phone_number:''
+        id:'', name:"", description:''
     });
     const [editing,setEditing]=useState(false);
     const [openModalConfirm, setOpenModalConfirm]=useState(false);
@@ -27,7 +27,7 @@ export default function DetailClient(props) {
     let history=useHistory();
     
     useEffect(() => {
-        if(!global.state.occupation?.name.toLowerCase().includes('administrator')) history.push('/projects');
+        if(!global.state.occupation?.id==8) history.push('/projects');
         getDetailClient();
     }, []);
 
@@ -55,12 +55,14 @@ export default function DetailClient(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + 'clients/'+params.id;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
+        
         toast.promise(
             axios.patch(url,data),
             {
-                loading: 'Updatng...',
+                loading: 'Updating...',
                 success: (result)=>{
                     setData(result.data);
+                    setEditing(false)
                     return <b>Successfully updated</b>
                 },
                 error: (error)=>{
@@ -92,6 +94,7 @@ export default function DetailClient(props) {
     }
     return (
         <Paper style={{ padding: '1em',width:'100%' }}>
+             
             <Grid container component="form" spacing={1} onSubmit={handleSubmit}>
                 <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                     <Router>
@@ -104,45 +107,16 @@ export default function DetailClient(props) {
                                 to="/clients">
                                 Clients
                             </Button>
-                            <Typography color="textPrimary">{data.name} {data.institution?`(${data.institution})`:<></>}</Typography>
+                            <Typography color="textPrimary">{data.institution}</Typography>
                         </Breadcrumbs>
                     </Router>
                 </Grid>
                 <Grid item xl={6} lg={6} md={12} sm={12}>
                     {(editing)?(
                         <TextField variant="standard"
-                            label="Name : "
-                            value={data.name}
-                            onChange={(e) => setData({...data,name:e.target.value})}
-                            placeholder={"PIC's name"}
-                            fullWidth
-                            required
-                        />
-                    ):(
-                        <Typography variant="body1"><b>PIC : </b>{data.name}</Typography>
-                    )}
-                </Grid>
-                <Grid item xl={6} lg={6} md={12} sm={12}>
-                    {(editing)?(
-                        <TextField variant="standard"
-                            label="Phone number : "
-                            onChange={(e) => setData({...data,phone_number:e.target.value})}
-                            placeholder={"Phone number"}
-                            value={data.phone_number}
-                            fullWidth
-                            required
-                            type="tel"
-                        />
-                    ):(
-                        <Typography variant="body1" component="div"> <b>Phone number : </b> {data.phone_number}</Typography>
-                    )}
-                </Grid>
-                <Grid item xl={6} lg={6} md={12} sm={12}>
-                    {(editing)?(
-                        <TextField variant="standard"
                             label="Institution"
                             value={data.institution}
-                            onChange={(e) => setData({...data, phone_number:e.target.value})}
+                            onChange={(e) => setData({...data, institution:e.target.value})}
                             placeholder={"Institution"}
                             fullWidth
                             required
@@ -221,7 +195,6 @@ const ModalConfirm = (props) => {
                 <Button onClick={handleClose}>Cancel</Button>
                 <Button onClick={()=>{handleConfirm();handleClose();}} variant='contained' color="primary"> Confirm </Button>
             </DialogActions>
-            <Toaster/>
         </Dialog>
     );
 }

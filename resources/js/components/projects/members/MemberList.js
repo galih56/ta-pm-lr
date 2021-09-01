@@ -96,7 +96,11 @@ export default function EnhancedTable(props) {
     const classes = useStyles();
     const handleDetailTaskOpen = props.handleDetailTaskOpen;
     const projects_id = props.projects_id;
+    const memberChange = props.memberChange;
+    const setMemberChange = props.setMemberChange;
     const data = props.data;
+    let global = useContext(UserContext);
+
     let initStateUser = { id: null, name: '', email: '', role: { id: null, name: '' } }
     const [clickedUser, setClickedUser] = useState(initStateUser);
     const [modalOpen, setModalOpen] = useState(false);
@@ -131,8 +135,7 @@ export default function EnhancedTable(props) {
                         setRows(rows.filter(function(row){
                             if(row.id!=deletedValue.id)return row;
                         }))
-                    }
-                    }
+                    }}
                     />
             )
         }
@@ -142,6 +145,29 @@ export default function EnhancedTable(props) {
         setRows(data);
     }, [data]);
 
+    useEffect(()=>{
+        if(memberChange===true){
+            getMembers()
+        }
+        console.log(memberChange);
+    },[memberChange])
+
+    const getMembers=()=>{
+        const url = process.env.MIX_BACK_END_BASE_URL + 'projects/' + projects_id + '/members';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.get(url)
+            .then((result) => {
+                setRows(result.data);
+                if(setMemberChange) setMemberChange(false);
+            }).catch((error) => {
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
+            });
+    }
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -157,7 +183,7 @@ export default function EnhancedTable(props) {
 
     return (
         <div className={classes.root}>
-            <Toaster/>
+             
             <Grid>
                 <Typography variant="h6">Members  <Button color="primary" component="span" onClick={() => setNewMemberOpen(true)}>+ Add new member</Button></Typography>
             </Grid>
@@ -182,7 +208,7 @@ export default function EnhancedTable(props) {
                 </Table>
             </TableContainer>
             <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPageOptions={[10, 20, 30]}
                 component="div"
                 count={rows.length}
                 rowsPerPage={rowsPerPage}
@@ -212,16 +238,13 @@ function Row(props) {
     let global = useContext(UserContext);
 
     const getTasks = (id) => {
-        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'project-members/' + id + '/tasks';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setTasks(result.data);
-                toast.dismiss(toast_loading);
             }).catch((error) => {
-                toast.dismiss(toast_loading);
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
@@ -238,7 +261,7 @@ function Row(props) {
                 <TableCell>
                     <IconButton aria-label="expand row" size="small"
                         onClick={() => {
-                            getTasks(data.project_member_id);
+                            getTasks(data.project_members_id);
                             setOpen(!open);
                         }}
                     > {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton>

@@ -143,7 +143,7 @@ export default function EnhancedTable(props) {
                 count={rows.length}
                 rowsPerPage={rowsPerPage}
                 onPageChange={handleChangePage}
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPageOptions={[10, 20, 30]}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
         </div>

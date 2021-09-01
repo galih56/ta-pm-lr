@@ -17,7 +17,7 @@ import Autocomplete from '@material-ui/core/Autocomplete';
 import PeopleIcon from '@material-ui/icons/People';
 import TextField from '@material-ui/core/TextField';
 
-export default function TeamList(props) {
+export default function TeamList({projects_id,onCreate}) {
     const [teams,setTeams]=useState([]);
     const [options,setOptions]=useState([]);
     const [newTeams,setNewTeams]=useState([])
@@ -25,7 +25,7 @@ export default function TeamList(props) {
 
     const getTeams = () => {
         const toast_loading = toast.loading('Loading...');
-        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${props.projects_id}/teams`;
+        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${projects_id}/teams`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
@@ -60,7 +60,7 @@ export default function TeamList(props) {
 
 
     const deleteTeam = (selected_team_id) => {
-        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${props.projects_id}/teams/${selected_team_id}`;
+        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${projects_id}/teams/${selected_team_id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         toast.promise(
@@ -68,6 +68,10 @@ export default function TeamList(props) {
             {
                 loading: 'Deleting...',
                 success: (result)=>{
+                    var newTeams=teams.filter((team)=>{
+                        if(team.teams_id!=selected_team_id) return team;
+                    })
+                    setTeams(newTeams);
                     return <b>Successfully deleted</b>
                 },
                 error: (error)=>{
@@ -77,25 +81,23 @@ export default function TeamList(props) {
                 },
             });
     
-        var newTeams=teams.filter((team)=>{
-            if(team.id!=selectedTeam.id) return team;
-        })
-        setTeams(newTeams);
     }
 
     const addNewTeams = (selectedTeams) => {
-        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${props.projects_id}/teams`;
+        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${projects_id}/teams`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
             toast.promise(
-                axios.post(url, { projects_id:props.projects_id,teams:selectedTeams}),
+                axios.post(url, { projects_id:projects_id,teams:selectedTeams}),
                 {
                     loading: 'Creating a new team',
                     success: (result)=>{
                         setTeams([...teams,...result.data]);
-                        return <b>A new meeting successfuly created</b>
+                        if(onCreate) onCreate();
+                        return <b>A new team successfuly created</b>
                     },
                     error: (error)=>{
+                        console.log(error);
                         if(error.response.status==401) return <b>Unauthenticated</b>;
                         if(error.response.status==422) return <b>Some required inputs are empty</b>;
                         return <b>{error.response.statusText}</b>;
@@ -106,8 +108,8 @@ export default function TeamList(props) {
     
     useEffect(()=>{
         getAllTeams();
-        if(props.projects_id)getTeams()
-    },[props.projects_id])    
+        if(projects_id)getTeams()
+    },[projects_id])    
     
     return (
         <Grid container>
@@ -173,11 +175,15 @@ const CustomListItem=React.memo(({team,deleteTeam})=>{
         </ListItem>
         <Collapse in={open} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-                {team.members.map((member)=>(
+                {(team.members)?team.members.map(member=>(
                     <ListItem style={{paddingLeft:'0.5em'}} key={member.id}>
                         <ListItemText primary={member.name}/>
                     </ListItem>
-                ))}
+                )):(
+                    <ListItem>
+                        <ListItemText primary={'No members'}/>
+                    </ListItem>
+                )}
             </List>
         </Collapse>
     </React.Fragment>;

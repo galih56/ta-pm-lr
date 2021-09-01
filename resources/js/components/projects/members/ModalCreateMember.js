@@ -55,16 +55,13 @@ export default function ModalCreateMember(props) {
     const global = useContext(UserContext);
 
     const getRoles = () => {
-        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'member-roles';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then(result =>{ 
                 setRoles(result.data)
-                toast.dismiss(toast_loading);
             }).catch((error) => {
-                toast.dismiss(toast_loading);
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
@@ -125,7 +122,7 @@ export default function ModalCreateMember(props) {
                 }} > Create a new member </DialogTitle>
             {(global.state.authenticated === true)?(
                 <>
-                    <Toaster/>
+                     
                     <DialogContent dividers>
                         <Grid container spacing={2} style={{ paddingLeft: 3, paddingRight: 3 }} >
                             {showValidation()}

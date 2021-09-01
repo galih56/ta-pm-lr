@@ -114,14 +114,14 @@ const Attachments = (props) => {
         toast.promise(
             axios.post(url, body),
             {
-                loading: 'Creating a new meeting schedule',
+                loading: 'Adding a new attachment',
                 success: (result)=>{
                     payload.data=result.data;
                     setDetailTask({...detailTask,attachments:[...detailTask.attachments, ...payload.data]});
                     setData([...data, ...payload.data]);
                     setChooseFileModalOpen(false);
                     global.dispatch({ type: 'create-new-attachments', payload: payload })
-                    return <b>A new meeting successfuly created</b>
+                    return <b>A new attachment successfuly added</b>
                 },
                 error: (error)=>{
                     if(error.response.status==401) return <b>Unauthenticated</b>;
@@ -193,7 +193,7 @@ const Attachments = (props) => {
         } else return (<></>)
     }
     return <>
-        <Toaster/>
+         
         <List className={classes.root}>
             {showEditButtons()}
             {data.map((item) => {

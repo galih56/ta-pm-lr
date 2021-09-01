@@ -13,6 +13,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import toast, { Toaster } from 'react-hot-toast';
 import DialogActionButtons from './DialogActionButtons';
 import EditForm from './EditForm';
+import axios from 'axios';
 
 // https://stackoverflow.com/questions/35352638/react-how-to-get-parameter-value-from-query-string
 const styles = (theme) => ({
@@ -50,29 +51,19 @@ export default function ModalDetailUser(props) {
     const {open,closeModal,asProfile}=props;
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const global = useContext(UserContext);
-    const history = useHistory();
     const [data, setData] = useState({
-        id: null, name: '', email: '', phone_number: '', last_login: '', occupation: null, occupations_id:'',profilePicture: ''
+        id: null, name: '', email: '', last_login: '', occupation: null, occupations_id:'',profilePicture: ''
     });
     const [isEditing, setIsEditing] = useState(false);
-    const [deletable, setDeletable] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
 
     useEffect(() => {
         setData(props.initialState);
-        
-        if(!global.state.occupation?.name?.toLowerCase().includes('administrator')
-            ||global.state.id==props.initialState.id){
-            setDeletable(false);
-        }else{
-            setDeletable(true);
-        }
     }, [props.initialState.id]);
 
     const saveChanges = () => {
         let body = {
             id: data.id, name: data.name, email: data.email, 
-            phone_number: data.phone_number,
             occupations_id: data.occupations_id, profile_picture_path: ''
         };
         
@@ -125,13 +116,12 @@ export default function ModalDetailUser(props) {
             maxWidth={'lg'} fullwidth={"true"}>
             <DialogTitle onClose={closeModal}>User information</DialogTitle>
             <DialogContent dividers>
-            <Toaster/>
-                <EditForm isEdit={isEditing} data={data} setData={setData} asProfile={asProfile}/>
+                <EditForm open={open} isEdit={isEditing} data={data} setData={setData} asProfile={asProfile}/>
             </DialogContent>
             <DialogActions>
                 <DialogActionButtons
                     isEdit={isEditing}
-                    deletable={deletable}
+                    deletable={!([1,8].includes(data.occupation?.id) || global.state.id==props.initialState.id)}
                     saveChanges={saveChanges}
                     setEditMode={handleEditingMode}
                     deleteUser={deleteUser}

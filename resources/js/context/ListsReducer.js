@@ -13,7 +13,6 @@ const createNewList = (payload) => {
 
 const removeList = (payload) => {
     var user = JSON.parse(localStorage.getItem('user'));
-    console.log('removeList',payload)
     const newProjects = user.projects.map((project) => {
         if (project.id == payload.projects_id) {
             project.columns = project.columns.filter(column => {

@@ -53,13 +53,14 @@ const ModalCreateUser = (props) => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [email, setEmail] = useState('');
     const [occupationsId, setOccupationsId] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
     const [inputRequireAlert, setInputRequireAlert] = useState(false);
+    const [emailTaken, setEmailTaken] = useState(false);
     const [passwordConfirmAlert, setPasswordConfirmAlert] = useState(false);
     const [offlineAlert, setOfflineAlert] = useState(false);
     let [userExists, setUserExists] = useState(false);
     let [signUpSuccess, setSignUpSuccess] = useState(false);
     let global = useContext(UserContext);
+
     const getOccupations = () => {
         const url = process.env.MIX_BACK_END_BASE_URL + 'occupations';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
@@ -67,17 +68,16 @@ const ModalCreateUser = (props) => {
         axios.get(url)
             .then((result) => {
                 var data=result.data.filter((item)=>{
-                    if(!(item.name.toLowerCase().includes('system administrator') 
-                    || item.name.toLowerCase().includes('system administrator')
-                    || item.name.toLowerCase().includes('ceo'))) {
+                    if(!(item.id==8 || item.id==1)) {
                         return item;
                     }
                 })
                 setOccupations(data);
             }).catch((error) => {
+                console.log(error);
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are invalid</b>); break;
                     default : toast.error(<b>{error.response.statusText}</b>); break
                 }
             });
@@ -89,15 +89,8 @@ const ModalCreateUser = (props) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const body = {
-            name: username,
-            password: password,
-            occupations_id: occupationsId,
-            confirmation: confirmPassword,
-            phone_number: phoneNumber,
-            email: email
-        }
-        if (username.trim() === '' || password.trim() === '' || phoneNumber.trim() === '' || email.trim() === '') {
+        
+        if (username.trim() === '' || password.trim() === '' || email.trim() === '') {
             setInputRequireAlert(true);
             return;
         } else {
@@ -113,27 +106,42 @@ const ModalCreateUser = (props) => {
         if (!window.navigator.onLine) setOfflineAlert(true);
         else setOfflineAlert(false);
         
-        const config = { mode: 'no-cors', crossdomain: true, headers: { 'Content-Type': 'application/json' } };
+        const body = {
+            name: username,
+            password: password,
+            occupations_id: occupationsId,
+            password_confirmation: confirmPassword,
+            email: email
+        }
+        
+        const url=`${process.env.MIX_BACK_END_BASE_URL}users`
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
         toast.promise(
-            axios.post(process.env.MIX_BACK_END_BASE_URL+'users', body, config),
+            axios.post(url, body),
             {
                 loading: 'Creating a new user',
                 success: (result)=>{ 
                     setSignUpSuccess(true);
                     setUserExists(false);
+                    setEmailTaken(false);
                     setUsername('');
                     setEmail('');
                     setPassword('');
                     setConfirmPassword('');
-                    setPhoneNumber('');
                     props.onCreate(result.data,'create');
                     return <b>A new user successfuly created</b>
                 },
                 error: (error)=>{
                     setSignUpSuccess(false);
+                    if(error.response.data.errors)
                     if (error.response.status===409) setUserExists(true);
                     if (error.response.status==401) return <b>Unauthenticated</b>;
-                    if (error.response.status==422) return <b>Some required inputs are empty</b>;
+                    if (error.response.status==422){ 
+                        if(error.response?.data?.errors?.email) setEmailTaken(true);
+                        if(error.response?.data?.errors?.password) setPasswordConfirmAlert(true);
+                        return <b>Some required inputs are invalid</b>
+                    };
                     return <b>{error.response.statusText}</b>;
                 },
             });
@@ -145,10 +153,10 @@ const ModalCreateUser = (props) => {
             <DialogTitle onClose={closeModal}>User information</DialogTitle>
             <DialogContent dividers>
                 <Container component="main" >
-                    <Toaster/>
                     <CssBaseline />
-                    { passwordConfirmAlert ? <Alert severity="error" > Password and confirm password does not match</Alert> : null}
-                    { inputRequireAlert ? <Alert severity="error" >Please complete the form</Alert> : null}
+                    { emailTaken ? <Alert severity="error" > The email has already been taken</Alert> : null}
+                    { passwordConfirmAlert ? <Alert severity="error" > Password confirmation doesn't match</Alert> : null}
+                    { inputRequireAlert ? <Alert severity="error" >Some fields are empty</Alert> : null}
                     { userExists ? <Alert severity="warning" >Email : <strong>{email} </strong>already in use</Alert> : null}
                     { signUpSuccess ? <Alert severity="success" ><strong>Success</strong><br />New user is now registered</Alert> : null}
                     { offlineAlert ? <Alert severity="warning" >You're currently offline. Please check your internet connection</Alert> : null}
@@ -174,17 +182,6 @@ const ModalCreateUser = (props) => {
                             type="email"
                             onChange={(e) => setEmail(e.target.value) }
                         />
-                        <TextField
-                            variant="standard"
-                            margin="normal"
-                            required
-                            fullWidth
-                            label="Phone Number"
-                            name="phoneNumber"
-                            value={phoneNumber}
-                            type="tel"
-                            onChange={(e) => setPhoneNumber(e.target.value) }
-                        />
                         <Select 
                             variant="standard"
                             onChange={e => {
@@ -194,11 +191,10 @@ const ModalCreateUser = (props) => {
                             fullWidth
                             placeholder="Occupation"
                         >
-                                <MenuItem>Choose occupation</MenuItem>
-                                {
-                                    occupations.map((occupation, index) =>(<MenuItem value={occupation.id} key={occupation.id}>{occupation.name}</MenuItem>))
-                                } 
-                            </Select>
+                            {
+                                occupations.map((occupation, index) =>(<MenuItem value={occupation.id} key={occupation.id}>{occupation.name}</MenuItem>))
+                            } 
+                        </Select>
                         <TextField
                             variant="standard"
                             margin="normal"

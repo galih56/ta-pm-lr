@@ -5,7 +5,6 @@ import { Chip, Autocomplete } from '@material-ui/core';
 import axios from 'axios';
 import UserContext from '../../context/UserContext';
 
-
 export default function UserSearchbar(props) {
     const { detailProject, exceptedData,exceptedUsers,exceptedClients,onChange,inputLabel,clientOnly,userOnly } = props;
     const handleValueChanges = onChange;
@@ -43,6 +42,7 @@ export default function UserSearchbar(props) {
                 getUsers()
             }
         }
+        console.log(detailProject,users,clients)
     }, [detailProject?.members,detailProject?.clients]);
 
     function checkExistingMember(id, arr=[]) {
@@ -82,9 +82,10 @@ export default function UserSearchbar(props) {
         });
 
         filteredClients = filteredClients.map((option) => {
-            var firstLetter = option.name[0].toUpperCase();
+            var firstLetter = option.institution[0].toUpperCase();
             option.is_user=false;
             option.is_client=true;
+            option.name=option.institution;
             return { firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter, ...option };
         });
 
@@ -107,7 +108,7 @@ export default function UserSearchbar(props) {
                     }
                 }
                 if(option.is_client){
-                    label= `${option.name} (${option.institution})`;
+                    label= `${option.institution}`;
                 }
                 return label;
             }}

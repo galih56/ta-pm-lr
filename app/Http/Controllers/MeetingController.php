@@ -62,7 +62,7 @@ class MeetingController extends Controller
         if($request->has('description')) $meeting->description=$request->description;
         if($request->has('start')) $meeting->start=$request->start;
         if($request->has('end')) $meeting->end=$request->end;
-        if($request->has('googleCalendarInfo')) $meeting->googleCalendarInfo=$request->googleCalendarInfo;
+        if($request->has('googleCalendarInfo')) $meeting->google_calendar_info=$request->googleCalendarInfo;
         if($request->has('users_id')) $meeting->users_id=$request->users_id;
         $meeting->save();
         return response()->json($meeting,200);

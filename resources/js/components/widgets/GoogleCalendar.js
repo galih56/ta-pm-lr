@@ -9,6 +9,7 @@ import { Icon } from '@iconify/react';
 import googleMeet from '@iconify-icons/logos/google-meet';
 import googleCalendar from '@iconify-icons/logos/google-calendar';
 import toast, { Toaster } from 'react-hot-toast';
+import moment from 'moment';
 
 const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
     const [loading, setLoading]=useState(false);
@@ -16,13 +17,14 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
     
     function insertEvent(calendarId,cb){
         var requestId = uuidv4();
+        console.log(calendarId)
         gapi.client.load('calendar', 'v3', function() {
-            const insertRequest=gapi.client.calendar.events.insert({
+            const body={
                 calendarId:calendarId,
                 conferenceDataVersion:1,
                 resource: {
-                    start:{ dateTime : meeting.start, timeZone : 'Asia/Jakarta' },
-                    end:{ dateTime : meeting.end, timeZone :'Asia/Jakarta' },
+                    start:{ dateTime : moment(meeting.start).format('YYYY-MM-DDTHH:MM:SS'), timeZone : 'Asia/Jakarta' },
+                    end:{ dateTime : moment(meeting.end).format('YYYY-MM-DDTHH:MM:SS'), timeZone :'Asia/Jakarta' },
                     conferenceData: {
                         createRequest: {
                             conferenceSolutionKey: { type: "hangoutsMeet" },
@@ -37,16 +39,16 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                             {method:'email',minutes:10},
                             {method:'popup',minutes:10}
                         ]
-                      },
-                    organizer: { email : global.state.email,self:true},
-                    creator:{ email : global.state.email ,self:true}
+                    },
                 }
-            });
+            }
+            console.log(body);
+            const insertRequest=gapi.client.calendar.events.insert(body);
             insertRequest.execute(function(event) {
                 if(event.error){
                     toast.error('Failed to create google calendar event')
                 }else{
-                    saveChanges({googleCalendarInfo:event})
+                    saveChanges({google_calendar_info:event})
                 }
                 if(cb)cb()
             });
@@ -54,30 +56,25 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
     }
     
     function insertCalendar(calendars,insertEventCallback){
-        var calendarWithEmailAsId = checkIfProjectCalendarExist(calendars,global.state.email);
         var calendarWithProjectName = checkIfProjectCalendarExist(calendars,detailProject.title);
         
-        if(calendarWithEmailAsId){
-            //cek apa ada calendar dengan id email terautentikasi
-            if(!calendarWithProjectName){
-                gapi.client.load('calendar', 'v3', function() {
-                    const insertRequest=gapi.client.calendar.calendars.insert({
-                        contentType: 'application/json',    
-                        summary: detailProject.title
-                    });
-                    insertRequest.execute(function(response) {
-                       var newCalendar= response.result;
-                       insertEventCallback(newCalendar.id);
-                       toast.success('A new calendar was created on google calendar');
-                    });
+        if(!calendarWithProjectName){
+            gapi.client.load('calendar', 'v3', function() {
+                const body={
+                    contentType: 'application/json',    
+                    summary: detailProject.title
+                }
+                console.log(body)
+                const insertRequest=gapi.client.calendar.calendars.insert(body);
+                insertRequest.execute(function(response) {
+                    var newCalendar= response.result;
+                    insertEventCallback(newCalendar.id);
+                    toast.success('A new calendar was created on google calendar');
                 });
-            }else{
-                insertEventCallback(calendarWithProjectName.id);
-            }
+            });
         }else{
-            toast.error('Please choose a valid email');
+            insertEventCallback(calendarWithProjectName.id);
         }
-
     }
 
     function checkIfProjectCalendarExist(calendars,id){
@@ -145,19 +142,12 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                                 setLoading(true);
                                 if (response.error) return;
                                 getCalendar(function(calendars){
-                                    var calendarWithEmailAsId = checkIfProjectCalendarExist(calendars,global.state.email);
                                     var calendarWithProjectName = checkIfProjectCalendarExist(calendars,detailProject.title);
                                     
-                                    if(calendarWithEmailAsId){
-                                        //cek apa ada calendar dengan id email terautentikasi
-                                        if(calendarWithProjectName){
-                                            deleteEvent(calendarWithProjectName.id,meeting.google_calendar_info.id);
-                                            setLoading(false);
-                                        }
+                                    if(calendarWithProjectName){
+                                        deleteEvent(calendarWithProjectName.id,meeting.google_calendar_info.id);
                                     }
-                                    else{
-                                        toast.error('Please choose a valid email');
-                                    }
+                                    setLoading(false);
                                 });
                             });
                             saveChanges({google_calendar_info:null});
@@ -177,7 +167,7 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                     <CircularProgress disableShrink={false} style={{margin:'1em'}}/>
                 </Grid>
                 ):<></>}
-                <Toaster/>
+                 
             <Grid item  lg={6} md={6} sm={12} xs={12} align="center" alignContent="center">
                 <Button onClick={()=>{
                     gapi.load('client:auth2', function(){
@@ -186,16 +176,17 @@ const GoogleClient  = ({meeting,detailProject,saveChanges}) => {
                             scope: "https://www.googleapis.com/auth/calendar",
                             response_type: 'id_token permission code'
                         }, async function(response) {
-                            console.log(response);
                             setLoading(true)
                             if (response.error) return;
                             getCalendar(function(calendars){
                                 insertCalendar(calendars,
                                     function(newCalendarId){
+                                        console.log(newCalendarId);
                                         insertEvent(newCalendarId,function(){
                                             setLoading(false);
                                         })
                                     });
+                                setLoading(false);
                             });
                         });
                     });

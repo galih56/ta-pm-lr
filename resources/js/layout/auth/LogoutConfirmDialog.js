@@ -40,7 +40,7 @@ export default function LogoutConfirmDialog(props) {
 
     return (
         <Dialog open={open} onClose={handleClose} >
-            <Toaster/>
+             
             <DialogTitle>Are you sure?</DialogTitle>
             <DialogActions>
                 <Button autoFocus onClick={handleClose}>Cancel</Button>

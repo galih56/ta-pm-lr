@@ -44,16 +44,12 @@ const Home = (props) => {
 
     const getProjects = () => {
         let url =''
-        if(global.state.occupation?.name.toLowerCase()=='system administrator' 
-            || global.state.occupation?.name.toLowerCase()=='ceo'
-            || global.state.occupation?.name.toLowerCase()=='manager'
-            || global.state.occupation?.name.toLowerCase()=='project manager'
-            || global.state.occupation?.name.toLowerCase()=='bendahara'){
+        if([1,2,8,9,5].includes(global.state.occupation?.id)){
             url = process.env.MIX_BACK_END_BASE_URL + 'projects';
         }else{
             url = process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';
         }
-        const toast_loading = toast.loading('Loading...');
+        const toast_loading = toast.loading('Loading...',{ id: 'clipboard' });
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
@@ -85,7 +81,7 @@ const Home = (props) => {
 
     return (
         <React.Fragment>
-            <Toaster/>
+             
             <Grid item xs={12}>
                 <Paper className={classes.paper}>
                     <ListItem button dense font="small" onClick={handleProjectListOpen} 

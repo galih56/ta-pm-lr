@@ -169,7 +169,7 @@ export default function EnhancedTable({data}) {
 
     return (
         <div className={classes.root}>
-            <Toaster/>
+             
             <Paper className={classes.paper}>
                 <TableContainer>
                     <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} >
@@ -203,12 +203,7 @@ export default function EnhancedTable({data}) {
                                                 onClick={() => {
                                                     var projects_id=(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id;
                                                     var lists_id=(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id;
-                                                    handleModalOpen({
-                                                        projects_id: projects_id,
-                                                        lists_id: lists_id,
-                                                        tasks_id: row.id,
-                                                        open: true
-                                                    });
+                                                    handleModalOpen({  projects_id: projects_id,  lists_id: lists_id,  tasks_id: row.id,  open: true });
                                                 }}>
                                                 {row.title} ({row.progress}%)
                                             </TableCell>
@@ -231,7 +226,7 @@ export default function EnhancedTable({data}) {
                     </Table>
                 </TableContainer>
                 <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
+                    rowsPerPageOptions={[10, 20, 30]}
                     component="div"
                     count={rows.length}
                     rowsPerPage={rowsPerPage}

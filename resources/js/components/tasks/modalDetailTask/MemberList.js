@@ -30,7 +30,6 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
     const classes = useStyles();
     
     useEffect(()=>{
-        console.log('memberlist',data.members);
         setMembers(data.members?data.members:[]);
     },[data.members])
 
@@ -89,7 +88,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
         <Grid container>
          {isEdit?(
              <>
-                <Toaster/>
+                 
                  <Grid item lg={12} md={12} sm={12} xs={12} style={{marginTop:'0.5em'}}>
                     <Typography>Assigned to : </Typography>
                  </Grid>
@@ -131,11 +130,11 @@ const CustomListItem=({classes,isEdit,member,onClick})=>{
         <ListItem alignItems="flex-start" >
             <ListItemAvatar>
                 {member.profile_picture_path?
-                <Avatar alt={"Photo profile " + member.name} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
-                <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name?.charAt(0).toUpperCase()}</Avatar>}
+                <Avatar alt={"Photo profile " + (member.is_user?member.name:member.institution)} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
+                <Avatar alt={"Photo profile " + (member.is_user?member.name:member.institution)} className={classes.photoProfileBg}>{(member.is_user?member.name:member.institution)?.charAt(0).toUpperCase()}</Avatar>}
             </ListItemAvatar>
             <ListItemText
-                primary={member.is_client?`${member.name} (Client)`:member.name}
+                primary={member.is_client?`${member.institution} (Client)`:(member.name)}
                 secondary={
                     <>
                         <Typography
@@ -146,8 +145,6 @@ const CustomListItem=({classes,isEdit,member,onClick})=>{
                         >
                             {member.is_user?member.role?.name:member.institution}
                         </Typography>
-                        <br/>
-                        {member.email?member.email:member.phone_number}
                     </>
                 }
 

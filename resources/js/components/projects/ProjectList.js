@@ -24,8 +24,7 @@ const ProjectList = ({data}) => {
     return (
         <Grid container spacing={2}>
             {
-                (global.state.occupation?.name.toLowerCase().includes('manager') 
-                    || global.state.occupation?.name.toLowerCase().includes('administrator'))?(
+                ([1,2,8].includes(global.state.occupation?.id) )?(
                     <Grid item xl={3} md={3} sm={3} xs={4} >
                         <Card >
                             <CardActionArea style={{ height: '100%' }} onClick={openModalCreateProject}>

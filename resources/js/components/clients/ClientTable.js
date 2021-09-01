@@ -45,10 +45,8 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-    { id: 'name', align: 'left', disablePadding: true, label: 'Name' },
     { id: 'Institution', align: 'left', disablePadding: false, label: 'Institution' },
     { id: 'City', align: 'left', disablePadding: false, label: 'City' },
-    { id: 'Contact', align: 'left', disablePadding: false, label: 'Contact' },
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -104,7 +102,7 @@ export default function EnhancedTable() {
 
     useEffect(() => {
         getClients();
-        if(!global.state.occupation?.name.toLowerCase().includes('administrator')) history.push('/projects');
+        if(!global.state.occupation?.id==8) history.push('/projects');
     }, []);
 
     const getClients = () => {
@@ -141,7 +139,7 @@ export default function EnhancedTable() {
     
     return (
         <Grid container>  
-        <Toaster/>  
+           
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                 <Router>
                     <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="clients">
@@ -157,7 +155,7 @@ export default function EnhancedTable() {
                 <Paper>
                     <div className={classes.root}>
                         <Typography variant="h6">Clients</Typography>
-                        {(global.state.occupation?.name?.toLowerCase().includes('administrator'))?(
+                        {([8,1,2].includes(global.state.occupation?.id))?(
                             <>
                                 <Button variant="contained" color="primary" onClick={()=>setOpenFormCreate(true)}><b>+</b> Create a new client</Button>
                                 <FormCreateClient
@@ -180,18 +178,13 @@ export default function EnhancedTable() {
                                         .map((row) => {
                                             return (
                                                 <TableRow hover key={row.id}>
-                                                    <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}>
-                                                        <Link to={`/clients/${row.id}`} style={{textDecoration:'none'}}>
-                                                        {row.name}</Link>
-                                                    </TableCell>
                                                     <TableCell align="left">
+                                                         <Link to={`/clients/${row.id}`} style={{textDecoration:'none'}}>
                                                         {row.institution}
+                                                        </Link>
                                                     </TableCell>
                                                     <TableCell align="left">
                                                         {row.city}
-                                                    </TableCell>
-                                                    <TableCell align="left">
-                                                        {row.phone_number}
                                                     </TableCell>
                                                 </TableRow>
                                             );
@@ -211,7 +204,7 @@ export default function EnhancedTable() {
                             count={rows.length}
                             rowsPerPage={rowsPerPage}
                             onPageChange={handleChangePage}
-                            rowsPerPageOptions={[5, 10, 25]}
+                            rowsPerPageOptions={[10, 20, 30]}
                             onRowsPerPageChange={handleChangeRowsPerPage}
                         />
                     </div>

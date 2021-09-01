@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useHistory,useLocation } from 'react-router-dom';
 import Checkbox from '@material-ui/core/Checkbox';
 import moment from 'moment';
 import StatusChip from '../../widgets/StatusChip';
@@ -15,6 +16,12 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [openPopOver, setOpenPopOver] = React.useState(null);
     const [memberOnHover, setMemberOnHover] = React.useState(null);
+    
+    let location = useLocation();
+    let history = useHistory();
+    let pathname = location.pathname;
+    let searchParams = new URLSearchParams(location.search);
+
     const handlePopoverOpen = (event,member) =>  {
         setMemberOnHover(member);
         setOpenPopOver(true);
@@ -28,38 +35,37 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
     useEffect(()=>{
         setSubtasks(tasks);
     },[tasks])
+
     return(
         <>
             <Table size={'small'}>
-                <EnhancedTableHead headCells={headCells} tablesubtasks={true} extraHeadCells={<TableCell></TableCell>}/>
+                <EnhancedTableHead headCells={headCells} extraHeadCells={<TableCell></TableCell>}/>
                 <TableBody>
                     {subtasks?subtasks.map((subtask)=>{
+                        searchParams.set('tasks_id', subtask.id);
                         return(
                             <TableRow hover key={subtask.id} >
                                 <TableCell padding="checkbox"></TableCell>
                                 <TableCell padding="checkbox"></TableCell>
                                 <TableCell padding="checkbox"> 
                                 </TableCell>
-                                <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}
-                                    onClick={()=>{
-                                        handleDetailTaskOpen({
-                                            task:{
-                                                ...subtask,
-                                                onTaskUpdate : onTaskUpdate, 
-                                                onTaskDelete : onTaskDelete
-                                            },open:true
-                                        })
-                                    }}
-                                > 
+                                <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}> 
                                 
                                 <Checkbox
-                                        onChange={(event)=>{
-                                            handleCompleteTask(subtask,event)
-                                        }}
+                                        onChange={event=>handleCompleteTask(subtask,event)}
                                         checked={subtask.complete}
                                     />
                                 
-                                {subtask.title}
+                                    <Link 
+                                    onClick={(e)=>{
+                                        e.preventDefault()
+                                        history.push({ pathname: pathname, search: searchParams.toString() });
+                                        handleDetailTaskOpen({ task:{ ...subtask, onTaskUpdate : onTaskUpdate,  onTaskDelete : onTaskDelete } , open:true })
+                                    }}
+                                    to={{ pathname: pathname, search: searchParams.toString() }} 
+                                        style={{ textDecoration: 'none', color: '#393939' }}>
+                                        {subtask.title}
+                                    </Link>
                                 </TableCell>
                                 <TableCell>
                                     {subtask.members?subtask.members.map((member,i)=>{
@@ -67,15 +73,16 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
                                                 <span 
                                                     key={i}
                                                     onMouseEnter={(event)=>handlePopoverOpen(event,member)}
-                                                    onMouseLeave={handlePopoverClose}>
-                                                    {member.project_client?.client? 
-                                                        `Client ${`(${member.project_client?.client?.institution})`}`:
-                                                        member.member?.role?.name}
-                                                </span>
+                                                    onMouseLeave={handlePopoverClose} style={{margin:'1em'}}>
+                                                    {member?.project_client?.client?(<Typography>{`Client ${`(${member.project_client?.client?.institution})`}`}</Typography>):null}
+                                                    {member?.member?.role?<Typography>{member?.member?.role?.name}</Typography>:null}
+                                                    {member?.role?<Typography>{member?.role?.name}</Typography>:null}
+                                            </span>
                                             )
                                         }):<></>}
                                         
-                                        {(openPopOver)?(<Popover
+                                        {(openPopOver)?(
+                                        <Popover
                                             style={{ pointerEvents: 'none', zIndex:'1200',padding:'1em' }}
                                             open={openPopOver}
                                             anchorEl={anchorEl}
@@ -89,11 +96,13 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
                                             }}
                                             onClose={handlePopoverClose}
                                         >
-                                            <Typography>
-                                                {(memberOnHover?.project_client?.client)?
-                                                    memberOnHover?.project_client?.client?.name :
-                                                    memberOnHover?.user?.username}
-                                            </Typography>
+                                            <div style={{padding:'0.3em'}}>
+                                                {memberOnHover.project_client?.client?(<Typography>{`Client ${`(${memberOnHover.project_client?.client?.institution})`}`}</Typography>):null}
+                                                {memberOnHover.user?(<Typography>{memberOnHover?.user?.name}</Typography>):null}
+                                                {memberOnHover.name?(<Typography>{memberOnHover?.name}</Typography>):null}
+                                                {memberOnHover.member?.role?<Typography>{memberOnHover?.member?.role?.name}</Typography>:null}
+                                                {memberOnHover.role?<Typography>{memberOnHover?.role?.name}</Typography>:null}
+                                            </div>
                                         </Popover>):<></>}
                                 </TableCell>
                                 <TableCell align="left">

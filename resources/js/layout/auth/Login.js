@@ -30,29 +30,35 @@ const SignIn = (props) => {
         global.dispatch({ type: 'remember-authentication' });
         const body = { password: password, email: email }
         if (email.trim() == '' || password.trim() == '') setInputRequireAlert(true);
-        else setInputRequireAlert(false);
-        
-        toast.promise(
-            axios.post(process.env.MIX_BACK_END_BASE_URL + 'login', body, 
-            { headers: { 'Content-Type': 'application/json' } }),
-                {
-                loading: 'Logging In...',
-                success:(result)=>{ 
-                    global.dispatch({ type: 'authenticate', payload: result.data});
-                    return <b>Authenticated!</b>
-                },
-                error: <b>Wrong credentials</b>,
-                }
-        );
-    
+        else{ 
+            setInputRequireAlert(false);
+            const url=`${process.env.MIX_BACK_END_BASE_URL}login`
+            toast.promise(
+                axios.post(url, body, 
+                { headers: { 'Content-Type': 'application/json' } }),
+                    {
+                    loading: 'Logging In...',
+                    success:(result)=>{ 
+                        global.dispatch({ type: 'authenticate', payload: result.data});
+                        return <b>Authenticated!</b>
+                    },
+                    error:(error)=>{ 
+                            setWrongCredentialAlert(true);
+                            if(error.response.status==401) return <b>Unauthenticated</b>;
+                            if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                            return <b>Wrong credentials</b>
+                        },
+                    }
+            );
+        }
     }
 
     return (
         <React.Fragment>
-            <Toaster/>
-            { wrongCredentialAlert ? <Alert severity="error" > Email/Password is incorrect</Alert> : null}
-            { inputRequireAlert ? <Alert severity="error" >Please complete the form</Alert> : null}
-            { offlineAlert ? <Alert severity="warning" >You're currently offline. Please check your internet connection</Alert> : null}
+             
+            { wrongCredentialAlert ? <Alert severity="error" style={{marginTop:'1em'}}> Email/Password is incorrect</Alert> : null}
+            { inputRequireAlert ? <Alert severity="error"  style={{marginTop:'1em'}}>Please complete the form</Alert> : null}
+            { offlineAlert ? <Alert severity="warning"  style={{marginTop:'1em'}}>You're currently offline. Please check your internet connection</Alert> : null}
             <form className={classes.form} style={{ textAlign: 'center' }} onSubmit={handleSubmit} >
                 <TextField
                     variant="outlined"

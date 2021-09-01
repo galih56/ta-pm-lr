@@ -83,7 +83,7 @@ const DetailProject = (props) => {
 
     return (
         <Grid container>
-            <Toaster/>
+             
             <Grid lg={12} md={12} sm={12} xs={12} item>
                 <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label={`project reports - ${detailProject.title}`}>
                     <Button component={Link}  color="primary"

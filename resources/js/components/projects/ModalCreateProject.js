@@ -20,10 +20,11 @@ import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import CloseIcon from '@material-ui/icons/Close';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import moment from 'moment';
-import UserSearchBar from './../widgets/UserSearchBar'
-import { parseISO } from 'date-fns'; 
+import UserSearchBar from './../widgets/UserSearchBar';
+import Autocomplete from '@material-ui/core/Autocomplete';
+import Chip from '@material-ui/core/Chip';
 
 const styles = (theme) => {
     return({
@@ -58,11 +59,11 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 const useStyles = makeStyles((theme) => {
-    console.log(theme)
     return({
-    root: { display: 'flex', flexWrap: 'wrap' },
-    margin: { margin: theme.spacing(1) },
-})});
+        root: { display: 'flex', flexWrap: 'wrap' },
+        margin: { margin: theme.spacing(1) },
+    })
+});
 
 export default function ModalCreateProject(props) {
     const classes = useStyles();
@@ -70,53 +71,68 @@ export default function ModalCreateProject(props) {
     var closeModal = props.closeModal;
 
     const [title, setTitle] = useState('');
-    const [cost, setCost] = useState('');
     const [description, setDescription] = useState('');
     const [start, setStart] = useState(null);
     const [end, setEnd] = useState(null);
     const [dateRange, setDateRange] = useState([null,null]);
     const [projectOwner, setProjectOwner] = useState([]);
     const [projectManager, setProjectManager] = useState([]);
+    const [projectClients, setProjectClients] = useState([]);
+    const [teams, setTeams] = useState([]);
+    const [choosenTeams, setChoosenTeams] = useState([]);
     const global = useContext(UserContext);
-    const history = useHistory();
+
+    
+    const getTeams = () => {
+        const toast_loading = toast.loading('Loading...');
+        const url = process.env.MIX_BACK_END_BASE_URL + `teams`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.get(url)
+            .then((result) => {
+                setTeams(result.data);
+                toast.dismiss(toast_loading);
+            }).catch((error) => {
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
+            });
+    }
 
     useEffect(() => {
         if (end === '') setEnd(null);
         if (start === '') setStart(null);
+        getTeams();
     }, [end,start]);
 
 
     const submitData = () => {
         const body = {
-            title: title,
-            description: description,
-            start: start,
-            end: end,
-            cost: cost,
-            project_owner:projectOwner,
-            project_manager:projectManager,
-            users_id: global.state.id,
+            title: title, description: description, start: start, end: end, 
+            project_owner:projectOwner, project_manager:projectManager, 
+            clients : projectClients, users_id: global.state.id, teams:choosenTeams
         }
-
+        
         if (!window.navigator.onLine) {
             toast.error(`You are currently offline`);
         } else {
-            var url = '';
-            if(global.state.occupation?.name=='system administrator' || global.state.occupation?.name=='ceo') url=process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';
-            else url=process.env.MIX_BACK_END_BASE_URL + 'projects';
+            var url = process.env.MIX_BACK_END_BASE_URL + 'projects';
 
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             toast.promise(
                 axios.post(url, body),
                 {
-                    loading: 'Creating a new meeting schedule',
+                    loading: 'Creating a new project',
                     success: (result)=>{
                         global.dispatch({ type: 'create-new-project', payload: result.data })
                         setTitle('');
                         setDescription('');
                         closeModal();
-                        return <b>A new meeting successfuly created</b>
+                        return <b>A new project successfuly created</b>
                     },
                     error: (error)=>{
                         if(error.response.status==401) return <b>Unauthenticated</b>;
@@ -138,22 +154,13 @@ export default function ModalCreateProject(props) {
                 }}>
                     <DialogContent dividers>
                         <Grid container spacing={2} style={{ paddingLeft: 3, paddingRight: 3 }} >
-                            <Grid item lg={6} md={6} sm={6} xs={12} >
+                            <Grid item lg={12} md={12} sm={12} xs={12} >
                                 <TextField variant="standard"
                                     label="Title : "
                                     placeholder="example : Project A"
                                     className={classes.textfield}
                                     onChange={(e) => setTitle(e.target.value) }
                                     style={{ width: '100%' }}
-                                />
-                            </Grid>
-                            <Grid item lg={6} md={6} sm={6} xs={12} >
-                                <TextField variant="standard"
-                                    label="Cost estimation : "
-                                    className={classes.textfield}
-                                    onChange={(e) => setCost(e.target.value) }
-                                    style={{ width: '100%' }}
-                                    type="number"
                                 />
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
@@ -183,6 +190,25 @@ export default function ModalCreateProject(props) {
                                 </LocalizationProvider> 
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
+                                <Autocomplete
+                                    multiple
+                                    freeSolo
+                                    options={teams}
+                                    getOptionLabel={(option) => option.name}
+                                    renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        variant="standard"
+                                        label="Search by team names"
+                                    />)}
+                                    onChange={(event, options)=> setChoosenTeams(options)}
+                                    renderTags={(value, getTagProps) =>
+                                        value.map((option, index) => (
+                                            <Chip variant="outlined" label={option.name} {...getTagProps({ index })} />
+                                        ))}
+                                />
+                            </Grid>
+                            <Grid item lg={12} md={12} sm={12} xs={12}>
                                 <UserSearchBar required={true} userOnly={true}
                                                 inputLabel={"Project Owner"}
                                                 onChange={(values)=>setProjectOwner(values.map((value)=>value.id))}/>
@@ -191,6 +217,11 @@ export default function ModalCreateProject(props) {
                                 <UserSearchBar required={true} userOnly={true}
                                                 inputLabel={"Project Manager"}
                                                 onChange={(values)=>setProjectManager(values.map((value)=>value.id))}/>
+                            </Grid>
+                            <Grid item lg={12} md={12} sm={12} xs={12}>
+                                <UserSearchBar required={true} clientOnly={true}
+                                                inputLabel={"Clients"}
+                                                onChange={(values)=>setProjectClients(values.map((value)=>value.id))}/>
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
                                 <TextField variant="standard"
@@ -214,7 +245,7 @@ export default function ModalCreateProject(props) {
                     <Alert severity="warning">Your action requires authentication. Please sign in.</Alert>
                 </DialogContent>
             )}
-            <Toaster/>
+             
         </Dialog>
     );
 }

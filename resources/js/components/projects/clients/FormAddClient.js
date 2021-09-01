@@ -58,9 +58,11 @@ const FormAddClient=({open,handleClose,onCreate,detailProject})=>{
                 success: (result)=>{
                     onCreate(result.data);
                     handleClose();
+                    global.dispatch({type:'add-clients-to-project',payload:{projects_id:detailProject.id,clients:result.data}});
                     return <b>A new client successfuly created</b>
                 },
                 error: (error)=>{
+                    console.log(error);
                     if(error.response.status==401) return <b>Unauthenticated</b>;
                     if(error.response.status==422) return <b>Some required inputs are empty</b>;
                     return <b>{error.response.statusText}</b>;
@@ -77,7 +79,7 @@ const FormAddClient=({open,handleClose,onCreate,detailProject})=>{
                         handleClose();
                     }} > Add a new client </DialogTitle>
             <DialogContent dividers>
-                <Toaster/>
+                 
                 <form onSubmit={(e)=>{
                         e.preventDefault();
                         formCreateOnSubmit();
@@ -87,10 +89,9 @@ const FormAddClient=({open,handleClose,onCreate,detailProject})=>{
                             <UserSearchBar 
                                 detailProject={detailProject}
                                 exceptedClients={detailProject.clients} 
-                                onChange={(clients)=>{
-                                    setNewClients(clients);
-                                }}
+                                onChange={(clients)=> setNewClients(clients)}
                                 clientOnly={true}
+                                inputLabel="Search clients"
                             />
                         </Grid>
                         <Grid xs={12} sm={12} md={12} lg={12} lg={12} item>

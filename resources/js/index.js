@@ -18,8 +18,14 @@ import {
     storeDetailSubtask,storeSubtasks, createNewSubtask, removeSubtask,
     createNewAttachments, removeAttachment
 } from './context/TasksReducer';
+
+import { addNotification, storeNotifications, updateNotification, removeNotification } from './context/NotificationsReducer';
+
+import { addClientsToProject, storeClientsToProject, removeClientFromProject } from './context/ClientsReducer';
+
 import { LinearProgress } from '@material-ui/core/';
 import './index.css';
+import {Toaster} from 'react-hot-toast';
 
 const Home = lazy(() => import("./layout/Home"));
 const DetailProject = lazy(() => import("./components/projects/DetailProject"));
@@ -101,6 +107,12 @@ const reducer = (state, action) => {
             return updateMeeting(payload); 
         case 'remove-meeting':
             return removeMeeting(payload);
+        case 'add-clients-to-project':
+            return addClientsToProject(payload);
+        case 'store-clients-to-project':
+            return storeClientsToProject(payload);
+        case 'remove-client-from-project':
+            return removeClientFromProject(payload);
         case 'logout':
             return logout();
         case 'run-delayed-http-request':
@@ -143,6 +155,7 @@ const App = () => {
             <ThemeProvider theme={theme}>
                 <Router>
                     <Layout>
+                        <Toaster/>
                         <React.Suspense fallback={<LinearProgress />}>
                             <Switch>
                                 {/* passing props ke component melalui route gak bisa langsung, jadi harus pakai anon function ke props render yg dimiliki component Route */}

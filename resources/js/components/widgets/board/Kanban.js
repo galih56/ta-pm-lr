@@ -1,20 +1,17 @@
 import 'fontsource-roboto';
-import React, { useContext, useEffect, memo, useState, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useContext, useEffect, memo, useState } from 'react';
 import Board from 'react-trello';
 import { createTranslate } from 'react-trello';
 import UserContext from '../../../context/UserContext';
 import axios from 'axios';
 import CustomCard from './Card';
 import EditLaneForm from './EditLaneForm';
-import toast, { Toaster } from 'react-hot-toast';
-import moment from 'moment';
+import toast from 'react-hot-toast';
 
 const Kanban = (props) => {
     const global = useContext(UserContext);
     const [board, setBoard] = useState({ lanes: [] });
     const {detailProject,handleDetailTaskOpen} = props;
-    const history = useHistory();
 
     useEffect(() => {
         if (detailProject) setBoard({ lanes: detailProject.columns });
@@ -106,7 +103,8 @@ const Kanban = (props) => {
                 id:detailProject.id,
                 start:detailProject.start,
                 end:detailProject.end,
-                members:detailProject.members
+                members:detailProject.members,
+                clients:detailProject.clients
             }} {...props}/>
         )
     }
@@ -114,7 +112,6 @@ const Kanban = (props) => {
     const [eventBus, setEventBus] = useState(undefined);
 
     const onCardDelete=(lists_id,tasks_id)=>{
-        console.log(lists_id,tasks_id)
         eventBus.publish({type: 'REMOVE_CARD', laneId: listId, cardId: tasks_id});
     }
     return (
@@ -135,7 +132,7 @@ const Kanban = (props) => {
                 eventBusHandle={setEventBus}
             >
             </Board>
-            <Toaster/>
+             
         </React.Fragment>
     )
 

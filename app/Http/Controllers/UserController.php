@@ -43,15 +43,13 @@ class UserController extends Controller
         $fields=$request->validate([
             'name'=>'required|string',
             'email'=>'required|string|unique:users,email',
-            'password'=>'required|string',
-            'phone_number'=>'required|string',
+            'password' => 'string|required_with:password_confirmation|same:password_confirmation',
             'occupations_id'=>'required',
         ]);
 
         $user=User::create([
             'name'=> $fields['name'],
             'email'=> $fields['email'],
-            'phone_number'=> $fields['phone_number'],
             'occupations_id'=> $fields['occupations_id'],
             'password'=> Hash::make($fields['password']),
             'verified'=> false,
@@ -82,7 +80,6 @@ class UserController extends Controller
         $user=User::findOrFail($id);
         if($request->has('name')) $user->name=$request->name;
         if($request->has('email')) $user->email=$request->email;
-        if($request->has('phone_number')) $user->phone_number=$request->phone_number;
         if($request->has('token')) $user->token=$request->token;
         if($request->has('occupations_id')) $user->occupations_id=$request->occupations_id;
         if($request->has('last_login')) $user->last_login=$request->last_login;
@@ -188,7 +185,7 @@ class UserController extends Controller
     public function login(Request $request){
         $fields = $request->validate([
             'email' => 'required|string',
-            'password' => 'required|string'
+            'password' => 'string|required',
         ]); 
 
         $user = User::where('email', $fields['email'])->with('occupation')->first();
@@ -199,17 +196,20 @@ class UserController extends Controller
             ], 401);
         }
 
-        $token = $user->createToken('myapptoken')->plainTextToken;        
+        $token = $user->createToken('tugas-akhir-pm-project-management-2021')->plainTextToken;        
         $project_members=ProjectMember::selectRaw('roles_id , count(roles_id)')->where('users_id',1)->groupBy('roles_id')->with('role')->get();
         $user=$user->toArray();
 
           
         /*
             access levels
-            1. system administrator, ceo
-            2. project owner
-            3. project manager
-            4. client
+            1. system administrator (id=8), ceo/direktur (id=1)
+            3. manager (id=2)
+            4. System analyst (id=5)
+            5. bendahara (id=9)
+        
+            6. project owner (id=1)
+            7. project manager (id=2)
         */
         
         $response = [
@@ -226,13 +226,11 @@ class UserController extends Controller
             'name'=>'required|string',
             'email'=>'required|string|unique:users,email',
             'password'=>'required|string',
-            'phone_number'=>'required|string',
         ]);
 
         $user=User::create([
             'name'=> $fields['name'],
             'email'=> $fields['email'],
-            'phone_number'=> $fields['phone_number'],
             'password'=> Hash::make($fields['password']),
             'verified'=> false,
         ]);
@@ -243,6 +241,27 @@ class UserController extends Controller
         return response([
             'user'=>$user,
             'token' => "Bearer $token",
+            'success' =>true
+        ],201);
+    }
+    
+    public function changePassword(Request $request,$id){
+        $fields=$request->validate([
+            'new_password' => 'required_with:confirm_password|same:confirm_password',
+            'confirm_password'
+        ]);
+        
+        $new_password=Hash::make($fields['new_password']);
+        $user=User::findOrFail($id);
+        $user->password=$new_password;
+        $user->save();
+        
+        // $user = User::where('id', $id)->with('occupation')->first();
+        // $token=$user->createToken('tugas-akhir-pm-project-management-2021')->plainTextToken;
+
+        return response([
+            'user'=>$user,
+            // 'token' => "Bearer $token",
             'success' =>true
         ],201);
     }

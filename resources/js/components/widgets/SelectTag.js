@@ -13,32 +13,31 @@ const SelectTag = (props) => {
     const global = useContext(UserContext);
     const handleValueChange = props.onChange;
     const [data, setData] = useState([]);
-    const history = useHistory();
     
-    const fetchData = () => {
+    const getTags = () => {
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true, }
             const url = process.env.MIX_BACK_END_BASE_URL+'tags';
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.get(url, {}, config)
-                .then(result => {
-                    setData(result.data);
-                }).catch(console.log);
+            axios.get(url)
+                .then(result =>setData(result.data)).catch(console.log);
         } else {
             const tags = JSON.parse(localStorage.getItem('tags'));
             setData(tags);
         }
     }
     useEffect(() => {
-        fetchData();
+        getTags();
     }, []);
 
     if (isEditing) {
         return (
             <Autocomplete
                 multiple
-                onChange={(event, arrValues) => { handleValueChange(arrValues) }}
+                onChange={(event, arrValues) => { 
+                    console.log(arrValues);
+                    handleValueChange(arrValues) 
+                }}
                 filterOptions={(options, params) => {
                     options=options.filter(function(item){
                         if(item.title.toLowerCase().includes(params.inputValue.toLowerCase()))

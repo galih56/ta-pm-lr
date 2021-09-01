@@ -1,12 +1,18 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, lazy, Suspense, useMemo } from 'react';
 import UserContext from '../../../context/UserContext';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableContainer from '@material-ui/core/TableContainer';
-import EditLaneForm from '../../widgets/board/EditLaneForm'
-import toast, { Toaster } from 'react-hot-toast';
-import Row from './Row';
+import SearchIcon from '@material-ui/icons/Search';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import toast from 'react-hot-toast';
 import axios from 'axios';
+
+const Row = lazy(() => import('./Row'));
+const EditLaneForm = lazy(() => import('../../widgets/board/EditLaneForm'));
 
 const headCells = [
     { id: 'Title', align: 'left', label: 'Title' },
@@ -26,13 +32,56 @@ function Timeline(props) {
     const [openEditList,setOpenEditList]=useState(false)
     const [selectedList,setSelectedList]=useState(false)
     const [rows, setRows] = useState([]);
+    const [keywords,setKeywords]=useState('');
+    const [searchTimeout, setSearchTimeout] = useState(null);
 
     let global = useContext(UserContext);
 
+    const searchByKeywords=()=>{
+        const toast_loading = toast.loading('Loading...');
+        var newRows=props.data.filter(row => {
+            var matched=false;
+            var filteredTasks=[];
+            if(row.title.toLowerCase().includes(keywords.toLowerCase())){
+                matched=true;
+            }
+            for (let i = 0; i < row.cards.length; i++) {
+                const task = row.cards[i];
+                var filteredSubtasks=[];
+                if(task.cards){
+                    for (let j = 0; j < task.cards.length; j++) {
+                        const subtask = task.cards[j];
+                        if(subtask.title.toLowerCase().includes(keywords.toLowerCase())){ 
+                            filteredSubtasks.push(subtask); 
+                            matched=true;
+                        }
+                    }
+                }
+                
+                if(task.title.toLowerCase().includes(keywords.toLowerCase()) || filteredSubtasks.length>0){ 
+                    task.cards=filteredSubtasks;
+                    filteredTasks.push(task);
+                    matched=true;
+                }
+            }
+            row = { ...row , cards : filteredTasks }
+            if(matched){
+                return row
+            }
+        })
+        toast.dismiss(toast_loading);
+        return newRows;
+    }
+
     useEffect(() => {
-        setRows(props.data);
-        setDetailProject(props.detailProject)
-    }, [props.detailProject.id,props.data]);
+        if(keywords){                
+            const results= searchByKeywords()
+            setRows(results);
+        }else{
+            setRows(props.data);
+            setDetailProject(props.detailProject)    
+        }
+    }, [props.detailProject.id,props.data,keywords]);
 
     const onTaskUpdate=(task)=>{
         var newRows=rows.map(row=>{
@@ -77,7 +126,8 @@ function Timeline(props) {
         newTask.users_id = global.state.id;
         newTask.projects_id = detailProject.id;
         newTask.creator=global.state.id;
-        
+        const body=newTask;
+
         if (window.navigator.onLine) {
             const url = process.env.MIX_BACK_END_BASE_URL + 'tasks';
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
@@ -90,12 +140,12 @@ function Timeline(props) {
                         newTask.id = result.data.id;
                         newTask.projects_id = detailProject.id;
                         newTask.lists_id = laneId;
-                        global.dispatch({ type: 'create-new-task', payload: newTask })
+                        global.dispatch({ type: 'create-new-task', payload: result.data })
                         setRows(rows.map((row)=>{
                             if(row.id==selectedList.id) row.cards.push(newTask)
                             return row
                         }))
-                        return <b>A new meeting successfuly created</b>
+                        return <b>A new task successfuly created</b>
                     },
                     error: (error)=>{
                         if(error.response.status==401) return <b>Unauthenticated</b>;
@@ -109,50 +159,56 @@ function Timeline(props) {
         }
     }
 
-    return (
-        <>
-           <Toaster/> 
-           <TableContainer  style={{ minWidth: 1800}}>         
-                <Table size={'small'} >
-                    <TableBody>
-                        {rows.map((row) => {
-                            return (
-                                <Row 
-                                    key={row.id} 
-                                    data={row} 
-                                    handleDetailTaskOpen={handleDetailTaskOpen} 
-                                    projects_id={projects_id}
-                                    detailProject={detailProject}
-                                    onClick={()=>{
-                                        setSelectedList(row);
-                                        setOpenEditList(true);
-                                    }}
-                                    headCells={headCells}
-                                    onTaskUpdate={onTaskUpdate}
-                                    onTaskDelete={onTaskDelete}
-                                    />
-                            );
-                        })}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-            {(selectedList.id && openEditList)?(
-                <EditLaneForm 
-                    laneId={selectedList.id}
-                    minDate={selectedList.start}
-                    maxDate={selectedList.end}
-                    detailProject={{
-                        id:detailProject.id,
-                        members:detailProject.members
-                    }} 
-                    open={openEditList}
-                    onCancel={()=>setOpenEditList(false)}
-                    onAdd={(newTask)=>{
-                        onTaskNew(newTask,selectedList.id)
-                        setOpenEditList(false); 
-                    }}/>
-            ):<></>}
-        </>
+    return (  
+        <React.Fragment>
+            <Grid item xl={12} md={12} sm={12} xs={12}>
+                <form onSubmit={e=>{ 
+                    e.preventDefault();
+                    const results= searchByKeywords();
+                    setRows(results);
+                }}>
+                    <TextField variant="standard" style={{marginTop:'1em',marginBottom:'1em',minWidth:'300px'}}
+                        InputProps={{endAdornment:<SearchIcon/>}} 
+                        placeholder="Search by title"
+                        onBlur={e=>setKeywords(e.target.value)}
+                        // Triggered when out of focus from input
+                        // onBlur to prevent lag
+                    />
+                    <Button type="submit" style={{marginTop:'1em'}}> Search </Button>
+                </form>
+            </Grid>
+            <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
+                <TableContainer  style={{ minWidth: 1600}}>         
+                    <Table size={'small'} >
+                        <Suspense fallback={<LinearProgress />}>
+                            <TableBody>
+                                {rows.map((row) => {
+                                    return (
+                                        <Row headCells={headCells} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete}
+                                            key={row.id} data={row} handleDetailTaskOpen={handleDetailTaskOpen} 
+                                            projects_id={projects_id} detailProject={detailProject} 
+                                            onClick={()=>{ setSelectedList(row); setOpenEditList(true); }} />
+                                    );
+                                })}
+                            </TableBody>
+                        </Suspense>
+                    </Table>
+                </TableContainer>
+                {(selectedList.id && openEditList)?(
+                    <EditLaneForm 
+                        laneId={selectedList.id} minDate={selectedList.start} maxDate={selectedList.end}
+                        detailProject={{ 
+                            id:detailProject.id, start:detailProject.start, end:detailProject.end,
+                            members:detailProject.members, clients:detailProject.clients 
+                        }} 
+                        open={openEditList} onCancel={()=>setOpenEditList(false)}
+                        onAdd={(newTask)=>{
+                            onTaskNew(newTask,selectedList.id)
+                            setOpenEditList(false); 
+                        }}/>
+                ):<></>}
+            </Grid>
+        </React.Fragment>
     );
 }
 

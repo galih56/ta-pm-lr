@@ -6,7 +6,6 @@ import Tab from '@material-ui/core/Tab';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
-import ModalDetailTask from '../tasks/modalDetailTask/ModalDetailTask';
 import BreadCrumbs from './BreadCrumbs';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import UserContext from '../../context/UserContext';
@@ -23,6 +22,7 @@ const Calendar = lazy(() => import('../widgets/Calendar'));
 const Files = lazy(() => import('../widgets/Files'));
 const Others = lazy(() => import('./Others'));
 const Timeline = lazy(() => import('./timeline/Timeline'));
+const ModalDetailTask = lazy(() => import('../tasks/modalDetailTask/ModalDetailTask'));
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -162,9 +162,7 @@ const DetailProject = (props) => {
         const paramTaskId = query.get('tasks_id');
         const paramMeetingId = query.get('meetings_id');
         if (paramTaskId) handleDetailTaskOpen({ task:{...clickedTask, id: paramTaskId}, open: true });
-        if (paramMeetingId) handleDetailMeetingOpen({ meeting:{
-            id:paramMeetingId,...clickedMeeting
-        }, open: true });
+        if (paramMeetingId) handleDetailMeetingOpen({ meeting : { id:paramMeetingId,...clickedMeeting }, open: true });
         getDetailProject();
     }, []);
 
@@ -191,6 +189,7 @@ const DetailProject = (props) => {
 
     return (
         <Router>
+             
             <Paper>
                 <Tabs
                     value={tabState}
@@ -216,9 +215,7 @@ const DetailProject = (props) => {
                                     <Grid container >   
                                         <BreadCrumbs projectName={detailProject.title} tabName="Timeline" style={{marginTop:'1em'}}/>
                                         <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                                            {(global.state.occupation?.name?.toLowerCase().includes('manager')
-                                                ||global.state.occupation?.name.toLowerCase().includes('administrator')
-                                                ||global.state.current_project_member_role?.name.toLowerCase().includes('project manager') )?(
+                                            {([2,8].includes(global.state.occupation?.id) || [1,2].includes(global.state.current_project_member_role?.id))?(
                                                 <Button
                                                     variant="contained"
                                                     color="primary"
@@ -234,7 +231,8 @@ const DetailProject = (props) => {
                                                 start:detailProject.start,end:detailProject.end,
                                                 actual_start:detailProject.actual_start,
                                                 actual_end:detailProject.actual_end,
-                                                members:detailProject.members
+                                                members:detailProject.members,
+                                                clients:detailProject.clients
                                             }}
                                             data={detailProject.columns} 
                                             handleDetailTaskOpen={handleDetailTaskOpen}
@@ -331,7 +329,7 @@ const DetailProject = (props) => {
                     projects_id={params.id}
                     open={showModalCreateList}
                     closeModal={()=>handleModalCreateList(false)} 
-                    detailProject={{id:detailProject.id,start:detailProject.start,end:detailProject.end}}
+                    detailProject={{id:detailProject.id,members:detailProject.members,clients:detailProject.clients,start:detailProject.start,end:detailProject.end}}
                     />
                 <ModalCreateMeeting
                     detailProject={{
@@ -368,9 +366,9 @@ const DetailProject = (props) => {
                     closeModal={()=>handleDetailMeetingOpen({open:false,meeting:clickedMeetingInitialState})}
                     detailProject={{ 
                         id:detailProject.id,
+                        title:detailProject.title,
                         start:detailProject.start,end:detailProject.end,
                         members:detailProject.members,
-                        clients:detailProject.clients
                     }}
                     initialState={clickedMeeting}
                 />:<></>}

@@ -50,7 +50,7 @@ const AuthPage = (props) => {
                         <div className={classes.paper}>
                             <img alt="LOGIN PAGE LOGO (PT. TATACIPTA TEKNOLOGI INDONESIA)" 
                                 src={mainLogo} style={{height:'100%',width:'25%'}}/>
-                            <Login classes={classes}></Login>
+                            <Login classes={classes}/>
                         </div>
                     </Container>
                 </DialogContent>

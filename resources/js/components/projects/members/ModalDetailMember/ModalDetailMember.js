@@ -47,25 +47,16 @@ const DialogActions = withStyles((theme) => ({
     root: { margin: 0, padding: theme.spacing(1), },
 }))(MuiDialogActions);
 
-const useStyles = makeStyles(() => ({
-  paper: { minWidth: "80% !important" },
-}));
-
-
 export default function ModalDetailMember(props) {
-    const classes = useStyles();
     const open = props.open;
     const closeModal = props.closeModal;
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const handleDetailTaskOpen = props.handleDetailTaskOpen;
     const global = useContext(UserContext);
-    const history = useHistory();
+
     const [data, setData] = useState({
-        id: null, 
-        name: '', email: '', phone_number: '',  last_login: '', occupation: null, profilePicture: '' ,
-        project_members_id:null,
-        role:{ id:null, name:'' },
-        tasks:[]
+        id: null, name: '', email: '',  last_login: '', occupation: null, profile_picture_path: '' ,
+        project_members_id:null, role:{ id:null, name:'' }, tasks:[]
     });
     const [tasks,setTasks]=useState([]);
     const [isEditing, setIsEditing] = useState(false);
@@ -77,16 +68,13 @@ export default function ModalDetailMember(props) {
     }, [props.initialState.id]);
 
     const getTasks = (id) => {
-        const toast_loading = toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}project-members/${props.initialState.id}/tasks`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setTasks(result.data);
-                toast.dismiss(toast_loading);
             }).catch((error) => {
-                toast.dismiss(toast_loading);
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
@@ -159,7 +147,7 @@ export default function ModalDetailMember(props) {
                     closeModal={closeModal}
                 > </DialogActionButtons>
             </DialogActions>
-                    <Toaster/>
+                     
         </Dialog>
     );
 }

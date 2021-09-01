@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState} from 'react';
 import axios from 'axios';
 import moment from 'moment';
-import { useHistory } from 'react-router-dom';
+import { useHistory,withRouter } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import DialogContentText from '@material-ui/core/DialogContentText';
@@ -73,7 +73,7 @@ const ProjectInfo = (props) => {
                 loading: 'Deleting...',
                 success: (result)=>{
                     global.dispatch({ type: 'remove-project', payload: detailProject.id });
-                    history.push('/');
+                    history.push('/projects');
                     return <b>Successfully deleted</b>
                 },
                 error: (error)=>{
@@ -87,7 +87,7 @@ const ProjectInfo = (props) => {
     return (
         <>
             <Grid container>
-                {(isEdit)?(
+                {(isEditing)?(
                 <React.Fragment>
                     <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>
                         <TextField
@@ -189,7 +189,7 @@ const ProjectInfo = (props) => {
                     </Grid>
                 </React.Fragment>
             )}
-            <Toaster/>
+             
             </Grid >
             <DeleteConfirmDialog
                 open={deleteConfirmOpen}
@@ -220,4 +220,4 @@ const DeleteConfirmDialog =(props) => {
     );
 }
 
-export default ProjectInfo
+export default withRouter(ProjectInfo)

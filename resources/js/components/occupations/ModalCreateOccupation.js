@@ -14,6 +14,7 @@ import MuiDialogActions from '@material-ui/core/DialogActions';
 import UserContext from '../../context/UserContext';
 import CloseIcon from '@material-ui/icons/Close';
 // import OccupationSearchBar from './../widgets/OccupationSearchBar';
+import Alert from '@material-ui/lab/Alert';
 import toast, { Toaster } from 'react-hot-toast';
 
 const styles = (theme) => ({
@@ -121,7 +122,7 @@ export default function ModalCreateOccupation(props) {
                     </DialogContent>
                 )}
         </Dialog>
-        <Toaster/>
+         
         </>
     );
 }

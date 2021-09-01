@@ -26,9 +26,7 @@ const OpenEditForm = ({ isEdit, data, setData ,detailProject,saveChanges}) => {
                         multiline 
                         rows={4}
                         defaultValue={data.description}
-                        onChange={(e) => {
-                            setData({ ...data, description: e.target.value })
-                        }} 
+                        onChange={(e) =>setData({ ...data, description: e.target.value })} 
                         style={{ width: '100%' }}
                     />
                 </Grid>

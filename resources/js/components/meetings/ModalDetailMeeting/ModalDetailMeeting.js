@@ -53,28 +53,24 @@ export default function ModalDetailMeeting(props) {
     const handleEditingMode = (bool = false) => setIsEditing(bool);
     
     const getDetailMeeting = () => {
-        if (window.navigator.onLine) {
-            const toast_loading = toast.loading('Loading...');
-            const url = process.env.MIX_BACK_END_BASE_URL + 'meetings/' + initialState.id;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.get(url)
-                .then((result) => {
-                    const data = result.data;
-                    global.dispatch({ type: 'store-detail-meeting', payload: data })
-                    setData(data);
-                    toast.dismiss(toast_loading);
-                }).catch((error) => {
-                    toast.dismiss(toast_loading);
-                    switch(error.response.status){
-                        case 401 : toast.error(<b>Unauthenticated</b>); break;
-                        case 422 : toast.error(<b>Some required inputs are empty</b>); break;
-                        default : toast.error(<b>{error.response.statusText}</b>); break
-                    }
-                });
-        } else {
-            toast.error(`You're currently offline. Please check your internet connection.`);
-        }
+        const toast_loading = toast.loading('Loading...');
+        const url = process.env.MIX_BACK_END_BASE_URL + 'meetings/' + initialState.id;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.get(url)
+            .then((result) => {
+                const data = result.data;
+                global.dispatch({ type: 'store-detail-meeting', payload: data })
+                setData(data);
+                toast.dismiss(toast_loading);
+            }).catch((error) => {
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
+            });
     }
     
     useEffect(() => {
@@ -125,7 +121,7 @@ export default function ModalDetailMeeting(props) {
     }
     return (
         <Dialog open={open} maxWidth={'lg'} fullwidth={"true"}>
-            <Toaster/>
+             
             <DialogTitle onClose={closeModal}>Meeting information</DialogTitle>
             <DialogContent dividers>
                 <EditForm 

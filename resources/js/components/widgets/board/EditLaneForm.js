@@ -70,11 +70,7 @@ const EditLaneForm = (props) => {
     const classes = useStyles();
     const { laneId, onAdd, onCancel,detailProject } = props;
     const [modalOpen, setModalOpen] = useState(true);
-    const history = useHistory();
-    const initLaneState = { 
-        id: null, title: '', 
-        project: null
-    };
+    const initLaneState = {  id: null, title: '',  project: null };
     const initCardState = {
         id: null, title: '', description: '', 
         label: '', progress: 0, start: null, end: null, cost:'',
@@ -86,7 +82,6 @@ const EditLaneForm = (props) => {
     const [tabState, setTabState] = useState(0);
     const global = useContext(UserContext);
     const handleTabChanges = (event, newValue) => setTabState(newValue);
-
     const handleAddCard = () => onAdd(newCard);
 
     useEffect(() => {
@@ -118,15 +113,12 @@ const EditLaneForm = (props) => {
         if(list){
             setLaneDetail(list);
         }else{
-            const toast_loading = toast.loading('Loading...');
             const url = process.env.MIX_BACK_END_BASE_URL+'lists/' + laneId;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.get(url)
                 .then((result) => {
                     setLaneDetail(result.data)
-                    toast.dismiss(toast_loading);
                 }).catch((error) => {
-                    toast.dismiss(toast_loading);
                     switch(error.response.status){
                         case 401 : toast.error(<b>Unauthenticated</b>); break;
                         case 422 : toast.error(<b>Some required inputs are empty</b>); break;
@@ -137,11 +129,7 @@ const EditLaneForm = (props) => {
     }
 
     const updateLane = () => {
-        const body = {
-            id: laneDetail.id,
-            title: laneDetail.title,
-            project: laneDetail.project,
-        }
+        const body = { id: laneDetail.id, title: laneDetail.title, project: laneDetail.project }
         const url = process.env.MIX_BACK_END_BASE_URL+'lists/' + laneDetail.id;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -248,7 +236,6 @@ const EditLaneForm = (props) => {
     }
     return (
         <React.Fragment>
-            <Toaster/>
             <Dialog aria-labelledby="Create a project" open={modalOpen}>
                 <DialogTitle onClose={
                     () => {

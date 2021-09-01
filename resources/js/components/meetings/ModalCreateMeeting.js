@@ -114,7 +114,7 @@ export default function ModalCreateMeeting(props) {
                     e.preventDefault(); 
                     submitData();
                 }}>
-            <Toaster/>
+             
             <DialogTitle onClose={
                 () => {
                     closeModal(false);
