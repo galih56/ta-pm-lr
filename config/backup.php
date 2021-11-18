@@ -104,7 +104,11 @@ return [
          * The file extension should be specified without a leading .
          */
 <<<<<<< HEAD
+<<<<<<< HEAD
         'database_dump_file_extension' => 'sql',
+=======
+        'database_dump_file_extension' => 'backup',
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
 =======
         'database_dump_file_extension' => 'backup',
 >>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
@@ -151,7 +155,11 @@ return [
      *
      * You can also use your own notification classes, just make sure the class is named after one of
 <<<<<<< HEAD
+<<<<<<< HEAD
      * the `Spatie\Backup\Events` classes.
+=======
+     * the `Spatie\Backup\Notifications\Notifications` classes.
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
 =======
      * the `Spatie\Backup\Notifications\Notifications` classes.
 >>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
@@ -160,6 +168,7 @@ return [
 
         'notifications' => [
 <<<<<<< HEAD
+<<<<<<< HEAD
             \Spatie\Backup\Notifications\Notifications\BackupHasFailed::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFound::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\CleanupHasFailed::class => ['mail'],
@@ -167,12 +176,17 @@ return [
             \Spatie\Backup\Notifications\Notifications\HealthyBackupWasFound::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\CleanupWasSuccessful::class => ['mail'],
 =======
+=======
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
             \Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\CleanupHasFailedNotification::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\HealthyBackupWasFoundNotification::class => ['mail'],
             \Spatie\Backup\Notifications\Notifications\CleanupWasSuccessfulNotification::class => ['mail'],
+<<<<<<< HEAD
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
+=======
 >>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
         ],
 
@@ -205,7 +219,10 @@ return [
 
         ],
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
 
         'discord' => [
             'webhook_url' => '',
@@ -214,6 +231,9 @@ return [
 
             'avatar_url' => null,
         ],
+<<<<<<< HEAD
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
+=======
 >>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
     ],
 

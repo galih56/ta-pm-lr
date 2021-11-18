@@ -32,6 +32,7 @@ class MeetingController extends Controller
         $meeting->description=$request->description;
         $meeting->start=$request->start;
         $meeting->end=$request->end;
+        $meeting->google_calendar_info=$request->google_calendar_info;
         $meeting->users_id=$request->users_id;
         $meeting->projects_id=$request->projects_id;
         $meeting->save();
@@ -49,6 +50,7 @@ class MeetingController extends Controller
 
     public function show(Request $request,$id)
     {
+<<<<<<< HEAD
         $meeting=Meeting::with('creator')
                         ->with('members')
                         ->with('meeting_members.user')
@@ -62,6 +64,10 @@ class MeetingController extends Controller
             }   
         }
         return response()->json(['meeting'=>$meeting,'member'=>$member,'user'=>$user]);
+=======
+        $meeting=$this->getDetailMeeting($id,$request->users_id);
+        return response()->json($meeting);
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
     }
 
     public function edit($id)
@@ -76,6 +82,10 @@ class MeetingController extends Controller
         if($request->has('description')) $meeting->description=$request->description;
         if($request->has('start')) $meeting->start=$request->start;
         if($request->has('end')) $meeting->end=$request->end;
+<<<<<<< HEAD
+=======
+        if($request->has('google_calendar_info')) $meeting->google_calendar_info=$request->google_calendar_info;
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
         if($request->has('users_id')) $meeting->users_id=$request->users_id;
         $meeting->save();
         
@@ -111,6 +121,7 @@ class MeetingController extends Controller
         return response()->json($meeting->delete(),200);
     }
 
+<<<<<<< HEAD
     public function addMembers(Request $request,$id){
         $meeting=Meeting::findOrFail($id);
         
@@ -126,13 +137,58 @@ class MeetingController extends Controller
         $meeting=Meeting::findOrFail($id);
         
         $member_ids=[];
+=======
+    public function addMembers(Request $request){
+        $meeting=Meeting::with('members')->findOrFail($request->id);
+        
+        $member_ids=$meeting->members()->get()->pluck('id')->toArray();
+        if($request->has('members')){
+            $member_ids=array_merge($member_ids,array_column($request->members,'id'));
+        }
+        $meeting->members()->sync($member_ids);
+        
+        $meeting=$this->getDetailMeeting($request->id,$request->users_id);
+        return response()->json($meeting);
+    }
+
+    public function removeMembers(Request $request){
+        $meeting=Meeting::with('members')->findOrFail($request->id);
+        
+        $member_ids=$meeting->members()->pluck('users_id')->toArray();
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
         if($request->has('members')){
             $member_ids=array_column($request->members,'id');
         }
         $meeting->members()->detach($member_ids);
         
+<<<<<<< HEAD
         $meeting=Meeting::with('creator')->with('members')->with('meeting_members.user')->findOrFail($id)->toArray();
         return response()->json($meeting);
     }
 
+=======
+        $meeting=Meeting::with('creator')->with('members')->findOrFail($request->id)->toArray();
+        
+        $meeting=$this->getDetailMeeting($request->id,$request->users_id);
+        return response()->json($meeting);
+    }
+
+    function getDetailMeeting($id,$users_id=null ){
+        $meeting=Meeting::with('creator')
+                        ->with('members')
+                        ->findOrFail($id);
+
+        $member=null;
+        if($users_id){
+            for ($i=0; $i < count($meeting->members); $i++) { 
+                $meeting_member=$meeting->members[$i];
+                if($meeting_member->id==$users_id){
+                    $member=$meeting_member;
+                    break;
+                }
+            }
+        }
+        return ['meeting'=>$meeting,'member'=>$member];
+    }
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
 }

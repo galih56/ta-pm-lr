@@ -28,7 +28,11 @@ class MeetingMemberController extends Controller
         $meeting_member=new MeetingMember();
         if($request->has('meetings_id')) $meeting_member->meetings_id=$request->meetings_id;
         if($request->has('google_calendar_info')) $meeting_member->google_calendar_info=$request->google_calendar_info;
+<<<<<<< HEAD
         if($request->has('project_members_id')) $meeting_member->project_members_id=$request->project_members_id;
+=======
+        if($request->has('users_id')) $meeting_member->users_id=$request->users_id;
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
         $meeting_member->save();
 
         return response()->json($meeting_member);
@@ -50,7 +54,11 @@ class MeetingMemberController extends Controller
         $meeting_member=MeetingMember::findOrFail($id);
         if($request->has('meetings_id')) $meeting_member->meetings_id=$request->meetings_id;
         if($request->has('google_calendar_info')) $meeting_member->google_calendar_info=$request->google_calendar_info;
+<<<<<<< HEAD
         if($request->has('project_members_id')) $meeting_member->project_members_id=$request->project_members_id;
+=======
+        if($request->has('users_id')) $meeting_member->users_id=$request->users_id;
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
         $meeting_member->save();
 
         return response()->json($meeting_member);

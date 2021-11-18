@@ -232,7 +232,11 @@ class TaskController extends Controller
             }
         }
 
+<<<<<<< HEAD
         $task=$this->getDetailTask($task->id);
+=======
+        $task=$this->getDetailTask($id);
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
         return response()->json($task);
     }
 

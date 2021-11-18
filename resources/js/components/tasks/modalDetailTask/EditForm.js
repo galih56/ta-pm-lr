@@ -116,7 +116,11 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                             
                             <Grid item lg={12} md={12} sm={12} xs={12}>
 <<<<<<< HEAD
+<<<<<<< HEAD
                                 <Typography style={{ whiteSpace: 'noWrap'}}>Realization start/end at : {data.start ? moment(data.start).format('DD MMMM YYYY') : ''} - {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}</Typography> 
+=======
+                                <Typography style={{ whiteSpace: 'noWrap'}}>Realization start/end at : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''} - {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</Typography> 
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
 =======
                                 <Typography style={{ whiteSpace: 'noWrap'}}>Realization start/end at : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''} - {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</Typography> 
 >>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
@@ -158,7 +162,10 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                             </Grid>
                         </Grid>
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
+=======
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
                         
                         {([1,8,9].includes(global.state.occupation?.id))?(
                             <Grid item lg={12} md={12} sm={12} xs={12} container spacing={2}>
@@ -172,6 +179,9 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                                 </Grid>
                             </Grid>
                         ):null} 
+<<<<<<< HEAD
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
+=======
 >>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
                         {([1,8,9].includes(global.state.occupation?.id) && !data.is_subtask)?(
                             <Grid item lg={12} md={12} sm={12} xs={12} container spacing={2}>

@@ -20,7 +20,15 @@ import CancelRoundedIcon from '@material-ui/icons/CancelRounded';
 import UserContext from '../../../../context/UserContext';
 <<<<<<< HEAD
 <<<<<<<< HEAD:resources/js/components/tasks/modalDetailTask/Subtasks/Subtasks.js
+<<<<<<< HEAD
+<<<<<<<< HEAD:resources/js/components/tasks/modalDetailTask/Subtasks/Subtasks.js
 import toast from 'react-hot-toast';
+========
+import toast, { Toaster } from 'react-hot-toast';
+>>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1:resources/js/components/tasks/modalDetailTask/Subtask/Subtasks.js
+=======
+import toast from 'react-hot-toast';
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
 ========
 import toast, { Toaster } from 'react-hot-toast';
 >>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1:resources/js/components/tasks/modalDetailTask/Subtask/Subtasks.js
@@ -83,9 +91,21 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
         toast.promise(
 <<<<<<< HEAD
 <<<<<<<< HEAD:resources/js/components/tasks/modalDetailTask/Subtasks/Subtasks.js
+<<<<<<< HEAD
+<<<<<<<< HEAD:resources/js/components/tasks/modalDetailTask/Subtasks/Subtasks.js
             axios.post(url, newTask),
             {
                 loading: 'Creating a new subtask',
+========
+            axios.post(url, body),
+            {
+                loading: 'Creating a new task',
+>>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1:resources/js/components/tasks/modalDetailTask/Subtask/Subtasks.js
+=======
+            axios.post(url, newTask),
+            {
+                loading: 'Creating a new subtask',
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
 ========
             axios.post(url, body),
             {
@@ -106,7 +126,15 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                     if(onTaskUpdate)onTaskUpdate(newDetailTask);
 <<<<<<< HEAD
 <<<<<<<< HEAD:resources/js/components/tasks/modalDetailTask/Subtasks/Subtasks.js
+<<<<<<< HEAD
+<<<<<<<< HEAD:resources/js/components/tasks/modalDetailTask/Subtasks/Subtasks.js
                     return <b>A new subtask successfuly created</b>
+========
+                    return <b>A new meeting successfuly created</b>
+>>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1:resources/js/components/tasks/modalDetailTask/Subtask/Subtasks.js
+=======
+                    return <b>A new subtask successfuly created</b>
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
 ========
                     return <b>A new meeting successfuly created</b>
 >>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1:resources/js/components/tasks/modalDetailTask/Subtask/Subtasks.js
@@ -255,7 +283,14 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
     return (
         <React.Fragment>
 <<<<<<< HEAD
+<<<<<<<< HEAD:resources/js/components/tasks/modalDetailTask/Subtasks/Subtasks.js
+<<<<<<< HEAD
             <Toaster />
+=======
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
+========
+            <Toaster />
+>>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1:resources/js/components/tasks/modalDetailTask/Subtask/Subtasks.js
 =======
 >>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
             <Grid container>

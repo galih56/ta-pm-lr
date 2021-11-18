@@ -116,8 +116,12 @@ export default function EnhancedTable({data}) {
         setPage(0);
     };
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
+=======
+    
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
 =======
     
 >>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1

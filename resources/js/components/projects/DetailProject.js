@@ -182,7 +182,10 @@ const DetailProject = (props) => {
     const handleDetailTaskOpen = (taskInfo) => {
         const {task, open,onTaskUpdate,onTaskDelete } = taskInfo;
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
 =======
 >>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
         console.log({task, open,onTaskUpdate,onTaskDelete });
@@ -231,8 +234,12 @@ const DetailProject = (props) => {
                                                         style={{ marginBottom: '1em' }}
                                                         startIcon={<AddIcon />}> Add new list </Button>
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 						   <Button
+=======
+                                                    <Button
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
 =======
                                                     <Button
 >>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
@@ -250,7 +257,10 @@ const DetailProject = (props) => {
                                                             Import 
                                                     </Button>
 <<<<<<< HEAD
+<<<<<<< HEAD
 
+=======
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
 =======
 >>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
                                                 </>
