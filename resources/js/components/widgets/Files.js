@@ -60,7 +60,7 @@ const trimString=(str)=>{
     if(space_counter<=3 && str.length>20) {trimmedString=str.substring(0, 16)+'..';trimmed=true}
     return (trimmed?trimmedString:str);
 }
-const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
+const CustomCard = ({ classes, file, projects_id,handleDetailTaskOpen,onPick}) => {
     const location = useLocation(); 
     const [anchorPopover, setAnchorPopover] = useState(false);
     const handleClick = (event) => setAnchorPopover(event.currentTarget);
@@ -140,12 +140,10 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
                         if(handleDetailTaskOpen){
                             let pathname = location.pathname;
                             let searchParams = new URLSearchParams(location.search);
-                            searchParams.set('task_id', file.tasks_id);
+                            searchParams.set('tasks_id', file.tasks_id);
                             return (<>
                                 Task: <Link to={{ pathname: pathname, search: searchParams.toString() }}
-                                    onClick={() => {
-                                        handleDetailTaskOpen({ projects_id: file.projects_id, listId: file.lists_id, taskId: file.tasks_id, open: true });
-                                    }}>
+                                    onClick={() => handleDetailTaskOpen({ task:{projects_id: projects_id, lists_id: file.lists_id, tasks_id: file.tasks_id,id: file.tasks_id}, open: true })}>
                                     {file.task_title}
                                 </Link>
                             </>)
@@ -153,9 +151,6 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
                             return (<></>)
                         }
                     })()}
-                </Typography>
-                <Typography variant="body1" color="textSecondary" component="p">
-                Uploaded by : {file.user_name}
                 </Typography>
             </CardContent>
         </Card>
@@ -224,6 +219,7 @@ const Files = (props) => {
                                 classes={classes} 
                                 handleDetailTaskOpen={handleDetailTaskOpen} 
                                 onPick={onPick}
+                                projects_id={projects_id}
                                 />
                         </Grid>
                     ))

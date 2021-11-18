@@ -65,7 +65,7 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSu
                     <NumberFormat 
                         customInput={TextField} 
                         variant="standard"
-                        label="Actual cost : "
+                        label="Cost estimation: "
                         onValueChange={ (formattedValue) => setNewTask({ ...newTask, cost: formattedValue.value })}
                         fullWidth
                         thousandSeparator={true} 

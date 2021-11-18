@@ -129,28 +129,33 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
                     </Grid>
                 ):(
                     <Grid item lg={12} md={12} sm={12} xs={12} align="center">
-                        <FormControl className={classes.textfield} >
-                            <InputLabel>Occupations</InputLabel>
-                            <Select 
-                            variant="standard"
-                            disabled={!([1,2,5,8,9].includes(data.occupation?.id))}
-                            onChange={e => {
-                                var choosenId= e.target.value;
-                                var choosenData= occupations.filter(item=>item.id==choosenId)
-                                if(choosenData.length>0){
-                                    setData({ ...data, occupation:choosenData[0],occupations_id:choosenData[0].id });
-                                }
-                            }}
-                            
-                                defaultValue={data.occupation.id}>
-                                {
-                                    occupations.map((occupation, index) => (<MenuItem value={occupation.id} key={occupation.id}>{occupation.name}</MenuItem>))
-                                } 
-                            </Select>
-                        </FormControl>
+                        {([1,8].includes(occupation.id))?(
+                                <FormControl className={classes.textfield} >
+                                    <InputLabel>Occupations</InputLabel>
+                                    <Select 
+                                    variant="standard"
+                                    onChange={e => {
+                                        var choosenId= e.target.value;
+                                        var choosenData= occupations.filter(item=>item.id==choosenId)
+                                        if(choosenData.length>0){
+                                            setData({ ...data, occupation:choosenData[0],occupations_id:choosenData[0].id });
+                                        }
+                                    }}
+                                    
+                                        defaultValue={data.occupation.id}>
+                                        {
+                                            occupations.map((occupation, index) => (<MenuItem value={occupation.id} key={occupation.id}>{occupation.name}</MenuItem>))
+                                        } 
+                                    </Select>
+                                </FormControl>
+                                ):(
+                            <>
+                                {data.occupation ? <Typography variant="body2">{data.occupation.name}</Typography> : <></>}
+                            </>
+                        )}
                     </Grid>
                 )}
-                {global.state.id==data.id  || global.state.occupation.name.toLowerCase().includes('administrator')?(
+                {global.state.id==data.id  || [1,8].includes(occupation.id)?(
                     <Grid item lg={12} md={12} sm={12} xs={12}>
                         <Accordion expanded={expanded} onChange={handleChange}>
                             <AccordionSummary expandIcon={<ExpandMoreIcon />}>

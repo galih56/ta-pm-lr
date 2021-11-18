@@ -34,7 +34,8 @@ const ProjectList = (props) => {
                 toast.dismiss(toast_loading);
             }).catch((error) => {
                 toast.dismiss(toast_loading);
-                switch(error.response.status){
+                console.error(error);
+                switch(error.response?.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
                     default : toast.error(<b>{error.response.statusText}</b>); break

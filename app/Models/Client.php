@@ -29,6 +29,6 @@ class Client extends Authenticatable
     }
 
     public function projects(){
-        return $this->hasMany(ClientsHasProjects::class,'clients_id');
+        return $this->belongsToMany(Project::class,'clients_has_projects','clients_id','projects_id');
     }
 }

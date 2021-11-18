@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 const GoogleDriveButton = (props) => {
     const global = useContext(UserContext);
     const payload = props.payload;
-
+    console.log('googledriveclient ',payload)
     var developerKey = process.env.MIX_GOOGLE_API_KEY;
     var clientId = process.env.MIX_GOOGLE_CLIENT_ID;
     var appId = "tugas-akhir-288302";
@@ -39,12 +39,11 @@ const GoogleDriveButton = (props) => {
     function pickerCallback(data,google) {
         if (data.action == google.picker.Action.PICKED) {
             var body = {
-                userId: global.state.id,
-                taskId: payload.taskId,
+                users_id: global.state.id,
+                tasks_id: payload.tasks_id,
                 source: 'google-drive',
                 files: data.docs
             }
-		console.log(body,clientId)
             if (!window.navigator.onLine) toast.error(`You are currently offline`);
 
             const config ={ headers: { 'X-Authorization':`Bearer ${global.state.token}`, 'Content-Type': 'application/json'  } }
@@ -61,7 +60,6 @@ const GoogleDriveButton = (props) => {
                         return <b>A new attachment successfuly created</b>
                     },
                     error: (error)=>{
-			console.log(error)
                         if(error.response.status==401) return <b>Unauthenticated</b>;
                         if(error.response.status==422) return <b>Some required inputs are empty</b>;
                         return <b>{error.response.statusText}</b>;

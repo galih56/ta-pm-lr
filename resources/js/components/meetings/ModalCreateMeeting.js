@@ -85,7 +85,7 @@ export default function ModalCreateMeeting(props) {
         var datetime_end=moment(date).format('YYYY-MM-DD')+' '+moment(end).format('HH:mm:ss');
         const body = {
             title: title,  start:datetime_start,  end:datetime_end,  projects_id: projects_id,  
-            members: members,  users_id: global.state.id
+            members: members,  users_id: global.state.id, google_calendar_info:null
         }
         
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
@@ -178,10 +178,16 @@ export default function ModalCreateMeeting(props) {
                             </LocalizationProvider>
                         </Grid> 
                         <Grid item  lg={12} md={12} sm={12} xs={12} >
-                            <UserSearchbar detailProject={detailProject} 
-                                    onChange={(value) => setMembers(value)} 
-                                    exceptedUsers={[]} 
-                                    userOnly={true}/>
+                            <UserSearchbar 
+                                detailProject={detailProject} 
+                                onChange={(value) => setMembers(value)} 
+                                exceptedUsers={[{
+                                    id:global.state.id,
+                                    email:global.state.email,
+                                    name:global.state.name
+                                }]} 
+                                withAdmin={true}
+                                userOnly={true}/>
                         </Grid>
                     </Grid>
                 </DialogContent>

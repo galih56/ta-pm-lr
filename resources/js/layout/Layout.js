@@ -15,7 +15,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Toolbar from '@material-ui/core/Toolbar';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'; 
-import NotificationsIcon from '@material-ui/icons/Notifications'; 
+// import Notification from './Notification'; 
 import MenuIcon from '@material-ui/icons/Menu';
 import { makeStyles } from '@material-ui/styles';
 import styleConfig from './Theme';
@@ -56,6 +56,7 @@ const Layout = (props) => {
                         <MenuIcon />
                     </IconButton>
                     <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>ManPro</Typography>
+                    {/* <Notification/> */}
                     <UserMenu/>
                 </Toolbar>
             </AppBar>
@@ -84,7 +85,7 @@ const Layout = (props) => {
                 </List>
             </Drawer>
             <main className={classes.content}>
-                <div className={classes.appBarSpacer} />
+                <div className={classes.appBarSpacer} ></div>
                 <Container maxWidth="lg" className={classes.container}>
                     <Grid container spacing={3} style={{ marginLeft:'0.5em',display:'block'}}>
                         {props.children}

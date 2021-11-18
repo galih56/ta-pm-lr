@@ -54,14 +54,18 @@ export default function ModalDetailMeeting(props) {
     
     const getDetailMeeting = () => {
         const toast_loading = toast.loading('Loading...');
-        const url = process.env.MIX_BACK_END_BASE_URL + 'meetings/' + initialState.id;
+        const url = `${process.env.MIX_BACK_END_BASE_URL}meetings/${initialState.id}?users_id=${global.state.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 const data = result.data;
-                global.dispatch({ type: 'store-detail-meeting', payload: data })
-                setData(data);
+                var meeting=data.meeting;
+                if(data.member){
+                    meeting.member=data.member;
+                }
+                global.dispatch({ type: 'store-detail-meeting', payload: meeting })
+                setData(meeting);
                 toast.dismiss(toast_loading);
             }).catch((error) => {
                 toast.dismiss(toast_loading);
@@ -77,7 +81,13 @@ export default function ModalDetailMeeting(props) {
         getDetailMeeting()
     }, [initialState]);
 
-    const saveChanges = (body) => {
+    const saveChanges = (params,message) => {
+        console.log(params);
+        var body={...params,users_id:global.state.id,meetings_id:params.id}
+        if(message){
+            toast.error(message);
+            return;
+        }
         if (window.navigator.onLine) {
             const url = process.env.MIX_BACK_END_BASE_URL + `meetings/${initialState.id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
@@ -87,12 +97,19 @@ export default function ModalDetailMeeting(props) {
                 {
                     loading: 'Updating...',
                     success: (result)=>{
-                        setData(result.data);
+                        const data = result.data;
+                        var meeting=data.meeting;
+                        if(data.member){
+                            meeting.member=data.member;
+                        }
+                        global.dispatch({ type: 'store-detail-meeting', payload: meeting })
+                        setData(meeting);
                         return <b>Successfully updated</b>
                     },
                     error: (error)=>{
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        console.log(error);
+                        if(error.response?.status==401) return <b>Unauthenticated</b>;
+                        if(error.response?.status==422) return <b>Some required inputs are empty</b>;
                         return <b>{error.response.statusText}</b>;
                     },
                 });
@@ -109,6 +126,7 @@ export default function ModalDetailMeeting(props) {
                 {
                     loading: 'Deleting...',
                     success: (result)=>{
+                        global.dispatch({ type: 'remove-detail-meeting', payload: data })
                         return <b>Successfully deleted</b>
                     },
                     error: (error)=>{
@@ -131,6 +149,7 @@ export default function ModalDetailMeeting(props) {
                     detailProject={detailProject} 
                     saveChanges={saveChanges}/>
             </DialogContent>
+
             <DialogActions>
                 <DialogActionButtons
                     isEdit={isEditing}

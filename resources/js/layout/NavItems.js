@@ -69,11 +69,10 @@ export const RestrictedAccessMenu = () => {
     useEffect(()=>{
         const occupation=global.state.occupation;
         const current_project_member_role=global.state.current_project_member_role;
-        if(occupation?.name?.toLowerCase().includes('administrator') 
-            || occupation?.name?.toLowerCase().includes('ceo')) setIsFirstLevel(true);
+        if([1,8].includes(occupation?.id)) setIsFirstLevel(true);
         else setIsFirstLevel(false);
-        if( current_project_member_role?.name?.toLowerCase().includes('project owner')) setIsSecondLevel(true); else setIsSecondLevel(false);
-        if(current_project_member_role?.name?.toLowerCase().includes('project manager')) setIsThirdLevel(true); else setIsThirdLevel(false);
+        if([1].includes(current_project_member_role?.id)) setIsSecondLevel(true); else setIsSecondLevel(false);
+        if( [2].includes(current_project_member_role?.id)) setIsThirdLevel(true); else setIsThirdLevel(false);
     },[global.state.occupation,global.state.current_project_member_role]);
 
 

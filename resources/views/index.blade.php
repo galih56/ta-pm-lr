@@ -19,8 +19,6 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
   </body>
-
-
     <!-- React JS -->
     <script  src="{{ asset('js/app.js') }}" defer></script>
 </html>

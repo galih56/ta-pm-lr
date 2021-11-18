@@ -203,7 +203,7 @@ class UserController extends Controller
           
         /*
             access levels
-            1. system administrator (id=8), ceo/direktur (id=1)
+            1.  ceo/direktur (id=1), system administrator (id=8)
             3. manager (id=2)
             4. System analyst (id=5)
             5. bendahara (id=9)

@@ -1,21 +1,23 @@
 import React, { useEffect, useContext,useState } from 'react';
-import { useHistory } from 'react-router-dom';
 import 'fontsource-roboto';
 import axios from 'axios';
-import Alert from '@material-ui/core/Alert';
-import withStyles from '@material-ui/styles/withStyles';
-import makeStyles from '@material-ui/styles/makeStyles';
+import Box from '@material-ui/core/Box';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
 import Grid from '@material-ui/core/Grid';
+import Alert from '@material-ui/core/Alert';
+import AlertTitle from '@material-ui/core/AlertTitle';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
+import UserContext from '../../context/UserContext';
+import withStyles from '@material-ui/styles/withStyles';
+import makeStyles from '@material-ui/styles/makeStyles';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
-import Box from '@material-ui/core/Box';
-import UserContext from '../../context/UserContext';
 import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
@@ -65,6 +67,14 @@ const useStyles = makeStyles((theme) => {
     })
 });
 
+
+function a11yProps(index) {
+    return {
+        id: `tab-${index}`,
+        'aria-controls': `tabpanel-${index}`,
+};
+}
+
 export default function ModalCreateProject(props) {
     const classes = useStyles();
     var open = props.open;
@@ -75,26 +85,33 @@ export default function ModalCreateProject(props) {
     const [start, setStart] = useState(null);
     const [end, setEnd] = useState(null);
     const [dateRange, setDateRange] = useState([null,null]);
-    const [projectOwner, setProjectOwner] = useState([]);
-    const [projectManager, setProjectManager] = useState([]);
+    const [projectOwners, setProjectOwners] = useState([]);
+    const [projectManagers, setProjectManagers] = useState([]);
     const [projectClients, setProjectClients] = useState([]);
     const [teams, setTeams] = useState([]);
+    const [selectedFile, setSelectedFile] = useState(null);
     const [choosenTeams, setChoosenTeams] = useState([]);
-    const global = useContext(UserContext);
+    const [showImportErrors,setShowImportErrors]=useState(false);
+   
+    const [importErrors, setImportErrors] = useState([]);
+    const [tabIndex, setTabIndex] = React.useState(0);
 
+    const handleChange = (event, newValue) =>  setTabIndex(newValue)
+    const handleShowMoreErrors=(e)=>{
+        e.preventDefault();
+        setShowImportErrors(!showImportErrors);
+    }
+    const global = useContext(UserContext);
     
     const getTeams = () => {
-        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + `teams`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setTeams(result.data);
-                toast.dismiss(toast_loading);
             }).catch((error) => {
-                toast.dismiss(toast_loading);
-                switch(error.response.status){
+                switch(error.response?.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
                     default : toast.error(<b>{error.response.statusText}</b>); break
@@ -110,36 +127,56 @@ export default function ModalCreateProject(props) {
 
 
     const submitData = () => {
-        const body = {
-            title: title, description: description, start: start, end: end, 
-            project_owner:projectOwner, project_manager:projectManager, 
-            clients : projectClients, users_id: global.state.id, teams:choosenTeams
+        let body = new FormData();
+        
+        body.append("title", title);
+        body.append("description", description);
+        body.append("start", start);
+        body.append("end", end);
+        body.append("users_id", global.state.id);
+
+        projectClients.forEach((client)=>{
+            body.append("clients[]", client.id);
+        });
+        choosenTeams.forEach((team)=>{
+            body.append("teams[]", team.id);
+        });
+        projectOwners.forEach((user)=>{
+            body.append("project_owners[]", user.id);
+        });
+        projectManagers.forEach((user)=>{
+            body.append("project_managers[]", user.id);
+        });
+
+        if(selectedFile){
+            var fileBlob= new Blob(selectedFile);
+            body.append("file", fileBlob);
         }
         
         if (!window.navigator.onLine) {
             toast.error(`You are currently offline`);
         } else {
             var url = process.env.MIX_BACK_END_BASE_URL + 'projects';
-
+            const toast_loading = toast.loading('Loading...');
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            toast.promise(
-                axios.post(url, body),
-                {
-                    loading: 'Creating a new project',
-                    success: (result)=>{
+            axios.post(url,body)
+                .then((result) => {
+                    if(!result.data?.error){
                         global.dispatch({ type: 'create-new-project', payload: result.data })
                         setTitle('');
                         setDescription('');
                         closeModal();
-                        return <b>A new project successfuly created</b>
-                    },
-                    error: (error)=>{
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                        return <b>{error.response.statusText}</b>;
-                    },
-                });
+                        toast.dismiss(toast_loading);
+                    }else{
+                        console.log(result.data);
+                        console.log(result.data.error,result.data.messages);
+                        if(result.data.error==true && result.data.messages.length>0){
+                            setImportErrors(result.data.messages);
+                            return 'Failed to import excel file';
+                        }
+                    }
+                }).catch(console.log);
         }
     }
     
@@ -154,85 +191,176 @@ export default function ModalCreateProject(props) {
                 }}>
                     <DialogContent dividers>
                         <Grid container spacing={2} style={{ paddingLeft: 3, paddingRight: 3 }} >
-                            <Grid item lg={12} md={12} sm={12} xs={12} >
-                                <TextField variant="standard"
-                                    label="Title : "
-                                    placeholder="example : Project A"
-                                    className={classes.textfield}
-                                    onChange={(e) => setTitle(e.target.value) }
-                                    style={{ width: '100%' }}
-                                />
-                            </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                    <MobileDateRangePicker
-                                        required
-                                        startText="Start : "
-                                        endText="End : "
-                                        value={dateRange}
-                                        onChange={(newValue) => {
-                                            if(newValue[0]){
-                                                setStart(moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss'))
-                                            }
-                                            if(newValue[1]){ 
-                                                setEnd(moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss'))
-                                            }
-                                            setDateRange([newValue[0],newValue[1]]);
-                                        }}
-                                        renderInput={(startProps, endProps) => (
-                                        <>
-                                            <TextField {...startProps} variant="standard" required />
-                                            <Box sx={{ mx: 2 }}> to </Box>
-                                            <TextField {...endProps}  variant="standard"  required/>
-                                        </>
-                                        )}
-                                    />
-                                </LocalizationProvider> 
-                            </Grid>
-                            <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <Autocomplete
-                                    multiple
-                                    freeSolo
-                                    options={teams}
-                                    getOptionLabel={(option) => option.name}
-                                    renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        variant="standard"
-                                        label="Search by team names"
-                                    />)}
-                                    onChange={(event, options)=> setChoosenTeams(options)}
-                                    renderTags={(value, getTagProps) =>
-                                        value.map((option, index) => (
-                                            <Chip variant="outlined" label={option.name} {...getTagProps({ index })} />
-                                        ))}
-                                />
-                            </Grid>
-                            <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <UserSearchBar required={true} userOnly={true}
+                                <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                                    <Tabs value={tabIndex} onChange={handleChange} aria-label="basic tabs example">
+                                        <Tab label="Form" {...a11yProps(0)} />
+                                        <Tab label="Import" {...a11yProps(1)} />
+                                    </Tabs>
+                                </Box>
+                                <TabPanel value={tabIndex} index={0}>
+                                    <Grid container>
+                                        <Grid item lg={12} md={12} sm={12} xs={12} >
+                                            <TextField variant="standard"
+                                                label="Title : "
+                                                placeholder="example : Project A"
+                                                className={classes.textfield}
+                                                onChange={(e) => setTitle(e.target.value) }
+                                                style={{ width: '100%' }}
+                                                required
+                                            />
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                                <MobileDateRangePicker
+                                                    required
+                                                    startText="Start : "
+                                                    endText="End : "
+                                                    value={dateRange}
+                                                    onChange={(newValue) => {
+                                                        if(newValue[0]){
+                                                            setStart(moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss'))
+                                                        }
+                                                        if(newValue[1]){ 
+                                                            setEnd(moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss'))
+                                                        }
+                                                        setDateRange([newValue[0],newValue[1]]);
+                                                    }}
+                                                    renderInput={(startProps, endProps) => (
+                                                    <>
+                                                        <TextField {...startProps} variant="standard" required />
+                                                        <Box sx={{ mx: 2 }}> to </Box>
+                                                        <TextField {...endProps}  variant="standard"  required/>
+                                                    </>
+                                                    )}
+                                                />
+                                            </LocalizationProvider> 
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <Autocomplete
+                                                multiple freeSolo options={teams}
+                                                getOptionLabel={(option) => option.name}
+                                                renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="standard"
+                                                    label="Teams"
+                                                />)}
+                                                onChange={(event, options)=> {
+                                                    console.log(options)
+                                                    setChoosenTeams(options)
+                                                }}
+                                                renderTags={(value, getTagProps) =>
+                                                    value.map((option, index) => (
+                                                        <Chip variant="outlined" label={option.name} {...getTagProps({ index })} />
+                                                    ))}
+                                            />
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <UserSearchBar required={true} userOnly={true}
                                                 inputLabel={"Project Owner"}
-                                                onChange={(values)=>setProjectOwner(values.map((value)=>value.id))}/>
-                            </Grid>
-                            <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <UserSearchBar required={true} userOnly={true}
+                                                onChange={(values)=> setProjectOwners(values)}/>
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <UserSearchBar required={true} userOnly={true}
                                                 inputLabel={"Project Manager"}
-                                                onChange={(values)=>setProjectManager(values.map((value)=>value.id))}/>
-                            </Grid>
-                            <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <UserSearchBar required={true} clientOnly={true}
+                                                onChange={(values)=>setProjectManagers(values)}/>
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <UserSearchBar required={true} clientOnly={true}
                                                 inputLabel={"Clients"}
-                                                onChange={(values)=>setProjectClients(values.map((value)=>value.id))}/>
-                            </Grid>
-                            <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <TextField variant="standard"
-                                    label="Description : "
-                                    placeholder="Example : Project A is a cool project"
-                                    className={classes.textfield}
-                                    onChange={(e) => setDescription(e.target.value) }
-                                    multiline
-                                    style={{ width: '100%' }}
-                                    rows={4}
-                                />
+                                                onChange={(values)=>setProjectClients(values)}/>
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <TextField variant="standard"
+                                                label="Description : "
+                                                placeholder="Example : Project A is a cool project"
+                                                className={classes.textfield}
+                                                onChange={(e) => setDescription(e.target.value) }
+                                                multiline
+                                                style={{ width: '100%' }}
+                                                rows={4}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </TabPanel>
+                                <TabPanel value={tabIndex} index={1}>
+                                    <Grid container>
+                                        <Grid item lg={12} md={12} sm={12} xs={12} >
+                                            <TextField variant="standard"
+                                                label="Title : "
+                                                placeholder="example : Project A"
+                                                className={classes.textfield}
+                                                onChange={(e) => setTitle(e.target.value) }
+                                                style={{ width: '100%' }}
+                                                required
+                                            />
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <Autocomplete
+                                                multiple freeSolo options={teams}
+                                                getOptionLabel={(option) => option.name}
+                                                renderInput={(params) => (
+                                                <TextField
+                                                    {...params}
+                                                    variant="standard"
+                                                    label="Teams"
+                                                />)}
+                                                onChange={(event, options)=>setChoosenTeams(options)}
+                                                renderTags={(value, getTagProps) =>
+                                                    value.map((option, index) => (
+                                                        <Chip variant="outlined" label={option.name} {...getTagProps({ index })} />
+                                                    ))}
+                                            />
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <UserSearchBar required={true} userOnly={true}
+                                                inputLabel={"Project Owner"}
+                                                onChange={(values)=>{
+                                                    console.log(values);
+                                                    setProjectOwners(values)
+                                                }}/>
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <UserSearchBar required={true} userOnly={true}
+                                                inputLabel={"Project Manager"}
+                                                onChange={(values)=>setProjectManagers(values)}/>
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <UserSearchBar required={true} clientOnly={true}
+                                                inputLabel={"Clients"}
+                                                onChange={(values)=>setProjectClients(values)}/>
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <TextField variant="standard"
+                                                label="Description : "
+                                                placeholder="Example : Project A is a cool project"
+                                                className={classes.textfield}
+                                                onChange={(e) => setDescription(e.target.value) }
+                                                multiline
+                                                style={{ width: '100%' }}
+                                                rows={4}
+                                            />
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
+                                            {importErrors.length?
+                                            <Alert severity="error">
+                                                <AlertTitle>Error</AlertTitle>
+                                                <ul>
+                                                {(showImportErrors)?importErrors.map(error=><li>Row {error.row} : {error.title}</li>):importErrors.slice(3).map(error=><li>{error.title}</li>)}
+                                                </ul>
+                                                {(showImportErrors)?
+                                                    <a onClick={handleShowMoreErrors}>Hide...</a>:
+                                                    <a onClick={handleShowMoreErrors}>Show more...</a>}
+                                            </Alert>:null}
+                                            <input 
+                                                accept=".csv, .xls, .xlsx, text/csv, application/csv, text/comma-separated-values, application/csv, application/excel, application/vnd.msexcel, text/anytext, application/vnd. ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                                type="file"
+                                                onChange={(e)=>setSelectedFile(e.target.files)}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </TabPanel>
                             </Grid>
                         </Grid>
                     </DialogContent>
@@ -249,3 +377,25 @@ export default function ModalCreateProject(props) {
         </Dialog>
     );
 }
+
+
+function TabPanel(props) {
+    const { children, value, index, ...other } = props;
+  
+    return (
+      <div
+        role="tabpanel"
+        hidden={value !== index}
+        id={`simple-tabpanel-${index}`}
+        aria-labelledby={`simple-tab-${index}`}
+        {...other}
+      >
+        {value === index && (
+          <Box sx={{ p: 3 }}>
+            <Typography>{children}</Typography>
+          </Box>
+        )}
+      </div>
+    );
+  }
+  

@@ -74,15 +74,16 @@ class TaskAttachmentController extends Controller
         }
 
         if($source=='google-drive'){
-            $uploaded_files=$request->files;
+            $uploaded_files=$request->get('files');
             for ($i=0; $i < count($uploaded_files); $i++) { 
                 $uploaded_file=$uploaded_files[$i];
                 
                 $file=new File();
-                $file->name=$uploaded_file->sizeBytes;
-                $file->type=$uploaded_file->mimeType;
-                $file->path=$uploaded_file->url;
-                $file->icon=$uploaded_file->iconUrl;
+                $file->name=$uploaded_file['name'];
+                $file->size=$uploaded_file['sizeBytes'];
+                $file->type=$uploaded_file['mimeType'];
+                $file->path=$uploaded_file['url'];
+                $file->icon=$uploaded_file['iconUrl'];
                 $file->users_id=$request->users_id;
                 $file->save();
 

@@ -55,7 +55,6 @@ class TeamsHasProjects extends Model
                     }
                 }
             }
-            dd($team_members);
         });
     }
 

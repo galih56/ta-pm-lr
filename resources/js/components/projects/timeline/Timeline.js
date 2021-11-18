@@ -148,6 +148,7 @@ function Timeline(props) {
                         return <b>A new task successfuly created</b>
                     },
                     error: (error)=>{
+                        console.error(error);
                         if(error.response.status==401) return <b>Unauthenticated</b>;
                         if(error.response.status==422) return <b>Some required inputs are empty</b>;
                         return <b>{error.response.statusText}</b>;

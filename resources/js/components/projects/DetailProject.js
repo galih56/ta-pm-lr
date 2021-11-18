@@ -22,6 +22,7 @@ const Calendar = lazy(() => import('../widgets/Calendar'));
 const Files = lazy(() => import('../widgets/Files'));
 const Others = lazy(() => import('./Others'));
 const Timeline = lazy(() => import('./timeline/Timeline'));
+const ModalImportExcel = lazy(() => import('./timeline/ModalImportExcel'));
 const ModalDetailTask = lazy(() => import('../tasks/modalDetailTask/ModalDetailTask'));
 
 function TabPanel(props) {
@@ -106,6 +107,8 @@ const DetailProject = (props) => {
         createdAt: '', updatedAt: '' 
     });
     const [showModalCreateList, setShowModalCreateList] = useState(false);
+    const [showModalImportExcel, setShowModalImportExcel] = useState(false);
+    
     const [showModalCreateMeeting, setShowModalCreateMeeting] = useState(false);
     const [tabState, setTabState] = useState(getCurrentTabIndex(location, history, params.id));
     const [clickedTask, setClickedTask] = useState(clickedTaskInitialState);
@@ -172,11 +175,13 @@ const DetailProject = (props) => {
     },[global.state.projects]);
 
     const handleModalCreateList = (open) => setShowModalCreateList(open);
+    const handleModalImportExcel = (open) => setShowModalImportExcel(open);
     const handleModalCreateMeeting = (open) => setShowModalCreateMeeting(open);
     const handleChange = (event, newValue) => setTabState(newValue);
 
     const handleDetailTaskOpen = (taskInfo) => {
         const {task, open,onTaskUpdate,onTaskDelete } = taskInfo;
+        console.log({task, open,onTaskUpdate,onTaskDelete });
         setDetailTaskOpen(open);
         setClickedTask({ ...task, onTaskDelete:onTaskDelete, onTaskUpdate:onTaskUpdate });
     };
@@ -186,10 +191,8 @@ const DetailProject = (props) => {
         setClickedMeeting({ ...meetingInfo.meeting });
     };
 
-
     return (
         <Router>
-             
             <Paper>
                 <Tabs
                     value={tabState}
@@ -199,7 +202,7 @@ const DetailProject = (props) => {
                     <Tab component={Link} label="Board" to={`board`} />
                     <Tab component={Link} label="Meeting" to={`meeting`} />
                     <Tab component={Link} label="Files" to={`files`} />
-                    <Tab component={Link} label="Others" to={`others`} />
+                    <Tab component={Link} label="Other" to={`others`} />
                 </Tabs>
             </Paper>
             <Suspense fallback={<LinearProgress />}>
@@ -216,12 +219,28 @@ const DetailProject = (props) => {
                                         <BreadCrumbs projectName={detailProject.title} tabName="Timeline" style={{marginTop:'1em'}}/>
                                         <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
                                             {([2,8].includes(global.state.occupation?.id) || [1,2].includes(global.state.current_project_member_role?.id))?(
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    onClick={()=>handleModalCreateList(true)}
-                                                    style={{ marginBottom: '1em' }}
-                                                    startIcon={<AddIcon />}> Add new list </Button>
+                                                <>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        onClick={()=>handleModalCreateList(true)}
+                                                        style={{ marginBottom: '1em' }}
+                                                        startIcon={<AddIcon />}> Add new list </Button>
+                                                    <Button
+                                                        href={`${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}/export`}
+                                                        target="_blank"
+                                                        variant="contained"
+                                                        color="primary"
+                                                        style={{ marginBottom: '1em' ,marginLeft:'1em' }}>
+                                                        Export
+                                                    </Button>
+                                                    <Button
+                                                        color="primary"
+                                                        onClick={()=>setShowModalImportExcel(true)}   
+                                                        style={{ marginBottom: '1em' ,marginLeft:'1em'}}> 
+                                                            Import 
+                                                    </Button>
+                                                </>
                                             ):<></>}
                                             
                                         </Grid>
@@ -325,18 +344,25 @@ const DetailProject = (props) => {
                             )
                         }} />
                 </Switch>
+                <ModalImportExcel
+                    projects_id={params.id}
+                    open={showModalImportExcel}
+                    closeModal={()=>handleModalImportExcel(false)} 
+                />
                 <ModalCreateList
                     projects_id={params.id}
                     open={showModalCreateList}
                     closeModal={()=>handleModalCreateList(false)} 
                     detailProject={{id:detailProject.id,members:detailProject.members,clients:detailProject.clients,start:detailProject.start,end:detailProject.end}}
-                    />
+                />
                 <ModalCreateMeeting
                     detailProject={{
                         id:detailProject.id,
                         members:detailProject.members,
                         start:detailProject.start,
-                        end:detailProject.end
+                        end:detailProject.end,
+                        actual_start:detailProject.actual_start,
+                        actual_end:detailProject.actual_end
                     }}
                     projects_id={params.id}
                     open={showModalCreateMeeting}

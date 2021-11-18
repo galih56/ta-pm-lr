@@ -13,19 +13,20 @@ const mix = require('laravel-mix');
 
 mix.js('resources/js/app.js', 'public/js')
     .sourceMaps()
-    // .browserSync('http://127.0.0.1:8000')
     .options({
-        watchOptions: {
-            ignored: /node_modules/
-        }
-    }).react();
-    
-    mix.disableNotifications();
-
-    if (mix.inProduction()) {
-        mix.version();
-    }
+            watchOptions: {
+                ignored: /node_modules/
+            }
+    })
+    .react();
     // .sass('resources/sass/app.scss', 'public/css')
+
+mix.disableNotifications();
+
+if (mix.inProduction()) {
+    mix.version();
+}
+
 
 //Install dibawah ini supaya bisa support experimental syntax jsx
 //npm install sass-loader@^12.1.0 sass resolve-url-loader@^4.0.0 @babel/preset-react --save-dev --legacy-peer-deps

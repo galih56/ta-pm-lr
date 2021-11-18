@@ -34,7 +34,6 @@ class ClientController extends Controller
 
         $client=new Client();
         if($request->has('description')) $client->description=$request->description;
-        if($request->has('email')) $client->email=$request->email;
         if($request->has('city')) $client->city=$request->city;
         if($request->has('institution')) $client->institution=$request->institution;
         $client->save();

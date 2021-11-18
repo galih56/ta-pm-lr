@@ -38,7 +38,7 @@ class TeamController extends Controller
     {
         $team=Team::with('members.user')
                     ->with('members.role')
-                    ->with('projects.project')
+                    ->with('projects')
                     ->where('id','=',$id)
                     ->firstOrFail()->toArray();
         $members=[];

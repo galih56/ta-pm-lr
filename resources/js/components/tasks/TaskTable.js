@@ -145,6 +145,7 @@ export default function EnhancedTable({data}) {
                         return <b>Successfully updated</b>
                     },
                     error: (error)=>{
+                        console.error(error);
                         if(error.response.status==401) return <b>Unauthenticated</b>;
                         if(error.response.status==422) return <b>Some required inputs are empty</b>;
                         return <b>{error.response.statusText}</b>;

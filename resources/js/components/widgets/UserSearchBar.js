@@ -6,7 +6,7 @@ import axios from 'axios';
 import UserContext from '../../context/UserContext';
 
 export default function UserSearchbar(props) {
-    const { detailProject, exceptedData,exceptedUsers,exceptedClients,onChange,inputLabel,clientOnly,userOnly } = props;
+    const { detailProject, exceptedData,exceptedUsers,exceptedClients,onChange,inputLabel,clientOnly,userOnly, withAdmin } = props;
     const handleValueChanges = onChange;
     const [users, setUsers] = useState([]);
     const [clients, setClients] = useState([]);
@@ -42,7 +42,6 @@ export default function UserSearchbar(props) {
                 getUsers()
             }
         }
-        console.log(detailProject,users,clients)
     }, [detailProject?.members,detailProject?.clients]);
 
     function checkExistingMember(id, arr=[]) {
@@ -60,13 +59,20 @@ export default function UserSearchbar(props) {
     }
 
     useEffect(() => {
-        var filteredUsers = users.filter((option) => { 
-            if (!(checkExistingMember(option.id, (exceptedData?exceptedData:exceptedUsers))
-                || option.occupation?.name?.toLowerCase().includes('administrator') 
-                || option.occupation?.name?.toLowerCase().includes('ceo'))){ 
-                    return option;
-                }
-        });
+        var filteredUsers = [];
+        
+        if(withAdmin) {
+            filteredUsers=users
+        }
+        else{
+            filteredUsers=users.filter((option) => { 
+                if (!(checkExistingMember(option.id, (exceptedData?exceptedData:exceptedUsers))
+                    || option.occupation?.name?.toLowerCase().includes('administrator') 
+                    || option.occupation?.name?.toLowerCase().includes('ceo'))){ 
+                        return option;
+                    }
+            });
+        }
 
         var filteredClients = clients.filter((option) => { 
             if (!checkExistingMember(option.id, (exceptedData?exceptedData:exceptedClients))){ 

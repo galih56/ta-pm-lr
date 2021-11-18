@@ -38,6 +38,7 @@ const DetailProject = (props) => {
                 toast.dismiss(toast_loading);
             }).catch((error) => {
                 toast.dismiss(toast_loading);
+                console.error(error);
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;

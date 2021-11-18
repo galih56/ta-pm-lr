@@ -49,10 +49,11 @@ export default function ModalExtendDeadline({open,handleClose,task,detailProject
     const global=useContext(UserContext);
     const [newDeadline,setNewDeadline]=useState(null);
     const [description,setDescription]=useState("");
-    var minDate=null;
     if(task){
-        minDate=task.is_subtask?task.parent_task.start:task.start;
-        minDate=parseISO(moment(minDate).format('YYYY-MM-DD HH:mm:ss'));
+        if(task.parent_task){
+            minDate=task.parent_task?task.parent_task?.start:task.start;
+            minDate=parseISO(moment(minDate).format('YYYY-MM-DD HH:mm:ss'));
+        }
     }else{
         minDate=parseISO(moment(detailProject.start).format('YYYY-MM-DD HH:mm:ss'));
     }
@@ -107,7 +108,7 @@ export default function ModalExtendDeadline({open,handleClose,task,detailProject
                                 <MobileDatePicker 
                                     label="New deadline"
                                     value={null}
-                                    minDate={parseISO(minDate)}
+                                    minDate={minDate}
                                     maxDate={parseISO(maxDate)}
                                     onChange={(value)=> setNewDeadline(parseISO(moment(value).format('YYYY-MM-DD HH:mm:ss')))}
                                     renderInput={(params)=><TextField {...params} variant="standard" style={{width:'100%'}}/>}

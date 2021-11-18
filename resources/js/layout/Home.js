@@ -7,7 +7,7 @@ import Collapse from '@material-ui/core/Collapse';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import TaskTable from '../components/tasks/TaskTable';
-import ProjectList from '../components/projects/ProjectList';
+import ProjectTable from '../components/projects/ProjectTable';
 import { makeStyles } from '@material-ui/styles';
 import UserContext from './../context/UserContext';
 import axios from 'axios';
@@ -87,7 +87,7 @@ const Home = (props) => {
                     <ListItem button dense font="small" onClick={handleProjectListOpen} 
                     style={{ paddingBottom: '1.2em' }}> {projectListOpen ? <ExpandLess /> : <ExpandMore />}Your projects </ListItem>
                     <Collapse in={projectListOpen} timeout="auto">
-                        <ProjectList data={global.state.projects}></ProjectList>
+                        <ProjectTable data={global.state.projects}></ProjectTable>
                     </Collapse>
                 </Paper>
             </Grid>

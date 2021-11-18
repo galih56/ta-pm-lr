@@ -86,9 +86,9 @@ export default function ModalDetailRole(props) {
 
     const deleteRole = () => {
         if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL + `memberrole/${data.id}`;
-            axios.defaults.headers.common['Authorization'] = global.state.token;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
+            const url = process.env.MIX_BACK_END_BASE_URL + `member-roles/${data.id}`;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+           axios.defaults.headers.post['Content-Type'] = 'application/json';
             toast.promise(
                 axios.delete(url),
                 {

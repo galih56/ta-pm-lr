@@ -18,11 +18,8 @@ import {
     storeDetailSubtask,storeSubtasks, createNewSubtask, removeSubtask,
     createNewAttachments, removeAttachment
 } from './context/TasksReducer';
-
 import { addNotification, storeNotifications, updateNotification, removeNotification } from './context/NotificationsReducer';
-
 import { addClientsToProject, storeClientsToProject, removeClientFromProject } from './context/ClientsReducer';
-
 import { LinearProgress } from '@material-ui/core/';
 import './index.css';
 import {Toaster} from 'react-hot-toast';
@@ -128,24 +125,6 @@ const reducer = (state, action) => {
     }
 }
 
-function RemoveTrailingSlashes({ path }) {
-    return <>
-        {/* https://github.com/ReactTraining/react-router/issues/4841#issuecomment-523625186 */}
-        {/* Removes trailing slashes */}
-        <Route path={`/${path}*(/+)`} exact strict ><Redirect to={`/${path}`} /></Route>
-        {/* Removes duplicate slashes in the middle of the URL */}
-        <Route
-            path={`/${path}(.*//+.*)`}
-            exact
-            strict
-            render={({ match }) => (
-                <Redirect to={`/${match.params.url.replace(/\/\/+/, "/")}`} />
-            )}
-        />
-
-    </>;
-}
-
 const theme = createTheme();
 const App = () => {
     const [state, dispatch] = useReducer(reducer, initState);
@@ -158,7 +137,6 @@ const App = () => {
                         <Toaster/>
                         <React.Suspense fallback={<LinearProgress />}>
                             <Switch>
-                                {/* passing props ke component melalui route gak bisa langsung, jadi harus pakai anon function ke props render yg dimiliki component Route */}
                                 <Route path="/my-tasks" render={(props) => (<TaskList {...props} ></TaskList>)} />
                                 <Route path="/users" render={(props) => (<UserInformation {...props} ></UserInformation>)} />
                                 <Route path='/auth' render={(props) => (<ModalAuthentication />)} />
@@ -168,7 +146,6 @@ const App = () => {
                                         <>
                                             <Route path={`${path}/:id`} component={DetailProject} />
                                             <Route path={`${path}`} exact component={Home} />
-                                            {/* <RemoveTrailingSlashes path={path}/> */}
                                         </>
                                     )
                                 }} />
@@ -178,7 +155,6 @@ const App = () => {
                                         <>
                                             <Route path={`${path}/:id`} component={DetailProjectReports} />
                                             <Route path={`${path}`} exact component={ProjectReports} />
-                                            {/* <RemoveTrailingSlashes path={path}/> */}
                                         </>
                                     )
                                 }} />

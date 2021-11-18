@@ -37,6 +37,10 @@ class ProjectMember extends Model
         return $this->hasMany(TaskMember::class,'project_members_id');
     }
 
+    public function tasks(){
+        return $this->belongsToMany(Task::class,'task_members','project_members_id','tasks_id');
+    }
+
     public function role(){
         return $this->belongsTo(MemberRole::class,'roles_id');
     }

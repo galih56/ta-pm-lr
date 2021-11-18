@@ -26,7 +26,7 @@ const Others = ({detailProject,handleDetailTaskOpen}) => {
                 <Grid item xl={7} md={7} sm={12} xs={12} >
                     <MemberList 
                         projects_id={detailProject.id} 
-                        data={detailProject.members} 
+                        data={detailProject?.members?detailProject.members:[]} 
                         handleDetailTaskOpen={handleDetailTaskOpen} 
                         memberChange={memberChange}
                         setMemberChange={setMemberChange}

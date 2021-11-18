@@ -115,7 +115,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                             </Grid>
                             
                             <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <Typography style={{ whiteSpace: 'noWrap'}}>Realization start/end at : {data.start ? moment(data.start).format('DD MMMM YYYY') : ''} - {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}</Typography> 
+                                <Typography style={{ whiteSpace: 'noWrap'}}>Realization start/end at : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''} - {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</Typography> 
                                 <StatusChip status={data.start_label}/> - <StatusChip status={data.end_label}/>
                                 {([1,8].includes(global.state.occupation?.id))?(
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
@@ -153,6 +153,19 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                                 )}
                             </Grid>
                         </Grid>
+                        
+                        {([1,8,9].includes(global.state.occupation?.id))?(
+                            <Grid item lg={12} md={12} sm={12} xs={12} container spacing={2}>
+                                <Grid item lg={12} md={12} sm={12} xs={12}>
+                                    <Typography>Progress : </Typography>
+                                    <TextField variant="standard" required value={data.progress} 
+                                        type="number"
+                                        onChange={(e)=>{
+                                            e =>setData({ ...data, progress: e.target.value })
+                                        }}/>     
+                                </Grid>
+                            </Grid>
+                        ):null} 
                         {([1,8,9].includes(global.state.occupation?.id) && !data.is_subtask)?(
                             <Grid item lg={12} md={12} sm={12} xs={12} container spacing={2}>
                                 <Grid item lg={12} md={12} sm={12} xs={12}>

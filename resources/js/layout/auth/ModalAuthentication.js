@@ -9,7 +9,8 @@ import Login from './Login';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import mainLogo from'./../../assets/images/logo_white.png';
+// import mainLogo from'./../../assets/images/logo_white.png';
+import mainLogo from'./../../assets/images/logo-manpro.png';
 
 const useStyles = makeStyles((theme) => ({
     root: { flexGrow: 1, backgroundColor: theme.palette.background.paper, },

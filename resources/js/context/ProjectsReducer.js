@@ -9,10 +9,9 @@ const storeProjects = (state, payload) => {
 
 const storeDetailProject = (payload) => {
     var user = JSON.parse(localStorage.getItem('user'));
-
     const newProjects = user.projects.map((project) => {
         if (project.id == payload.id) {
-            project = payload;
+            project = {...project,...payload};
         }
         return project
     });

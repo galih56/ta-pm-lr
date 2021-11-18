@@ -23,12 +23,13 @@ import { parseISO } from 'date-fns';
 const ProjectInfo = (props) => {
     const global = useContext(UserContext);
     const [isEditing, setIsEditing] = useState(false);
-    const [dateRange, setDateRange] = useState([null, null]);
     const [detailProject, setDetailProject] = useState({ 
         id: null, title: '', description: '', columns: [], 
         createdAt: '', updatedAt: '', start:null, end:null,
-        actualStart: null,actualEnd: null 
+        actual_start: null,actual_end: null 
     });
+    const [estimationDateRange,setEstimationDateRange]=useState([null,null]);
+    const [realizationDateRange,setRealizationDateRange]=useState([null,null]);
     const [showExtendDeadlineForm,setShowExtendDeadlineForm]=useState(false);
     
     useEffect(() => {
@@ -48,6 +49,7 @@ const ProjectInfo = (props) => {
                 loading: 'Updating...',
                 success: (result)=>{
                     setIsEditing(false)
+                    global.dispatch({ type: 'store-detail-project', payload: result.data });
                     return <b>Successfully updated</b>
                 },
                 error: (error)=>{
@@ -89,38 +91,67 @@ const ProjectInfo = (props) => {
             <Grid container>
                 {(isEditing)?(
                 <React.Fragment>
-                    <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>
+                    <Grid item xl={6} md={6} sm={12} xs={12} style={{ padding: '1em' }}>
                         <TextField
                             label="Title : "
                             value={detailProject.title}
-                            onChange={(e) => {
-                                setDetailProject({ ...detailProject, title: e.target.value })
-                            }}
+                            onChange={(e) => setDetailProject({ ...detailProject, title: e.target.value })}
                             style={{ width: '90%' }}
                             variant="standard" 
                         />
                     </Grid>
-                    <Grid item lg={12} md={12} sm={12} xs={12}  style={{ padding: '1em' }}>
+                    <Grid item lg={6} md={6} sm={12} xs={12}  style={{ padding: '1em' }}>
                         <Typography style={{ whiteSpace: 'noWrap'}} component="div">
                             Estimation start/end at : {detailProject.start ? moment(detailProject.start).format('DD MMMM YYYY') : ''} - {detailProject.end ? moment(detailProject.end).format('DD MMMM YYYY') : ''}
                             <Button variant="contained" color="primary" onClick={()=>setShowExtendDeadlineForm(true)} style={{ margin: '1em' }}>Extend deadline</Button>
                         </Typography> 
+                        <Typography style={{ whiteSpace: 'noWrap'}} component="div">
+                            Realization start/end at : {detailProject.actual_start ? moment(detailProject.actual_start).format('DD MMMM YYYY') : ''} - {detailProject.actual_end ? moment(detailProject.actual_end).format('DD MMMM YYYY') : ''}
+                        </Typography> 
                     </Grid>
+                    {([1,8].includes(global.state.occupation?.id))?(
+                        <Grid item lg={12} md={12} sm={12} xs={12} style={{padding:'1em'}}>
+                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                <MobileDateRangePicker
+                                    required
+                                    startText="Start : "
+                                    endText="End : "
+                                    value={estimationDateRange}
+                                    onChange={(newValue) => {
+                                        if(newValue[0]){
+                                            setDetailProject({ ...detailProject, start: moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss') })
+                                        }
+                                        if(newValue[1]){ 
+                                            setDetailProject({ ...detailProject, end: moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss') })
+                                        }
+                                        setEstimationDateRange([newValue[0],newValue[1]]);
+                                    }}
+                                    renderInput={(startProps, endProps) => (
+                                    <>
+                                        <TextField {...startProps} variant="standard" required />
+                                        <Box sx={{ mx: 2 }}> to </Box>
+                                        <TextField {...endProps}  variant="standard"  required/>
+                                    </>
+                                    )}
+                                />
+                            </LocalizationProvider>  
+                        </Grid>
+                    ):null}
                     <Grid item lg={12} md={12} sm={12} xs={12} style={{padding:'1em'}}>
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                             <MobileDateRangePicker
                                 required
                                 startText="Actual Start : "
                                 endText="Actual End : "
-                                value={dateRange}
+                                value={realizationDateRange}
                                 onChange={(newValue) => {
                                     if(newValue[0]){
-                                        setStart(moment(start).format('YYYY-MM-DD HH:mm:ss'))
+                                        setDetailProject({ ...detailProject, actual_start: moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss') })
                                     }
                                     if(newValue[1]){ 
-                                        setEnd(moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss'))
+                                        setDetailProject({ ...detailProject, actual_end: moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss') })
                                     }
-                                    setDateRange([newValue[0],newValue[1]]);
+                                    setRealizationDateRange([newValue[0],newValue[1]]);
                                 }}
                                 renderInput={(startProps, endProps) => (
                                 <>
@@ -174,11 +205,11 @@ const ProjectInfo = (props) => {
                         {detailProject.end ? (
                                 <Typography variant="body1" >End : {moment(detailProject.end).format('DD MMMM YYYY') }</Typography>
                             ): null} 
-                        {detailProject.actualStart ? (
-                                <Typography variant="body1" >Actual Start : {moment(detailProject.actualStart).format('DD MMMM YYYY') }</Typography>
+                        {detailProject.actual_start ? (
+                                <Typography variant="body1" >Actual Start : {moment(detailProject.actual_start).format('DD MMMM YYYY') }</Typography>
                             ): null}
-                        {detailProject.actualEnd ? (
-                                <Typography variant="body1" >Actual End : {moment(detailProject.actualEnd).format('DD MMMM YYYY') }</Typography>
+                        {detailProject.actual_end ? (
+                                <Typography variant="body1" >Actual End : {moment(detailProject.actual_end).format('DD MMMM YYYY') }</Typography>
                             ): null}
                     </Grid>
                     <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>

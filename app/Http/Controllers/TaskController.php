@@ -53,13 +53,12 @@ class TaskController extends Controller
         $task->start=$request->start;
         $task->end=$request->end;
         
-        if($request->start && $request->end){
-            $start = Carbon::parse($request->start);
-            $end = Carbon::parse($request->end);
-            $days= $start->diffInDays($end);
-            $task->days=$days;
-    
-        }
+        // if($request->start && $request->end){
+        //     $start = Carbon::parse($request->start);
+        //     $end = Carbon::parse($request->end);
+        //     $days= $start->diffInDays($end);
+        //     $task->days=$days;
+        // }
         $task->lists_id=$request->lists_id;
         $task->is_subtask=$request->is_subtask;
         $task->users_id=$request->users_id;
@@ -71,6 +70,7 @@ class TaskController extends Controller
         $tags=$request->tags;
         if($tags){
             $inserted_tags=[];
+            $tag_ids=[];
             for ($i=0; $i < count($tags); $i++) { 
                 $tag=$tags[$i];
                 if(array_key_exists('inputNewTag', $tag)){
@@ -161,16 +161,23 @@ class TaskController extends Controller
             if($actual_end>$end) $task->end_label='Selesai terlambat';
             if($actual_end==$end) $task->end_label='Selesai tepat waktu';
         }
-        
+        /*
+        if(($request->has('start') && !empty($request->start)) 
+                && ($request->has('end')) && !empty($request->end)){
+            $start = Carbon::parse($request->start);
+            $end = Carbon::parse($request->end);
+            $days= $start->diffInDays($end);
+            $task->days=$days;
+        }       
+
         if(($request->has('actual_start') && !empty($request->actual_start)) 
                 && ($request->has('actual_end')) && !empty($request->actual_end)){
             $actual_start = Carbon::parse($request->actual_start);
             $actual_end = Carbon::parse($request->actual_end);
-            $days= $actual_start->diffInDays($actual_end);
             $work_days= $actual_start->diffInDays($actual_end);
             $task->work_days=$work_days;
         }
-        
+        */
         $task->save();
         
         if($task->is_subtask){
@@ -194,6 +201,7 @@ class TaskController extends Controller
                     return $tag; 
                 }
             });
+
             $tag_ids=array_map(function($tag){
                 return $tag['id'];
             },$tag_ids);
@@ -224,7 +232,7 @@ class TaskController extends Controller
             }
         }
 
-        $task=$this->getDetailTask($task->id);
+        $task=$this->getDetailTask($id);
         return response()->json($task);
     }
 
@@ -298,20 +306,19 @@ class TaskController extends Controller
         $task=Task::with('creator')->with('cards')->with('logs')->with('comments.creator')
                     ->with('list')->with('members.member.role')->with('members.user')
                     ->with('members.project_client.client')
-                    ->with('tags.tag')
+                    ->with('tags')
                     ->with(['parentTask'=>function($q){
                         return $q->select('id','start','end','old_deadline','actual_start','actual_end','created_at','updated_at');
                     }])->findOrFail($id)->toArray();
 
         $task['attachments']=$this->getAttachments($id);
-        $task['tags']=$this->getTagsFromTask($task);
         $task['members']=$this->getTaskMembers($task);
         unset($task['task_members']);
         return collect($task);
     }
     
     public function addTag(Request $request,$id){
-        $task=Task::with('tags.tag')->findOrFail($id);
+        $task=Task::with('tags')->findOrFail($id);
         $tags=$request->tags;
         if($tags){
             $inserted_tags=[];
@@ -335,8 +342,7 @@ class TaskController extends Controller
             }
         }
         
-        $task=Task::with('tags.tag')->findOrFail($id)->toArray();
-        $task['tags']=$this->getTagsFromTask($task);
+        $task=Task::with('tags')->findOrFail($id)->toArray();
         return response()->json($task);
     }
 
@@ -352,23 +358,9 @@ class TaskController extends Controller
             $tag->delete();
         }
 
-        $task=Task::with('tags.tag')->findOrFail($id)->toArray();
-        $task['tags']=$this->getTagsFromTask($task);
+        $task=Task::with('tags')->findOrFail($id)->toArray();
         return response()->json($taks,200);
     }
-
-    function getTagsFromTask($task){
-        $tag_relations=$task['tags'];
-        $tags=[];
-        for ($i=0; $i < count($tag_relations); $i++) { 
-            $tag_relation=$tag_relations[$i];
-            $tag_relation['tag']['task_tag_id']=$tag_relation['id'];
-            $tag=$tag_relation['tag'];
-            if($tag)$tags[]=$tag;
-        }
-        return $tags;        
-    }
-
     function getAttachments($tasks_id){
         $attachments=File::selectRaw('ta.id, f.id AS files_id, ta.tasks_id, f.name, 
                                     f.type, f.size, f.icon, f.path, f.source, f.base64, f.users_id')

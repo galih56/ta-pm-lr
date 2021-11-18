@@ -1,12 +1,14 @@
 
 import 'fontsource-roboto';
-import React,{useEffect} from 'react';
+import React from 'react';
 import Grid from '@material-ui/core/Grid';
-import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
 import moment from 'moment';
-import GoogleCalendar from '../../widgets/GoogleCalendar';
+import GoogleCalendar from './GoogleCalendar';
+// import GoogleMeet from './GoogleMeet';
+import MemberList from './MemberList';
+import Alert from '@material-ui/core/Alert';
 
 const OpenEditForm = ({ isEdit, data, setData ,detailProject,saveChanges}) => {
     if (isEdit) {
@@ -30,7 +32,25 @@ const OpenEditForm = ({ isEdit, data, setData ,detailProject,saveChanges}) => {
                         style={{ width: '100%' }}
                     />
                 </Grid>
-                <GoogleCalendar meeting={data} detailProject={detailProject} saveChanges={saveChanges}/>
+                <Grid item  lg={12} md={12} sm={12} xs={12} >
+                    <MemberList isEdit={isEdit} data={data} setData={setData} exceptedData={[]}/>
+                </Grid>
+                {data.member?(
+                    <>
+                        {/* 
+                            <Grid item  lg={6} md={6} sm={6} xs={12} container>
+                                <GoogleMeet isEdit={isEdit} meeting={data} detailProject={detailProject} saveChanges={saveChanges}/>
+                            </Grid> 
+                        */}
+                        <Grid item  lg={6} md={6} sm={6} xs={12} container>
+                            <GoogleCalendar isEdit={isEdit} meeting={data} setMeeting={setData} detailProject={detailProject} saveChanges={saveChanges}/>
+                        </Grid>
+                    </>
+                   ):(
+                    <Grid item  lg={12} md={12} sm={12} xs={12} >
+                        <Alert severity="warning">You're not a invited in this meeting</Alert>
+                    </Grid>
+                )}
             </Grid>
         )
     } else {
@@ -44,11 +64,14 @@ const OpenEditForm = ({ isEdit, data, setData ,detailProject,saveChanges}) => {
                     <Typography style={{ whiteSpace: 'noWrap' }}>Start : {data.start ? moment(data.start ).format('HH:mm') : ''}</Typography>
                     <Typography style={{ whiteSpace: 'noWrap' }}>End : {data.end ? moment(data.end).format('HH:mm') : ''}</Typography>
                 </Grid>
+                <Grid item  lg={12} md={12} sm={12} xs={12} >
+                    <MemberList isEdit={isEdit} data={data} setData={setData} 
+                        exceptedData={data.members}/>
+                </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <Typography>Description : </Typography>
                     <Typography variant="body2">{data.description}</Typography>
                 </Grid>
-
             </Grid>
         )
     }

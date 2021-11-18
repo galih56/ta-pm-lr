@@ -97,7 +97,8 @@ export default function ModalDetailTask(props) {
                 if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
                 else global.dispatch({ type: 'store-detail-task', payload: payload })
             }).catch((error) => {
-                switch(error.response.status){
+                console.error(error);
+                switch(error.response?.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
                     default : toast.error(<b>{error.response.statusText}</b>); break
@@ -241,8 +242,8 @@ export default function ModalDetailTask(props) {
                     return <b>Successfully updated</b>
                 },
                 error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    if(error.response?.status==401) return <b>Unauthenticated</b>;
+                    if(error.response?.status==422) return <b>Some required inputs are empty</b>;
                     return <b>{error.response.statusText}</b>;
                 },
             });

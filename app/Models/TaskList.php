@@ -11,18 +11,21 @@ class TaskList extends Model
 
     protected $table = 'lists';
 
-    protected $fillable = [
-        'title', 'position', 'projects_id', 'start', 'end',
-        'actual_start', 'actual_end',
+    protected $fillable = [ 'title', 'position', 'projects_id', 'start', 'end', 'actual_start', 'actual_end' ];
 
-    ];
+    public static function boot() {
+        parent::boot();
+
+        static::deleting(function($list) { 
+             $list->tasks()->delete();
+        });
+    }
 
     public function tasks(){
         return $this->hasMany(Task::class,'lists_id');
     }
     
     public function cards(){
-        //tasks for kanban
         return $this->hasMany(Task::class,'lists_id');
     }
     
