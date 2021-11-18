@@ -242,18 +242,8 @@ export default function ModalDetailTask(props) {
                     return <b>Successfully updated</b>
                 },
                 error: (error)=>{
-<<<<<<< HEAD
-<<<<<<< HEAD
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-=======
                     if(error.response?.status==401) return <b>Unauthenticated</b>;
                     if(error.response?.status==422) return <b>Some required inputs are empty</b>;
->>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
-=======
-                    if(error.response?.status==401) return <b>Unauthenticated</b>;
-                    if(error.response?.status==422) return <b>Some required inputs are empty</b>;
->>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
                     return <b>{error.response.statusText}</b>;
                 },
             });

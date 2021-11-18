@@ -17,13 +17,8 @@
         "laravel/tinker": "^2.5",
         "laravel/ui": "^3.3",
         "maatwebsite/excel": "^3.1",
-<<<<<<< HEAD
-        "pusher/pusher-php-server": "^5.0",
-        "spatie/laravel-backup": "^6.16"
-=======
         "pusher/pusher-php-server": "4.1.1",
         "spatie/laravel-backup": "^7.6"
->>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
     },
     "require-dev": {
         "facade/ignition": "^2.5",

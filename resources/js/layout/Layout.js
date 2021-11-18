@@ -56,14 +56,7 @@ const Layout = (props) => {
                         <MenuIcon />
                     </IconButton>
                     <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>ManPro</Typography>
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
                     {/* <Notification/> */}
->>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
-=======
-                    {/* <Notification/> */}
->>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
                     <UserMenu/>
                 </Toolbar>
             </AppBar>
