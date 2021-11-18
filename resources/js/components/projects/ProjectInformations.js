@@ -1,7 +1,7 @@
 import React, { useEffect, useContext, useState} from 'react';
 import axios from 'axios';
 import moment from 'moment';
-import { useHistory } from 'react-router-dom';
+import { useHistory,withRouter } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import DialogContentText from '@material-ui/core/DialogContentText';
@@ -13,7 +13,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import UserContext from '../../context/UserContext';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
@@ -22,14 +22,14 @@ import { parseISO } from 'date-fns';
 
 const ProjectInfo = (props) => {
     const global = useContext(UserContext);
-    const { enqueueSnackbar } = useSnackbar();
     const [isEditing, setIsEditing] = useState(false);
-    const [dateRange, setDateRange] = useState([null, null]);
     const [detailProject, setDetailProject] = useState({ 
         id: null, title: '', description: '', columns: [], 
         createdAt: '', updatedAt: '', start:null, end:null,
-        actualStart: null,actualEnd: null 
+        actual_start: null,actual_end: null 
     });
+    const [estimationDateRange,setEstimationDateRange]=useState([null,null]);
+    const [realizationDateRange,setRealizationDateRange]=useState([null,null]);
     const [showExtendDeadlineForm,setShowExtendDeadlineForm]=useState(false);
     
     useEffect(() => {
@@ -39,23 +39,28 @@ const ProjectInfo = (props) => {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     let history = useHistory();
 
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
-
     const saveChanges = () => {        
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.patch(url, detailProject, config)
-            .then((result) => {
-                setIsEditing(false)
-                handleSnackbar(`Data has been changed`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.patch(url, detailProject),
+            {
+                loading: 'Updating...',
+                success: (result)=>{
+                    setIsEditing(false)
+                    global.dispatch({ type: 'store-detail-project', payload: result.data });
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
 
         if (!window.navigator.onLine) {
-            handleSnackbar(`You are currently offline`, 'warning');
+            toast.error(`You are currently offline`);
             // handleStoreList(body); //Untuk offline mode
         }
     }
@@ -64,53 +69,89 @@ const ProjectInfo = (props) => {
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.delete(url, {}, {})
-            .then((result) => {
-                global.dispatch({ type: 'remove-project', payload: detailProject.id });
-                history.push('/');
-                handleSnackbar(`Data has been deleted successfuly`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.delete(url),
+            {
+                loading: 'Deleting...',
+                success: (result)=>{
+                    global.dispatch({ type: 'remove-project', payload: detailProject.id });
+                    history.push('/projects');
+                    return <b>Successfully deleted</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
-
-    const checkIfEditing = (isEdit) => {
-        if (isEdit) {
-            return (
+    
+    return (
+        <>
+            <Grid container>
+                {(isEditing)?(
                 <React.Fragment>
-                    <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>
+                    <Grid item xl={6} md={6} sm={12} xs={12} style={{ padding: '1em' }}>
                         <TextField
                             label="Title : "
                             value={detailProject.title}
-                            onChange={(e) => {
-                                setDetailProject({ ...detailProject, title: e.target.value })
-                            }}
+                            onChange={(e) => setDetailProject({ ...detailProject, title: e.target.value })}
                             style={{ width: '90%' }}
                             variant="standard" 
                         />
                     </Grid>
-                    <Grid item lg={12} md={12} sm={12} xs={12}  style={{ padding: '1em' }}>
+                    <Grid item lg={6} md={6} sm={12} xs={12}  style={{ padding: '1em' }}>
                         <Typography style={{ whiteSpace: 'noWrap'}} component="div">
                             Estimation start/end at : {detailProject.start ? moment(detailProject.start).format('DD MMMM YYYY') : ''} - {detailProject.end ? moment(detailProject.end).format('DD MMMM YYYY') : ''}
                             <Button variant="contained" color="primary" onClick={()=>setShowExtendDeadlineForm(true)} style={{ margin: '1em' }}>Extend deadline</Button>
                         </Typography> 
+                        <Typography style={{ whiteSpace: 'noWrap'}} component="div">
+                            Realization start/end at : {detailProject.actual_start ? moment(detailProject.actual_start).format('DD MMMM YYYY') : ''} - {detailProject.actual_end ? moment(detailProject.actual_end).format('DD MMMM YYYY') : ''}
+                        </Typography> 
                     </Grid>
+                    {([1,8].includes(global.state.occupation?.id))?(
+                        <Grid item lg={12} md={12} sm={12} xs={12} style={{padding:'1em'}}>
+                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                <MobileDateRangePicker
+                                    required
+                                    startText="Start : "
+                                    endText="End : "
+                                    value={estimationDateRange}
+                                    onChange={(newValue) => {
+                                        if(newValue[0]){
+                                            setDetailProject({ ...detailProject, start: moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss') })
+                                        }
+                                        if(newValue[1]){ 
+                                            setDetailProject({ ...detailProject, end: moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss') })
+                                        }
+                                        setEstimationDateRange([newValue[0],newValue[1]]);
+                                    }}
+                                    renderInput={(startProps, endProps) => (
+                                    <>
+                                        <TextField {...startProps} variant="standard" required />
+                                        <Box sx={{ mx: 2 }}> to </Box>
+                                        <TextField {...endProps}  variant="standard"  required/>
+                                    </>
+                                    )}
+                                />
+                            </LocalizationProvider>  
+                        </Grid>
+                    ):null}
                     <Grid item lg={12} md={12} sm={12} xs={12} style={{padding:'1em'}}>
                         <LocalizationProvider dateAdapter={AdapterDateFns}>
                             <MobileDateRangePicker
                                 required
                                 startText="Actual Start : "
                                 endText="Actual End : "
-                                value={dateRange}
+                                value={realizationDateRange}
                                 onChange={(newValue) => {
                                     if(newValue[0]){
-                                        setStart(moment(start).format('YYYY-MM-DD HH:mm:ss'))
+                                        setDetailProject({ ...detailProject, actual_start: moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss') })
                                     }
                                     if(newValue[1]){ 
-                                        setEnd(moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss'))
+                                        setDetailProject({ ...detailProject, actual_end: moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss') })
                                     }
-                                    setDateRange([newValue[0],newValue[1]]);
+                                    setRealizationDateRange([newValue[0],newValue[1]]);
                                 }}
                                 renderInput={(startProps, endProps) => (
                                 <>
@@ -152,9 +193,7 @@ const ProjectInfo = (props) => {
                         maxDate={null}
                         />
                 </React.Fragment>
-            );
-        } else {
-            return (
+            ):(
                 <React.Fragment>
                     <Grid item xl={6} md={6} sm={6} xs={12} style={{ padding: '1em' }}>
                         <Typography variant="h5">{detailProject.title}</Typography>
@@ -166,11 +205,11 @@ const ProjectInfo = (props) => {
                         {detailProject.end ? (
                                 <Typography variant="body1" >End : {moment(detailProject.end).format('DD MMMM YYYY') }</Typography>
                             ): null} 
-                        {detailProject.actualStart ? (
-                                <Typography variant="body1" >Actual Start : {moment(detailProject.actualStart).format('DD MMMM YYYY') }</Typography>
+                        {detailProject.actual_start ? (
+                                <Typography variant="body1" >Actual Start : {moment(detailProject.actual_start).format('DD MMMM YYYY') }</Typography>
                             ): null}
-                        {detailProject.actualEnd ? (
-                                <Typography variant="body1" >Actual End : {moment(detailProject.actualEnd).format('DD MMMM YYYY') }</Typography>
+                        {detailProject.actual_end ? (
+                                <Typography variant="body1" >Actual End : {moment(detailProject.actual_end).format('DD MMMM YYYY') }</Typography>
                             ): null}
                     </Grid>
                     <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>
@@ -180,14 +219,8 @@ const ProjectInfo = (props) => {
                         <Button onClick={() => { setIsEditing(true) }} variant="contained" color="primary">Edit</Button>
                     </Grid>
                 </React.Fragment>
-            )
-        }
-    }
-    
-    return (
-        <>
-            <Grid container>
-                {checkIfEditing(isEditing)}
+            )}
+             
             </Grid >
             <DeleteConfirmDialog
                 open={deleteConfirmOpen}
@@ -218,4 +251,4 @@ const DeleteConfirmDialog =(props) => {
     );
 }
 
-export default ProjectInfo
+export default withRouter(ProjectInfo)

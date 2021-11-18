@@ -12,7 +12,7 @@ const storeDetailProject = (payload) => {
 
     const newProjects = user.projects.map((project) => {
         if (project.id == payload.id) {
-            project = payload;
+            project = {...project,...payload};
         }
         return project
     });

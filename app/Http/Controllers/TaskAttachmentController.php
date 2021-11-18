@@ -73,16 +73,18 @@ class TaskAttachmentController extends Controller
             $saved_files[]=$saved_file;
         }
 
+
         if($source=='google-drive'){
-            $uploaded_files=$request->files;
+            $uploaded_files=$request->get('files');
             for ($i=0; $i < count($uploaded_files); $i++) { 
                 $uploaded_file=$uploaded_files[$i];
-                
+
                 $file=new File();
-                $file->name=$uploaded_file->sizeBytes;
-                $file->type=$uploaded_file->mimeType;
-                $file->path=$uploaded_file->url;
-                $file->icon=$uploaded_file->iconUrl;
+                $file->name=$uploaded_file['name'];
+                $file->size=$uploaded_file['sizeBytes'];
+                $file->type=$uploaded_file['mimeType'];
+                $file->path=$uploaded_file['url'];
+                $file->icon=$uploaded_file['iconUrl'];
                 $file->users_id=$request->users_id;
                 $file->save();
 
@@ -91,11 +93,11 @@ class TaskAttachmentController extends Controller
                 $attachment->tasks_id=$tasks_id;
                 $attachment->save();
 
-                    
                 $saved_file=$file->toArray();
                 $saved_file['id']=$attachment->id;
                 $saved_file['files_id']=$file['id'];
                 $saved_files[]=$saved_file;
+
             }
         }
         return response()->json($saved_files);

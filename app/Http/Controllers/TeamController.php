@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Team;
 use App\Models\TeamMember;
+use App\Models\TeamsHasProjects;
 
 class TeamController extends Controller
 {
@@ -36,13 +37,17 @@ class TeamController extends Controller
     public function show($id)
     {
         $team=Team::with('members.user')
-                    ->with('projects.project')
+                    ->with('members.role')
+                    ->with('projects')
                     ->where('id','=',$id)
                     ->firstOrFail()->toArray();
         $members=[];
         for ($i=0; $i < count($team['members']); $i++) { 
             if($team['members'][$i]['user']){
-                $members[]=$team['members'][$i]['user'];
+                $member=$team['members'][$i]['user'];
+                $member['team_members_id']=$team['members'][$i]['id'];
+                $member['role']=$team['members'][$i]['role'];
+                $members[]=$member;
             }
         }
         $projects=[];
@@ -71,6 +76,8 @@ class TeamController extends Controller
     public function destroy($id)
     {
         $team=Team::findOrFail($id);
+        TeamsHasProjects::where('teams_id',$team->id)->delete();
+        TeamMember::where('teams_id',$team->id)->delete();
         return response()->json($team->delete());
     }
 }

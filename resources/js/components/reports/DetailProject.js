@@ -8,7 +8,7 @@ import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import ModalDetailTask from '../tasks/modalDetailTask/ModalDetailTask';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import UserContext from '../../context/UserContext';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 
 const clickedTaskInitialState={ 
@@ -18,7 +18,6 @@ const clickedTaskInitialState={
 const Overview = lazy(() => import('../projects/Overview'));
 
 const DetailProject = (props) => {
-    const { enqueueSnackbar } = useSnackbar();
     let global = useContext(UserContext);
     const { match: { params } } = props;
     const [detailProject, setDetailData] = useState({ 
@@ -28,26 +27,29 @@ const DetailProject = (props) => {
     const [detailTaskOpen, setDetailTaskOpen] = useState(false)
     const [clickedTask, setClickedTask] = useState(clickedTaskInitialState);
 
-    const snackbar = (message, variant) => enqueueSnackbar(message, { variant });
-
     const getDetailProject = () => {
+        const toast_loading = toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
-                const data = result.data;
-                global.dispatch({ type: 'store-detail-project', payload: data })
-                setDetailData(data);
+                setDetailData(result.data)
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                console.error(error);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
     useEffect(() => {
         const query = new URLSearchParams(props.location.search);
-        const paramTaskId = query.get('task_id');
+        const paramTaskId = query.get('tasks_id');
         if (paramTaskId) handleDetailTaskOpen({ ...clickedTask, taskId: paramTaskId, open: true });
         getDetailProject();
     }, []);
@@ -81,28 +83,29 @@ const DetailProject = (props) => {
     }, [clickedTask]);
 
     return (
-            <Grid container>
-                <Grid lg={12} md={12} sm={12} xs={12} item>
-                    <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label={`project reports - ${detailProject.title}`}>
-                        <Button component={Link}  color="primary"
-                            to="/projects">
-                            Projects
-                        </Button>
-                        <Button component={Link}  color="primary"
-                            to="/reports">
-                            Reports
-                        </Button>
-                        <Typography>
-                            {detailProject.title}
-                        </Typography>
-                    </Breadcrumbs>
-                </Grid>
-                <Grid xl={12} lg={12} md={12} sm={12} xs={12}>
-                    <Suspense fallback={<LinearProgress />}>
-                        <Overview detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen} refreshDetailProject={getDetailProject}/>
-                    </Suspense>
-                </Grid>
+        <Grid container>
+             
+            <Grid lg={12} md={12} sm={12} xs={12} item>
+                <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label={`project reports - ${detailProject.title}`}>
+                    <Button component={Link}  color="primary"
+                        to="/projects">
+                        Projects
+                    </Button>
+                    <Button component={Link}  color="primary"
+                        to="/reports">
+                        Reports
+                    </Button>
+                    <Typography>
+                        {detailProject.title}
+                    </Typography>
+                </Breadcrumbs>
             </Grid>
+            <Grid xl={12} lg={12} md={12} sm={12} xs={12}>
+                <Suspense fallback={<LinearProgress />}>
+                    <Overview detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen} refreshDetailProject={getDetailProject}/>
+                </Suspense>
+            </Grid>
+        </Grid>
     );
 }
 export default DetailProject;

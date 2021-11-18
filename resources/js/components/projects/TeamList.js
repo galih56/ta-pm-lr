@@ -9,7 +9,7 @@ import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import IconButton from '@material-ui/core/IconButton';
 import Collapse from '@material-ui/core/Collapse';
 import CancelIcon from '@material-ui/icons/Cancel';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import Chip from '@material-ui/core/Chip';
 import Button from '@material-ui/core/Button';
@@ -17,36 +17,32 @@ import Autocomplete from '@material-ui/core/Autocomplete';
 import PeopleIcon from '@material-ui/icons/People';
 import TextField from '@material-ui/core/TextField';
 
-
-export default function TeamList(props) {
+export default function TeamList({projects_id,onCreate}) {
     const [teams,setTeams]=useState([]);
     const [options,setOptions]=useState([]);
     const [newTeams,setNewTeams]=useState([])
     const global = useContext(UserContext);
-    
-    const { enqueueSnackbar } = useSnackbar();
-    const snackbar = (message, variant) =>  enqueueSnackbar(message, { variant });
 
     const getTeams = () => {
-        if (!window.navigator.onLine) {
-            snackbar(`You are currently offline`, 'warning');
-        }
-        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${props.projects_id}/teams`;
+        const toast_loading = toast.loading('Loading...');
+        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${projects_id}/teams`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setTeams(result.data);
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
     const getAllTeams = () => {
-        if (!window.navigator.onLine) {
-            snackbar(`You are currently offline`, 'warning');
-        }
         const url = process.env.MIX_BACK_END_BASE_URL + `teams`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -54,47 +50,66 @@ export default function TeamList(props) {
             .then((result) => {
                 setOptions(result.data);
             }).catch((error) => {
-                const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
 
     const deleteTeam = (selected_team_id) => {
-        if (!window.navigator.onLine) {
-            snackbar(`You are currently offline`, 'warning');
-        }
-         const url = process.env.MIX_BACK_END_BASE_URL + `projects/${props.projects_id}/teams/${selected_team_id}`;
+        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${projects_id}/teams/${selected_team_id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.delete(url)
+        toast.promise(
+            axios.delete(url),
+            {
+                loading: 'Deleting...',
+                success: (result)=>{
+                    var newTeams=teams.filter((team)=>{
+                        if(team.teams_id!=selected_team_id) return team;
+                    })
+                    setTeams(newTeams);
+                    return <b>Successfully deleted</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
     
-        var newTeams=teams.filter((team)=>{
-            if(team.id!=selectedTeam.id) return team;
-        })
-        setTeams(newTeams);
     }
 
     const addNewTeams = (selectedTeams) => {
-        if (!window.navigator.onLine) {
-            snackbar(`You are currently offline`, 'warning');
-        }
-        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${props.projects_id}/teams`;
+        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${projects_id}/teams`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, { projects_id:props.projects_id,teams:selectedTeams})
-            .then((result) => {
-                setTeams([...teams,...result.data]);
-            }).catch((error) => {
-                const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
-            });
+            toast.promise(
+                axios.post(url, { projects_id:projects_id,teams:selectedTeams}),
+                {
+                    loading: 'Creating a new team',
+                    success: (result)=>{
+                        setTeams([...teams,...result.data]);
+                        if(onCreate) onCreate();
+                        return <b>A new team successfuly created</b>
+                    },
+                    error: (error)=>{
+                        console.log(error);
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
+                });
+    
     }
     
     useEffect(()=>{
         getAllTeams();
-        if(props.projects_id)getTeams()
-    },[props.projects_id])    
+        if(projects_id)getTeams()
+    },[projects_id])    
     
     return (
         <Grid container>
@@ -160,11 +175,15 @@ const CustomListItem=React.memo(({team,deleteTeam})=>{
         </ListItem>
         <Collapse in={open} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-                {team.members.map((member)=>(
+                {(team.members)?team.members.map(member=>(
                     <ListItem style={{paddingLeft:'0.5em'}} key={member.id}>
                         <ListItemText primary={member.name}/>
                     </ListItem>
-                ))}
+                )):(
+                    <ListItem>
+                        <ListItemText primary={'No members'}/>
+                    </ListItem>
+                )}
             </List>
         </Collapse>
     </React.Fragment>;

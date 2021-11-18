@@ -12,10 +12,10 @@ import UserSearchBar from '../widgets/UserSearchBar';
 import moment from 'moment';
 import UserContext from './../../context/UserContext';
 import { parseISO } from 'date-fns'; 
+import NumberFormat from 'react-number-format';
 
 const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSubtask,minDate,maxDate})=>{
     const global=useContext(UserContext);
-    // const handleTagChanges = (tags) => setNewTask({ ...newTask, tags: tags });
     const [dateRange, setDateRange] = useState([null, null]);
     const [exceptedUsers,setExceptedUsers]=useState([]);
 
@@ -40,7 +40,6 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSu
                 users=[ logged_in_user ];
                 setExceptedUsers(users);
             }
-            console.log({registered,users,exceptedUsers});
         }
         checkLoggedInUserProjectMember();
     },[]);
@@ -63,13 +62,15 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSu
             </Grid>
             <Grid item lg={6} md={6} sm={6} xs={12}>
                 {(!isSubtask)?
-                    <TextField
-                        label="Estimation cost : "
-                        onChange={ (e) => setNewTask({ ...newTask, cost: e.target.value })}
-                        placeholder={"Rp."}
-                        style={{ width: '100%' }}
-                        variant="standard" 
-                    />:<></>}
+                    <NumberFormat 
+                        customInput={TextField} 
+                        variant="standard"
+                        label="Cost estimation: "
+                        onValueChange={ (formattedValue) => setNewTask({ ...newTask, cost: formattedValue.value })}
+                        fullWidth
+                        thousandSeparator={true} 
+                        isNumericString={true} 
+                        displayType={'input'} />:<></>}
                 
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12} container>
@@ -82,12 +83,8 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSu
                         minDate={minDate?parseISO(minDate):null}
                         maxDate={maxDate?parseISO(maxDate):null}
                         onChange={(newValue) => {
-                            if(newValue[0]){
-                                setNewTask({...newTask, start:moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss')})
-                            }
-                            if(newValue[1]){ 
-                                setNewTask({...newTask, end:moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss')})
-                            }
+                            if(newValue[0]) setNewTask({...newTask, start:moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss')});
+                            if(newValue[1]) setNewTask({...newTask, end:moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss')});
                             setDateRange([newValue[0],newValue[1]]);
                         }}
                         renderInput={(startProps, endProps) => (
@@ -109,9 +106,9 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSu
                     }}
                 />
             </Grid>
-            {/* <Grid item lg={12} md={12} sm={12} xs={12}>
-                <SelectTag onChange={handleTagChanges} isEdit={true} defaultValue={[]}/>
-            </Grid> */}
+            <Grid item lg={12} md={12} sm={12} xs={12}>
+                <SelectTag onChange={(tags) => setNewTask({ ...newTask, tags: tags })} isEdit={true} defaultValue={[]}/>
+            </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12}>
                 <Typography>Description : </Typography>
                 <TextField 

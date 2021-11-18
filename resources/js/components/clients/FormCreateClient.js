@@ -3,13 +3,13 @@ import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import axios from 'axios'
-import { useSnackbar } from 'notistack';
 import UserContext from './../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
 import { Dialog, IconButton, Typography } from '@material-ui/core/';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import CloseIcon from '@material-ui/icons/Close';
+import toast, { Toaster } from 'react-hot-toast';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },
@@ -38,66 +38,43 @@ const DialogContent = withStyles((theme) => ({
 
 const FormCreateClient=({open,handleClose,onCreate})=>{
     const global=useContext(UserContext);
-    const [name,setName]=useState('');
     const [description,setDescription]=useState('');
     const [city,setCity]=useState('');
-    const [phoneNumber,setPhoneNumber]=useState('');
     const [institution,setInstitution]=useState('');
-    const { enqueueSnackbar } = useSnackbar();
-    const snackbar = (message, variant) =>  enqueueSnackbar(message, { variant });
 
     const formCreateOnSubmit=()=>{
-        const body = {
-            name: name,
-            description: description,
-            city: city,
-            institution: institution,
-            phone_number:phoneNumber,
-        }
+        const body = { city: city, institution: institution, description: description }
         
         const url = process.env.MIX_BACK_END_BASE_URL + 'clients';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, body)
-            .then((result) => {
-                onCreate(result.data);
-                handleClose();
-                snackbar(`A new client successfully created`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.post(url, body),
+            {
+                loading: 'Creating a new client',
+                success: (result)=>{
+                    onCreate(result.data);
+                    handleClose();
+                    return <b>A new client successfully created</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
 
     return(
         <Dialog aria-labelledby="Create a client" open={open}>
-            <DialogTitle onClose={
-                () => {
-                    handleClose();
-                }} > Create a new client </DialogTitle>
+             
+            <DialogTitle onClose={() => handleClose() } > Create a new client </DialogTitle>
             <DialogContent dividers>
                 <form onSubmit={(e)=>{
                         e.preventDefault();
                         formCreateOnSubmit();
                     }}>
-                    <Grid container spacing={2}>
-                        <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <TextField variant="standard"
-                                label="Name : "
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder={"PIC's name"}
-                                fullWidth
-                                required
-                            />
-                        </Grid>     
-                        <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <TextField variant="standard"
-                                label="City : "
-                                onChange={(e) => setCity(e.target.value)}
-                                fullWidth
-                                required
-                            />
-                        </Grid>
+                    <Grid container spacing={2}>  
                         <Grid lg={12} md={12} sm={12} xs={12} item>
                             <TextField 
                                 variant="standard"
@@ -108,15 +85,11 @@ const FormCreateClient=({open,handleClose,onCreate})=>{
                             />
                         </Grid>
                         <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <TextField
-                                variant="standard"
-                                required
+                            <TextField variant="standard"
+                                label="City : "
+                                onChange={(e) => setCity(e.target.value)}
                                 fullWidth
-                                label="Phone Number"
-                                name="phoneNumber"
-                                value={phoneNumber}
-                                type="tel"
-                                onChange={(e) => setPhoneNumber(e.target.value) }
+                                required
                             />
                         </Grid>
                         <Grid lg={12} md={12} sm={12} xs={12} item>

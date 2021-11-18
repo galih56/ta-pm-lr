@@ -106,8 +106,6 @@ const TaskList = (props) => {
         setPage(0);
     };
     
-    // Avoid a layout jump when reaching the last page with empty rows.
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
     return (
         <React.Fragment>
             <TableContainer>
@@ -148,7 +146,7 @@ const TaskList = (props) => {
                 </Table>
                 </TableContainer>
                 <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
+                    rowsPerPageOptions={[10, 20, 30]}
                     component="div"
                     count={rows.length}
                     rowsPerPage={rowsPerPage}

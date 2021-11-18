@@ -20,13 +20,11 @@ const storeDetailTask = (payload) => {
 
 const storeDetailSubtask = (payload) => {
     var user = JSON.parse(localStorage.getItem('user'));
-    console.log(payload);
     const newProjects = user.projects.map((project) => {
         project.columns = project.columns.map(column => {
             column.cards = column.cards.map((card) => {
                 if (card.id == payload.parent_task_id) {
                     card.cards=card.cards.map((subtask)=>{
-                        console.log(subtask.title,subtask.id,payload.id,subtask.id==payload.id);
                         if(subtask.id==payload.id){ return payload}
                         return subtask;
                     })
@@ -66,7 +64,6 @@ const storeSubtasks = (payload) => {
 
 const createNewTask = (payload) => {
     var user = JSON.parse(localStorage.getItem('user'));
-    console.log(payload)
     const newProjects = user.projects.map((project) => {
         project.columns = project.columns.map(column => {
             if(column.id==payload.lists_id ||column.id==payload.laneId){ 
@@ -83,8 +80,6 @@ const createNewTask = (payload) => {
 
 const removeTask = (payload) => {
     var user = JSON.parse(localStorage.getItem('user'));
-
-    console.log('removing-task',payload);
     const newProjects = user.projects.map((project) => {
         project.columns = project.columns.map(column => {
                 column.cards = column.cards.filter(card => {

@@ -16,6 +16,15 @@ class ClientsHasProjects extends Model
         'clients_id',
     ];
 
+    protected static function boot(){
+        parent::boot();
+        static::deleting(function ($cp) {
+            foreach ($cp->task_member as $item) {
+                $item->delete();
+            }
+        });
+    }
+
     public function project(){
         return $this->belongsTo(Project::class,'projects_id');
     }
@@ -25,8 +34,6 @@ class ClientsHasProjects extends Model
     }
 
     public function task_member(){
-        return $this->hasMany(TaskMember::class,'project_clients_id');
-    }
-
-    
+        return $this->hasOne(TaskMember::class,'project_clients_id');
+    }  
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import Typography from '@material-ui/core/Typography';
 import makeStyles from '@material-ui/styles/makeStyles';
 import {
     Table, TableBody, TableCell, TableContainer, TablePagination,
@@ -98,8 +99,6 @@ export default function EnhancedTable(props) {
         setPage(0);
     };
 
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
     return (
         <div className={classes.root}>
             <TableContainer>
@@ -109,7 +108,8 @@ export default function EnhancedTable(props) {
                         rowCount={rows.length}
                     />
                     <TableBody>
-                        {stableSort(rows, getComparator(order, orderBy))
+                        {(rows.length)?
+                            stableSort(rows, getComparator(order, orderBy))
                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((row) => {
                                 return (
@@ -125,8 +125,15 @@ export default function EnhancedTable(props) {
                                         </TableCell>
                                     </TableRow>
                                 );
-                            })}
-                        {emptyRows > 0 && (<TableRow style={{ height: (53) * emptyRows }} > <TableCell colSpan={6} /> </TableRow>)}
+                            }):(
+                                (
+                                    <TableRow>
+                                        <TableCell align="center" colSpan={headCells.length}>
+                                            <Typography variant="body1"><b>There is no data to show</b></Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            )}
                     </TableBody>
                 </Table>
             </TableContainer>
@@ -136,7 +143,7 @@ export default function EnhancedTable(props) {
                 count={rows.length}
                 rowsPerPage={rowsPerPage}
                 onPageChange={handleChangePage}
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPageOptions={[10, 20, 30]}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
         </div>

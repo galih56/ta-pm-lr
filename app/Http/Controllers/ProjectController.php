@@ -10,13 +10,19 @@ use App\Models\TeamsHasProjects;
 use App\Models\File;
 use App\Models\Team;
 use App\Models\Task;
+use App\Models\TaskList;
 use App\Models\Meeting;
 use App\Models\TaskAttachment;
 use App\Models\Approval;
 use App\Models\Client;
 use App\Models\ClientsHasProjects;
 use App\Models\GithubRepository;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ProjectExport;
+use App\Imports\ProjectImport;
+use Carbon\Carbon;
 use DB;
+use Illuminate\Support\Facades\Log;
 
 class ProjectController extends Controller
 {
@@ -38,69 +44,69 @@ class ProjectController extends Controller
 
     public function store(Request $request)
     {
-        $project=new Project();
-        $project->title=$request->title;
-        $project->description=$request->description;
-        $project->start=$request->start;
-        $project->end=$request->end;
-        $project->cost=$request->cost;
-        $project->save();
-
-        $inserted_members=[];
-        $project_owners=$request->project_owner;
-        if($project_owners){
-            
-            for ($i=0; $i < count($project_owners); $i++) { 
-                $po=$project_owners[$i];
-                $new_po=new ProjectMember();
-                $new_po->projects_id=$project->id;
-                if(gettype($po)=='object') $new_po->users_id=$po->id;
-                if(gettype($po)=='string' || gettype($po)=='integer' ) $new_po->users_id=$po;
-                $new_po->roles_id=1;
-                $new_po->save();
-                
-                $inserted_members[]=$new_po->id;
+        if($request->hasFile('file')){
+            $project=$this->import($request);
+            if($project['error']==true){   
+                return response()->json($project);
+            }else{
+                $project=$project->toArray();
+                $project['columns']=[];    
+                return response()->json($project);
             }
+        }else{
+            $project=new Project();
+            $project->title=$request->title;
+            $project->description=$request->description;
+            $project->start=$request->start;
+            $project->end=$request->end;
+            $project->save();
+            
+            if($request->has('teams')){
+                $project->teams()->sync($request->teams);
+            }
+
+            $inserted_members=[];
+            if($request->has('project_owners')){
+                $project->users()->sync($request->project_owners,['roles_id'=>1]);
+            }
+
+            if($request->has('project_managers')){
+                $project->users()->sync($request->project_managers,['roles_id'=>2]);
+            }
+            
+            if($request->has('clients')){
+                $project->clients()->sync($request->clients);
+            }
+            
+            $project=$project->toArray();
+            $project['columns']=[];    
+            return response()->json($project);
         }
-
-        $project_managers=$request->project_manager;
-        if($project_managers){
-            
-            for ($i=0; $i < count($project_managers); $i++) { 
-                $pm=$project_managers[$i];
-                $new_pm=new ProjectMember();
-                $new_pm->projects_id=$project->id;
-                if(gettype($pm)=='object') $new_pm->users_id=$pm->id;
-                if(gettype($pm)=='string' || gettype($pm)=='integer' ) $new_pm->users_id=$pm;
-                $new_pm->roles_id=2;
-                $new_pm->save();
-                
-                $inserted_members[]=$new_pm->id;
-            }
-        }        
-        $project=$project->toArray();
-        $project['columns']=[]; //prevent error on front-end
         
-        return response()->json($project);
     }
 
     public function show($id)
     {
-        $project=Project::with(['columns.cards'=>function($q1){
-                            return $q1->orderBy('start','ASC')
-                                    ->with(['cards'=>function($q2){
-                                        return $q2->orderBy('start','ASC')
-                                                    ->with('members.user.occupation')
-                                                    ->with('members.project_client.client')
-                                                    ->with('members.member.role');
+        $project=Project::with(['columns'=>function($q){
+                        return $q->orderBy('end','ASC')
+                            ->with(['cards'=>function($q1){
+                                return $q1->orderBy('end','ASC')
+                                    ->with(['cards'=>function($q1){
+                                        return $q1->orderBy('end','ASC')
+                                            ->with('members.user.occupation')
+                                            ->with('members.project_client.client')
+                                            ->with('members.member.role')
+                                            ->with('tags');
                                     }])
-                                    ->with('members.user')
-                                    ->with('members.member.role')
-                                    ->with('members.project_client.client');
-                        }])
-                        ->with('members.role')->with('members.user.occupation')
-                        ->with('meetings')
-                        ->findOrFail($id)->toArray();
+                                ->with('members.user.occupation')
+                                ->with('members.project_client.client')
+                                ->with('members.member.role')
+                                ->with('tags');
+                            }]);
+                    }])
+                    ->with('members.role')->with('members.user.occupation')
+                    ->with('meetings')
+                    ->findOrFail($id)->toArray();
 
         $members=$project['members'];
         $project_members=[];
@@ -204,7 +210,8 @@ class ProjectController extends Controller
     public function getTeams($id){
         $teams=Team::from('teams AS t')
                         ->join('teams_has_projects AS tp','t.id','=','tp.teams_id')
-                        ->where('tp.projects_id','=',$id)->with('members.user')
+                        ->where('tp.projects_id','=',$id)
+                        ->with('members.user')->with('members.role')
                         ->get()->toArray();
         $new_teams=[];
         for ($i=0; $i < count($teams); $i++) { 
@@ -249,9 +256,8 @@ class ProjectController extends Controller
             $client_has_project=new  ClientsHasProjects();
             $client_has_project->projects_id=$id;
             if(gettype($new_client)=='object') $client_has_project->clients_id=$new_client->id;
-            else if(gettype($new_client)=='array'){ 
-                $client_has_project->clients_id=$new_client['id'];
-            }
+            if(gettype($new_client)=='array') $client_has_project->clients_id=$new_client['id'];
+            if(gettype($new_client)=='integer'||gettype($new_client)=='string') $client_has_project->clients_id=$new_client;
             $client_has_project->save();
             $inserted_clients[]=$client_has_project;
         }
@@ -283,16 +289,17 @@ class ProjectController extends Controller
         return response()->json("",200);
     }
 
-    public function addTeam(Request $request,$id){
+    public function addTeams(Request $request,$id){
         $project=Project::findOrFail($id);
 
         $new_teams=$request->teams;
         $inserted_teams=[];
-        for ($i=0; $i < $new_teams; $i++) { 
+        for ($i=0; $i < count($new_teams); $i++) { 
             $new_team=$new_teams[$i];
             $team_has_project=new  TeamsHasProjects();
             $team_has_project->projects_id=$id;
             if(gettype($new_team)=='object') $team_has_project->teams_id=$new_team->id;
+            elseif(gettype($new_team)=='array') $team_has_project->teams_id=$new_team['id'];
             else $team_has_project->teams_id=$new_team;
             $team_has_project->save();
 
@@ -300,17 +307,32 @@ class ProjectController extends Controller
         }
 
         $teams=Team::from('teams AS t')
-                        ->join('teams_has_projects AS tp','t.id','=','tp.teams_id')
-                        ->whereIn('tp.projects_id','=',$inserted_teams)
-                        ->get();
-        
+                    ->join('teams_has_projects AS tp','t.id','=','tp.teams_id')
+                    ->whereIn('tp.id',$inserted_teams)
+                    ->with('members.user')->with('members.role')
+                    ->get()->toArray();
+                    
+        $new_teams=[];
+        for ($i=0; $i < count($teams); $i++) { 
+            $team=$teams[$i];
+            $members=[];
+            for ($j=0; $j < count($team['members']); $j++) { 
+                $member=$team['members'][$j];
+                $user=$member['user'];
+                $user['teams_id']=$team['id'];
+                $user['team_members_id']=$member['id'];
+                $member=$user;
+                $members[]=$member;
+            }
+            $team['members']=$members;
+            $new_teams[]=$team;
+        }
         return response()->json($teams);
     }
 
     public function removeTeams(Request $request,$id,$teams_id){
         $project=Project::findOrFail($id);
-        $teams_has_projects=TeamsHasProjects::where('projects_id','=',$id)->where('teams_id','=',$teams_id)->get();
-        
+        $teams_has_projects=TeamsHasProjects::where('projects_id','=',$id)->where('teams_id','=',$teams_id)->delete();
         return response()->json($teams_has_projects,200);
     }
 
@@ -328,20 +350,13 @@ class ProjectController extends Controller
                             ->get();
         return response()->json($meetings);
     }
-    
-    // ->orWhereIn('t.parent_task_id',function($query) use($id){
-    //     return $query->select('t1.id')
-    //                 ->from('tasks AS t1')
-    //                 ->leftJoin('lists AS l1','t1.lists_id','=','l1.id')
-    //                 ->where('l1.projects_id','=',$id);
-    //})
 
     public function getReports($id){
         $tasks=Task::selectRaw('t.*,t.parent_task_id AS parentTask,l.projects_id')
                         ->from('tasks AS t')
                         ->leftJoin('lists AS l','t.lists_id','=','l.id')
                         ->where('l.projects_id','=',$id)
-                        ->orderBy('t.start','ASC')->get($id);
+                        ->orderBy('t.end','ASC')->get($id);
 
         $mulai_cepat=[];
         $selesai_cepat=[];
@@ -511,4 +526,151 @@ class ProjectController extends Controller
         $new_approval->save();
         return response()->json($project);
     } 
+
+    public function export($id){
+        $project=Project::with(['columns'=>function($q){
+            $q->orderBy('end','ASC')
+            ->with(['cards'=>function($q1){
+                $q1->select('id','title','lists_id',
+                                'start','end','days',
+                                'actual_start','actual_end','work_days',
+                                'description', 'parent_task_id','is_subtask')
+                    ->orderBy('end','ASC')
+                    ->with(['cards'=>function($q1){
+                        $q1->select('id','title','lists_id',
+                                        'start','end','days',
+                                        'actual_start','actual_end','work_days',
+                                        'description', 'parent_task_id','is_subtask')
+                            ->orderBy('end','ASC');
+                    }]);
+            }]);
+        }])->findOrFail($id);
+        
+        return Excel::download(new ProjectExport($project), str_slug($project->title).'.xlsx');
+    }
+
+    public function import(Request $request,$id=null){
+        $project=null;
+        try {
+            $import = new ProjectImport();
+            $imported_data = $import->toCollection($request->file('file')->store('temp'));
+    
+            $data=[];
+            $earliest_date=null;
+            $latest_date=null;
+            $errors=['error'=>false,'messages'=>[],'data'=>null];
+            if($imported_data->count()){
+                $rows=$imported_data[0];
+                for ($i=0; $i < $rows->count(); $i++) { 
+                    $row=$rows[$i]->toArray();
+                    if(empty($row['title'])) {
+                        $errors['error']=true;
+                        $errors['messages'][]=['row'=>$i,'title'=> 'Title column is required'];
+                    }
+                    if(empty($row['wbs'])) {
+                        $errors['error']=true;
+                        $errors['messages'][]=['row'=>$i,'title'=> 'WBS column is required'];
+                    }
+                    if(gettype($row['start'])=='integer' || gettype($row['end'])=='integer') {
+                        $errors['error']=true;
+                        $errors['messages'][]=['row'=>$i,'title'=> 'start/end column must be a valid date (yyyy-mm-dd)'];
+                    }
+                    if(gettype($row['actual_start'])=='integer' || gettype($row['actual_end'])=='integer') {
+                        $errors['error']=true;
+                        $errors['messages'][]=['row'=>$i,'title'=> 'actual_start/actual_end column must be a valid date (yyyy-mm-dd)'];
+                    }
+                    
+                    $start = Carbon::parse($row['start'])->format('Y-m-d');
+                    $end = Carbon::parse($row['end'])->format('Y-m-d');
+                    
+                    if(!empty($row['start'])){
+                        $earliest_date=$start;   
+                    }else if($earliest_date>$start){
+                        $earliest_date=$start;   
+                    }
+    
+                    if(!empty($row['end'])){
+                        $latest_date=$end;   
+                    } else if($latest_date<$end){
+                        $latest_date=$end;   
+                    }
+                                    
+                    $wbs=explode('.',$row['wbs'].'');
+                    if(count($wbs) == 1){
+                        //create list
+                        $data[$wbs[0]]=$row;
+                    }
+                    
+                    if(count($wbs) == 2){
+                        //create task
+                        $data[$wbs[0]]['tasks'][$wbs[1]]=$row;
+                    }
+    
+                    if(count($wbs) == 3){
+                        //create subtask
+                        $data[$wbs[0]]['tasks'][$wbs[1]]['subtasks'][$wbs[2]]=$row;
+                    }
+                }
+                if($errors['error']==true){
+                    return $errors;
+                }
+                if($id){
+                    $project=Project::findOrFail($id);
+                }  else{
+                    $project=new Project();
+                    $project->title=$request->title;
+                    $project->description=$request->description;
+                    $project->start=$earliest_date;
+                    $project->end=$latest_date;
+                    $project->save();
+                    
+                    if($request->has('teams')){
+                        $project->teams()->sync($request->teams);
+                    }
+    
+                    $inserted_members=[];
+                    if($request->has('project_owners')){
+                        $project->users()->sync($request->project_owners,['roles_id'=>1]);
+                    }
+    
+                    if($request->has('project_managers')){
+                        $project->users()->sync($request->project_managers,['roles_id'=>2]);
+                    }
+                    
+                    if($request->has('clients')){
+                        $project->clients()->sync($request->clients);
+                    }
+                }  
+    
+                foreach ($data as $i => $list) {
+                    $list['projects_id']=$project->id;
+                    $tasks=[];
+                    if(array_key_exists('tasks',$list)) $tasks= $list['tasks'];
+                    $list=TaskList::create($list);
+                    foreach ($tasks as $j => $task) {
+                        $task['lists_id']=$list->id;
+                        $task['is_subtask']=true;
+                        $subtasks=[];
+                        if(array_key_exists('subtasks',$task)) $subtasks=$task['subtasks'];
+                        $task=Task::create($task);
+                        foreach ($subtasks as $k => $subtask) {
+                            $subtask['parent_task_id']=$task->id;
+                            $subtask['is_subtask']=true;
+                            Task::create($subtask);
+                        }
+                    }
+                }
+    
+                if($id){
+                    return redirect(route('projects.show',['project'=>$project->id]));
+                }else{
+                    return $project;
+                }
+            }
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            return response()->json($failures,500);
+        } 
+    }
 }
+

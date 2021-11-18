@@ -17,7 +17,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import MobileDatePicker from '@material-ui/lab/MobileDatePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import { parseISO } from 'date-fns'; 
 
 const styles = (theme) => ({
@@ -47,14 +47,13 @@ const DialogContent = withStyles((theme) => ({
 
 export default function ModalExtendDeadline({open,handleClose,task,detailProject,minDate,maxDate}) {
     const global=useContext(UserContext);
-    const { enqueueSnackbar } = useSnackbar();
-    const snackbar = (message, variant) => enqueueSnackbar(message, { variant });
     const [newDeadline,setNewDeadline]=useState(null);
     const [description,setDescription]=useState("");
-    var minDate=null;
     if(task){
-        minDate=task.is_subtask?task.parent_task.start:task.start;
-        minDate=parseISO(moment(minDate).format('YYYY-MM-DD HH:mm:ss'));
+        if(task.parent_task){
+            minDate=task.parent_task?task.parent_task?.start:task.start;
+            minDate=parseISO(moment(minDate).format('YYYY-MM-DD HH:mm:ss'));
+        }
     }else{
         minDate=parseISO(moment(detailProject.start).format('YYYY-MM-DD HH:mm:ss'));
     }
@@ -77,14 +76,20 @@ export default function ModalExtendDeadline({open,handleClose,task,detailProject
         }
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url,body)
-            .then((result) => {
-                handleClose();
-                snackbar('Request sent successfuly','success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
-            });          
+        toast.promise(
+            axios.post(url, body),
+            {
+                loading: 'Sending request',
+                success: (result)=>{
+                    handleClose();
+                    return <b>Request sent successfully</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });       
     }
 
     return (
@@ -94,6 +99,7 @@ export default function ModalExtendDeadline({open,handleClose,task,detailProject
                     handleClose();
                 }} > Extend deadline </DialogTitle>
             <DialogContent dividers>
+                 
                 <form onSubmit={handleSubmit}>
                     <Grid container spacing={2}>
                         <Grid item lg={12} md={12} sm={12} xs={12}>
@@ -102,7 +108,7 @@ export default function ModalExtendDeadline({open,handleClose,task,detailProject
                                 <MobileDatePicker 
                                     label="New deadline"
                                     value={null}
-                                    minDate={parseISO(minDate)}
+                                    minDate={minDate}
                                     maxDate={parseISO(maxDate)}
                                     onChange={(value)=> setNewDeadline(parseISO(moment(value).format('YYYY-MM-DD HH:mm:ss')))}
                                     renderInput={(params)=><TextField {...params} variant="standard" style={{width:'100%'}}/>}

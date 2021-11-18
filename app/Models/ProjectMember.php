@@ -12,9 +12,9 @@ class ProjectMember extends Model
     protected $table = 'project_members';
 
     protected $fillable = [
-        'title',
         'users_id',
         'projects_id',
+        'roles_id',
     ];
 
     public static function boot() {
@@ -35,6 +35,10 @@ class ProjectMember extends Model
     
     public function taskMembers(){
         return $this->hasMany(TaskMember::class,'project_members_id');
+    }
+
+    public function tasks(){
+        return $this->belongsToMany(Task::class,'task_members','project_members_id','tasks_id');
     }
 
     public function role(){

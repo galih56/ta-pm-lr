@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { Link, useLocation, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -10,7 +12,6 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
-import Chip from '@material-ui/core/Chip';
 import ModalDetailUser from './ModalDetailUser/ModalDetailUser';
 import ModalCreateUser from './ModalCreateUser';
 import UserContext from '../../context/UserContext';
@@ -18,6 +19,7 @@ import { visuallyHidden } from '@material-ui/utils';
 import moment from 'moment';
 import axios from 'axios';
 import DoneIcon from '@material-ui/icons/Done';
+import toast, { Toaster } from 'react-hot-toast';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) return -1;
@@ -89,6 +91,9 @@ function EnhancedTableHead(props) {
 
 export default function EnhancedTable() {
     const classes = useStyles();
+    let location = useLocation();
+    let history=useHistory();
+    let pathname = location.pathname;
     const [rows, setRows] = useState([]);
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('name');
@@ -99,16 +104,32 @@ export default function EnhancedTable() {
     const [modalCreateOpen,setModalCreateOpen]=useState(false);
     let global = useContext(UserContext);
 
+    const removeUserIdQueryString=()=>{
+        const queryParams = new URLSearchParams(history.location.search)
+        if (queryParams.has('users_id')) {
+            queryParams.delete('users_id');
+            history.replace({
+                search: queryParams.toString(),
+            })
+        }
+    }
+    
     const getUsers = () => {
+        const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'users';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setRows(result.data);
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -128,6 +149,7 @@ export default function EnhancedTable() {
                 newRows = rows.filter((row => {
                     if (row.id != data.id) return row
                 }));
+                removeUserIdQueryString()
                 break;
             default:
                 newRows = rows;
@@ -140,11 +162,21 @@ export default function EnhancedTable() {
         const { user, open } = data;
         setModalOpen(open);
         setClickedUser(user);
+        removeUserIdQueryString()
     }
 
     useEffect(() => {
         getUsers();
     }, []);
+
+    useEffect(()=>{
+        const query = new URLSearchParams(location.search);
+        const paramUserId = query.get('users_id');
+        if (paramUserId){ 
+            const currentUser=rows.filter((user)=>user.id==paramUserId);
+            if(currentUser.length>0) handleModalOpen({user: currentUser[0],open:true});
+        }
+    },[rows])
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -159,9 +191,9 @@ export default function EnhancedTable() {
         setPage(0);
     };
 
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
     return (
         <div className={classes.root}>
+             
             <Button 
                 variant="contained"
                 color="primary"
@@ -175,21 +207,31 @@ export default function EnhancedTable() {
                         rowCount={rows.length}
                     />
                     <TableBody>
-                        {stableSort(rows, getComparator(order, orderBy))
+                        {rows.length?stableSort(rows, getComparator(order, orderBy))
                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((row, index) => {
+                                let searchParams = new URLSearchParams(location.search);
+                                searchParams.set('users_id', row.id);
                                 return (
                                     <TableRow hover key={row.id}>
-                                        <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}
-                                            onClick={() => handleModalOpen({ user: row, open: true })}>
-                                            {row.name} ({row.email})
+                                        <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}>
+                                            <Link to={{ pathname: pathname, search: searchParams.toString() }} 
+                                                style={{ textDecoration: 'none', color: '#393939' }} 
+                                                onClick={() => handleModalOpen({ user: row, open: true })}>
+                                                {row.name} ({row.email})
+                                            </Link>
                                         </TableCell>
                                         <TableCell align="left">{row.occupation?.name}</TableCell>
                                         <TableCell align="right">{row.last_login ? moment(row.last_login).format('DD MMM YYYY') : ''}</TableCell>
                                     </TableRow>
                                 );
-                            })}
-                        {emptyRows > 0 && (<TableRow style={{ height: (53) * emptyRows }} > <TableCell colSpan={6} /> </TableRow>)}
+                            }):(
+                                <TableRow>
+                                    <TableCell  colSpan={headCells.length} align="center">
+                                        <Typography variant="body1">There is no data to show</Typography>
+                                    </TableCell>
+                                </TableRow>
+                            )}
                     </TableBody>
                 </Table>
             </TableContainer>
@@ -199,7 +241,7 @@ export default function EnhancedTable() {
                 count={rows.length}
                 rowsPerPage={rowsPerPage}
                 onPageChange={handleChangePage}
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPageOptions={[10, 20, 30]}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
             

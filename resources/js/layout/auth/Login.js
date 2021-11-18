@@ -5,7 +5,7 @@ import TextField  from '@material-ui/core/TextField';
 import axios from 'axios';
 import UserContext from '../../context/UserContext';
 import Alert from '@material-ui/lab/Alert';
-import {useSnackbar} from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 
 const SignIn = (props) => {
     const classes = props.classes;
@@ -16,9 +16,7 @@ const SignIn = (props) => {
     const [offlineAlert, setOfflineAlert] = useState(false);
     const global = useContext(UserContext);
     let history = useHistory();
-    const {enqueueSnackbar}=useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
-    
+
     useEffect(() => {
         global.dispatch({ type: 'remember-authentication' });
         if (global.state.authenticated === true) history.push('/');
@@ -27,50 +25,40 @@ const SignIn = (props) => {
 
     }, [global.state.authenticated]);
 
-    const sendLoginRequest = ( body) => {
-        if (global.state.authenticated && global.state.authenticated == false) {
-            global.dispatch({ type: 'remember-authentication' });
-        } else {
-            axios.post(process.env.MIX_BACK_END_BASE_URL + 'login', body, { headers: { 'Content-Type': 'application/json' } })
-                .then((result) => {
-                    global.dispatch({
-                        type: 'authenticate',
-                        payload: result.data
-                    });
-                }).catch((error) => {
-                    if (error.response) {
-                        // Request made and server responded
-                        switch (error.response.status) {
-                            case 401:
-                                setWrongCredentialAlert(true);
-                                handleSnackbar(`Wrong Credentials`, 'warning');
-                                break;
-                            default:
-                                handleSnackbar(`Server Error : ${error.response.statusText} (${error.response.status})`, 'error');
-                                break;
-                        }
-                    } else if (error.request) {
-                        handleSnackbar(`Server is not responding`, 'error');
-                    } else {
-                        handleSnackbar(`Client Error : ${error.message}`, 'error');
-                    }
-                });
-        }
-    }
-
     const handleSubmit = (e) => {
         e.preventDefault();
+        global.dispatch({ type: 'remember-authentication' });
         const body = { password: password, email: email }
         if (email.trim() == '' || password.trim() == '') setInputRequireAlert(true);
-        else setInputRequireAlert(false);
-        sendLoginRequest(body);
+        else{ 
+            setInputRequireAlert(false);
+            const url=`${process.env.MIX_BACK_END_BASE_URL}login`
+            toast.promise(
+                axios.post(url, body, 
+                { headers: { 'Content-Type': 'application/json' } }),
+                    {
+                    loading: 'Logging In...',
+                    success:(result)=>{ 
+                        global.dispatch({ type: 'authenticate', payload: result.data});
+                        return <b>Authenticated!</b>
+                    },
+                    error:(error)=>{ 
+                            setWrongCredentialAlert(true);
+                            if(error.response.status==401) return <b>Unauthenticated</b>;
+                            if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                            return <b>Wrong credentials</b>
+                        },
+                    }
+            );
+        }
     }
 
     return (
         <React.Fragment>
-            { wrongCredentialAlert ? <Alert severity="error" > Email/Password is incorrect</Alert> : null}
-            { inputRequireAlert ? <Alert severity="error" >Please complete the form</Alert> : null}
-            { offlineAlert ? <Alert severity="warning" >You're currently offline. Please check your internet connection</Alert> : null}
+             
+            { wrongCredentialAlert ? <Alert severity="error" style={{marginTop:'1em'}}> Email/Password is incorrect</Alert> : null}
+            { inputRequireAlert ? <Alert severity="error"  style={{marginTop:'1em'}}>Please complete the form</Alert> : null}
+            { offlineAlert ? <Alert severity="warning"  style={{marginTop:'1em'}}>You're currently offline. Please check your internet connection</Alert> : null}
             <form className={classes.form} style={{ textAlign: 'center' }} onSubmit={handleSubmit} >
                 <TextField
                     variant="outlined"
@@ -96,12 +84,6 @@ const SignIn = (props) => {
                     fullWidth
                     required
                 />
-                {/* 
-                <FormControlLabel
-                    control={<Checkbox name="remember" color="primary" />}
-                    label="Remember me" style={{ textAlign: 'left' }}
-                /> 
-                */}
                 <Button
                     type="submit"
                     variant="contained"
@@ -110,13 +92,6 @@ const SignIn = (props) => {
                     onClick={handleSubmit}
                     fullWidth
                 > Sign In  </Button>
-                {/* 
-                <Grid container>
-                    <Grid item xs>
-                        <Link href="#" variant="body2">  Forgot password? </Link>
-                    </Grid> 
-                </Grid>
-                */}
             </form >
         </React.Fragment>
     );

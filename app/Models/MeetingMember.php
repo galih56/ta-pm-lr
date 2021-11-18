@@ -14,7 +14,7 @@ class MeetingMember extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'users_id', 'meetings_id',
+        'users_id', 'meetings_id','google_calendar_info'
     ];
 
     public function user(){

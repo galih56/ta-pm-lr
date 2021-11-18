@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
+import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -15,9 +16,9 @@ import Checkbox from '@material-ui/core/Checkbox';
 import ModalDetailTask from './modalDetailTask/ModalDetailTask';
 import UserContext from '../../context/UserContext';
 import { visuallyHidden } from '@material-ui/utils';
+import toast, { Toaster } from 'react-hot-toast';
 import moment from 'moment';
 import axios from 'axios';
-import { useSnackbar } from 'notistack';
 
 function descendingComparator(a, b, orderBy) {
    if (b[orderBy] < a[orderBy]) return -1;
@@ -95,18 +96,16 @@ export default function EnhancedTable({data}) {
     const [orderBy, setOrderBy] = useState('end');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [clickedTask, setClickedTask] = useState({ projectId: null, listId: null, taskId: null });
+    const [clickedTask, setClickedTask] = useState({ projects_id: null, lists_id: null, tasks_id: null });
     const [modalOpen, setModalOpen] = useState(false);
     let history=useHistory();
 
     let global = useContext(UserContext);
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     const handleModalOpen = (taskInfo) => {
-        const { projectId, listId, taskId, open } = taskInfo;
+        const { projects_id, lists_id, tasks_id, open } = taskInfo;
         setModalOpen(open);
-        setClickedTask({ projectId: projectId, listId: listId, taskId: taskId });
+        setClickedTask({ projects_id: projects_id, lists_id: lists_id, tasks_id: tasks_id });
     }
 
     useEffect(()=>{
@@ -114,38 +113,43 @@ export default function EnhancedTable({data}) {
     },[data])
 
     const showModalDetailTask = () => {
-        if (clickedTask.taskId != null && clickedTask.taskId !== undefined && modalOpen == true) {
+        if (clickedTask.tasks_id != null && clickedTask.tasks_id !== undefined && modalOpen == true) {
             return (
                 <ModalDetailTask
                     open={modalOpen}
                     closeModalDetailTask={() => {
-                        handleModalOpen({ projectId: null, listId: null, taskId: null, open: false })
+                        handleModalOpen({ projects_id: null, lists_id: null, tasks_id: null, open: false })
                     }}
-                    projectId={clickedTask.projectId}
+                    projects_id={clickedTask.projects_id}
                     initialState={clickedTask} />
             )
         }
     }
 
-    const handleCompleteTask = (taskId, isChecked) => {
-        var oldRows = rows;
+    const handleCompleteTask = (tasks_id, isChecked) => {
         var newRows = rows.map((row) => {
-            if (row.id == taskId) row.complete = isChecked;
+            if (row.id == tasks_id) row.complete = isChecked;
             return row;
         });
         setRows(newRows);
-        const body = { id: taskId, complete: isChecked };
+        const body = { id: tasks_id, complete: isChecked };
         if (window.navigator.onLine) {
-            const config = { headers: { 'X-Authorization':`Bearer ${global.state.token}`, 'Content-Type': 'application/json'  } };
-            const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${taskId}`;
+            const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${tasks_id}`;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.patch(url, body, config)
-                .then((result) => {
-                    handleSnackbar(`Data has been updated`, 'success');
-                }).catch((error) => {
-                    setRows(oldRows);
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            toast.promise(
+                axios.patch(url, body),
+                {
+                    loading: 'Updating...',
+                    success: (result)=>{
+                        return <b>Successfully updated</b>
+                    },
+                    error: (error)=>{
+                        console.error(error);
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
                 });
         } else {
 
@@ -164,11 +168,9 @@ export default function EnhancedTable({data}) {
         setPage(0);
     };
 
-    // Avoid a layout jump when reaching the last page with empty rows.
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
     return (
         <div className={classes.root}>
+             
             <Paper className={classes.paper}>
                 <TableContainer>
                     <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} >
@@ -180,7 +182,7 @@ export default function EnhancedTable({data}) {
                             rowCount={rows.length}
                         />
                         <TableBody>
-                            {stableSort(rows, getComparator(order, orderBy))
+                            {rows.length?stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
                                     if (row.progress >= 100) row.complete = true;
@@ -202,12 +204,7 @@ export default function EnhancedTable({data}) {
                                                 onClick={() => {
                                                     var projects_id=(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id;
                                                     var lists_id=(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id;
-                                                    handleModalOpen({
-                                                        projectId: projects_id,
-                                                        listId: lists_id,
-                                                        taskId: row.id,
-                                                        open: true
-                                                    });
+                                                    handleModalOpen({  projects_id: projects_id,  lists_id: lists_id,  tasks_id: row.id,  open: true });
                                                 }}>
                                                 {row.title} ({row.progress}%)
                                             </TableCell>
@@ -219,17 +216,18 @@ export default function EnhancedTable({data}) {
                                             </TableCell>
                                         </TableRow>
                                     );
-                                })}
-                            {emptyRows > 0 && (
-                                <TableRow style={{ height: (53) * emptyRows }} >
-                                    <TableCell colSpan={6} />
-                                </TableRow>
-                            )}
+                                }):(
+                                    <TableRow>
+                                        <TableCell colSpan={headCells.length+1} align="center">
+                                            <Typography variant="body1">There is no data to show</Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                         </TableBody>
                     </Table>
                 </TableContainer>
                 <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
+                    rowsPerPageOptions={[10, 20, 30]}
                     component="div"
                     count={rows.length}
                     rowsPerPage={rowsPerPage}

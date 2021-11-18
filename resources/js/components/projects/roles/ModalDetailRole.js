@@ -1,7 +1,6 @@
 import 'fontsource-roboto';
 import React, { useEffect, useContext, useState } from 'react';
 import axios from 'axios';
-import { useSnackbar } from 'notistack';
 import { useHistory } from "react-router-dom";
 import UserContext from '../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
@@ -16,6 +15,7 @@ import MuiDialogActions from '@material-ui/core/DialogActions';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
+import toast, { Toaster } from 'react-hot-toast';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2), },
@@ -53,13 +53,9 @@ export default function ModalDetailRole(props) {
     const closeModal = props.closeModal;
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const global = useContext(UserContext);
-    const history = useHistory();
     const [data, setData] = useState({ id: null, name: '', color: '', bgColor: ''});
     const [isEditing, setIsEditing] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
-
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     useEffect(() => {
         setData(props.initialState);
@@ -71,35 +67,45 @@ export default function ModalDetailRole(props) {
             const url = process.env.MIX_BACK_END_BASE_URL + `member-roles/${props.initialState.id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.patch(url, body, config)
-                .then((result) => {
-                    handleSnackbar(`Data has been updated`, 'success');
-                    props.onUpdate(result.data);
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                });        }
+            toast.promise(
+                axios.patch(url, body),
+                {
+                    loading: 'Updating...',
+                    success: (result)=>{
+                        props.onUpdate(result.data);
+                        return <b>Successfully updated</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
+                });        
+            }
     }
 
     const deleteRole = () => {
         if (window.navigator.onLine) {
-            const config = { mode: 'no-cors', crossdomain: true }
-            const url = process.env.MIX_BACK_END_BASE_URL + `memberrole/${data.id}`;
-            try {
-                axios.defaults.headers.common['Authorization'] = global.state.token;
-                axios.defaults.headers.post['Content-Type'] = 'application/json';
-                axios.delete(url, {}, config)
-                    .then((result) => {
-                        handleSnackbar(`Data has been deleted`, 'success');
+            const url = process.env.MIX_BACK_END_BASE_URL + `member-roles/${data.id}`;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+           axios.defaults.headers.post['Content-Type'] = 'application/json';
+            toast.promise(
+                axios.delete(url),
+                {
+                    loading: 'Deleting...',
+                    success: (result)=>{
                         props.onDelete(data);
-                    }).catch((error) => {
-                        const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                        global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                    });
-            } catch (error) {
-                handleSnackbar('Failed to send request', 'error')
-            }
+                        return <b>Successfully deleted</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
+                });
         }
+        
+            
     }
 
     return (
@@ -119,6 +125,7 @@ export default function ModalDetailRole(props) {
                     closeModal={closeModal}
                 > </DialogActionButtons>
             </DialogActions>
+             
         </Dialog>
     );
 }

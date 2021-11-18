@@ -10,10 +10,10 @@ import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';
 import CloseIcon from '@material-ui/icons/Close';
-import axios from 'axios';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import DialogActionButtons from './DialogActionButtons';
 import EditForm from './EditForm';
+import axios from 'axios';
 
 // https://stackoverflow.com/questions/35352638/react-how-to-get-parameter-value-from-query-string
 const styles = (theme) => ({
@@ -51,68 +51,63 @@ export default function ModalDetailUser(props) {
     const {open,closeModal,asProfile}=props;
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const global = useContext(UserContext);
-    const history = useHistory();
     const [data, setData] = useState({
-        id: null, name: '', email: '', phone_number: '', last_login: '', occupation: null, occupations_id:'',profilePicture: ''
+        id: null, name: '', email: '', last_login: '', occupation: null, occupations_id:'',profilePicture: ''
     });
     const [isEditing, setIsEditing] = useState(false);
-    const [deletable, setDeletable] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
-
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     useEffect(() => {
         setData(props.initialState);
-        
-        if(!global.state.occupation?.name?.toLowerCase().includes('administrator')
-            ||global.state.id==props.initialState.id){
-            setDeletable(false);
-        }else{
-            setDeletable(true);
-        }
     }, [props.initialState.id]);
 
     const saveChanges = () => {
         let body = {
             id: data.id, name: data.name, email: data.email, 
-            phone_number: data.phone_number,
             occupations_id: data.occupations_id, profile_picture_path: ''
         };
-        console.log(body)
+        
         if (window.navigator.onLine) {
             const url = process.env.MIX_BACK_END_BASE_URL + `users/${props.initialState.id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.patch(url, body)
-                .then(result => {
-                    setData(result.data);
-                    props.onUpdate(result.data, 'update');
-                    handleSnackbar(`Data has been updated`, 'success');
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            toast.promise(
+                axios.patch(url, body),
+                {
+                    loading: 'Updating...',
+                    success: (result)=>{
+                        setData(result.data);
+                        props.onUpdate(result.data, 'update');
+                        return <b>Successfully updated</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
                 });
         }
     }
 
     const deleteUser = () => {
         if (window.navigator.onLine) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+            axios.defaults.headers.post['Content-Type'] = 'application/json';
             const url = process.env.MIX_BACK_END_BASE_URL + `users/${data.id}`;
-            try {
-                axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-                axios.defaults.headers.post['Content-Type'] = 'application/json';
-                axios.delete(url)
-                    .then((result) => {
+            toast.promise(
+                axios.delete(url),
+                {
+                    loading: 'Deleting...',
+                    success: (result)=>{
                         props.onUpdate(data, 'delete');
-                        handleSnackbar(`Data has been deleted`, 'success');
-                    }).catch((error) => {
-                        const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                        global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                    });
-            } catch (error) {
-                handleSnackbar('Failed to send request', 'error')
-            }
+                        return <b>Successfully deleted</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
+                });
         }
     }
 
@@ -121,12 +116,12 @@ export default function ModalDetailUser(props) {
             maxWidth={'lg'} fullwidth={"true"}>
             <DialogTitle onClose={closeModal}>User information</DialogTitle>
             <DialogContent dividers>
-                <EditForm isEdit={isEditing} data={data} setData={setData} asProfile={asProfile}/>
+                <EditForm open={open} isEdit={isEditing} data={data} setData={setData} asProfile={asProfile}/>
             </DialogContent>
             <DialogActions>
                 <DialogActionButtons
                     isEdit={isEditing}
-                    deletable={deletable}
+                    deletable={!([1,8].includes(data.occupation?.id) || global.state.id==props.initialState.id)}
                     saveChanges={saveChanges}
                     setEditMode={handleEditingMode}
                     deleteUser={deleteUser}

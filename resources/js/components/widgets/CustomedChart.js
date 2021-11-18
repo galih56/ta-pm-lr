@@ -93,9 +93,7 @@ const CustomedChart=({
     },[data,prop1,prop2])
 
     return (
-        <div>
-            <CanvasJSReact.CanvasJSChart options = {options}/>
-        </div>
+        <CanvasJSReact.CanvasJSChart options = {options}/>
     );
 }
 export default CustomedChart

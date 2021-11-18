@@ -1,40 +1,42 @@
 import React,{ useState,useContext,useEffect} from 'react';
-import UserContext from './../../../context/UserContext'
-import { useHistory } from 'react-router-dom';
+import UserContext from './../../../context/UserContext';
 import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
-import axios from 'axios';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import TextField from '@material-ui/core/TextField';
+import axios from 'axios';
 
 const NewRepositoryForm=({projects_id,onSave})=>{
-    const { enqueueSnackbar } = useSnackbar();
-    const history = useHistory();
     const global=useContext(UserContext);
-    const snackbar = (message, variant) => enqueueSnackbar(message, { variant });
     const [usernameOwner,setUsernameOwner]=useState('');
     const [repositoryName,setRepositoryName]=useState('');
 
     const saveRepository=(e) => {
         e.preventDefault();
-       const url = process.env.MIX_BACK_END_BASE_URL + `github-repositories`;
+        const url = process.env.MIX_BACK_END_BASE_URL + `github-repositories`;
         const body= {
             owner_name: usernameOwner,
             repository_name: repositoryName,
             projects_id: projects_id,
         }
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url,body)
-        .then(result => {
-            onSave(result.data)
-            setUsernameOwner(''); 
-            setRepositoryName('');
-            snackbar(`Data was added successfuly`, 'success'); 
-        }).catch((error) => {
-            const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: history }
-            global.dispatch({ type: 'handle-fetch-error', payload: payload });
-        });
+        axios.defaults.headers.post['Content-Type'] = 
+
+        toast.promise(
+            axios.post(url, body),
+            {
+                loading: 'Creating a new repository',
+                success: (result)=>{
+                    onSave(result.data)
+                    setUsernameOwner(''); 
+                    setRepositoryName('');
+                    return <b>A new repostory successfuly created</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
     }
     
     return (   
@@ -52,6 +54,7 @@ const NewRepositoryForm=({projects_id,onSave})=>{
                     style={{margin:'0.8em'}}
                     variant="contained"
                     color="primary">Save</Button>
+             
         </form>
     )
 }

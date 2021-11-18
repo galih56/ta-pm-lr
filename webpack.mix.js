@@ -21,5 +21,12 @@ mix.js('resources/js/app.js', 'public/js')
     .react();
     // .sass('resources/sass/app.scss', 'public/css')
 
+mix.disableNotifications();
+
+if (mix.inProduction()) {
+    mix.version();
+}
+
+
 //Install dibawah ini supaya bisa support experimental syntax jsx
 //npm install sass-loader@^12.1.0 sass resolve-url-loader@^4.0.0 @babel/preset-react --save-dev --legacy-peer-deps

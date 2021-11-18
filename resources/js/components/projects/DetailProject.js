@@ -6,12 +6,11 @@ import Tab from '@material-ui/core/Tab';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
-import ModalDetailTask from '../tasks/modalDetailTask/ModalDetailTask';
 import BreadCrumbs from './BreadCrumbs';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import UserContext from '../../context/UserContext';
 import AddIcon from '@material-ui/icons/Add';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 
 const ModalCreateList = lazy(() => import('./ModalCreateList'));
@@ -23,6 +22,8 @@ const Calendar = lazy(() => import('../widgets/Calendar'));
 const Files = lazy(() => import('../widgets/Files'));
 const Others = lazy(() => import('./Others'));
 const Timeline = lazy(() => import('./timeline/Timeline'));
+const ModalImportExcel = lazy(() => import('./timeline/ModalImportExcel'));
+const ModalDetailTask = lazy(() => import('../tasks/modalDetailTask/ModalDetailTask'));
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -96,7 +97,6 @@ const clickedMeetingInitialState={
 };
 
 const DetailProject = (props) => {
-    const { enqueueSnackbar } = useSnackbar();
     let global = useContext(UserContext);
     let history = useHistory();
     let location = useLocation();
@@ -107,13 +107,14 @@ const DetailProject = (props) => {
         createdAt: '', updatedAt: '' 
     });
     const [showModalCreateList, setShowModalCreateList] = useState(false);
+    const [showModalImportExcel, setShowModalImportExcel] = useState(false);
+    
     const [showModalCreateMeeting, setShowModalCreateMeeting] = useState(false);
     const [tabState, setTabState] = useState(getCurrentTabIndex(location, history, params.id));
     const [clickedTask, setClickedTask] = useState(clickedTaskInitialState);
     const [detailTaskOpen,setDetailTaskOpen]=useState(false)
+    const [detailMeetingOpen,setDetailMeetingOpen]=useState(false)
     const [clickedMeeting, setClickedMeeting] = useState(clickedMeetingInitialState);
-
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     const getUserMemberRole=(project)=>{
         var user=null;
@@ -140,19 +141,22 @@ const DetailProject = (props) => {
         axios.get(url)
             .then((result) => {
                 const data = result.data;
-                global.dispatch({ type: 'store-detail-project', payload: data })
                 setDetailProject(data);
                 getUserMemberRole(data);
+                global.dispatch({ type: 'store-detail-project', payload: data });
             }).catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
             
         if (!window.navigator.onLine) {
             const currentProject=getProjectFromState(global.state.projects, params.id);
             getUserMemberRole(currentProject)
             if(currentProject)setDetailProject(currentProject);
-            handleSnackbar(`You're currently offline. Please check your internet connection.`, 'warning');
+            toast.error(`You're currently offline. Please check your internet connection.`);
         }
     }
 
@@ -161,9 +165,7 @@ const DetailProject = (props) => {
         const paramTaskId = query.get('tasks_id');
         const paramMeetingId = query.get('meetings_id');
         if (paramTaskId) handleDetailTaskOpen({ task:{...clickedTask, id: paramTaskId}, open: true });
-        if (paramMeetingId) handleDetailMeetingOpen({ meeting:{
-            id:paramMeetingId,...clickedMeeting
-        }, open: true });
+        if (paramMeetingId) handleDetailMeetingOpen({ meeting : { id:paramMeetingId,...clickedMeeting }, open: true });
         getDetailProject();
     }, []);
 
@@ -173,11 +175,14 @@ const DetailProject = (props) => {
     },[global.state.projects]);
 
     const handleModalCreateList = (open) => setShowModalCreateList(open);
+    const handleModalImportExcel = (open) => setShowModalImportExcel(open);
     const handleModalCreateMeeting = (open) => setShowModalCreateMeeting(open);
     const handleChange = (event, newValue) => setTabState(newValue);
 
     const handleDetailTaskOpen = (taskInfo) => {
         const {task, open,onTaskUpdate,onTaskDelete } = taskInfo;
+
+        console.log({task, open,onTaskUpdate,onTaskDelete });
         setDetailTaskOpen(open);
         setClickedTask({ ...task, onTaskDelete:onTaskDelete, onTaskUpdate:onTaskUpdate });
     };
@@ -186,7 +191,6 @@ const DetailProject = (props) => {
         setDetailMeetingOpen(meetingInfo.open);
         setClickedMeeting({ ...meetingInfo.meeting });
     };
-
 
     return (
         <Router>
@@ -199,7 +203,7 @@ const DetailProject = (props) => {
                     <Tab component={Link} label="Board" to={`board`} />
                     <Tab component={Link} label="Meeting" to={`meeting`} />
                     <Tab component={Link} label="Files" to={`files`} />
-                    <Tab component={Link} label="Others" to={`others`} />
+                    <Tab component={Link} label="Other" to={`others`} />
                 </Tabs>
             </Paper>
             <Suspense fallback={<LinearProgress />}>
@@ -215,15 +219,31 @@ const DetailProject = (props) => {
                                     <Grid container >   
                                         <BreadCrumbs projectName={detailProject.title} tabName="Timeline" style={{marginTop:'1em'}}/>
                                         <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                                            {(global.state.occupation?.name?.toLowerCase().includes('manager')
-                                                ||global.state.occupation?.name.toLowerCase().includes('administrator')
-                                                ||global.state.current_project_member_role?.name.toLowerCase().includes('project manager') )?(
-                                                <Button
-                                                    variant="contained"
-                                                    color="primary"
-                                                    onClick={()=>handleModalCreateList(true)}
-                                                    style={{ marginBottom: '1em' }}
-                                                    startIcon={<AddIcon />}> Add new list </Button>
+                                            {([2,8].includes(global.state.occupation?.id) || [1,2].includes(global.state.current_project_member_role?.id))?(
+                                                <>
+                                                    <Button
+                                                        variant="contained"
+                                                        color="primary"
+                                                        onClick={()=>handleModalCreateList(true)}
+                                                        style={{ marginBottom: '1em' }}
+                                                        startIcon={<AddIcon />}> Add new list </Button>
+
+						   <Button
+                                                        href={`${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}/export`}
+                                                        target="_blank"
+                                                        variant="contained"
+                                                        color="primary"
+                                                        style={{ marginBottom: '1em' ,marginLeft:'1em' }}>
+                                                        Export
+                                                    </Button>
+                                                    <Button
+                                                        color="primary"
+                                                        onClick={()=>setShowModalImportExcel(true)}   
+                                                        style={{ marginBottom: '1em' ,marginLeft:'1em'}}> 
+                                                            Import 
+                                                    </Button>
+
+                                                </>
                                             ):<></>}
                                             
                                         </Grid>
@@ -233,7 +253,8 @@ const DetailProject = (props) => {
                                                 start:detailProject.start,end:detailProject.end,
                                                 actual_start:detailProject.actual_start,
                                                 actual_end:detailProject.actual_end,
-                                                members:detailProject.members
+                                                members:detailProject.members,
+                                                clients:detailProject.clients
                                             }}
                                             data={detailProject.columns} 
                                             handleDetailTaskOpen={handleDetailTaskOpen}
@@ -326,18 +347,25 @@ const DetailProject = (props) => {
                             )
                         }} />
                 </Switch>
+                <ModalImportExcel
+                    projects_id={params.id}
+                    open={showModalImportExcel}
+                    closeModal={()=>handleModalImportExcel(false)} 
+                />
                 <ModalCreateList
                     projects_id={params.id}
                     open={showModalCreateList}
                     closeModal={()=>handleModalCreateList(false)} 
-                    detailProject={{id:detailProject.id,start:detailProject.start,end:detailProject.end}}
-                    />
+                    detailProject={{id:detailProject.id,members:detailProject.members,clients:detailProject.clients,start:detailProject.start,end:detailProject.end}}
+                />
                 <ModalCreateMeeting
                     detailProject={{
                         id:detailProject.id,
                         members:detailProject.members,
                         start:detailProject.start,
-                        end:detailProject.end
+                        end:detailProject.end,
+                        actual_start:detailProject.actual_start,
+                        actual_end:detailProject.actual_end
                     }}
                     projects_id={params.id}
                     open={showModalCreateMeeting}
@@ -361,6 +389,18 @@ const DetailProject = (props) => {
                         onTaskDelete={clickedTask.onTaskDelete}
                         />
                 ):<></>}
+                {(clickedMeeting.id && detailMeetingOpen)?
+                <ModalDetailMeeting
+                    open={detailMeetingOpen}
+                    closeModal={()=>handleDetailMeetingOpen({open:false,meeting:clickedMeetingInitialState})}
+                    detailProject={{ 
+                        id:detailProject.id,
+                        title:detailProject.title,
+                        start:detailProject.start,end:detailProject.end,
+                        members:detailProject.members,
+                    }}
+                    initialState={clickedMeeting}
+                />:<></>}
             </Suspense>
         </Router>
     );

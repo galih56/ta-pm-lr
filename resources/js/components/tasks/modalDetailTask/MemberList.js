@@ -15,7 +15,7 @@ import UserContext from '../../../context/UserContext';
 import makeStyles from '@material-ui/styles/makeStyles';
 import UserSearchBar from '../../widgets/UserSearchBar';
 import axios from 'axios';
-import {useSnackbar} from 'notistack'
+import toast, { Toaster } from 'react-hot-toast';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -27,12 +27,9 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
     const global = useContext(UserContext);
     const [members,setMembers]=useState([]);
     const [newMembers,setNewMembers]=useState([])
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
     const classes = useStyles();
     
     useEffect(()=>{
-        console.log('memberlist',data.members);
         setMembers(data.members?data.members:[]);
     },[data.members])
 
@@ -40,16 +37,22 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
        const url = process.env.MIX_BACK_END_BASE_URL + `task-members`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, body)
-            .then((result) => {
-                const payload = { tasks_id:data.id, data: data };
-                setData({...data,members:[...data.members,...result.data]});
-                if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
-                else global.dispatch({ type: 'store-detail-task', payload: payload })
-                handleSnackbar(`Data has been updated`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.post(url, body),
+            {
+                loading: 'Adding a new member',
+                success: (result)=>{
+                    const payload = { tasks_id:data.id, data: data };
+                    setData({...data,members:[...data.members,...result.data]});
+                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
+                    else global.dispatch({ type: 'store-detail-task', payload: payload })
+                    return <b>Successfuly updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
     
@@ -57,20 +60,26 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
         const url = process.env.MIX_BACK_END_BASE_URL + `task-members/${user.task_members_id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.delete(url, {id:user.task_members_id})
-            .then((result) => {
-                var newMemberList=members.filter(function(member){
-                    if(member.task_members_id!=user.task_members_id) return member;
-                });
-                setMembers(newMemberList);
-                setData({...data,members:newMemberList});
-                const payload = { tasks_id:data.id, data: data };
-                if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
-                else global.dispatch({ type: 'store-detail-task', payload: payload })
-                handleSnackbar(`Data has been updated`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.delete(url, {id:user.task_members_id}),
+            {
+                loading: 'Deleting...',
+                success: (result)=>{
+                    var newMemberList=members.filter(function(member){
+                        if(member.task_members_id!=user.task_members_id) return member;
+                    });
+                    setMembers(newMemberList);
+                    setData({...data,members:newMemberList});
+                    const payload = { tasks_id:data.id, data: data };
+                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
+                    else global.dispatch({ type: 'store-detail-task', payload: payload })
+                    return <b>Successfully deleted</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
 
@@ -79,6 +88,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
         <Grid container>
          {isEdit?(
              <>
+                 
                  <Grid item lg={12} md={12} sm={12} xs={12} style={{marginTop:'0.5em'}}>
                     <Typography>Assigned to : </Typography>
                  </Grid>
@@ -120,11 +130,11 @@ const CustomListItem=({classes,isEdit,member,onClick})=>{
         <ListItem alignItems="flex-start" >
             <ListItemAvatar>
                 {member.profile_picture_path?
-                <Avatar alt={"Photo profile " + member.name} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
-                <Avatar alt={"Photo profile " + member.name} className={classes.photoProfileBg}>{member.name?.charAt(0).toUpperCase()}</Avatar>}
+                <Avatar alt={"Photo profile " + (member.is_user?member.name:member.institution)} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
+                <Avatar alt={"Photo profile " + (member.is_user?member.name:member.institution)} className={classes.photoProfileBg}>{(member.is_user?member.name:member.institution)?.charAt(0).toUpperCase()}</Avatar>}
             </ListItemAvatar>
             <ListItemText
-                primary={member.is_client?`${member.name} (Client)`:member.name}
+                primary={member.is_client?`${member.institution} (Client)`:(member.name)}
                 secondary={
                     <>
                         <Typography
@@ -135,8 +145,6 @@ const CustomListItem=({classes,isEdit,member,onClick})=>{
                         >
                             {member.is_user?member.role?.name:member.institution}
                         </Typography>
-                        <br/>
-                        {member.email?member.email:member.phone_number}
                     </>
                 }
 

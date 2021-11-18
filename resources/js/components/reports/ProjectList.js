@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useHistory, BrowserRouter as Router } from "react-router-dom";
+import toast, { Toaster } from 'react-hot-toast';
 import Grid from '@material-ui/core/Grid';
 import CardContent from '@material-ui/core/CardContent';
 import Card from '@material-ui/core/Card';
@@ -23,15 +24,22 @@ const ProjectList = (props) => {
     },[projects])
 
     const getProjects = () => {
+        const toast_loading = toast.loading('Loading...');
         let url = process.env.MIX_BACK_END_BASE_URL + 'projects-overview';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setProjects(result.data)
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                console.error(error);
+                switch(error.response?.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -43,6 +51,7 @@ const ProjectList = (props) => {
 
     return (
         <Grid container spacing={2}>
+             
              <Grid lg={12} md={12} sm={12} xs={12} item>
                 <Router>
                     <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
@@ -100,22 +109,6 @@ const ProjectList = (props) => {
                             dataPoints: data.incomplete
                         }]}/>
             </Grid >
-             {/* <Grid lg={12} md={12} sm={12} xs={12} item>
-                    <BarChart datasets={[
-                         {
-                            type: 'bar',
-                            label: 'Complete',
-                            data: data.complete,
-                            backgroundColor: 'rgb(67, 160, 71)',
-                        },
-                        {
-                            type: 'bar',
-                            label: 'Incomplete',
-                            data: data.incomplete,
-                            backgroundColor: 'rgb(229, 57, 53)',
-                        },
-                    ]}/>
-            </Grid > */}
         </Grid >
     );
 }

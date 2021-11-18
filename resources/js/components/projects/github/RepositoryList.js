@@ -2,8 +2,6 @@ import React,{ useState,useContext,useEffect} from 'react';
 import UserContext from './../../../context/UserContext'
 import { useHistory } from 'react-router-dom';
 import Grid from '@material-ui/core/Grid';
-import axios from 'axios';
-import { useSnackbar } from 'notistack';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -14,14 +12,14 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import ModalRepositoryInformation from './ModalRepositoryInformation';
 import GithubLoginButton from './GithubLoginButton';
 import Typography from '@material-ui/core/Typography';
-import { Icon, InlineIcon } from '@iconify/react';
+import { Icon } from '@iconify/react';
 import githubIcon from '@iconify-icons/logos/github-icon';
+import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 
 const RepositoryList=({projects_id})=>{
-    const { enqueueSnackbar } = useSnackbar();
     const history = useHistory();
     const global=useContext(UserContext);
-    const snackbar = (message, variant) => enqueueSnackbar(message, { variant });
     const [repos,setRepos]=useState([]);
     const [clickedRepo,setClickedRepo]=useState({
         owner_name:'',
@@ -42,16 +40,22 @@ const RepositoryList=({projects_id})=>{
         const url = process.env.MIX_BACK_END_BASE_URL + 'github-repository/'+id;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.delete(url)
-        .then(result => {
-            setRepos(repos.filter((item)=>{
-                if(item.id!=id) return item
-            }))
-            snackbar(`Data was deleted`, 'success'); 
-        }).catch((error) => {
-            const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: history }
-            global.dispatch({ type: 'handle-fetch-error', payload: payload });
-        });
+        toast.promise(
+            axios.delete(url),
+            {
+                loading: 'Deleting...',
+                success: (result)=>{
+                    setRepos(repos.filter((item)=>{
+                        if(item.id!=id) return item
+                    }))
+                    return <b>Successfully deleted</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
     }
     useEffect(()=>{
         getRepositories();

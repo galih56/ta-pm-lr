@@ -5,6 +5,7 @@ import TextField from '@material-ui/core/TextField';
 import { Chip, Autocomplete } from '@material-ui/core';
 import axios from 'axios';
 import UserContext from '../../context/UserContext';
+import toast, { Toaster } from 'react-hot-toast';
 
 function OccupationSearchBar(props) {
     const { label, exceptedData, defaultValue } = props;
@@ -18,12 +19,15 @@ function OccupationSearchBar(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + 'occupations';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url, {}, {})
+        axios.get(url)
             .then((result) => {
                 setData(result.data);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -56,30 +60,33 @@ function OccupationSearchBar(props) {
     }, [data]);
 
     return (
-        <Autocomplete
-            multiple
-            freeSolo
-            options={options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter))}
-            getOptionLabel={(option) => option.name}
-            style={{ width: '100%' }}
-            renderInput={params => <TextField {...params} label={label} variant={'standard'} />}
-            onChange={(event, options) => handleValueChanges(options)}
-            defaultValue={defaultValue.map((option) => {
-                const firstLetter = option.name[0].toUpperCase();
-                return { firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter, ...option };
-            })}
-            renderTags={(value, getTagProps) => {
-                return (
-                    <>
-                        {value.map((option, index) => {
-                            return (
-                                <Chip variant="outlined" label={option.person ? option.person.name : option.name} {...getTagProps({ index })} />
-                            )
-                        })}
-                    </>
-                )
-            }}
-        />
+        <>
+            <Autocomplete
+                multiple
+                freeSolo
+                options={options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter))}
+                getOptionLabel={(option) => option.name}
+                style={{ width: '100%' }}
+                renderInput={params => <TextField {...params} label={label} variant={'standard'} />}
+                onChange={(event, options) => handleValueChanges(options)}
+                defaultValue={defaultValue.map((option) => {
+                    const firstLetter = option.name[0].toUpperCase();
+                    return { firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter, ...option };
+                })}
+                renderTags={(value, getTagProps) => {
+                    return (
+                        <>
+                            {value.map((option, index) => {
+                                return (
+                                    <Chip variant="outlined" label={option.person ? option.person.name : option.name} {...getTagProps({ index })} />
+                                )
+                            })}
+                        </>
+                    )
+                }}
+            />
+             
+        </>
     );
 }
 

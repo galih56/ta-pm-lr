@@ -15,9 +15,10 @@ import Checkbox from '@material-ui/core/Checkbox';
 import ModalDetailTask from './../tasks/modalDetailTask/ModalDetailTask';
 import UserContext from '../../context/UserContext';
 import { visuallyHidden } from '@material-ui/utils';
+import Typography from '@material-ui/core/Typography';
 import moment from 'moment';
 import axios from 'axios';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 
 function descendingComparator(a, b, orderBy) {
    if (b[orderBy] < a[orderBy]) return -1;
@@ -98,11 +99,8 @@ export default function EnhancedTable({detailProject}) {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [clickedTask, setClickedTask] = useState({ projects_id: null, lists_id: null, tasks_id: null });
     const [modalOpen, setModalOpen] = useState(false);
-    let history=useHistory();
 
     let global = useContext(UserContext);
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     const handleModalOpen = (taskInfo) => {
         const { projects_id, lists_id, tasks_id, open } = taskInfo;
@@ -132,21 +130,23 @@ export default function EnhancedTable({detailProject}) {
         });
         setRows(newRows);
         const body = { id: tasks_id, complete: isChecked };
-        if (window.navigator.onLine) {
-            const config = { headers: { 'X-Authorization':`Bearer ${global.state.token}`, 'Content-Type': 'application/json'  } }
-            const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${tasks_id}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.patch(url, body, config)
-                .then((result) => {
-                    handleSnackbar(`Data has been updated`, 'success');
-                }).catch((error) => {
-                    setRows(oldRows);
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                });
-        } else {
-
-        }
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${tasks_id}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        toast.promise(
+            axios.patch(url, body),
+            {
+                loading: 'Updating...',
+                success: (result)=>{
+                    setData(result.data);
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
     }
     useEffect(() => {
         setRows(detailProject.columns);
@@ -165,12 +165,10 @@ export default function EnhancedTable({detailProject}) {
         setPage(0);
     };
 
-    // Avoid a layout jump when reaching the last page with empty rows.
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
     return (
         <div className={classes.root}>
             <Paper className={classes.paper}>
+                 
                 <TableContainer>
                     <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} >
                         <EnhancedTableHead
@@ -181,7 +179,7 @@ export default function EnhancedTable({detailProject}) {
                             rowCount={rows.length}
                         />
                         <TableBody>
-                            {stableSort(rows, getComparator(order, orderBy))
+                            {rows.length?stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
                                     if (row.progress >= 100) row.complete = true;
@@ -220,17 +218,18 @@ export default function EnhancedTable({detailProject}) {
                                             <TableCell align="right">{row.creator?row.creator.name:''}</TableCell>
                                         </TableRow>
                                     );
-                                })}
-                            {emptyRows > 0 && (
-                                <TableRow style={{ height: (53) * emptyRows }} >
-                                    <TableCell colSpan={6} />
-                                </TableRow>
-                            )}
+                                }):( 
+                                    <TableRow>
+                                        <TableCell colSpan={headCells.length} align="center">
+                                            <Typography variant="body1">There is no data to show</Typography>
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                         </TableBody>
                     </Table>
                 </TableContainer>
                 <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
+                    rowsPerPageOptions={[10, 20, 30]}
                     component="div"
                     count={rows.length}
                     rowsPerPage={rowsPerPage}

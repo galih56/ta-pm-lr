@@ -24,7 +24,7 @@ const UserMenu = (props) => {
     const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
     const handleMenuOpen = (event) => { setAnchorEl(event.currentTarget); };
     const handleMenuClose = () => { setAnchorEl(null); };
-    const handleLogoutDialogClose = () => { setOpenLogoutDialog(false);console.log(openLogoutDialog) };
+    const handleLogoutDialogClose = () => { setOpenLogoutDialog(false); };
     const [modalProfileOpen, setModalProfileOpen] = useState(false);
     const global = useContext(UserContext);
     let history = useHistory();

@@ -16,7 +16,7 @@ import MuiDialogContent from '@material-ui/core/DialogContent';
 import UserContext from '../../../context/UserContext';
 import CloseIcon from '@material-ui/icons/Close';
 import Alert from '@material-ui/core/Alert';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 import FormCreateNewTask from './../../tasks/FormCreateNewTask';
 
@@ -70,11 +70,7 @@ const EditLaneForm = (props) => {
     const classes = useStyles();
     const { laneId, onAdd, onCancel,detailProject } = props;
     const [modalOpen, setModalOpen] = useState(true);
-    const history = useHistory();
-    const initLaneState = { 
-        id: null, title: '', 
-        project: null
-    };
+    const initLaneState = {  id: null, title: '',  project: null };
     const initCardState = {
         id: null, title: '', description: '', 
         label: '', progress: 0, start: null, end: null, cost:'',
@@ -85,13 +81,8 @@ const EditLaneForm = (props) => {
     const [isDeletingLane, setIsDeletingLane] = useState(false);
     const [tabState, setTabState] = useState(0);
     const global = useContext(UserContext);
-    const { enqueueSnackbar } = useSnackbar();
-
     const handleTabChanges = (event, newValue) => setTabState(newValue);
-
     const handleAddCard = () => onAdd(newCard);
-
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     useEffect(() => {
         if(laneId){
@@ -124,75 +115,60 @@ const EditLaneForm = (props) => {
         }else{
             const url = process.env.MIX_BACK_END_BASE_URL+'lists/' + laneId;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.get(url, {}, {})
+            axios.get(url)
                 .then((result) => {
                     setLaneDetail(result.data)
                 }).catch((error) => {
-                    const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });    
+                    switch(error.response.status){
+                        case 401 : toast.error(<b>Unauthenticated</b>); break;
+                        case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                        default : toast.error(<b>{error.response.statusText}</b>); break
+                    }
                 });
         }
     }
 
     const updateLane = () => {
-        const body = {
-            id: laneDetail.id,
-            title: laneDetail.title,
-            project: laneDetail.project,
-        }
-        if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL+'lists/' + laneDetail.id;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.patch(url, body)
-                .then((result) => {
+        const body = { id: laneDetail.id, title: laneDetail.title, project: laneDetail.project }
+        const url = process.env.MIX_BACK_END_BASE_URL+'lists/' + laneDetail.id;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        toast.promise(
+            axios.patch(url, body),
+            {
+                loading: 'Updating...',
+                success: (result)=>{
                     global.dispatch({ type: 'update-list', payload: body });
-                    handleSnackbar(`Data has been updated`, 'success');
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });    
-                });
-        }
-        else {
-            handleSnackbar(`You are currently offline`, 'warning');
-        }
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
     }
 
     const deleteList = () => {
-        global.dispatch({ type: 'remove-list', payload: {projects_id:detailProject.id,id:laneId} });
-        if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL+'lists/' + laneDetail.id;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.delete(url, { id: laneDetail.id })
-            .then((result) => {
-                setModalOpen(false);
-                onCancel();
-                handleSnackbar(`Data has been deleted`, 'success');
-            }).catch((error) => console.log(error));
-        } else {
-            handleSnackbar(`You are currently offline`, 'warning');
-        }
-    }
-
-    const checkIfDeletingList = (isDeletingLane) => {
-        if (isDeletingLane) {
-            return (
-                <Grid item lg={12} md={12} sm={12} xs={12} style={{ marginTop: '1em' }}>
-                    <Typography variant="body2">Data will be permanently deleted. Are you sure?</Typography>
-                    <br />
-                    <Button onClick={() => setIsDeletingLane(false)}>Cancel</Button>
-                    <Button onClick={(e)=>{e.preventDefault();deleteList();}} variant="contained" color="secondary">Delete</Button>
-                </Grid>
-            );
-        } else {
-            return (
-                <Grid item lg={12} md={12} sm={12} xs={12} style={{ marginTop: '1em' }}>
-                    <Button onClick={() => setIsDeletingLane(true)} variant="contained" color="secondary" style={{ marginRight: '1.5em' }}>Delete</Button>
-                    <Button variant="contained" color="primary" type="submit">Save</Button>
-                </Grid>
-            );
-        }
+        const url = process.env.MIX_BACK_END_BASE_URL+'lists/' + laneDetail.id;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        toast.promise(
+            axios.delete(url, { id: laneDetail.id }),
+            {
+                loading: 'Deleting...',
+                success: (result)=>{
+                    setModalOpen(false);
+                    onCancel();
+                    global.dispatch({ type: 'remove-list', payload: {projects_id:detailProject.id,id:laneId} });        
+                    return <b>Successfully deleted</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
     }
 
     const checkIfAuthenticated = () => {
@@ -221,7 +197,19 @@ const EditLaneForm = (props) => {
                                     variant="standard" 
                                 />
                             </Grid>
-                            {checkIfDeletingList(isDeletingLane)}
+                            {(isDeletingLane)?(
+                                    <Grid item lg={12} md={12} sm={12} xs={12} style={{ marginTop: '1em' }}>
+                                        <Typography variant="body2">Data will be permanently deleted. Are you sure?</Typography>
+                                        <br />
+                                        <Button onClick={() => setIsDeletingLane(false)}>Cancel</Button>
+                                        <Button onClick={(e)=>{e.preventDefault();deleteList();}} variant="contained" color="secondary">Delete</Button>
+                                    </Grid>
+                                ):(
+                                    <Grid item lg={12} md={12} sm={12} xs={12} style={{ marginTop: '1em' }}>
+                                        <Button onClick={() => setIsDeletingLane(true)} variant="contained" color="secondary" style={{ marginRight: '1.5em' }}>Delete</Button>
+                                        <Button variant="contained" color="primary" type="submit">Save</Button>
+                                    </Grid>
+                                )}
                         </Grid>
                     </TabPanel>
                     <TabPanel value={tabState} index={1}>

@@ -27,7 +27,7 @@ export default function SelectRole({data,onChange,defaultValue}) {
         <>
             <FormControl fullWidth style={{marginTop:'1em',marginBottom:'1em'}}>
                 <InputLabel>Role</InputLabel>
-                <Select onChange={(event) => handleChange(event.target.value)} defaultValue={dv.id}>
+                <Select variant="standard" onChange={(event) => handleChange(event.target.value)} defaultValue={dv.id}>
                     {checkIfEmpty()}
                 </Select>
             </FormControl>

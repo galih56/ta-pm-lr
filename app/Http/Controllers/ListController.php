@@ -32,6 +32,7 @@ class ListController extends Controller
         $list->end=$request->end;
         $list->projects_id=$request->projects_id;
         $list->save();
+        $list=TaskList::with('cards.cards')->findOrFail($list->id);
         return response()->json($list);
     }
 

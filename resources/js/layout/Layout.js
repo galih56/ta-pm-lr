@@ -21,7 +21,6 @@ import { makeStyles } from '@material-ui/styles';
 import styleConfig from './Theme';
 import UserContext from '../context/UserContext';
 import mainLogo from'./../assets/images/logo_white.png';
-import { SnackbarProvider } from 'notistack';
 
 const useStyles = makeStyles((theme) => (styleConfig(theme)));
 
@@ -40,70 +39,61 @@ const Layout = (props) => {
     }, []);
 
     return (
-    <SnackbarProvider maxSnack={5}>
         <div className={classes.root}>
             <CssBaseline />
             <Router>
-                <AppBar position="absolute" 
-                    className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
-                    style={{ zIndex: 701 }}>
-                    <Toolbar className={classes.toolbar}>
-                        <IconButton
-                            edge="start"
-                            color="inherit"
-                            aria-label="open drawer"
-                            onClick={handleDrawerOpen}
-                            className={clsx(classes.menuButton, drawerOpen && classes.menuButtonHidden)}
-                        >
-                            <MenuIcon />
-                        </IconButton>
-                        <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>ManPro</Typography>
-                        {/* 
-                        <IconButton color="inherit">
-                            <Badge badgeContent={4} color="secondary">
-                                <NotificationsIcon />
-                            </Badge>
-                        </IconButton> 
-                        */}
-                        <UserMenu></UserMenu>
-                    </Toolbar>
-                </AppBar>
-                <Drawer
-                    variant="permanent"
-                    style={{ zIndex: 700 }}
-                    classes={{
-                        paper: clsx(classes.drawerPaper, !drawerOpen && classes.drawerPaperClose),
-                    }}
-                    open={drawerOpen} >
-                    <div className={classes.toolbarIcon}>
-                        <div className={classes.toolbarLogo}style={{padding:'2px'}}>
-                            <img src={mainLogo} style={{maxHeight:'3em'}}/>
-                        </div>
-                        <IconButton onClick={handleDrawerClose}>
-                            <ChevronLeftIcon />
-                        </IconButton>
+            <AppBar position="absolute" 
+                className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
+                style={{ zIndex: 701 }}>
+                <Toolbar className={classes.toolbar}>
+                    <IconButton
+                        edge="start"
+                        color="inherit"
+                        aria-label="open drawer"
+                        onClick={handleDrawerOpen}
+                        className={clsx(classes.menuButton, drawerOpen && classes.menuButtonHidden)}
+                    >
+                        <MenuIcon />
+                    </IconButton>
+                    <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>ManPro</Typography>
+                    <UserMenu/>
+                </Toolbar>
+            </AppBar>
+            <Drawer
+                variant="permanent"
+                style={{ zIndex: 700 }}
+                classes={{
+                    paper: clsx(classes.drawerPaper, !drawerOpen && classes.drawerPaperClose),
+                }}
+                open={drawerOpen} >
+                <div className={classes.toolbarIcon}>
+                    <div className={classes.toolbarLogo}style={{padding:'2px'}}>
+                        <img src={mainLogo} style={{maxHeight:'3em'}}/>
                     </div>
-                    <Divider />
-                    <List component="nav">
-                        <MainListItems />
-                    </List>
-                    <Divider />
-                    <List component="nav">
-                        <RestrictedAccessMenu />
-                    </List>
-                </Drawer>
-                <main className={classes.content}>
-                    <div className={classes.appBarSpacer} />
-                    <Container maxWidth="lg" className={classes.container}>
-                        <Grid container spacing={3} style={{ marginLeft:'0.5em',display:'block'}}>
-                            {props.children}
-                            <Footer />
-                        </Grid>
-                    </Container>
-                </main>
-            </Router>
-        </div>
-    </SnackbarProvider>
+                    <IconButton onClick={handleDrawerClose}>
+                        <ChevronLeftIcon />
+                    </IconButton>
+                </div>
+                <Divider />
+                <List component="nav">
+                    <MainListItems />
+                </List>
+                <Divider />
+                <List component="nav">
+                    <RestrictedAccessMenu />
+                </List>
+            </Drawer>
+            <main className={classes.content}>
+                <div className={classes.appBarSpacer} ></div>
+                <Container maxWidth="lg" className={classes.container}>
+                    <Grid container spacing={3} style={{ marginLeft:'0.5em',display:'block'}}>
+                        {props.children}
+                        <Footer />
+                    </Grid>
+                </Container>
+            </main>
+        </Router>
+    </div>
     )
 };
 

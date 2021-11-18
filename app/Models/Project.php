@@ -14,7 +14,7 @@ class Project extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'title', 'description', 'actualStart', 'actualEnd',
+        'title', 'description', 'actual_start', 'actual_end',
         'start', 'end'
     ];
 
@@ -23,11 +23,18 @@ class Project extends Model
 
         static::deleting(function($project) { 
              $project->members()->delete();
+             $project->clients()->delete();
+             $project->lists()->delete();
+             $project->meetings()->delete();
         });
     }
 
     public function members(){
         return $this->hasMany(ProjectMember::class,'projects_id');
+    }
+
+    public function users(){
+        return $this->belongsToMany(User::class,'project_members','projects_id','users_id');
     }
 
     public function lists(){
@@ -47,7 +54,7 @@ class Project extends Model
     }
     
     public function teams(){
-        return $this->hasMany(TeamsHasProjects::class,'projects_id');
+        return $this->belongsToMany(Team::class,'teams_has_projects','projects_id','teams_id');
     }
     
     public function approvals(){
@@ -59,6 +66,6 @@ class Project extends Model
     }
     
     public function clients(){
-        return $this->hasMany(ClientsHasProjects::class,'clients_id');
+        return $this->belongsToMany(Client::class,'clients_has_projects','projects_id','clients_id');
     }
 }

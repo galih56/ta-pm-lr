@@ -18,7 +18,7 @@ import ModalCreateSubtask from './ModalCreateSubtask';
 import FormCreateNewTask from '../../FormCreateNewTask';
 import CancelRoundedIcon from '@material-ui/icons/CancelRounded';
 import UserContext from '../../../../context/UserContext';
-import { useSnackbar } from 'notistack';
+import toast from 'react-hot-toast';
 import ModalDetailTask from './../ModalDetailTask';
 import moment from 'moment';
 import axios from 'axios';
@@ -55,10 +55,6 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
     const [showCreateSubtaskForm, setShowCreateSubtaskForm] = useState(false);
     const [newTask,setNewTask]=useState(initialStateNewTask);   
     
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
-    const location=useLocation();
-    
     useEffect(() => {
         setData(detailTask.cards);
     }, [detailTask]);
@@ -76,60 +72,79 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.post(url, newTask)
-            .then((result) => {
-                setShowCreateSubtaskForm(false);
-                var newData=[...data,result.data];
-                var newDetailTask={...detailTask,cards:newData}
-                setData(newData);
-                setDetailTask(newDetailTask);
-                global.dispatch({ type: 'create-new-subtask', payload: result.data })
-                if(onTaskUpdate)onTaskUpdate(newDetailTask);
-            }) .catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.post(url, newTask),
+            {
+                loading: 'Creating a new subtask',
+                success: (result)=>{
+                    setShowCreateSubtaskForm(false);
+                    var newData=[...data,result.data];
+                    var newDetailTask={...detailTask,cards:newData}
+                    setData(newData);
+                    setDetailTask(newDetailTask);
+                    global.dispatch({ type: 'create-new-subtask', payload: result.data })
+                    if(onTaskUpdate)onTaskUpdate(newDetailTask);
+                    return <b>A new subtask successfuly created</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
 
     const handleCompleteTask = (id,event) => {
-        var newSubtasks=data.map(item=>{
-            if(item.id==id) item.complete=event.target.checked;
-            return item
-        })
-        var newDetailTask={...detailTask,cards:newSubtasks}
-        setData(newSubtasks);
-        setDetailTask(newDetailTask);
-        if(onTaskUpdate)onTaskUpdate(newDetailTask);
-
         const body = { id: id, complete: event.target.checked };
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${id}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.patch(url, body)
-            .then((result) => {
-                handleSnackbar(`Data has been updated`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.patch(url, body),
+            {
+                loading: 'Updating...',
+                success: (result)=>{
+                    var newSubtasks=data.map(item=>{
+                        if(item.id==id) item.complete=event.target.checked;
+                        return item
+                    })
+                    var newDetailTask={...detailTask,cards:newSubtasks}
+                    setData(newSubtasks);
+                    setDetailTask(newDetailTask);
+                    if(onTaskUpdate)onTaskUpdate(newDetailTask);            
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
     const handleRemoveSubtask = (subtask) => {
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${subtask.id}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.delete(url)
-            .then((result) => {
-                var newSubtasks = data.filter((item) => {
-                    if (item.id != subtask.id) return item
-                });
-                setData(newSubtasks)
-                setDetailTask({...detailTask,cards:newSubtasks});
-                if(onTaskDelete)onTaskDelete(subtask);
-                global.dispatch({ type: 'remove-subtask', payload: subtask })
-            }).catch((error) => {
-                error = { ...error };
-                const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        
+        toast.promise(
+            axios.delete(url),
+            {
+                loading: 'Deleting...',
+                success: (result)=>{
+                    var newSubtasks = data.filter((item) => {
+                        if (item.id != subtask.id) return item
+                    });
+                    setData(newSubtasks)
+                    setDetailTask({...detailTask,cards:newSubtasks});
+                    if(onTaskDelete)onTaskDelete(subtask);
+                    global.dispatch({ type: 'remove-subtask', payload: subtask })
+                    return <b>Successfully deleted</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
 

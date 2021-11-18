@@ -23,6 +23,7 @@ import TaskList from '../../tasks/TaskList';
 import moment from 'moment';
 import axios from 'axios';
 import ModalCreateMember from './ModalCreateMember';
+import toast, { Toaster } from 'react-hot-toast';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) return -1;
@@ -95,7 +96,11 @@ export default function EnhancedTable(props) {
     const classes = useStyles();
     const handleDetailTaskOpen = props.handleDetailTaskOpen;
     const projects_id = props.projects_id;
+    const memberChange = props.memberChange;
+    const setMemberChange = props.setMemberChange;
     const data = props.data;
+    let global = useContext(UserContext);
+
     let initStateUser = { id: null, name: '', email: '', role: { id: null, name: '' } }
     const [clickedUser, setClickedUser] = useState(initStateUser);
     const [modalOpen, setModalOpen] = useState(false);
@@ -130,8 +135,7 @@ export default function EnhancedTable(props) {
                         setRows(rows.filter(function(row){
                             if(row.id!=deletedValue.id)return row;
                         }))
-                    }
-                    }
+                    }}
                     />
             )
         }
@@ -141,6 +145,29 @@ export default function EnhancedTable(props) {
         setRows(data);
     }, [data]);
 
+    useEffect(()=>{
+        if(memberChange===true){
+            getMembers()
+        }
+        console.log(memberChange);
+    },[memberChange])
+
+    const getMembers=()=>{
+        const url = process.env.MIX_BACK_END_BASE_URL + 'projects/' + projects_id + '/members';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.get(url)
+            .then((result) => {
+                setRows(result.data);
+                if(setMemberChange) setMemberChange(false);
+            }).catch((error) => {
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
+            });
+    }
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -154,10 +181,9 @@ export default function EnhancedTable(props) {
         setPage(0);
     };
 
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
     return (
         <div className={classes.root}>
+             
             <Grid>
                 <Typography variant="h6">Members  <Button color="primary" component="span" onClick={() => setNewMemberOpen(true)}>+ Add new member</Button></Typography>
             </Grid>
@@ -178,16 +204,11 @@ export default function EnhancedTable(props) {
                                     <Row key={row.id} data={row} handleDetailTaskOpen={handleDetailTaskOpen} handleModalOpen={handleModalOpen} projects_id={projects_id}/>
                                 );
                             })}
-                        {emptyRows > 0 && (
-                            <TableRow style={{ height: (53) * emptyRows }} >
-                                <TableCell colSpan={6} />
-                            </TableRow>
-                        )}
                     </TableBody>
                 </Table>
             </TableContainer>
             <TablePagination
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPageOptions={[10, 20, 30]}
                 component="div"
                 count={rows.length}
                 rowsPerPage={rowsPerPage}
@@ -224,8 +245,11 @@ function Row(props) {
             .then((result) => {
                 setTasks(result.data);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -237,7 +261,7 @@ function Row(props) {
                 <TableCell>
                     <IconButton aria-label="expand row" size="small"
                         onClick={() => {
-                            getTasks(data.project_member_id);
+                            getTasks(data.project_members_id);
                             setOpen(!open);
                         }}
                     > {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton>

@@ -10,10 +10,10 @@ import MuiDialogActions from '@material-ui/core/DialogActions';
 import UserContext from '../../../context/UserContext';
 import CloseIcon from '@material-ui/icons/Close';
 import Alert from '@material-ui/core/Alert';
-import { useSnackbar } from 'notistack';
-import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 import UserSearchBar from '../../widgets/UserSearchBar';
 import SelectRole from '../../widgets/SelectRole';
+import axios from 'axios';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },
@@ -52,7 +52,6 @@ export default function ModalCreateMember(props) {
     const [selectedRole, setSelectedRole] = useState(null);
     const [roles, setRoles] = useState([]);
     const [showAlert, setShowAlert] = useState(false);
-    const { enqueueSnackbar } = useSnackbar();
     const global = useContext(UserContext);
 
     const getRoles = () => {
@@ -60,9 +59,14 @@ export default function ModalCreateMember(props) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
-            .then(result => setRoles(result.data)).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+            .then(result =>{ 
+                setRoles(result.data)
+            }).catch((error) => {
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -70,10 +74,7 @@ export default function ModalCreateMember(props) {
         getRoles();
     }, [open]);
 
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
-
     const submitData = () => {
-        if (!window.navigator.onLine) handleSnackbar(`You are currently offline`, 'warning');
         if (newMembers.length <= 0 || !selectedRole) setShowAlert(true);
         else setShowAlert(false);
         
@@ -82,25 +83,46 @@ export default function ModalCreateMember(props) {
             const url = process.env.MIX_BACK_END_BASE_URL + 'project-members/';
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.post(url, body)
-                .then((result) => {
-                    // global.dispatch({ type: 'create-new-member', payload: result.data });
-                    onCreate(result.data)
-                    setNewMembers([]);
-                    closeModal();
-                    handleSnackbar(`New members successfuly created`, 'success');
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+
+            toast.promise(
+                axios.post(url, body),
+                {
+                    loading: 'Loading...',
+                    success: (result)=>{ 
+                        onCreate(result.data)
+                        setNewMembers([]);
+                        closeModal();
+                        return <b>A new member successfully created</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
                 });
         }
         
     }
 
-    const checkIfAuthenticated = () => {
-        if (global.state.authenticated === true) {
+    const showValidation = () => {
+        if ((newMembers.length <= 0 || !selectedRole) && showAlert) {
             return (
+                <Grid item lg={12} md={12} sm={12} xs={12} >
+                    <Alert severity="warning" >Please fill all the required inputs</Alert>
+                </Grid>
+            )
+        }
+    }
+
+    return (
+        <Dialog aria-labelledby="Create a new member" open={open} fullWidth={true} maxWidth={'md'}>
+            <DialogTitle onClose={
+                () => {
+                    closeModal(false);
+                }} > Create a new member </DialogTitle>
+            {(global.state.authenticated === true)?(
                 <>
+                     
                     <DialogContent dividers>
                         <Grid container spacing={2} style={{ paddingLeft: 3, paddingRight: 3 }} >
                             {showValidation()}
@@ -127,35 +149,11 @@ export default function ModalCreateMember(props) {
                         <Button onClick={submitData} color="primary">Create</Button>
                     </DialogActions>
                 </>
-            )
-        } else {
-            return (
+            ): (
                 <DialogContent dividers>
                     <Alert severity="warning">Your action requires authentication. Please sign in.</Alert>
                 </DialogContent>
-            )
-        }
-    }
-
-    const showValidation = () => {
-        if ((newMembers.length <= 0 || !selectedRole) && showAlert) {
-            return (
-                <Grid item lg={12} md={12} sm={12} xs={12} >
-                    <Alert severity="warning" >Please fill all the required inputs</Alert>
-                </Grid>
-            )
-        }
-    }
-
-    return (
-        <Dialog aria-labelledby="Create a new member" open={open} fullWidth={true} maxWidth={'md'}>
-            <DialogTitle onClose={
-                () => {
-                    closeModal(false);
-                }} > Create a new member </DialogTitle>
-            {
-                checkIfAuthenticated()
-            }
+            )}
         </Dialog>
     );
 }

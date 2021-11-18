@@ -11,7 +11,7 @@ const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteTask, del
             <React.Fragment>
                 <Button onClick={() => setEditMode(false)} color="primary"> Cancel </Button>
                 <Button onClick={
-                    () => { saveChanges(); setEditMode(false); }
+                    () => { saveChanges()}
                 } variant="contained" color="primary"> Save</Button>
                 <Button onClick={
                     () => { setDeleteConfirmOpen(true); }

@@ -34,7 +34,7 @@ import ZipIcon from './../../assets/icons/zip.svg';
 import FilesIcon from './../../assets/icons/files.svg';
 import PlayButtonIcon from './../../assets/icons/play-button.svg';
 import axios from 'axios';
-import { useSnackbar } from 'notistack';
+import toast, { Toaster } from 'react-hot-toast';
 import Alert from '@material-ui/core/Alert';
 
 const useStyles = makeStyles((theme) => ({
@@ -60,7 +60,7 @@ const trimString=(str)=>{
     if(space_counter<=3 && str.length>20) {trimmedString=str.substring(0, 16)+'..';trimmed=true}
     return (trimmed?trimmedString:str);
 }
-const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
+const CustomCard = ({ classes, file, projects_id,handleDetailTaskOpen,onPick}) => {
     const location = useLocation(); 
     const [anchorPopover, setAnchorPopover] = useState(false);
     const handleClick = (event) => setAnchorPopover(event.currentTarget);
@@ -140,12 +140,10 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
                         if(handleDetailTaskOpen){
                             let pathname = location.pathname;
                             let searchParams = new URLSearchParams(location.search);
-                            searchParams.set('task_id', file.tasks_id);
+                            searchParams.set('tasks_id', file.tasks_id);
                             return (<>
                                 Task: <Link to={{ pathname: pathname, search: searchParams.toString() }}
-                                    onClick={() => {
-                                        handleDetailTaskOpen({ projects_id: file.projects_id, listId: file.lists_id, taskId: file.tasks_id, open: true });
-                                    }}>
+                                    onClick={() => handleDetailTaskOpen({ task:{projects_id: projects_id, lists_id: file.lists_id, tasks_id: file.tasks_id,id: file.tasks_id}, open: true })}>
                                     {file.task_title}
                                 </Link>
                             </>)
@@ -154,9 +152,7 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
                         }
                     })()}
                 </Typography>
-                <Typography variant="body1" color="textSecondary" component="p">
-                Uploaded by : {file.user_name}
-                </Typography>
+
             </CardContent>
         </Card>
     );
@@ -169,42 +165,43 @@ const Files = (props) => {
     const [deleteModalOpen,setDeleteModalOpen]=useState(false);
     const [choosenFileId,setChoosenFileId]=useState(null);
     const handleDeleteModalClose=()=> setDeleteModalOpen(false);
-    
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = (message, variant) => enqueueSnackbar(message, { variant });
 
     const getFiles = () => {
-        if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL + 'projects/' + projects_id + '/files';
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.get(url)
-                .then((result) => {
-                    const data = result.data;
-                    setFiles(data);
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        const toast_loading = toast.loading('Loading...');
+        const url = process.env.MIX_BACK_END_BASE_URL + 'projects/' + projects_id + '/files';
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.get(url)
+            .then((result) => {
+                const data = result.data;
+                setFiles(data);
+                toast.dismiss(toast_loading);
+            }).catch((error) => {
+                toast.dismiss(toast_loading);
+                switch(error.response.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
                 });
-        } else {
-            handleSnackbar(`You're currently offline. Please check your internet connection.`, 'warning');
-        }
     }
 
     const handleDelete = (id) => {
-        if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL + 'files/' + id;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.delete(url)
-                .then((result) => {
-                    const data = result.data;
+        const url = process.env.MIX_BACK_END_BASE_URL + 'files/' + id;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        toast.promise(
+            axios.delete(url),
+            {
+                loading: 'Deleting...',
+                success: (result)=>{
                     setChoosenFileId(null)
-                }).catch((error) => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: null }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                });
-        } else {
-            handleSnackbar(`You're currently offline. Please check your internet connection.`, 'warning');
-        }
+                    return <b>Successfully deleted</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
     }
 
     useEffect(() => {
@@ -213,37 +210,32 @@ const Files = (props) => {
 
     return (
         <Grid container spacing={2}>
-            {(()=>{
-                if(files.length){
-                    return(
-                        <>
-                        {
-                            files.map(file => (
-                                <Grid item xl={2} lg={3} md={4} sm={6} xs={6} key={file.id}>
-                                    <CustomCard 
-                                        file={file} 
-                                        classes={classes} 
-                                        handleDetailTaskOpen={handleDetailTaskOpen} 
-                                        onPick={onPick}
-                                        />
-                                </Grid>
-                            ))
-                        }
-                        </>
-                    )
-                }else{
-                    return(
-                        <Grid xl={12} lg={12} sm={12} xs={12}>
-                            <Alert severity="info" style={{margin:'1em',padding:'auto'}}>No files have been uploaded to this project yet</Alert>
+            {(files.length>0)?(
+                <React.Fragment>
+                {
+                    files.map(file => (
+                        <Grid item xl={2} lg={3} md={4} sm={6} xs={6} key={file.id}>
+                            <CustomCard 
+                                file={file} 
+                                classes={classes} 
+                                handleDetailTaskOpen={handleDetailTaskOpen} 
+                                onPick={onPick}
+                                projects_id={projects_id}
+                                />
                         </Grid>
-                    )
+                    ))
                 }
-               
-            })()}
+                </React.Fragment>
+            ):(
+                <Grid xl={12} lg={12} sm={12} xs={12}>
+                    <Alert severity="info" style={{margin:'1em',padding:'auto'}}>No files have been uploaded to this project yet</Alert>
+                </Grid>
+            )}
             <ModalDeleteConfirm 
                 open={deleteModalOpen} 
                 handleClose={handleDeleteModalClose} 
                 handleDelete={()=>handleDelete(choosenFileId)}/>
+             
         </Grid>
     )
 };

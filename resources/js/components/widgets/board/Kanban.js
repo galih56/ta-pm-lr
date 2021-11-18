@@ -1,23 +1,17 @@
-import React, { useContext, useEffect, memo, useState, useCallback } from 'react';
-import { useHistory } from 'react-router-dom';
+import 'fontsource-roboto';
+import React, { useContext, useEffect, memo, useState } from 'react';
 import Board from 'react-trello';
 import { createTranslate } from 'react-trello';
 import UserContext from '../../../context/UserContext';
-import { useSnackbar } from 'notistack';
 import axios from 'axios';
 import CustomCard from './Card';
 import EditLaneForm from './EditLaneForm';
-import 'fontsource-roboto';
-import moment from 'moment';
-
+import toast from 'react-hot-toast';
 
 const Kanban = (props) => {
     const global = useContext(UserContext);
     const [board, setBoard] = useState({ lanes: [] });
     const {detailProject,handleDetailTaskOpen} = props;
-    const { enqueueSnackbar } = useSnackbar();
-    const handleSnackbar = useCallback((message, variant) => enqueueSnackbar(message, { variant }));
-    const history = useHistory();
 
     useEffect(() => {
         if (detailProject) setBoard({ lanes: detailProject.columns });
@@ -42,26 +36,27 @@ const Kanban = (props) => {
             if(member.id==global.state.id) newCard.projectMemberId=member.id; break;
         }
 
-        if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL + 'tasks/';
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.post(url, newCard)
-                .then((result) => {
+        const url = process.env.MIX_BACK_END_BASE_URL + 'tasks/';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        toast.promise(
+            axios.post(url, newCard),
+            {
+                loading: 'Creating a new task',
+                success: (result)=>{
                     newCard.id = result.data.id;
                     newCard.projects_id = detailProject.id;
                     newCard.lists_id = laneId;
                     newCard={...newCard,...result.data}
                     global.dispatch({ type: 'create-new-task', payload: newCard })
-                    handleSnackbar(`A new card successfuly created`, 'success');
-                }).catch(error => {
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                });
-        } else {
-            handleSnackbar(`You're currently offline. Please check your internet connection`, 'warning');
-            global.dispatch({ type: 'create-new-task', payload: newCard });
-        }
+                    return <b>A new task successfully created</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
         return newCard;
     }
 
@@ -70,23 +65,22 @@ const Kanban = (props) => {
         data.lists_id = laneId;
         if (window.navigator.onLine) {
             const url = process.env.MIX_BACK_END_BASE_URL + 'lists/' + laneId;
-            try {
-                axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-                axios.defaults.headers.post['Content-Type'] = 'application/json';
-                axios.patch(url, data)
-                    .then((result) => {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+            axios.defaults.headers.post['Content-Type'] = 'application/json';
+            toast.promise(
+                axios.patch(url, data),
+                {
+                    loading: 'Updating...',
+                    success: (result)=>{
                         global.dispatch({ type: 'update-list', payload: data })
-                        handleSnackbar(`Data has been updated successfuly`, 'success');
-                    }).catch((error) => {
-                        error = { ...error };
-                        const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history }
-                        global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                    });
-            }
-            catch (error) { handleSnackbar(`Error : ${error}`, 'danger'); }
-        } else {
-            // global.dispatch({ type: 'create-new-task', payload: newCard });
-            handleSnackbar(`You're currently offline. Please check your internet connection`, 'warning');
+                        return <b>Successfully updated</b>
+                    },
+                    error: (error)=>{
+                        if(error.response.status==401) return <b>Unauthenticated</b>;
+                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error.response.statusText}</b>;
+                    },
+                });
         }
     }
     const onCardMove = (fromLaneId, toLaneId, cardId, index) => {
@@ -97,12 +91,8 @@ const Kanban = (props) => {
             axios.patch(url, body, config)
                 .then((result) => {
                     global.dispatch({ type: 'move-card', payload: result.data })
-                    handleSnackbar(`A card has been moved`, 'success');
-                }).catch((error) => {
-                    error = { ...error };
-                    const payload = { error: error, snackbar: handleSnackbar, dispatch: global.dispatch, history: history };
-                    global.dispatch({ type: 'handle-fetch-error', payload: payload });
-                });
+                    toast.success(`A card has been moved`);
+                }).catch(console.log);
     }
     const onCardClick = (cardId, metadata,laneId) =>{ 
         handleDetailTaskOpen({ task : {projects_id: detailProject.id, lists_id: laneId, id: cardId, onTaskDelete:onCardDelete}, open: true});
@@ -113,7 +103,8 @@ const Kanban = (props) => {
                 id:detailProject.id,
                 start:detailProject.start,
                 end:detailProject.end,
-                members:detailProject.members
+                members:detailProject.members,
+                clients:detailProject.clients
             }} {...props}/>
         )
     }
@@ -121,7 +112,6 @@ const Kanban = (props) => {
     const [eventBus, setEventBus] = useState(undefined);
 
     const onCardDelete=(lists_id,tasks_id)=>{
-        console.log(lists_id,tasks_id)
         eventBus.publish({type: 'REMOVE_CARD', laneId: listId, cardId: tasks_id});
     }
     return (
@@ -142,6 +132,7 @@ const Kanban = (props) => {
                 eventBusHandle={setEventBus}
             >
             </Board>
+             
         </React.Fragment>
     )
 

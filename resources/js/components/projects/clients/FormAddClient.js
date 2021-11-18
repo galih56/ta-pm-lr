@@ -1,8 +1,8 @@
 import React,{useState,useContext} from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
-import axios from 'axios'
-import { useSnackbar } from 'notistack';
+import axios from 'axios';
+import toast, { Toaster } from 'react-hot-toast';
 import UserContext from './../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
 import Dialog from '@material-ui/core/Dialog';
@@ -41,8 +41,6 @@ const DialogContent = withStyles((theme) => ({
 const FormAddClient=({open,handleClose,onCreate,detailProject})=>{
     const global=useContext(UserContext);
     const [newClients,setNewClients]=useState('');
-    const { enqueueSnackbar } = useSnackbar();
-    const snackbar = (message, variant) =>  enqueueSnackbar(message, { variant });
 
     const formCreateOnSubmit=()=>{
         const body = {
@@ -53,14 +51,22 @@ const FormAddClient=({open,handleClose,onCreate,detailProject})=>{
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/clients`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.post(url, body)
-            .then((result) => {
-                onCreate(result.data);
-                handleClose();
-                snackbar(`A new client successfully created`, 'success');
-            }).catch((error) => {
-                const payload = { error: error, snackbar: snackbar, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+        toast.promise(
+            axios.post(url, body),
+            {
+                loading: 'Creating a new client',
+                success: (result)=>{
+                    onCreate(result.data);
+                    handleClose();
+                    global.dispatch({type:'add-clients-to-project',payload:{projects_id:detailProject.id,clients:result.data}});
+                    return <b>A new client successfuly created</b>
+                },
+                error: (error)=>{
+                    console.log(error);
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
             });
     }
 
@@ -73,6 +79,7 @@ const FormAddClient=({open,handleClose,onCreate,detailProject})=>{
                         handleClose();
                     }} > Add a new client </DialogTitle>
             <DialogContent dividers>
+                 
                 <form onSubmit={(e)=>{
                         e.preventDefault();
                         formCreateOnSubmit();
@@ -82,10 +89,9 @@ const FormAddClient=({open,handleClose,onCreate,detailProject})=>{
                             <UserSearchBar 
                                 detailProject={detailProject}
                                 exceptedClients={detailProject.clients} 
-                                onChange={(clients)=>{
-                                    setNewClients(clients);
-                                }}
+                                onChange={(clients)=> setNewClients(clients)}
                                 clientOnly={true}
+                                inputLabel="Search clients"
                             />
                         </Grid>
                         <Grid xs={12} sm={12} md={12} lg={12} lg={12} item>

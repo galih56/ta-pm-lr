@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { BrowserRouter as Router, Link, useHistory } from 'react-router-dom';
 import UserContext from '../../context/UserContext';
-import moment from 'moment';
-import axios from 'axios';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -20,6 +19,9 @@ import { visuallyHidden } from '@material-ui/utils';
 import ApprovalStatus from './../widgets/ApprovalStatus';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
+import toast, { Toaster } from 'react-hot-toast';
+import moment from 'moment';
+import axios from 'axios';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) return -1;
@@ -107,15 +109,22 @@ export default function EnhancedTable() {
     }, []);
 
     const getApprovals = () => {
+        const toast_loading = toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}approvals?projects_id=${global.state.current_project_member_role?.project?.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setRows(result.data);
+                toast.dismiss(toast_loading);
             }).catch((error) => {
-                const payload = { error: error, snackbar: null, dispatch: global.dispatch, history: null }
-                global.dispatch({ type: 'handle-fetch-error', payload: payload });
+                toast.dismiss(toast_loading);
+                console.error(error.response);
+                switch(error.response?.status){
+                    case 401 : toast.error(<b>Unauthenticated</b>); break;
+                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                    default : toast.error(<b>{error.response.statusText}</b>); break
+                }
             });
     }
 
@@ -131,8 +140,6 @@ export default function EnhancedTable() {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
-
-    const emptyRows = page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
 
     return (
         <Grid container>        
@@ -156,7 +163,7 @@ export default function EnhancedTable() {
                                     rowCount={rows.length}
                                 />
                                 <TableBody>
-                                    {stableSort(rows, getComparator(order, orderBy))
+                                    {(rows.length>0)?stableSort(rows, getComparator(order, orderBy))
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                         .map((row) => {
                                             var maxLenght = 50;
@@ -192,8 +199,13 @@ export default function EnhancedTable() {
                                                     </TableCell>
                                                 </TableRow>
                                             );
-                                        })}
-                                    {emptyRows > 0 && (<TableRow style={{ height: (53) * emptyRows }} > <TableCell colSpan={6} /> </TableRow>)}
+                                        }):(
+                                            <TableRow>
+                                                <TableCell align="center"  colSpan={headCells.length}>
+                                                    <Typography variant="body1"><b>There is no data to show</b></Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
                                 </TableBody>
                             </Table>
                         </TableContainer>
@@ -203,7 +215,7 @@ export default function EnhancedTable() {
                             count={rows.length}
                             rowsPerPage={rowsPerPage}
                             onPageChange={handleChangePage}
-                            rowsPerPageOptions={[5, 10, 25]}
+                            rowsPerPageOptions={[10, 20, 30]}
                             onRowsPerPageChange={handleChangeRowsPerPage}
                         />
                     </div>

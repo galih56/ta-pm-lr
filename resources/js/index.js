@@ -1,6 +1,6 @@
 import React, { useReducer, lazy } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, Switch, Redirect, useLocation,withRouter } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import { ThemeProvider, createTheme } from '@material-ui/core/styles';
 import 'fontsource-roboto';
 import Layout from "./layout/Layout";
@@ -18,8 +18,11 @@ import {
     storeDetailSubtask,storeSubtasks, createNewSubtask, removeSubtask,
     createNewAttachments, removeAttachment
 } from './context/TasksReducer';
+import { addNotification, storeNotifications, updateNotification, removeNotification } from './context/NotificationsReducer';
+import { addClientsToProject, storeClientsToProject, removeClientFromProject } from './context/ClientsReducer';
 import { LinearProgress } from '@material-ui/core/';
 import './index.css';
+import {Toaster} from 'react-hot-toast';
 
 const Home = lazy(() => import("./layout/Home"));
 const DetailProject = lazy(() => import("./components/projects/DetailProject"));
@@ -43,39 +46,6 @@ const checkAuthentication = (payload, state) => {
             history.push('/auth');
         }
     } else history.push('/auth');
-    return state;
-}
-
-const handleFetchError = (payload, state) => {
-    const { error, snackbar, dispatch, history } = payload;
-    try {
-        if (error.response) {
-            // Request made and server responded
-            switch (error.response.status) {
-                case 401:
-                    if (snackbar) snackbar(`Unauthenticated`, 'warning');
-                    break;
-                case 422:
-                    if (snackbar) snackbar(`Some required inputs are empty`, 'warning');
-                    break;
-                case 409:
-                    var message = '';
-                    if ('data' in error.response) message = `${error.response.data}`;
-                    else message = `${error.response.statusText}`;
-                    if (snackbar) snackbar(`${message}`, 'warning');
-                    break;
-                default:
-                    if (snackbar) snackbar(`Server Error : ${error.response.statusText} (${error.response.status})`, 'error');
-                    break;
-            }
-        } else if (error.request) {
-            if (snackbar) snackbar(`Server is not responding`, 'error');
-        } else {
-            if (snackbar) snackbar(`Client Error : ${error.message}`, 'error');
-        }
-    } catch (errors) {
-        console.log('Catch Errors : ', errors);
-    }
     return state;
 }
 
@@ -134,10 +104,14 @@ const reducer = (state, action) => {
             return updateMeeting(payload); 
         case 'remove-meeting':
             return removeMeeting(payload);
+        case 'add-clients-to-project':
+            return addClientsToProject(payload);
+        case 'store-clients-to-project':
+            return storeClientsToProject(payload);
+        case 'remove-client-from-project':
+            return removeClientFromProject(payload);
         case 'logout':
             return logout();
-        case 'handle-fetch-error':
-            return handleFetchError(payload, state);
         case 'run-delayed-http-request':
             return runDelayedHTTPRequest(state);
         case 'check-authentication':
@@ -151,92 +125,72 @@ const reducer = (state, action) => {
     }
 }
 
-function RemoveTrailingSlashes({ path }) {
-    return <>
-        {/* https://github.com/ReactTraining/react-router/issues/4841#issuecomment-523625186 */}
-        {/* Removes trailing slashes */}
-        <Route path={`/${path}*(/+)`} exact strict ><Redirect to={`/${path}`} /></Route>
-        {/* Removes duplicate slashes in the middle of the URL */}
-        <Route
-            path={`/${path}(.*//+.*)`}
-            exact
-            strict
-            render={({ match }) => (
-                <Redirect to={`/${match.params.url.replace(/\/\/+/, "/")}`} />
-            )}
-        />
-
-    </>;
-}
-
 const theme = createTheme();
 const App = () => {
     const [state, dispatch] = useReducer(reducer, initState);
 
     return (
         <UserContext.Provider value={{ state, dispatch }}>
-                <ThemeProvider theme={theme}>
-                    <Router>
-                        <Layout>
-                            <React.Suspense fallback={<LinearProgress />}>
-                                <Switch>
-                                    {/* passing props ke component melalui route gak bisa langsung, jadi harus pakai anon function ke props render yg dimiliki component Route */}
-                                    <Route path="/my-tasks" render={(props) => (<TaskList {...props} ></TaskList>)} />
-                                    <Route path="/users" render={(props) => (<UserInformation {...props} ></UserInformation>)} />
-                                    <Route path='/auth' render={(props) => (<ModalAuthentication />)} />
-                                    <Route path={'/projects'} render={(props) => {
-                                        const { match: { path } } = props;
-                                        return (
-                                            <>
-                                                <Route path={`${path}/:id`} component={DetailProject} />
-                                                <Route path={`${path}`} exact component={Home} />
-                                                {/* <RemoveTrailingSlashes path={path}/> */}
-                                            </>
-                                        )
-                                    }} />
-                                    <Route path={'/reports'} render={(props) => {
-                                        const { match: { path } } = props;
-                                        return (
-                                            <>
-                                                <Route path={`${path}/:id`} component={DetailProjectReports} />
-                                                <Route path={`${path}`} exact component={ProjectReports} />
-                                                {/* <RemoveTrailingSlashes path={path}/> */}
-                                            </>
-                                        )
-                                    }} />
-                                    <Route path='/teams' render={(props) => {
-                                        const { match: { path } } = props;
-                                        return (
-                                            <>
-                                                <Route path={`${path}/:id`} component={DetailTeam} />
-                                                <Route path={`${path}`} exact component={TeamList} />
-                                            </>
-                                        )
-                                    }} />
-                                    <Route path='/approvals' render={(props) => {
-                                        const { match: { path } } = props;
-                                        return (
-                                            <>
-                                                <Route path={`${path}/:id`} component={DetailApproval} />
-                                                <Route path={`${path}`} exact component={ApprovalTable} />
-                                            </>
-                                        )
-                                    }} />
-                                    <Route path='/clients' render={(props) => {
-                                        const { match: { path } } = props;
-                                        return (
-                                            <>
-                                                <Route path={`${path}/:id`} component={DetailClient} />
-                                                <Route path={`${path}`} exact component={ClientTable} />
-                                            </>
-                                        )
-                                    }} />
-                                    <Route path='/' exact ><Redirect to='/projects' /></Route>
-                                </Switch>
-                            </React.Suspense>
-                        </Layout>
-                    </Router>
-                </ThemeProvider>
+            <ThemeProvider theme={theme}>
+                <Router>
+                    <Layout>
+                        <Toaster/>
+                        <React.Suspense fallback={<LinearProgress />}>
+                            <Switch>
+                                <Route path="/my-tasks" render={(props) => (<TaskList {...props} ></TaskList>)} />
+                                <Route path="/users" render={(props) => (<UserInformation {...props} ></UserInformation>)} />
+                                <Route path='/auth' render={(props) => (<ModalAuthentication />)} />
+                                <Route path={'/projects'} render={(props) => {
+                                    const { match: { path } } = props;
+                                    return (
+                                        <>
+                                            <Route path={`${path}/:id`} component={DetailProject} />
+                                            <Route path={`${path}`} exact component={Home} />
+                                        </>
+                                    )
+                                }} />
+                                <Route path={'/reports'} render={(props) => {
+                                    const { match: { path } } = props;
+                                    return (
+                                        <>
+                                            <Route path={`${path}/:id`} component={DetailProjectReports} />
+                                            <Route path={`${path}`} exact component={ProjectReports} />
+                                        </>
+                                    )
+                                }} />
+                                <Route path='/teams' render={(props) => {
+                                    const { match: { path } } = props;
+                                    return (
+                                        <>
+                                            <Route path={`${path}/:id`} component={DetailTeam} />
+                                            <Route path={`${path}`} exact component={TeamList} />
+                                        </>
+                                    )
+                                }} />
+                                <Route path='/approvals' render={(props) => {
+                                    const { match: { path } } = props;
+                                    return (
+                                        <>
+                                            <Route path={`${path}/:id`} component={DetailApproval} />
+                                            <Route path={`${path}`} exact component={ApprovalTable} />
+                                        </>
+                                    )
+                                }} />
+                                <Route path='/clients' render={(props) => {
+                                    const { match: { path } } = props;
+                                    return (
+                                        <>
+                                            <Route path={`${path}/:id`} component={DetailClient} />
+                                            <Route path={`${path}`} exact component={ClientTable} />
+                                        </>
+                                    )
+                                }} />
+                                <Route path='/' exact ><Redirect to='/projects' /></Route>
+                            </Switch>
+                        </React.Suspense>
+                    </Layout>
+                </Router>
+            </ThemeProvider>
         </UserContext.Provider>
 
     );

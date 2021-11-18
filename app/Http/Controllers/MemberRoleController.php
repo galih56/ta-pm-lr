@@ -9,7 +9,7 @@ class MemberRoleController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['index','show','update','store','destroy']]);  
+        $this->middleware('auth:sanctum',['only'=>['show','update','store','destroy']]);  
     }
     
     public function index()

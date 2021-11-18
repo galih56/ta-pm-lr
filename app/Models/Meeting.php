@@ -15,6 +15,9 @@ class Meeting extends Model
         'title', 'description', 'google_calendar_info',
         'start', 'end', 'users_id',
     ];
+    protected $casts = [
+        'google_calendar_info' => 'json',
+    ];
 
     public function creator(){
         return $this->belongsTo(User::class,'users_id');
@@ -28,4 +31,7 @@ class Meeting extends Model
         return $this->belongsTo(User::class,'projects_id');
     }
 
+    public function members(){
+        return $this->belongsToMany(User::class,'meeting_members','meetings_id','users_id');
+    }
 }

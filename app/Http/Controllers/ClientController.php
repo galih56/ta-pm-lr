@@ -28,16 +28,12 @@ class ClientController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name'=>'required',
             'city'=>'required',
-            'phone_number'=>'required|numeric'
+            'institution'=>'required',
         ]);
 
         $client=new Client();
-        if($request->has('name')) $client->name=$request->name;
         if($request->has('description')) $client->description=$request->description;
-        if($request->has('email')) $client->email=$request->email;
-        if($request->has('phone_number')) $client->phone_number=$request->phone_number;
         if($request->has('city')) $client->city=$request->city;
         if($request->has('institution')) $client->institution=$request->institution;
         $client->save();
@@ -65,15 +61,12 @@ class ClientController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name'=>'required',
             'city'=>'required',
-            'phone_number'=>'required|numeric'
+            'institution'=>'required',
         ]);
 
         $client=Client::findOrFail($id);
-        $client->name=$request->name;
-        $client->description=$request->description;
-        $client->phone_number=$request->phone_number;
+        $client->description='';
         $client->city=$request->city;
         $client->institution=$request->institution;
         $client->save();
@@ -84,7 +77,6 @@ class ClientController extends Controller
     {
         $client=Client::findOrFail($id);
         ClientsHasProjects::where('clients_id',$client->id)->delete();
-        TaskMember::where('clients_id',$client->id)->delete();
         return response()->json($client->delete());
     }
 }
