@@ -152,7 +152,10 @@ const CustomCard = ({ classes, file, projects_id,handleDetailTaskOpen,onPick}) =
                         }
                     })()}
                 </Typography>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
             </CardContent>
         </Card>
     );

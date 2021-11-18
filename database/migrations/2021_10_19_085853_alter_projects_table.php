@@ -28,6 +28,10 @@ class AlterProjectsTable extends Migration
     public function down()
     {
         Schema::table('projects', function (Blueprint $table) {
+<<<<<<< HEAD
+=======
+            $table->text('description')->nullable(false)->change();
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
             $table->datetime('start',$precision=0)->nullable(false)->change();
             $table->datetime('end',$precision=0)->nullable(false)->change();
         });

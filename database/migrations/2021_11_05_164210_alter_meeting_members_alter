@@ -1,0 +1,35 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class AlterMeetingMembersAlter extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('meeting_members', function (Blueprint $table) {
+            DB::statement('ALTER TABLE meeting_members ALTER COLUMN 
+                  google_calendar_info TYPE JSON USING cast(google_calendar_info AS JSON)::json');
+
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('meeting_members', function (Blueprint $table) {
+            DB::statement('ALTER TABLE meeting_members ALTER COLUMN 
+            google_calendar_info TYPE text USING (trim(google_calendar_info)::text');
+        });
+    }
+}

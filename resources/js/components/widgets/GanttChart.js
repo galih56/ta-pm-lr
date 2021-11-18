@@ -73,6 +73,7 @@ class GanttChart extends React.Component {
             }
             data[i]=new_column;
         }
+        console.log(data);
         this.setState({dataSource:data});
     }
     shouldComponentUpdate() {

@@ -19,6 +19,8 @@ Route::resource('task-members', 'App\Http\Controllers\TaskMemberController');
 Route::resource('task-attachments', 'App\Http\Controllers\TaskAttachmentController');
 Route::resource('files', 'App\Http\Controllers\FileController');
 Route::get('files/{id}/download', 'App\Http\Controllers\FileController@download');
+Route::patch('meetings/add-meeting-members', 'App\Http\Controllers\MeetingController@addMembers');
+Route::patch('meetings/remove-meeting-members', 'App\Http\Controllers\MeetingController@removeMembers');
 Route::resource('meetings', 'App\Http\Controllers\MeetingController');
 Route::resource('meeting-members', 'App\Http\Controllers\MeetingMemberController');
 Route::resource('member-roles', 'App\Http\Controllers\MemberRoleController');
@@ -26,8 +28,8 @@ Route::resource('teams', 'App\Http\Controllers\TeamController');
 Route::resource('team-members', 'App\Http\Controllers\TeamMemberController');
 Route::resource('tags', 'App\Http\Controllers\TagController');
 Route::resource('comments', 'App\Http\Controllers\CommentController');
-Route::resource('activity-logs', 'App\Http\Controllers\ActivityLogController');   
-Route::resource('github-repositories', 'App\Http\Controllers\GithubRepositories');   
+// Route::resource('activity-logs', 'App\Http\Controllers\ActivityLogController');   
+// Route::resource('github-repositories', 'App\Http\Controllers\GithubRepositories');   
 Route::resource('users', 'App\Http\Controllers\UserController');
 
 Route::get('/occupations/tree','App\Http\Controllers\OccupationController@getTree');
@@ -70,3 +72,4 @@ Route::resource('approvals', 'App\Http\Controllers\ApprovalController');
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+ 

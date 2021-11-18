@@ -181,7 +181,10 @@ const DetailProject = (props) => {
 
     const handleDetailTaskOpen = (taskInfo) => {
         const {task, open,onTaskUpdate,onTaskDelete } = taskInfo;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
         console.log({task, open,onTaskUpdate,onTaskDelete });
         setDetailTaskOpen(open);
         setClickedTask({ ...task, onTaskDelete:onTaskDelete, onTaskUpdate:onTaskUpdate });
@@ -227,8 +230,12 @@ const DetailProject = (props) => {
                                                         onClick={()=>handleModalCreateList(true)}
                                                         style={{ marginBottom: '1em' }}
                                                         startIcon={<AddIcon />}> Add new list </Button>
+<<<<<<< HEAD
 
 						   <Button
+=======
+                                                    <Button
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
                                                         href={`${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}/export`}
                                                         target="_blank"
                                                         variant="contained"
@@ -242,7 +249,10 @@ const DetailProject = (props) => {
                                                         style={{ marginBottom: '1em' ,marginLeft:'1em'}}> 
                                                             Import 
                                                     </Button>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 553d6033c97fa34d14364136d49cd6b632f825c1
                                                 </>
                                             ):<></>}
                                             
