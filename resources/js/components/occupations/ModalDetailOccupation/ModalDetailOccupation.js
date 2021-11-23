@@ -1,4 +1,3 @@
-import 'fontsource-roboto';
 import React, { useEffect, useContext, useState } from 'react';
 import UserContext from '../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
@@ -115,15 +114,13 @@ export default function ModalDetailOccupation(props) {
             <DialogActions>
                 <DialogActionButtons
                     isEdit={isEditing}
-                    deletable={!([1, 2, 5, 8, 9].includes(data.id))}
+                    deletable={!([1,2,3,4,5,6].includes(data.id))}
                     saveChanges={saveChanges}
                     setEditMode={handleEditingMode}
                     deleteOccupation={deleteOccupation}
                     deleteConfirmOpen={deleteConfirmOpen}
                     setDeleteConfirmOpen={setDeleteConfirmOpen}
-                    closeModal={closeModal}
-
-                > </DialogActionButtons>
+                    closeModal={closeModal}/>
             </DialogActions>
         </Dialog>
     );

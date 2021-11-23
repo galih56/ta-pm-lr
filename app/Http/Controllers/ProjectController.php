@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\ProjectMember;
+use App\Models\TeamMember;
 use App\Models\TeamsHasProjects;
 use App\Models\File;
 use App\Models\Team;
@@ -66,13 +67,10 @@ class ProjectController extends Controller
             }
 
             $inserted_members=[];
-            if($request->has('project_owners')){
-                $project->users()->sync($request->project_owners,['roles_id'=>1]);
+            if($request->has('members')){
+                $project->users()->sync($request->members,['roles_id'=>1]);
             }
 
-            if($request->has('project_managers')){
-                $project->users()->sync($request->project_managers,['roles_id'=>2]);
-            }
             
             if($request->has('clients')){
                 $project->clients()->sync($request->clients);
@@ -211,7 +209,7 @@ class ProjectController extends Controller
         $teams=Team::from('teams AS t')
                         ->join('teams_has_projects AS tp','t.id','=','tp.teams_id')
                         ->where('tp.projects_id','=',$id)
-                        ->with('members.user')->with('members.role')
+                        ->with('members.user')
                         ->get()->toArray();
         $new_teams=[];
         for ($i=0; $i < count($teams); $i++) { 
@@ -233,14 +231,16 @@ class ProjectController extends Controller
     }
 
     public function getMembers($id){
-        $project_members=ProjectMember::where('projects_id','=',$id)->with('role')->with('user')->get()->toArray();
-        
+        $project_members=ProjectMember::where('projects_id','=',$id)->with('user.occupation')->get()->toArray();
+
         $members=[];
         for ($i=0; $i < count($project_members); $i++) { 
             $member=$project_members[$i];
             $user=$member['user'];
             $user['project_members_id']=$member['id'];
-            $user['role']=$member['role'];
+            if(array_key_exists('occupation',$member['user'])) $user['role']=$member['user']['occupation'];
+            else $user['role']=['id'=>'','name'=>"-"]; 
+            unset($user['occupation']);
             $members[]=$user;
         }
         return response()->json($members);
@@ -332,7 +332,12 @@ class ProjectController extends Controller
 
     public function removeTeams(Request $request,$id,$teams_id){
         $project=Project::findOrFail($id);
-        $teams_has_projects=TeamsHasProjects::where('projects_id','=',$id)->where('teams_id','=',$teams_id)->delete();
+        $team_members=TeamMember::where('teams_id','=',$teams_id)->pluck('users_id')->toArray();
+        $project_members=ProjectMember::whereIn('users_id',$team_members)->delete();
+        $teams_has_projects=TeamsHasProjects::where('projects_id','=',$id)
+                                                ->where('teams_id','=',$teams_id)
+                                                ->delete();
+        
         return response()->json($teams_has_projects,200);
     }
 
@@ -671,6 +676,48 @@ class ProjectController extends Controller
             $failures = $e->failures();
             return response()->json($failures,500);
         } 
+    }
+
+    public function getAlltasks($id){
+        $tasks=Task::selectRaw('t.*,t.parent_task_id AS parentTask,l.projects_id')
+                        ->from('tasks AS t')
+                        ->leftJoin('lists AS l','t.lists_id','=','l.id')
+                        ->where('l.projects_id','=',$id)
+                        ->orderBy('t.end','ASC')->get($id);
+        $custom_columns=[
+            [ 'title'=>'To do','cards'=>[] ],
+            [ 'title'=>'In progress','cards'=>[] ],
+            [ 'title'=>'Finish','cards'=>[] ],
+        ];
+
+        for ($i=0; $i < count($tasks); $i++) { 
+            $task=$tasks[$i];
+            if(!$task->actual_start && !$task->actual_end){
+                //plan  
+                $custom_columns[0]['cards'][]=$task;
+            }
+            
+            if($task->actual_start && !$task->actual_end){
+                // in progress
+                $custom_columns[1]['cards'][]=$task;
+            }
+
+            if($task->actual_start && !$task->complete && $task->actual_end){
+                //finish
+                $custom_columns[2]['cards'][]=$task;
+            }
+
+            if($task->actual_start && $task->complete && $task->actual_end){
+                //finish    
+                $custom_columns[2]['cards'][]=$task;
+            }
+        }
+        return response()->json(['data'=>$custom_columns,'counter'=>[
+            'todo'=>count($custom_columns[0]['cards']),
+            'inprogress'=>count($custom_columns[1]['cards']),
+            'finish'=>count($custom_columns[2]['cards']),
+            'all_tasks'=>count($tasks)
+        ]]);
     }
 }
 

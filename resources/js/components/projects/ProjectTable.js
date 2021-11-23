@@ -121,13 +121,18 @@ export default function EnhancedTable({data}) {
             <Paper className={classes.paper}>
                 <Grid container spacing={2}>
                     <Grid item lg={12} md={12} sm={12} xs={12}>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={openModalCreateProject}
-                            style={{ marginBottom: '1em' }}
-                            startIcon={<AddIcon />}> Add new project </Button> 
-                        <ModalCreateProject open={modalOpen} closeModal={() => setModalOpen(false)}/>
+                        
+                        {([1,2,4].includes(global.state.occupation?.id) )?(
+                            <>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={openModalCreateProject}
+                                    style={{ marginBottom: '1em' }}
+                                    startIcon={<AddIcon />}> Add new project </Button> 
+                                <ModalCreateProject open={modalOpen} closeModal={() => setModalOpen(false)}/>
+                            </>
+                        ):null}
                         <TextField 
                             variant="standard" InputProps={{endAdornment:<SearchIcon/>}} 
                             style={{ margin:'1em', float:'right', minWidth:'300px' }}

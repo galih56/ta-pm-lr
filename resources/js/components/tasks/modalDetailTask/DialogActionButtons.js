@@ -1,5 +1,3 @@
-
-import 'fontsource-roboto';
 import React, { memo } from 'react';
 import DialogConfirm from './DialogConfirm';
 import { Button } from '@material-ui/core/';

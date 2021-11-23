@@ -1,11 +1,10 @@
 import React, { useState, useContext, useEffect, memo } from 'react';
-import clsx from 'clsx'; import 'fontsource-roboto';
+import clsx from 'clsx';
 import Footer from './Footer'; import UserMenu from './auth/UserMenu';
 import { BrowserRouter as Router, useLocation } from "react-router-dom";
 import { MainListItems, RestrictedAccessMenu } from './NavItems';
 import AppBar from '@material-ui/core/AppBar';
 import List from '@material-ui/core/List';
-import Badge from '@material-ui/core/Badge';
 import Grid from '@material-ui/core/Grid';
 import Drawer from '@material-ui/core/Drawer';
 import Divider from '@material-ui/core/Divider';

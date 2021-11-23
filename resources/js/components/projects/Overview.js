@@ -178,7 +178,7 @@ const Overview=({detailProject,refreshDetailProject,handleDetailTaskOpen})=>{
                         ]}
                     />
             </Grid> 
-            {([1,8,9].includes(global.state.occupation?.id))?(    
+            {([1,2].includes(global.state.occupation?.id))?(    
                 <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
                     <CostChart 
                         data={allTasks.sort((task1, task2)=> {

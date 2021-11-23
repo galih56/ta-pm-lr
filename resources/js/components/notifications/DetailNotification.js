@@ -29,11 +29,7 @@ export default function DetailApproval(props) {
     const [openModalConfirm, setOpenModalConfirm]=useState(false);
     const { match: { params } } = props;
     let history=useHistory();
-    
-    useEffect(() => {
-        if(!global.state.current_project_member_role.project) history.push('/projects');
-    }, []);
-
+  
     const getDetailApproval=()=>{
         const toast_loading = toast.loading('Loading...');
         const url = process.env.MIX_BACK_END_BASE_URL + 'approvals/'+params.id;

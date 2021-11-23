@@ -40,48 +40,44 @@ export const RestrictedAccessMenu = () => {
     const global=useContext(UserContext);
     const history=useHistory();
 
-    useEffect(()=>{
-        const checkCurrentProjectMemberRole=(location)=>{
-            var pathname=location.pathname.split('/');
-            var current_route=pathname[1];
-            var id=pathname[2];
-            var remove_member_role=true;
-            if((current_route=='projects'  && id)) remove_member_role=false;
-            if(current_route=='approvals')  remove_member_role=false;
-            if(remove_member_role) global.dispatch({type:'remove-project-member-role'});
-        }
-        checkCurrentProjectMemberRole(history.location);
-        return history.listen(location=>{
-            checkCurrentProjectMemberRole(location);
-        });
-    },[history])
-
     /*
         access levels
         1. system administrator, ceo
         2. project owner
         3. project manager
     */
-    const [isFirstLevel,setIsFirstLevel]=useState(false);
-    const [isSecondLevel,setIsSecondLevel]=useState(false);
-    const [isThirdLevel,setIsThirdLevel]=useState(false);
+    const [showAdminMenu,setAdminMenu]=useState(false);
+    const [showApprovalMenu,setShowApprovalMenu]=useState(false);
+    useEffect(()=>{
+        const checkCurrentSelectedProject=(location)=>{
+            var pathname=location.pathname.split('/');
+            var current_route=pathname[1];
+            var id=pathname[2]; 
+            if(((current_route=='projects' && id) || current_route=='approvals') && global.state.current_project_id) {
+                setShowApprovalMenu(true); 
+            } else{ 
+                setShowApprovalMenu(false);
+                global.dispatch({type:'remove-current-selected-project'});
+            }
+        }
+        checkCurrentSelectedProject(history.location);
+        return history.listen(location=>{
+            checkCurrentSelectedProject(location);
+        });
+    },[ global.state.current_project_id,history]);
 
     useEffect(()=>{
-        const occupation=global.state.occupation;
-        const current_project_member_role=global.state.current_project_member_role;
-        if([1,8].includes(occupation?.id)) setIsFirstLevel(true);
-        else setIsFirstLevel(false);
-        if([1].includes(current_project_member_role?.id)) setIsSecondLevel(true); else setIsSecondLevel(false);
-        if( [2].includes(current_project_member_role?.id)) setIsThirdLevel(true); else setIsThirdLevel(false);
-    },[global.state.occupation,global.state.current_project_member_role]);
+        if([1,2].includes(global.state.occupation?.id)) setAdminMenu(true);
+        else setAdminMenu(false);
+    },[global.state.occupation]);
 
 
     return (
         <React.Fragment>
-            {(isFirstLevel || isSecondLevel)?(
+            {(showAdminMenu || showApprovalMenu)?(
                 <ListSubheader inset>Restricted Access</ListSubheader>
             ):<></>}
-            {(isFirstLevel)?(
+            {(showAdminMenu)?(
                 <React.Fragment>
                     <ListItem button component={Link} to="/clients" >
                         <ListItemIcon>
@@ -98,7 +94,7 @@ export const RestrictedAccessMenu = () => {
                 </React.Fragment>
             ):<></>}
             
-            {(isSecondLevel)?(
+            {(showApprovalMenu)?(
                 <React.Fragment>
                     <ListItem button component={Link} to="/approvals" >
                         <ListItemIcon>

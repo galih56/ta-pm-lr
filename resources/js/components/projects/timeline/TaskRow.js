@@ -87,8 +87,7 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
                                 <span key={i} onMouseEnter={(event)=>handlePopoverOpen(event,member)} 
                                     onMouseLeave={handlePopoverClose}  style={{margin:'1em'}}>
                                     {member?.project_client?.client?(<Typography>{`Client ${`(${member.project_client?.client?.institution})`}`}</Typography>):null}
-                                    {member?.member?.role?<Typography>{member?.member?.role?.name}</Typography>:null}
-                                    {member?.role?<Typography>{member?.role?.name}</Typography>:null}
+                                    {member?.occupation?<Typography>{member?.occupation?.name}</Typography>:null}
                                 </span>
                             )
                         }):<></>}
@@ -100,8 +99,8 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
                                     {memberOnHover.project_client?.client?(<Typography>{`Client ${`(${memberOnHover.project_client?.client?.institution})`}`}</Typography>):null}
                                     {memberOnHover.user?(<Typography>{memberOnHover?.user?.name}</Typography>):null}
                                     {memberOnHover.name?(<Typography>{memberOnHover?.name}</Typography>):null}
-                                    {memberOnHover.member?.role?<Typography>{memberOnHover?.member?.role?.name}</Typography>:null}
-                                    {memberOnHover.role?<Typography>{memberOnHover?.role?.name}</Typography>:null}
+                                    {memberOnHover.member?.occupation?<Typography>{memberOnHover?.member?.occupation?.name}</Typography>:null}
+                                    {memberOnHover.occupation?<Typography>{memberOnHover?.occupation?.name}</Typography>:null}
                                 </div>
                         </Popover>):<></>}
                 </TableCell>

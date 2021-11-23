@@ -31,7 +31,11 @@ export default function DetailApproval(props) {
     let history=useHistory();
     
     useEffect(() => {
-        if(!global.state.current_project_member_role.project) history.push('/projects');
+        if(!([1,2,4,5].includes(global.state.occupation?.id) && global.state.current_project_id)) {
+            history.push('/projects');
+        }else{        
+            getDetailApproval();
+        }
     }, []);
 
     const getDetailApproval=()=>{
@@ -77,10 +81,6 @@ export default function DetailApproval(props) {
                 },
             });
     }
-    useEffect(()=>{
-        getDetailApproval();
-    },[]);
-
     var url=``;
     if(data.task){
         url=(data.parent_task_id)?

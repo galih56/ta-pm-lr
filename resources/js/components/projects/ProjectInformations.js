@@ -61,7 +61,6 @@ const ProjectInfo = (props) => {
 
         if (!window.navigator.onLine) {
             toast.error(`You are currently offline`);
-            // handleStoreList(body); //Untuk offline mode
         }
     }
 
@@ -109,7 +108,7 @@ const ProjectInfo = (props) => {
                             Realization start/end at : {detailProject.actual_start ? moment(detailProject.actual_start).format('DD MMMM YYYY') : ''} - {detailProject.actual_end ? moment(detailProject.actual_end).format('DD MMMM YYYY') : ''}
                         </Typography> 
                     </Grid>
-                    {([1,8].includes(global.state.occupation?.id))?(
+                    {([1,2].includes(global.state.occupation?.id))?(
                         <Grid item lg={12} md={12} sm={12} xs={12} style={{padding:'1em'}}>
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
                                 <MobileDateRangePicker

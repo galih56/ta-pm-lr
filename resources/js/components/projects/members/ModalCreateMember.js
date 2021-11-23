@@ -1,4 +1,3 @@
-import 'fontsource-roboto';
 import React, { useEffect, useContext, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import withStyles from '@material-ui/styles/withStyles';
@@ -12,7 +11,6 @@ import CloseIcon from '@material-ui/icons/Close';
 import Alert from '@material-ui/core/Alert';
 import toast, { Toaster } from 'react-hot-toast';
 import UserSearchBar from '../../widgets/UserSearchBar';
-import SelectRole from '../../widgets/SelectRole';
 import axios from 'axios';
 
 const styles = (theme) => ({
@@ -47,39 +45,17 @@ const DialogActions = withStyles((theme) => ({
 export default function ModalCreateMember(props) {
     var { open, projects_id, exceptedUsers,onCreate } = props;
     var closeModal = props.handleClose;
-    const history = useHistory();
     const [newMembers, setNewMembers] = useState([]);
-    const [selectedRole, setSelectedRole] = useState(null);
-    const [roles, setRoles] = useState([]);
     const [showAlert, setShowAlert] = useState(false);
     const global = useContext(UserContext);
 
-    const getRoles = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'member-roles';
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url)
-            .then(result =>{ 
-                setRoles(result.data)
-            }).catch((error) => {
-                switch(error.response.status){
-                    case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
-                    default : toast.error(<b>{error.response.statusText}</b>); break
-                }
-            });
-    }
-
-    useEffect(() => {
-        getRoles();
-    }, [open]);
 
     const submitData = () => {
-        if (newMembers.length <= 0 || !selectedRole) setShowAlert(true);
+        if (newMembers.length <= 0) setShowAlert(true);
         else setShowAlert(false);
         
         if (!showAlert) {
-            const body = { projects_id: projects_id, members: newMembers, roles_id: selectedRole }
+            const body = { projects_id: projects_id, members: newMembers }
             const url = process.env.MIX_BACK_END_BASE_URL + 'project-members/';
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -105,7 +81,7 @@ export default function ModalCreateMember(props) {
     }
 
     const showValidation = () => {
-        if ((newMembers.length <= 0 || !selectedRole) && showAlert) {
+        if ((newMembers.length <= 0) && showAlert) {
             return (
                 <Grid item lg={12} md={12} sm={12} xs={12} >
                     <Alert severity="warning" >Please fill all the required inputs</Alert>
@@ -115,11 +91,11 @@ export default function ModalCreateMember(props) {
     }
 
     return (
-        <Dialog aria-labelledby="Create a new member" open={open} fullWidth={true} maxWidth={'md'}>
+        <Dialog aria-labelledby="Add a new member" open={open} fullWidth={true} maxWidth={'md'}>
             <DialogTitle onClose={
                 () => {
                     closeModal(false);
-                }} > Create a new member </DialogTitle>
+                }} > Add a new member </DialogTitle>
             {(global.state.authenticated === true)?(
                 <>
                      
@@ -140,13 +116,10 @@ export default function ModalCreateMember(props) {
                                     userOnly={true}
                                     />
                             </Grid>
-                            <Grid item lg={12} md={12} sm={12} xs={12} >
-                                <SelectRole onChange={(value) => setSelectedRole(value)} data={roles} />
-                            </Grid>
                         </Grid>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={submitData} color="primary">Create</Button>
+                        <Button onClick={submitData} color="primary">Add</Button>
                     </DialogActions>
                 </>
             ): (

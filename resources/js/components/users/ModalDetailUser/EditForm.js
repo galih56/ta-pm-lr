@@ -46,7 +46,7 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
         axios.get(url)
             .then((result) => {
                 var data=result.data;
-                data=data.filter(occupation=>(![1,2,8].includes(occupation.id)))
+                data=data.filter(occupation=>(![1,2].includes(occupation.id)))
                 setOccupations(data);
             }).catch((error) => {
                 switch(error.response.status){
@@ -129,7 +129,7 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
                     </Grid>
                 ):(
                     <Grid item lg={12} md={12} sm={12} xs={12} align="center">
-                        {([1,8].includes(occupation.id))?(
+                        {([1,2].includes(global.state.occupation.id))?(
                                 <FormControl className={classes.textfield} >
                                     <InputLabel>Occupations</InputLabel>
                                     <Select 
@@ -155,7 +155,7 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
                         )}
                     </Grid>
                 )}
-                {global.state.id==data.id  || [1,8].includes(occupation.id)?(
+                {global.state.id==data.id  || [1,2].includes(global.state.occupation.id)?(
                     <Grid item lg={12} md={12} sm={12} xs={12}>
                         <Accordion expanded={expanded} onChange={handleChange}>
                             <AccordionSummary expandIcon={<ExpandMoreIcon />}>

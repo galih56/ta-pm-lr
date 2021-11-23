@@ -2,13 +2,12 @@ import React, { useReducer, lazy } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import { ThemeProvider, createTheme } from '@material-ui/core/styles';
-import 'fontsource-roboto';
 import Layout from "./layout/Layout";
 import UserContext, {
     initState, resetState, getAuthDataFromStorage,
     storeAuthData, runDelayedHTTPRequest, logout,
-    storeGoogleAuth, storeGithubAuth, removeGithubAuth,
-    storeProjectMemberRole,removeProjectMemberRole,storeUserInformation
+    storeGoogleAuth,  storeCurrentSelectedProject,
+    removeCurrentSelectedProject,storeUserInformation
 } from './context/UserContext';
 import { createNewList, removeList, updateList } from './context/ListsReducer';
 import { createNewMeeting, storeDetailMeeting, removeMeeting, updateMeeting } from './context/MeetingsReducer';
@@ -60,10 +59,6 @@ const reducer = (state, action) => {
             return storeUserInformation(payload);
         case 'store-google-auth':
             return storeGoogleAuth(payload, state);
-        case 'store-github-auth':
-            return storeGithubAuth(payload, state);
-        case 'remove-github-auth':
-            return removeGithubAuth(payload, state);
         case 'store-projects':
             return storeProjects(state, payload);
         case 'store-detail-project':
@@ -116,10 +111,10 @@ const reducer = (state, action) => {
             return runDelayedHTTPRequest(state);
         case 'check-authentication':
             return checkAuthentication(payload, state);
-        case 'store-project-member-role':
-            return storeProjectMemberRole(payload, state);
-        case 'remove-project-member-role':
-            return removeProjectMemberRole(payload, state);
+        case 'store-current-selected-project':
+            return storeCurrentSelectedProject(payload, state);
+        case 'remove-current-selected-project':
+            return removeCurrentSelectedProject(payload, state);
         default:
             console.log('Default switch : ',action,state);
     }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { BrowserRouter as Router, Link, useHistory } from 'react-router-dom';
+import { BrowserRouter as Router, Link, useHistory,useLocation } from 'react-router-dom';
 import UserContext from '../../context/UserContext';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
@@ -104,13 +104,16 @@ export default function EnhancedTable() {
     let history=useHistory();
 
     useEffect(() => {
-        getApprovals();
-        if(!global.state.current_project_member_role) history.push('/projects');
+        if(!([1,2,4,5].includes(global.state.occupation?.id) && global.state.current_project_id)) {
+            history.push('/projects');
+        }else{
+            getApprovals();
+        }
     }, []);
 
     const getApprovals = () => {
         const toast_loading = toast.loading('Loading...');
-        const url = `${process.env.MIX_BACK_END_BASE_URL}approvals?projects_id=${global.state.current_project_member_role?.project?.id}`;
+        const url = `${process.env.MIX_BACK_END_BASE_URL}approvals?projects_id=${global.state.current_project_id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)

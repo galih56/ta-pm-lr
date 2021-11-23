@@ -8,7 +8,6 @@ import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import CloseIcon from '@material-ui/icons/Close';
 import Files from './../Files';
-import 'fontsource-roboto';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },

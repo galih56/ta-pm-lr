@@ -31,6 +31,7 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
+    { id: 'id', align: 'left', disablePadding: true, label: 'ID' },
     { id: 'name', align: 'left', disablePadding: true, label: 'Name' },
 ];
 
@@ -78,7 +79,7 @@ export default function EnhancedTable(props) {
     const [page, setPage] = useState(0);
     const [rows, setRows] = useState([]);
     const [order, setOrder] = useState('asc');
-    const [orderBy, setOrderBy] = useState('name');
+    const [orderBy, setOrderBy] = useState('id');
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const handleModalOpen = props.modalOpen;
 
@@ -114,6 +115,9 @@ export default function EnhancedTable(props) {
                             .map((row) => {
                                 return (
                                     <TableRow hover key={row.id}>
+                                        <TableCell component="th" scope="row">
+                                            {row.id}
+                                        </TableCell>
                                         <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}
                                             onClick={() => handleModalOpen({
                                                 occupation: {

@@ -143,7 +143,7 @@ const CustomListItem=({classes,isEdit,member,onClick})=>{
                             className={classes.inline}
                             color="textPrimary"
                         >
-                            {member.is_user?member.role?.name:member.institution}
+                            {member.is_user?member.occupation?.name:member.institution}
                         </Typography>
                     </>
                 }

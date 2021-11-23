@@ -9,8 +9,8 @@ import StatusChip from './../StatusChip';
 const CustomCard = (props) => {
     const { 
         onClick, cardStyle, className, onDelete, 
-        id, title, label, start, end,
-        actualStart,actualEnd,startLabel,endLabel,
+        id, title, start, end,
+        actual_start,actual_end,start_label,end_label,
         tags, complete, progress 
     } = props;
     let location = useLocation();
@@ -36,11 +36,11 @@ const CustomCard = (props) => {
                                 </div>
                         </header>
                         <div style={{ fontSize: '1em' }}>
-                            {formattedDateTimes(start, end,actualStart,actualEnd,startLabel,endLabel,progress)}
+                            {formattedDateTimes(start, end,actual_start,actual_end,start_label,end_label,progress)}
                             <div style={{ marginTop: 5, textAlign: 'center', fontSize: '1em', fontWeight: 'bold' }}>
-                               {(startLabel=='Belum dikerjakan' && endLabel=='Belum dikerjakan')?(
+                               {(start_label=='Belum dikerjakan' && end_label=='Belum dikerjakan')?(
                                 <span style={{margin:'0.2em'}}>
-                                    <StatusChip status={startLabel}/>
+                                    <StatusChip status={start_label}/>
                                 </span>
                                ):<></>}
                             </div>
@@ -50,7 +50,7 @@ const CustomCard = (props) => {
                                         borderTop: '1px solid #eee', paddingTop: 6, display: 'flex',
                                         justifyContent: 'flex-end', flexDirection: 'row', flexWrap: 'wrap'
                                     }}>
-                                    {isCompleted(complete, progress)}
+                                    {isCompleted(complete)}
                                     {tags.map(tag => {
                                         if(tag.tag){
                                             return (<Tag key={tag.tag.id} {...tag.tag} />)
@@ -72,11 +72,10 @@ const formattedDateTimes = (start, end,progress) => {
         <div style={{ color: '#4C4C4C' }}>
             Start : {start} <br />
             End : {end} <br/>
-            Progress : {progress}%
         </div>
     )
 }
-const isCompleted = (complete, progress) => {
+const isCompleted = (complete) => {
     if (complete) return (<Tag title={'Complete'} color="white" bgcolor={'#06890c'} />);
     return (<></>)
 }

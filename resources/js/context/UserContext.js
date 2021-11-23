@@ -1,4 +1,4 @@
-import React, { createContext } from 'react';
+import { createContext } from 'react';
 
 const initState = {
     token: '', authenticated: false,
@@ -8,7 +8,7 @@ const initState = {
     githubAuth:{
         code:'',  authenticated:false,  access_token:'',  scope:null
     }, 
-    current_project_member_role:null,
+    current_project_id:null,
 };
 
 const getAuthDataFromStorage = () => {
@@ -47,37 +47,22 @@ const storeGoogleAuth = (payload, state) => {
     return data
 }
 
-const storeGithubAuth = (payload, state) => {
+
+const storeCurrentSelectedProject = (payload, state) => {
     var user = JSON.parse(localStorage.getItem('user'));
-    user.githubAuth = payload;
+    console.log('payload : ',payload);
+    if(user){ user.current_project_id = payload; }
     localStorage.setItem("user", JSON.stringify(user));
     return user;
 }
 
-const storeProjectMemberRole = (payload, state) => {
+const removeCurrentSelectedProject = (payload, state) => {
     var user = JSON.parse(localStorage.getItem('user'));
-    if(user){ user.current_project_member_role = payload; }
+    if(user){ user.current_project_id = null; }
     localStorage.setItem("user", JSON.stringify(user));
     return user;
 }
 
-const removeProjectMemberRole = (payload, state) => {
-    var user = JSON.parse(localStorage.getItem('user'));
-    if(user){ user.current_project_member_role = null; }
-    localStorage.setItem("user", JSON.stringify(user));
-    return user;
-}
-
-const removeGithubAuth=(payload,state)=>{
-    var user = JSON.parse(localStorage.getItem('user'));
-    user.githubAuth = {
-        code:'',  authenticated:false,  access_token:'',  scope:null
-    };
-    localStorage.setItem("user", JSON.stringify(user));
-    const data = { ...user };
-    return data
-    
-}
 
 const logout=()=>{
     var user = JSON.parse(localStorage.getItem('user'));
@@ -110,8 +95,9 @@ const runDelayedHTTPRequest = () => {
 
 const context = createContext();
 export default context;
-export { initState, resetState, getAuthDataFromStorage, storeAuthData, logout,
-    runDelayedHTTPRequest, storeGoogleAuth,storeGithubAuth ,removeGithubAuth,
-    storeProjectMemberRole,removeProjectMemberRole,storeUserInformation
+export { 
+    initState, resetState, getAuthDataFromStorage, storeAuthData, logout,
+    runDelayedHTTPRequest, storeGoogleAuth,
+    storeCurrentSelectedProject,removeCurrentSelectedProject,storeUserInformation
 };
 

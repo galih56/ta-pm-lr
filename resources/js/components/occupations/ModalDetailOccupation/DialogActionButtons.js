@@ -1,4 +1,3 @@
-import 'fontsource-roboto';
 import React, { useEffect, useContext, useState,memo } from 'react';
 import UserContext from '../../../context/UserContext';
 import ModalDeleteConfirm from './ModalDeleteConfirm';

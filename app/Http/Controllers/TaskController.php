@@ -258,8 +258,20 @@ class TaskController extends Controller
     }
     public function updateComplete(Request $request,$id){
         
-        $task=Task::findOrFail($id);
+        $task=Task::with('cards')->findOrFail($id);
         if($request->has('complete')){ 
+            if($task->is_subtask){
+                $parent_task=Task::with('cards')->findOrFail($task->parent_task_id);
+                $valuePerSubtask=100/count($parent_task->cards);
+                $completeSubtaskCounter=0;
+                for ($i = 0; $i < count($parent_task->cards); $i++) {
+                    $subtask = $parent_task->cards[$i];
+                    if($subtask->complete){ $completeSubtaskCounter++; }
+                }
+                $progress=$completeSubtaskCounter*$valuePerSubtask;
+                $parent_task->progress=$progress;
+                $parent_task->save();
+            }
             if($request->complete===true){
                 $current_date_time = Carbon::now()->toDateTimeString();
                 $task->actual_end=$current_date_time;

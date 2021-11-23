@@ -127,10 +127,6 @@ const DetailProject = (props) => {
                     break;
                 }
             }
-            if(user){
-                var role={...user.role,project: { id: project.id,  title: project.title }}
-                global.dispatch({type:'store-project-member-role',payload:role})
-            }
         }
     }
 
@@ -144,6 +140,7 @@ const DetailProject = (props) => {
                 setDetailProject(data);
                 getUserMemberRole(data);
                 global.dispatch({ type: 'store-detail-project', payload: data });
+                global.dispatch({type:'store-current-selected-project',payload:params.id});
             }).catch((error) => {
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
@@ -218,7 +215,7 @@ const DetailProject = (props) => {
                                     <Grid container >   
                                         <BreadCrumbs projectName={detailProject.title} tabName="Timeline" style={{marginTop:'1em'}}/>
                                         <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                                            {([2,8].includes(global.state.occupation?.id) || [1,2].includes(global.state.current_project_member_role?.id))?(
+                                            {([1,2,4,5].includes(global.state.occupation?.id))?(
                                                 <>
                                                     <Button
                                                         variant="contained"

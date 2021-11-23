@@ -45,7 +45,7 @@ const FormAddNewProject=({teams_id,open,closeModal,onCreate})=>{
 
     const getProjects = () => {
         let url =''
-        if([1,2,8].includes(global.state.occupation?.id)) url = process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';
+        if([1,2].includes(global.state.occupation?.id)) url = process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';
         else url = process.env.MIX_BACK_END_BASE_URL + 'projects';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
