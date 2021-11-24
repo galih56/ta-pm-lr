@@ -129,7 +129,7 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
                     </Grid>
                 ):(
                     <Grid item lg={12} md={12} sm={12} xs={12} align="center">
-                        {([1,2].includes(global.state.occupation.id))?(
+                        {([1,2].includes(global.state.occupation?.id))?(
                                 <FormControl className={classes.textfield} >
                                     <InputLabel>Occupations</InputLabel>
                                     <Select 
