@@ -188,7 +188,12 @@ function Timeline(props) {
                                         <Row headCells={headCells} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete}
                                             key={row.id} data={row} handleDetailTaskOpen={handleDetailTaskOpen} 
                                             projects_id={projects_id} detailProject={detailProject} 
-                                            onClick={()=>{ setSelectedList(row); setOpenEditList(true); }} />
+                                            onClick={()=>{ 
+                                                if([2,4].includes(global.state.occupation?.id)){
+                                                    setSelectedList(row); 
+                                                    setOpenEditList(true); 
+                                                }
+                                            }} />
                                     );
                                 })}
                             </TableBody>

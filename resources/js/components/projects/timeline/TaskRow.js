@@ -81,21 +81,23 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
                         {data.title} ({progress}%)
                     </Link>
                 </TableCell>
-                <TableCell>
+                <TableCell style={{maxWidth:'100px'}}>
                     {data.members?data.members.map((member,i)=>{
                             return (
                                 <span key={i} onMouseEnter={(event)=>handlePopoverOpen(event,member)} 
-                                    onMouseLeave={handlePopoverClose}  style={{margin:'1em'}}>
-                                    {member?.project_client?.client?(<Typography>{`Client ${`(${member.project_client?.client?.institution})`}`}</Typography>):null}
-                                    {member?.occupation?<Typography>{member?.occupation?.name}</Typography>:null}
+                                    onMouseLeave={handlePopoverClose}  style={{margin:'0.5em',float:'left'}}>
+                                    {member?.project_client?.client?(<>{`Client ${`(${member.project_client?.client?.institution})`}`}</>):null}
+                                    {member?.occupation?<>{member?.occupation?.name}</>:null}
+                                    {member?.user?.occupation?<>{member?.user?.occupation?.name}</>:null}
                                 </span>
                             )
                         }):<></>}
                         
                         {(openPopOver)?(
-                        <Popover style={{ pointerEvents: 'none', zIndex:'1200',padding:'1em' }} open={openPopOver} anchorEl={anchorEl} 
+                        <Popover style={{ pointerEvents: 'none', zIndex:'1200',padding:'1em' }} 
+                                open={openPopOver} anchorEl={anchorEl} 
                                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center', }} transformOrigin={{ vertical: 'top', horizontal: 'center', }} onClose={handlePopoverClose}>
-                                <div style={{padding:'0.3em'}}>
+                                <div style={{padding:'0.5em'}}>
                                     {memberOnHover.project_client?.client?(<Typography>{`Client ${`(${memberOnHover.project_client?.client?.institution})`}`}</Typography>):null}
                                     {memberOnHover.user?(<Typography>{memberOnHover?.user?.name}</Typography>):null}
                                     {memberOnHover.name?(<Typography>{memberOnHover?.name}</Typography>):null}

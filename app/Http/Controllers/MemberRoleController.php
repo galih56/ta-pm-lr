@@ -27,8 +27,6 @@ class MemberRoleController extends Controller
     {
         $member_role=new MemberRole();
         $member_role->name=$request->name;
-        $member_role->color=$request->color;
-        $member_role->bg_color=$request->bg_color;
         $member_role->save();
         return response()->json($member_role);
     }

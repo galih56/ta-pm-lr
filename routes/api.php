@@ -47,7 +47,7 @@ Route::resource('projects', 'App\Http\Controllers\ProjectController');
 Route::group(['prefix'=>'projects'],function(){
     Route::post('/{id}/extend-deadline', 'App\Http\Controllers\ProjectController@extendDeadline');
     Route::get('/{id}/reports','App\Http\Controllers\ProjectController@getReports');
-    Route::get('/{id}/all-tasks','App\Http\Controllers\ProjectController@getAllTasks');
+    Route::get('/{id}/kanban','App\Http\Controllers\ProjectController@getKanban');
     Route::get('/{id}/export','App\Http\Controllers\ProjectController@export');
     Route::post('/{id}/import','App\Http\Controllers\ProjectController@import');
     Route::get('/{id}/tasks','App\Http\Controllers\ProjectController@getTasks');

@@ -27,8 +27,6 @@ class OccupationController extends Controller
     {
         $occupation=new Occupation();
         $occupation->name=$request->name;
-        $occupation->color=$request->color;
-        $occupation->bg_color=$request->bg_color;
         $occupation->save();
         return response()->json($occupation);
     }

@@ -83,13 +83,19 @@ class ProjectController extends Controller
         
     }
 
-    public function show($id)
+    public function show(Request $request,$id)
     {
-        $project=Project::with(['columns'=>function($q){
+        $project=Project::with(['columns'=>function($q) use($request){
                         return $q->orderBy('end','ASC')
-                            ->with(['cards'=>function($q1){
-                                return $q1->orderBy('end','ASC')
-                                    ->with(['cards'=>function($q1){
+                            ->with(['cards'=>function($q1) use($request){
+                                $q1=$q1->orderBy('end','ASC');
+                                if($request->has('users_id')){
+                                    $users_id=$request->users_id;
+                                    $q1=$q1->whereHas('members',function($members_q) use($users_id){
+                                        return $members_q->where('users_id',$users_id);
+                                    });
+                                }
+                                $q1=$q1->with(['cards'=>function($q1){
                                         return $q1->orderBy('end','ASC')
                                             ->with('members.user.occupation')
                                             ->with('members.project_client.client')
@@ -100,6 +106,7 @@ class ProjectController extends Controller
                                 ->with('members.project_client.client')
                                 ->with('members.member.role')
                                 ->with('tags');
+                                return $q1;
                             }]);
                     }])
                     ->with('members.role')->with('members.user.occupation')
@@ -678,12 +685,17 @@ class ProjectController extends Controller
         } 
     }
 
-    public function getAlltasks($id){
+    public function getKanban(Request $request,$id){
         $tasks=Task::selectRaw('t.*,t.parent_task_id AS parentTask,l.projects_id')
                         ->from('tasks AS t')
                         ->leftJoin('lists AS l','t.lists_id','=','l.id')
-                        ->where('l.projects_id','=',$id)
-                        ->orderBy('t.end','ASC')->get($id);
+                        ->where('l.projects_id','=',$id);
+        if($request->has('users_id')){
+            $tasks=$tasks->whereHas('t.members',function($members_q) use($users_id){
+                return $members_q->where('users_id',$users_id);
+            });
+        }
+        $tasks= $tasks->orderBy('t.end','ASC')->get($id);
         $custom_columns=[
             [ 'title'=>'To do','cards'=>[] ],
             [ 'title'=>'In progress','cards'=>[] ],
@@ -703,7 +715,7 @@ class ProjectController extends Controller
             }
 
             if($task->actual_start && !$task->complete && $task->actual_end){
-                //finish
+                // in progress
                 $custom_columns[2]['cards'][]=$task;
             }
 

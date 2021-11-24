@@ -1,10 +1,8 @@
-import React, { useEffect, useContext, useState,memo } from 'react';
-import UserContext from '../../../context/UserContext';
+import React, {memo } from 'react';
 import ModalDeleteConfirm from './ModalDeleteConfirm';
 import { Button } from '@material-ui/core/';
 
 const dialogActionButtons = ({ isEdit, deletable, saveChanges, setEditMode, deleteOccupation, deleteConfirmOpen, setDeleteConfirmOpen, closeModal }) => {
-    const global = useContext(UserContext);
     
     if (isEdit) {
         return (
