@@ -192,7 +192,7 @@ const ModalCreateUser = (props) => {
                             placeholder="Occupation"
                         >
                             {
-                                occupations.map((occupation, index) =>(<MenuItem value={occupation.id} key={occupation.id}>{occupation.name}</MenuItem>))
+                                occupations.map((occupation, index) =>(<MenuItem value={occupation?.id} key={occupation?.id}>{occupation?.name}</MenuItem>))
                             } 
                         </Select>
                         <TextField

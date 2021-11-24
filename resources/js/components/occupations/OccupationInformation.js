@@ -79,7 +79,7 @@ export default function OccupationInformation() {
     }
 
     const showModalDetailOccupation = () => {
-        if (clickedOccupation.id !== null && clickedOccupation.id !== undefined && modalDetailOpen === true) {
+        if (clickedOccupation?.id !== null && clickedOccupation?.id !== undefined && modalDetailOpen === true) {
             return (
                 <ModalDetailOccupation
                     open={modalDetailOpen}
