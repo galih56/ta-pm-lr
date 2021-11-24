@@ -155,7 +155,7 @@ export default function EnhancedTable() {
                 <Paper>
                     <div className={classes.root}>
                         <Typography variant="h6">Clients</Typography>
-                        {([8,1,2].includes(global.state.occupation?.id))?(
+                        {([1,2].includes(global.state.occupation?.id))?(
                             <>
                                 <Button variant="contained" color="primary" onClick={()=>setOpenFormCreate(true)}><b>+</b> Create a new client</Button>
                                 <FormCreateClient

@@ -44,6 +44,7 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
+    { id: 'id', align: 'left', disablePadding: true, label: 'ID' },
     { id: 'name', align: 'left', disablePadding: true, label: 'Name' },
     { id: 'role', align: 'left', disablePadding: false, label: 'Role' },
     { id: 'last_login', align: 'right', disablePadding: false, label: 'Last login' },
@@ -214,6 +215,9 @@ export default function EnhancedTable() {
                                 searchParams.set('users_id', row.id);
                                 return (
                                     <TableRow hover key={row.id}>
+                                        <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}>
+                                            {row.id}
+                                        </TableCell>
                                         <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}>
                                             <Link to={{ pathname: pathname, search: searchParams.toString() }} 
                                                 style={{ textDecoration: 'none', color: '#393939' }} 

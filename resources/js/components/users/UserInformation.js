@@ -48,7 +48,7 @@ const UserInformation = (props) => {
                 </Grid>
                 <Grid lg={12} md={12} sm={12} xs={12} item>
                     <Paper className={classes.paper}>
-                        <ListItem button dense font="small" onClick={handleOccupationTableOpen} style={{ paddingBottom: '1.2em' }}> {occupationTableOpen ? <ExpandLess /> : <ExpandMore />}Occupations</ListItem>
+                        <ListItem button dense font="small" onClick={handleOccupationTableOpen} style={{ paddingBottom: '1.2em' }}> {occupationTableOpen ? <ExpandLess /> : <ExpandMore />}Roles</ListItem>
                         <Collapse in={occupationTableOpen} timeout="auto">
                             <OccupationInformation />
                         </Collapse>

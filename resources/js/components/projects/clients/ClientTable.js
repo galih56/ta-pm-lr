@@ -162,7 +162,7 @@ export default function EnhancedTable(props) {
         <Grid container>  
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12} >
                    
-            {([8,1,2].includes(global.state.occupation?.id || [1,2].global.state.current_project_member_role?.id))?(    
+            {([1,2,4,5].includes(global.state.occupation?.id ))?(    
                     <FormAddClient
                         open={openFormAddClient}
                         handleClose={()=>setOpenFormAddClient(false)}
@@ -171,10 +171,8 @@ export default function EnhancedTable(props) {
                 ):<></>}
                 <div className={classes.root}>
                     <Typography variant="h6">Clients</Typography>
-                    {([8,1,2].includes(global.state.occupation?.id || [1,2].global.state.current_project_member_role?.id))?(
-                        <Button variant="contained" color="primary" onClick={()=>setOpenFormAddClient(true)}>
-                            <b>+</b> Add a client
-                        </Button>   
+                    {([1,2,4,5].includes(global.state.occupation?.id ))?(
+                        <Button variant="contained" color="primary" onClick={()=>setOpenFormAddClient(true)}>Add</Button>   
                         ):<></>}
                     <TableContainer>
                         <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} padding="normal" >

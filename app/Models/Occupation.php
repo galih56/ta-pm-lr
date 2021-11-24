@@ -15,8 +15,6 @@ class Occupation extends Model
 
     protected $fillable = [
         'name',
-        'color',
-        'bg_color',
         'root',
     ];
 

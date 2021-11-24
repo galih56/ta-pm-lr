@@ -1,11 +1,11 @@
-
-import 'fontsource-roboto';
-import React, { memo } from 'react';
+import React, { memo,useContext } from 'react';
 import DialogConfirm from './DialogConfirm';
 import { Button } from '@material-ui/core/';
 import DialogContentText from '@material-ui/core/DialogContentText';
+import UserContext from '../../../context/UserContext';
 
 const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteTask, deleteConfirmOpen, setDeleteConfirmOpen, closeModal }) => {
+    const global = useContext(UserContext);
     if (isEdit) {
         return (
             <React.Fragment>
@@ -13,9 +13,13 @@ const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteTask, del
                 <Button onClick={
                     () => { saveChanges()}
                 } variant="contained" color="primary"> Save</Button>
-                <Button onClick={
-                    () => { setDeleteConfirmOpen(true); }
-                } variant="contained" color="secondary">Delete</Button>
+                {([2,4].includes(global.state.occupation?.id))?(
+                    <Button onClick={
+                        () => { setDeleteConfirmOpen(true); }
+                    } variant="contained" color="secondary">
+                        Delete
+                    </Button>
+                ):null}
                 <DialogConfirm
                     open={deleteConfirmOpen}
                     handleConfirm={() => { deleteTask(); setDeleteConfirmOpen(false); closeModal(); }}

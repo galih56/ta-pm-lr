@@ -9,7 +9,7 @@ import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import IconButton from '@material-ui/core/IconButton';
 import Collapse from '@material-ui/core/Collapse';
 import CancelIcon from '@material-ui/icons/Cancel';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import axios from 'axios';
 import Chip from '@material-ui/core/Chip';
 import Button from '@material-ui/core/Button';
@@ -17,7 +17,7 @@ import Autocomplete from '@material-ui/core/Autocomplete';
 import PeopleIcon from '@material-ui/icons/People';
 import TextField from '@material-ui/core/TextField';
 
-export default function TeamList({projects_id,onCreate}) {
+export default function TeamList({projects_id,callback}) {
     const [teams,setTeams]=useState([]);
     const [options,setOptions]=useState([]);
     const [newTeams,setNewTeams]=useState([])
@@ -72,6 +72,7 @@ export default function TeamList({projects_id,onCreate}) {
                         if(team.teams_id!=selected_team_id) return team;
                     })
                     setTeams(newTeams);
+                    if(callback) callback();
                     return <b>Successfully deleted</b>
                 },
                 error: (error)=>{
@@ -80,7 +81,6 @@ export default function TeamList({projects_id,onCreate}) {
                     return <b>{error.response.statusText}</b>;
                 },
             });
-    
     }
 
     const addNewTeams = (selectedTeams) => {
@@ -93,11 +93,10 @@ export default function TeamList({projects_id,onCreate}) {
                     loading: 'Creating a new team',
                     success: (result)=>{
                         setTeams([...teams,...result.data]);
-                        if(onCreate) onCreate();
+                        if(callback) callback();
                         return <b>A new team successfuly created</b>
                     },
                     error: (error)=>{
-                        console.log(error);
                         if(error.response.status==401) return <b>Unauthenticated</b>;
                         if(error.response.status==422) return <b>Some required inputs are empty</b>;
                         return <b>{error.response.statusText}</b>;
@@ -116,31 +115,33 @@ export default function TeamList({projects_id,onCreate}) {
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                 <Typography variant="h6">Teams </Typography>
             </Grid>
-            <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
-                <form onSubmit={(e)=>{
-                    e.preventDefault();
-                    addNewTeams(newTeams);
-                }}>
-                    <Autocomplete
-                        multiple
-                        freeSolo
-                        options={options}
-                        getOptionLabel={(option) => option.name}
-                        renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            variant="standard"
-                            label="Search by team names"
-                        />)}
-                        onChange={(event, options)=> setNewTeams(options)}
-                        renderTags={(value, getTagProps) =>
-                            value.map((option, index) => (
-                                <Chip variant="outlined" label={option.name} {...getTagProps({ index })} />
-                            ))}
-                    />
-                    <Button type="submit"variant="contained" color="primary" style={{marginTop:'0.3em'}}>Add </Button>
-                </form>
-            </Grid>
+            {([1,2,4,5].includes(global.state.occupation?.id))?( 
+                <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
+                    <form onSubmit={(e)=>{
+                        e.preventDefault();
+                        addNewTeams(newTeams);
+                    }}>
+                        <Autocomplete
+                            multiple
+                            freeSolo
+                            options={options}
+                            getOptionLabel={(option) => option.name}
+                            renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="standard"
+                                label="Search by team names"
+                            />)}
+                            onChange={(event, options)=> setNewTeams(options)}
+                            renderTags={(value, getTagProps) =>
+                                value.map((option, index) => (
+                                    <Chip variant="outlined" label={option.name} {...getTagProps({ index })} />
+                                ))}
+                        />
+                        <Button type="submit"variant="contained" color="primary" style={{marginTop:'0.3em'}}>Add </Button>
+                    </form>
+                    </Grid>
+             ):null}
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                 <List component="nav" aria-label="teams">
                     {teams.map((team)=>{

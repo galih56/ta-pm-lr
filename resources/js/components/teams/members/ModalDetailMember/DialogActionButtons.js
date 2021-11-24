@@ -1,5 +1,3 @@
-
-import 'fontsource-roboto';
 import React, { memo } from 'react';
 import ModalDeleteConfirm from './ModalDeleteConfirm';
 import { Button } from '@material-ui/core/';

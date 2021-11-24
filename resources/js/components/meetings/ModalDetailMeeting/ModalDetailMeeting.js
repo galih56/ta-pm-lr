@@ -1,4 +1,3 @@
-import 'fontsource-roboto';
 import React, { useEffect, useContext, useState } from 'react';
 import UserContext from '../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';

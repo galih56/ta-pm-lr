@@ -1,5 +1,4 @@
 import React, { useEffect, useContext,useState } from 'react';
-import 'fontsource-roboto';
 import axios from 'axios';
 import Box from '@material-ui/core/Box';
 import Tabs from '@material-ui/core/Tabs';
@@ -85,8 +84,7 @@ export default function ModalCreateProject(props) {
     const [start, setStart] = useState(null);
     const [end, setEnd] = useState(null);
     const [dateRange, setDateRange] = useState([null,null]);
-    const [projectOwners, setProjectOwners] = useState([]);
-    const [projectManagers, setProjectManagers] = useState([]);
+    const [members, setMembers] = useState([]);
     const [projectClients, setProjectClients] = useState([]);
     const [teams, setTeams] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
@@ -141,11 +139,8 @@ export default function ModalCreateProject(props) {
         choosenTeams.forEach((team)=>{
             body.append("teams[]", team.id);
         });
-        projectOwners.forEach((user)=>{
-            body.append("project_owners[]", user.id);
-        });
-        projectManagers.forEach((user)=>{
-            body.append("project_managers[]", user.id);
+        members.forEach((user)=>{
+            body.append("members[]", user.id);
         });
 
         if(selectedFile){
@@ -258,13 +253,8 @@ export default function ModalCreateProject(props) {
                                         </Grid>
                                         <Grid item lg={12} md={12} sm={12} xs={12}>
                                             <UserSearchBar required={true} userOnly={true}
-                                                inputLabel={"Project Owner"}
-                                                onChange={(values)=> setProjectOwners(values)}/>
-                                        </Grid>
-                                        <Grid item lg={12} md={12} sm={12} xs={12}>
-                                            <UserSearchBar required={true} userOnly={true}
-                                                inputLabel={"Project Manager"}
-                                                onChange={(values)=>setProjectManagers(values)}/>
+                                                inputLabel={"Members"}
+                                                onChange={(values)=> setMembers(values)}/>
                                         </Grid>
                                         <Grid item lg={12} md={12} sm={12} xs={12}>
                                             <UserSearchBar required={true} clientOnly={true}
@@ -318,13 +308,8 @@ export default function ModalCreateProject(props) {
                                                 inputLabel={"Project Owner"}
                                                 onChange={(values)=>{
                                                     console.log(values);
-                                                    setProjectOwners(values)
+                                                    setMembers(values)
                                                 }}/>
-                                        </Grid>
-                                        <Grid item lg={12} md={12} sm={12} xs={12}>
-                                            <UserSearchBar required={true} userOnly={true}
-                                                inputLabel={"Project Manager"}
-                                                onChange={(values)=>setProjectManagers(values)}/>
                                         </Grid>
                                         <Grid item lg={12} md={12} sm={12} xs={12}>
                                             <UserSearchBar required={true} clientOnly={true}

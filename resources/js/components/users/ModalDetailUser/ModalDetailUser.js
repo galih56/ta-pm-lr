@@ -1,4 +1,3 @@
-import 'fontsource-roboto';
 import React, { useEffect, useContext, useState, useCallback } from 'react';
 import { useHistory } from "react-router-dom";
 import UserContext from '../../../context/UserContext';
@@ -121,7 +120,7 @@ export default function ModalDetailUser(props) {
             <DialogActions>
                 <DialogActionButtons
                     isEdit={isEditing}
-                    deletable={!([1,8].includes(data.occupation?.id) || global.state.id==props.initialState.id)}
+                    deletable={!([1,2].includes(data.occupation?.id) || global.state.id==props.initialState.id)}
                     saveChanges={saveChanges}
                     setEditMode={handleEditingMode}
                     deleteUser={deleteUser}

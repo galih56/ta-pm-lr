@@ -61,7 +61,6 @@ const ProjectInfo = (props) => {
 
         if (!window.navigator.onLine) {
             toast.error(`You are currently offline`);
-            // handleStoreList(body); //Untuk offline mode
         }
     }
 
@@ -109,7 +108,7 @@ const ProjectInfo = (props) => {
                             Realization start/end at : {detailProject.actual_start ? moment(detailProject.actual_start).format('DD MMMM YYYY') : ''} - {detailProject.actual_end ? moment(detailProject.actual_end).format('DD MMMM YYYY') : ''}
                         </Typography> 
                     </Grid>
-                    {([1,8].includes(global.state.occupation?.id))?(
+                    {([1,2].includes(global.state.occupation?.id))?(
                         <Grid item lg={12} md={12} sm={12} xs={12} style={{padding:'1em'}}>
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
                                 <MobileDateRangePicker
@@ -179,12 +178,20 @@ const ProjectInfo = (props) => {
                         <Button onClick={() => { setIsEditing(false) }} style={{ marginRight: '1.5em' }}>Cancel</Button>
                         <Button variant="contained" color="primary" onClick={saveChanges} style={{ marginRight: '3em' }}> Save </Button>
                     </Grid>
-                    <Grid item container xl={4} md={4} sm={4} xs={4} style={{ padding: '1em' }}
-                        justifyContent="flex-end"
-                        alignItems="baseline"
-                    >
-                        <Button variant="contained" color="secondary" onClick={() => setDeleteConfirmOpen(true)} > Delete </Button>
-                    </Grid>
+                    {([2,4].includes(global.state.occupation?.id))?(
+                        <>
+                            <Grid item container xl={4} md={4} sm={4} xs={4} style={{ padding: '1em' }}
+                                justifyContent="flex-end"
+                                alignItems="baseline"
+                            >
+                                <Button variant="contained" color="secondary" onClick={() => setDeleteConfirmOpen(true)} > Delete </Button>
+                            </Grid>
+                            <DeleteConfirmDialog
+                                open={deleteConfirmOpen}
+                                handleClose={() => { setDeleteConfirmOpen(false); }}
+                                handleConfirm={handleRemoveProject}></DeleteConfirmDialog>
+                        </>
+                    ):null}
                     <ExtendDeadlineForm 
                         open={showExtendDeadlineForm} 
                         handleClose={()=>setShowExtendDeadlineForm(false)}
@@ -215,17 +222,15 @@ const ProjectInfo = (props) => {
                     <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>
                         <Typography variant="body1" >{detailProject.description}</Typography>
                     </Grid>
-                    <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>
-                        <Button onClick={() => { setIsEditing(true) }} variant="contained" color="primary">Edit</Button>
-                    </Grid>
+                    {([2,4].includes(global.state.occupation?.id))?(
+                        <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>
+                            <Button onClick={() => { setIsEditing(true) }} variant="contained" color="primary">Edit</Button>
+                        </Grid>
+                    ):null}
                 </React.Fragment>
             )}
              
             </Grid >
-            <DeleteConfirmDialog
-                open={deleteConfirmOpen}
-                handleClose={() => { setDeleteConfirmOpen(false); }}
-                handleConfirm={handleRemoveProject}></DeleteConfirmDialog>
         </ >
     )
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useContext,useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
@@ -20,6 +20,7 @@ import AddIcon from '@material-ui/icons/Add';
 import moment from 'moment';
 import SearchIcon from '@material-ui/icons/Search';
 import ModalCreateProject from './ModalCreateProject';
+import UserContext from '../../context/UserContext';
 
 function descendingComparator(a, b, orderBy) {
    if (b[orderBy] < a[orderBy]) return -1;
@@ -54,6 +55,7 @@ const useStyles = makeStyles((theme) => ({
     paper: { width: '100%', marginBottom: theme.spacing(2), },
     sortSpan: visuallyHidden,
 }));
+// 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
 
 function EnhancedTableHead(props) {
     const { classes, order, orderBy, onRequestSort } = props;
@@ -96,6 +98,7 @@ export default function EnhancedTable({data}) {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [keywords,setKeywords]=useState('');
     const [modalOpen, setModalOpen] = useState(false);
+    const global = useContext(UserContext);
 
     const openModalCreateProject = () => setModalOpen(true);
 
@@ -121,13 +124,17 @@ export default function EnhancedTable({data}) {
             <Paper className={classes.paper}>
                 <Grid container spacing={2}>
                     <Grid item lg={12} md={12} sm={12} xs={12}>
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={openModalCreateProject}
-                            style={{ marginBottom: '1em' }}
-                            startIcon={<AddIcon />}> Add new project </Button> 
-                        <ModalCreateProject open={modalOpen} closeModal={() => setModalOpen(false)}/>
+                        {([2].includes(global.state.occupation?.id) )?(
+                            <>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={openModalCreateProject}
+                                    style={{ marginBottom: '1em' }}
+                                    startIcon={<AddIcon />}> Add new project </Button> 
+                                <ModalCreateProject open={modalOpen} closeModal={() => setModalOpen(false)}/>
+                            </>
+                        ):null}
                         <TextField 
                             variant="standard" InputProps={{endAdornment:<SearchIcon/>}} 
                             style={{ margin:'1em', float:'right', minWidth:'300px' }}

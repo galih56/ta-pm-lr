@@ -96,7 +96,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
 
     const handleCompleteTask = (id,event) => {
         const body = { id: id, complete: event.target.checked };
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${id}`;
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${id}/complete`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         toast.promise(
@@ -108,6 +108,8 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                         if(item.id==id) item.complete=event.target.checked;
                         return item
                     })
+                    console.log(body,newSubtasks,id,result.data)
+
                     var newDetailTask={...detailTask,cards:newSubtasks}
                     setData(newSubtasks);
                     setDetailTask(newDetailTask);
@@ -240,9 +242,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                                     style={{cursor:'pointer'}}
                                 >        
                                     <Checkbox
-                                        onChange={(event)=>{
-                                            handleCompleteTask(item.id,event)
-                                        }}
+                                        onChange={(event)=>handleCompleteTask(item.id,event)}
                                         checked={item.complete}
                                     />
                                     <span onClick={()=> handleDetailTaskOpen({task:item,open:true})} > 

@@ -28,7 +28,7 @@ export default function DetailClient(props) {
     let history=useHistory();
     
     useEffect(() => {
-        if(![1,8].includes(global.state.occupation?.id)) history.push('/projects');
+        if(![1,2,4,5].includes(global.state.occupation?.id)) history.push('/projects');
         getDetailClient();
     }, []);
 

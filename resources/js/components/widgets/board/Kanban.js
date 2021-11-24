@@ -1,4 +1,3 @@
-import 'fontsource-roboto';
 import React, { useContext, useEffect, memo, useState } from 'react';
 import Board from 'react-trello';
 import { createTranslate } from 'react-trello';
@@ -14,7 +13,15 @@ const Kanban = (props) => {
     const {detailProject,handleDetailTaskOpen} = props;
 
     useEffect(() => {
+        var custom_columns=[
+            { title : "Plan", cards : [] },
+            { title : "To do", cards : [] },
+            { title : "In progress", cards : [] },
+            { title : "Finish", cards : [] },
+        ]
+        
         if (detailProject) setBoard({ lanes: detailProject.columns });
+        console.log(detailProject.columns)
     }, [props.detailProject]);
 
     const TEXTS = {
@@ -83,17 +90,7 @@ const Kanban = (props) => {
                 });
         }
     }
-    const onCardMove = (fromLaneId, toLaneId, cardId, index) => {
-        const body = { id: cardId, lists_id: toLaneId }
-        const url = process.env.MIX_BACK_END_BASE_URL + 'tasks/' + cardId;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-            axios.patch(url, body, config)
-                .then((result) => {
-                    global.dispatch({ type: 'move-card', payload: result.data })
-                    toast.success(`A card has been moved`);
-                }).catch(console.log);
-    }
+    
     const onCardClick = (cardId, metadata,laneId) =>{ 
         handleDetailTaskOpen({ task : {projects_id: detailProject.id, lists_id: laneId, id: cardId, onTaskDelete:onCardDelete}, open: true});
     }
@@ -114,22 +111,24 @@ const Kanban = (props) => {
     const onCardDelete=(lists_id,tasks_id)=>{
         eventBus.publish({type: 'REMOVE_CARD', laneId: listId, cardId: tasks_id});
     }
+
+    const onSorting=(card1,card2)=>{
+        // console.log(card1,card2)
+    }
+
     return (
         <React.Fragment>
             <Board
                 t={createTranslate(TEXTS)}
                 data={board}
-                editable={true}
-                // draggable={true}
-                // laneDraggable={true}
                 collapsibleLanes={true}
                 onLaneUpdate={onLaneRename}
                 onCardAdd={onCardNew}
                 onCardClick={onCardClick}
                 components={{ Card: CustomCard, NewCardForm: EditLaneFormWithDetailProject }}
-                onCardMoveAcrossLanes={onCardMove}
                 detailProject={detailProject}
                 eventBusHandle={setEventBus}
+                laneSortFunction={onSorting}
             >
             </Board>
              

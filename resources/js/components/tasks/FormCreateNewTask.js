@@ -27,7 +27,6 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSu
                 name:global.state.name,
                 username:global.state.username,
                 email:global.state.email,
-                current_project_member_role:global.state.current_project_member_role
             }
             var registered=false
             for (let i = 0; i < detailProject.members.length; i++) {

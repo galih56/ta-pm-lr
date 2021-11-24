@@ -98,12 +98,18 @@ class UserController extends Controller
         return response()->json($user->delete());
     }
 
+    function checkIfUserAssigned($query,$users_id){
+        return $query->where('users_id','=',$users_id);
+    }
+
     public function getProjects(Request $request,$id){
         $user=User::findOrFail($id);
         $project_members=ProjectMember::where('users_id',$id)
-                                        ->with('project.columns',function($q1){
-                                            return $q1->with('cards',function($q2){
-                                                return $q2->with('cards');
+                                        ->with('project.columns',function($columns_q) use($id){
+                                            return $columns_q->with('cards',function($tasks_q) use($id){
+                                                return $tasks_q->whereHas('members',function($members_q) use($id){
+                                                        return $members_q->where('users_id',$id);
+                                                    })->with('cards');
                                             });
                                         })->with('role')->get();
         $projects=[];
@@ -111,6 +117,7 @@ class UserController extends Controller
             $project=$project_members[$i]['project'];
             if($project) $projects[]=$project;
         }
+
         return response()->json($projects);
     }
 

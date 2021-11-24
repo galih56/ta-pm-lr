@@ -258,8 +258,20 @@ class TaskController extends Controller
     }
     public function updateComplete(Request $request,$id){
         
-        $task=Task::findOrFail($id);
+        $task=Task::with('cards')->findOrFail($id);
         if($request->has('complete')){ 
+            if($task->is_subtask){
+                $parent_task=Task::with('cards')->findOrFail($task->parent_task_id);
+                $valuePerSubtask=100/count($parent_task->cards);
+                $completeSubtaskCounter=0;
+                for ($i = 0; $i < count($parent_task->cards); $i++) {
+                    $subtask = $parent_task->cards[$i];
+                    if($subtask->complete){ $completeSubtaskCounter++; }
+                }
+                $progress=$completeSubtaskCounter*$valuePerSubtask;
+                $parent_task->progress=$progress;
+                $parent_task->save();
+            }
             if($request->complete===true){
                 $current_date_time = Carbon::now()->toDateTimeString();
                 $task->actual_end=$current_date_time;
@@ -304,7 +316,7 @@ class TaskController extends Controller
         $task=Task::findOrFail($id);
         
         $task=Task::with('creator')->with('cards')->with('logs')->with('comments.creator')
-                    ->with('list')->with('members.member.role')->with('members.user')
+                    ->with('list')->with('members.user.occupation')
                     ->with('members.project_client.client')
                     ->with('tags')
                     ->with(['parentTask'=>function($q){
@@ -370,7 +382,7 @@ class TaskController extends Controller
         return $attachments;
     }
     public function getMembers($id){
-        $task=Task::with('members.user')->with('members.member.role')
+        $task=Task::with('members.user.occupation')
                     ->with('members.project_client.client')->findOrFail($id)->toArray();
         $members=$this->getTaskMembers($task);
         return response()->json($members);
@@ -382,8 +394,6 @@ class TaskController extends Controller
             $task_member=$task_members[$i];
             if($task_member['user']){
                 $user=$task_member['user'];
-                if($task_member['member']) $user['role']=$task_member['member']['role'];
-                else $user['role']=['id'=>'','name'=>''];
                 $user['project_members_id']=$task_member['project_members_id'];
                 $user['tasks_id']=$task_member['tasks_id'];
                 $user['task_members_id']=$task_member['id'];

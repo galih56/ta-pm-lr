@@ -68,7 +68,7 @@ const ModalCreateUser = (props) => {
         axios.get(url)
             .then((result) => {
                 var data=result.data.filter((item)=>{
-                    if(!(item.id==8 || item.id==1)) {
+                    if(!(item.id==2 || item.id==1)) {
                         return item;
                     }
                 })

@@ -73,7 +73,6 @@ class GanttChart extends React.Component {
             }
             data[i]=new_column;
         }
-        console.log(data);
         this.setState({dataSource:data});
     }
     shouldComponentUpdate() {
@@ -242,7 +241,7 @@ class GanttChart extends React.Component {
                             </div>
                             <div style={{display:'inline-flex',marginRight:'0,5em'}}>
                                 <div style={{width: '1em',padding: '1em',backgroundColor: '#ccdc27'}}></div>
-                                <span style={{marginLeft:'1em',marginRight:'1em'}}>On progress</span>
+                                <span style={{marginLeft:'1em',marginRight:'1em'}}>In progress</span>
                             </div>
                             <div style={{display:'inline-flex',marginRight:'0,5em'}}>
                                 <div style={{width: '1em',padding: '1em',backgroundColor: '#43a047'}}></div>

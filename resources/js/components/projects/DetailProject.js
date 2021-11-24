@@ -127,15 +127,14 @@ const DetailProject = (props) => {
                     break;
                 }
             }
-            if(user){
-                var role={...user.role,project: { id: project.id,  title: project.title }}
-                global.dispatch({type:'store-project-member-role',payload:role})
-            }
         }
     }
 
     const getDetailProject = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'projects/' + params.id;
+        var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
+        if(![1,2,3,4].includes(global.state.occupation?.id)){
+            url+='?users_id='+global.state.id;
+        }
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
@@ -144,7 +143,9 @@ const DetailProject = (props) => {
                 setDetailProject(data);
                 getUserMemberRole(data);
                 global.dispatch({ type: 'store-detail-project', payload: data });
+                global.dispatch({type:'store-current-selected-project',payload:params.id});
             }).catch((error) => {
+                console.log(error)
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
@@ -181,7 +182,6 @@ const DetailProject = (props) => {
 
     const handleDetailTaskOpen = (taskInfo) => {
         const {task, open,onTaskUpdate,onTaskDelete } = taskInfo;
-        console.log({task, open,onTaskUpdate,onTaskDelete });
         setDetailTaskOpen(open);
         setClickedTask({ ...task, onTaskDelete:onTaskDelete, onTaskUpdate:onTaskUpdate });
     };
@@ -218,7 +218,7 @@ const DetailProject = (props) => {
                                     <Grid container >   
                                         <BreadCrumbs projectName={detailProject.title} tabName="Timeline" style={{marginTop:'1em'}}/>
                                         <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                                            {([2,8].includes(global.state.occupation?.id) || [1,2].includes(global.state.current_project_member_role?.id))?(
+                                            {([2,4].includes(global.state.occupation?.id))?(
                                                 <>
                                                     <Button
                                                         variant="contained"
@@ -226,7 +226,7 @@ const DetailProject = (props) => {
                                                         onClick={()=>handleModalCreateList(true)}
                                                         style={{ marginBottom: '1em' }}
                                                         startIcon={<AddIcon />}> Add new list </Button>
-                                                    <Button
+                                                    {/* <Button
                                                         href={`${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}/export`}
                                                         target="_blank"
                                                         variant="contained"
@@ -239,7 +239,7 @@ const DetailProject = (props) => {
                                                         onClick={()=>setShowModalImportExcel(true)}   
                                                         style={{ marginBottom: '1em' ,marginLeft:'1em'}}> 
                                                             Import 
-                                                    </Button>
+                                                    </Button> */}
                                                 </>
                                             ):<></>}
                                             

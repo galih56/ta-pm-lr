@@ -1,7 +1,5 @@
-//test push
-import 'fontsource-roboto';
 import axios from 'axios';
-import React, { useEffect, useContext, useState, useCallback } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import { useHistory } from "react-router-dom";
 import UserContext from '../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
@@ -215,7 +213,7 @@ export default function ModalDetailTask(props) {
             is_subtask:data.is_subtask,  progress: data.progress, parent_task_id:data.parent_task_id, tags:data.tags,
             projects_id:props.detailProject.id, users_id:global.state.id
         }
-        if([1,8].includes(global.state.occupation?.id)){
+        if([1,2].includes(global.state.occupation?.id)){
             body.start=data.start;
             body.end=data.end;
             body.actual_start=data.actual_start;
@@ -317,22 +315,18 @@ export default function ModalDetailTask(props) {
                         setStartConfirmOpen={setStartConfirmOpen}
                     /> 
                     <br/>
-                </DialogContent>
-                {
-                    ([1,2,5,8,9].includes(global.state.occupation?.id) || [1,2].includes(global.state.current_project_member_role?.id))?(                    
-                            <DialogActions>
-                                <DialogActionButtons
-                                    isEdit={isEditing}
-                                    saveChanges={saveChanges}
-                                    setEditMode={handleEditingMode}
-                                    deleteTask={deleteTask}
-                                    deleteConfirmOpen={deleteConfirmOpen}
-                                    setDeleteConfirmOpen={setDeleteConfirmOpen}
-                                    closeModal={closeModalDetailTask}
-                                > </DialogActionButtons>
-                            </DialogActions>
-                    ):<></>
-                }
+                </DialogContent>                
+                <DialogActions>
+                    <DialogActionButtons
+                        isEdit={isEditing}
+                        saveChanges={saveChanges}
+                        setEditMode={handleEditingMode}
+                        deleteTask={deleteTask}
+                        deleteConfirmOpen={deleteConfirmOpen}
+                        setDeleteConfirmOpen={setDeleteConfirmOpen}
+                        closeModal={closeModalDetailTask}
+                    > </DialogActionButtons>
+                </DialogActions>
             </Dialog>
             <DialogConfirm
                 open={startConfirmOpen}

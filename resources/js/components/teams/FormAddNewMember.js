@@ -10,7 +10,6 @@ import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import CloseIcon from '@material-ui/icons/Close';
 import UserSearchBar from '../widgets/UserSearchBar';
-import SelectRole from '../widgets/SelectRole';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },
@@ -40,33 +39,9 @@ const DialogContent = withStyles((theme) => ({
 const FormAddNewMember=({teamId,open,closeModal,onCreate})=>{
     const global=useContext(UserContext);
     const [users,setUsers]=useState([]);
-
-    const [roleId,setRoleId]=useState(null);
-    const [alerts, setAlerts]=useState([]);
-    const [roles,setRoles]=useState([]);
-
-    const getRoles = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'member-roles';
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url)
-            .then(result =>{ 
-                setRoles(result.data)
-            }).catch((error) => {
-                switch(error.response.status){
-                    case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
-                    default : toast.error(<b>{error.response.statusText}</b>); break
-                }
-            });
-    }
-
-    useEffect(() => {
-        getRoles();
-    }, [open]);
     
     const addNewMember=()=>{
-        const body = { teams_id:teamId, users: users, roles_id:roleId }
+        const body = { teams_id:teamId, users: users }
         const url = process.env.MIX_BACK_END_BASE_URL + `team-members`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -86,12 +61,7 @@ const FormAddNewMember=({teamId,open,closeModal,onCreate})=>{
                 },
             });
     }
-    const currentUser={
-        id:global.state.id,
-        username:global.state.username,
-        email:global.state.email
-    }
-
+    
     return(
         <Dialog aria-labelledby="Create a member" open={open} fullWidth={true} maxWidth="xs">
             <DialogTitle onClose={
@@ -99,7 +69,6 @@ const FormAddNewMember=({teamId,open,closeModal,onCreate})=>{
                     closeModal();
                 }} > Add new member </DialogTitle>
             <DialogContent dividers>
-                 
                 <form onSubmit={(e)=>{
                         e.preventDefault();
                         addNewMember();
@@ -111,9 +80,6 @@ const FormAddNewMember=({teamId,open,closeModal,onCreate})=>{
                                 onChange={(values)=> setUsers(values.map((value)=>value.id))}
                                 userOnly={true}
                             />
-                        </Grid>
-                        <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <SelectRole onChange={(value) => setRoleId(value)} data={roles} />
                         </Grid>
                         <Grid xs={12} sm={12} md={12} lg={12} lg={12} item>
                             <Button type="submit" variant="contained" color="primary">Add</Button>

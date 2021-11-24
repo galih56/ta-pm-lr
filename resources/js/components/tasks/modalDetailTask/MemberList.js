@@ -116,7 +116,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
             <List>
                 {members.map((member)=>{
                     return(
-                        <CustomListItem key={member.id} classes={classes} isEdit={isEdit} member={member} onClick={()=>removeMember(member)}/>
+                        <CustomListItem key={member.id} classes={classes} isEdit={isEdit} member={member} onClick={()=>removeMember(member)} logged_in_user_role={global.state.occupation}/>
                     )
                 })}
             </List>
@@ -125,7 +125,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
     )
 }
 
-const CustomListItem=({classes,isEdit,member,onClick})=>{
+const CustomListItem=({classes,isEdit,member,onClick,logged_in_user_role})=>{
     return <React.Fragment key={member.id}>
         <ListItem alignItems="flex-start" >
             <ListItemAvatar>
@@ -143,13 +143,13 @@ const CustomListItem=({classes,isEdit,member,onClick})=>{
                             className={classes.inline}
                             color="textPrimary"
                         >
-                            {member.is_user?member.role?.name:member.institution}
+                            {member.is_user?member.occupation?.name:member.institution}
                         </Typography>
                     </>
                 }
 
             />
-            {isEdit?(<ListItemSecondaryAction>
+            {isEdit && [1,2,4].includes(logged_in_user_role?.id)?(<ListItemSecondaryAction>
                 <IconButton
                     edge="end"
                     aria-label="Remove"
