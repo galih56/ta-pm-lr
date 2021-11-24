@@ -142,7 +142,7 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
                                         }
                                     }}
                                     
-                                        defaultValue={data.occupation.id}>
+                                        defaultValue={data.occupation?.id}>
                                         {
                                             occupations.map((occupation, index) => (<MenuItem value={occupation.id} key={occupation.id}>{occupation.name}</MenuItem>))
                                         } 
