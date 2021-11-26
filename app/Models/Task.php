@@ -98,16 +98,3 @@ class Task extends Model
 }
 
 
-
-// public function getMembersAttribute(){
-//     $task_members= $this->taskMembers()->with('user')->get()->toArray();
-//     $members=[];
-//     for ($i=0; $i < count($task_members); $i++) { 
-//        $task_member=$task_members[$i];
-//         $user=$task_member['user'];
-//         $user['task_members_id']=$task_member['id'];
-//         $user['project_members_id']=$task_member['project_members_id'];
-//         $members[]=$user;
-//     }
-//     return $members;
-// }

@@ -53,7 +53,7 @@ export default function ModalDetailMember(props) {
 
     const [data, setData] = useState({
         id: null, name: '', email: '',  last_login: '', occupation: null, profile_picture_path: '' ,
-         role:{ id:null, name:'' }, team_members_id:null
+         occupation:{ id:null, name:'' }, team_members_id:null
     });
     const [isEditing, setIsEditing] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
@@ -109,17 +109,19 @@ export default function ModalDetailMember(props) {
             <DialogContent dividers>
                 <EditForm isEdit={isEditing} data={data} setData={setData} />
             </DialogContent>
-            <DialogActions>
-                <DialogActionButtons
-                    isEdit={isEditing}
-                    saveChanges={saveChanges}
-                    setEditMode={handleEditingMode}
-                    deleteMember={deleteMember}
-                    deleteConfirmOpen={deleteConfirmOpen}
-                    setDeleteConfirmOpen={setDeleteConfirmOpen}
-                    closeModal={closeModal}
-                />
-            </DialogActions>
+            {[1,2,4].includes(global.state.occupation?.id)?(
+                <DialogActions>
+                    <DialogActionButtons
+                        isEdit={isEditing}
+                        saveChanges={saveChanges}
+                        setEditMode={handleEditingMode}
+                        deleteMember={deleteMember}
+                        deleteConfirmOpen={deleteConfirmOpen}
+                        setDeleteConfirmOpen={setDeleteConfirmOpen}
+                        closeModal={closeModal}
+                    />
+                </DialogActions>
+            ):null}
                      
         </Dialog>
     );

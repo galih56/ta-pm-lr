@@ -5,7 +5,6 @@ import UserContext from '../../../../context/UserContext';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Avatar from '@material-ui/core/Avatar';
-import SelectRole from '../../../widgets/SelectRole';
 import toast from 'react-hot-toast';
 import moment from 'moment';
 import axios from 'axios';
@@ -16,29 +15,7 @@ const useStyles = makeStyles((theme) => ({
 
 const OpenEditForm = ({ isEdit, data, setData}) => {
     const classes = useStyles();
-    const [roles,setRoles]=useState([]);
-    const global = useContext(UserContext);
-
-    const getRoles = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'member-roles';
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url)
-            .then((result) => {
-                setRoles(result.data);
-            }).catch((error) => {
-                switch(error.response.status){
-                    case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
-                    default : toast.error(<b>{error.response.statusText}</b>); break
-                }
-            });
-    }
-
-    useEffect(()=>{
-        getRoles();
-    },[]);
-    
+    const global = useContext(UserContext);    
     if (isEdit) {
         return (
             <Grid container spacing={2} style={{ paddingLeft: 3, paddingRight: 3 }} >
@@ -50,19 +27,6 @@ const OpenEditForm = ({ isEdit, data, setData}) => {
                 <Grid item lg={12} md={12} sm={12} xs={12} align="center">
                     {data.occupation ? <Typography variant="body2">{data.occupation.name}</Typography> : <></>}
                         <Typography variant="body2">Last login : {data.last_login ? moment(data.last_login).format('DD MMM YYYY') : ''}</Typography>
-
-                        <SelectRole data={roles} 
-                        onChange={
-                            (value)=>{
-                                var selectedRole=roles.filter(function(role){
-                                    if(value==role.id) return role;
-                                })
-                                if(selectedRole.length){
-                                    setData({...data,role:selectedRole[0]})
-                                }
-                            }
-                        } value={data.role?.id?data.role.id:data.role}/>
-                     
                 </Grid>
             </Grid>
         )

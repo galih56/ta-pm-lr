@@ -91,25 +91,30 @@ class ProjectController extends Controller
                                 $q1=$q1->orderBy('end','ASC');
                                 if($request->has('users_id')){
                                     $users_id=$request->users_id;
-                                    $q1=$q1->whereHas('members',function($members_q) use($users_id){
+                                    $q1=$q1->orWhereHas('members',function($members_q) use($users_id){
                                         return $members_q->where('users_id',$users_id);
                                     });
                                 }
-                                $q1=$q1->with(['cards'=>function($q1){
-                                        return $q1->orderBy('end','ASC')
-                                            ->with('members.user.occupation')
+                                $q1=$q1->with(['cards'=>function($q2) use($request){
+                                        $q2=$q2->orderBy('end','ASC');
+                                            if($request->has('users_id')){
+                                                $users_id=$request->users_id;
+                                                $q2=$q2->whereHas('members',function($members_q) use($users_id){
+                                                    return $members_q->where('users_id',$users_id);
+                                                });
+                                            }
+                                        $q2=$q2->with('members.user.occupation')
                                             ->with('members.project_client.client')
-                                            ->with('members.member.role')
                                             ->with('tags');
+                                        return $q2;
                                     }])
                                 ->with('members.user.occupation')
                                 ->with('members.project_client.client')
-                                ->with('members.member.role')
                                 ->with('tags');
                                 return $q1;
                             }]);
                     }])
-                    ->with('members.role')->with('members.user.occupation')
+                    ->with('members.user.occupation')
                     ->with('meetings')
                     ->findOrFail($id)->toArray();
 
@@ -118,11 +123,9 @@ class ProjectController extends Controller
         for ($i=0; $i < count($members); $i++) { 
             $member=$members[$i];
             $project_members_id=$member['id'];
-            $role=$member['role'];
             $user=$member['user'];
             $projects_id=$member['projects_id'];
             $member=$user;
-            $member['role']=$role;
             $member['is_user']=true;
             $member['is_client']=false;
             $member['project_members_id']=$project_members_id;
@@ -363,13 +366,20 @@ class ProjectController extends Controller
         return response()->json($meetings);
     }
 
-    public function getReports($id){
-        $tasks=Task::selectRaw('t.*,t.parent_task_id AS parentTask,l.projects_id')
-                        ->from('tasks AS t')
-                        ->leftJoin('lists AS l','t.lists_id','=','l.id')
+    public function getReports(Request $request,$id){
+        $tasks=Task::selectRaw('tasks.*,tasks.parent_task_id AS parentTask,l.projects_id')
+                        ->leftJoin('lists AS l','tasks.lists_id','=','l.id')
                         ->where('l.projects_id','=',$id)
-                        ->orderBy('t.end','ASC')->get($id);
+                        ->orderBy('tasks.end','ASC');
 
+        if($request->has('users_id')){
+            $users_id=$request->users_id;
+            $tasks=$tasks->whereHas('members',function($members_q) use($users_id){
+                return $members_q->where('users_id','=',$users_id);
+            });
+        }
+        $tasks=$tasks->get();
+        
         $mulai_cepat=[];
         $selesai_cepat=[];
         $mulai_tepat_waktu=[];
@@ -441,20 +451,33 @@ class ProjectController extends Controller
     }
 
     public function getoverallProjectReports(Request $request){
-        $projects=Project::get()->toArray();
+        $projects=Project::select('id','title','start','end','actual_start','actual_end','progress','complete');
+        if($request->has('users_id')){
+            $users_id=$request->users_id;
+            $projects=$projects->whereHas('members',function($members_q) use($users_id){
+                return $members_q->where('users_id','=',$users_id);
+            });
+        }
+        $projects=$projects->get()->toArray();
         $new_projects=[];
         for ($i=0; $i < count($projects); $i++) { 
             $project=$projects[$i];
-            $tasks=Task::selectRaw('t1.*,t1.parent_task_id AS parentTask,l1.projects_id')
-                ->from('tasks AS t1')
-                ->join('lists AS l1','t1.lists_id','=','l1.id')
-                ->where('l1.projects_id','=',$project['id'])
-                ->orWhereIn('t1.parent_task_id',function($query) use($project){
-                    return $query->select('t2.id')
-                                    ->from('tasks AS t2')
-                                    ->leftJoin('lists AS l2','t2.lists_id','l2.id')
-                                    ->where('l2.projects_id','=',$project['id'])->get();
-                })->get();
+            $tasks=Task::selectRaw('tasks.id,tasks.title,tasks.progress,tasks.complete,
+                tasks.lists_id,tasks.start,tasks.end,tasks.actual_start,tasks.actual_end,tasks.is_subtask,
+                tasks.cost,tasks.actual_cost,tasks.start_label,tasks.end_label,tasks.parent_task_id,tasks.days,
+                tasks.work_days,tasks.parent_task_id AS parentTask,l1.projects_id')
+                ->from('tasks')
+                ->join('lists AS l1','tasks.lists_id','=','l1.id')
+                ->where('l1.projects_id','=',$project['id']);
+
+            $tasks=$tasks->orWhereIn('tasks.parent_task_id',function($query) use($project){
+                        return $query->select('subtasks.id')
+                                ->from('tasks AS subtasks')
+                                ->leftJoin('lists AS l2','subtasks.lists_id','l2.id')
+                                ->where('l2.projects_id','=',$project['id'])->get();
+                    });
+            $tasks=$tasks->get();
+
             $project['tasks']=$tasks;
             $complete_task_counter=0;
             $incomplete_task_counter=0;
@@ -476,10 +499,19 @@ class ProjectController extends Controller
         return response()->json($repos);
     }
 
-    public function getGanttDataSource($id){
+    public function getGanttDataSource(Request $request,$id){
         
-        $project=Project::with(['columns.cards'=>function($q1){
+        $project=Project::with(['columns'=>function($q1) use($request){
             return $q1->orderBy('start','ASC')
+                    ->with(['cards'=>function($q1) use($request){
+                        $q1=$q1->orderBy('end','ASC');
+                        if($request->has('users_id')){
+                            $users_id=$request->users_id;
+                            $q1=$q1->whereHas('members',function($members_q) use($users_id){
+                                return $members_q->where('users_id',$users_id);
+                            });
+                        }
+                    }])    
                     ->with(['cards'=>function($q2){
                         return $q2->orderBy('start','ASC');
                     }]);

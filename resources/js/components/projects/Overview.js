@@ -29,7 +29,10 @@ const Overview=({detailProject,refreshDetailProject,handleDetailTaskOpen})=>{
     },[detailProject.id]);
 
     const getReports = useCallback(() => {
-        const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/reports`;
+        var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/reports`;
+        if(![1,2,3,4,5,6].includes(global.state.occupation?.id)){
+            url+=`?users_id=${global.state.id}`;
+        }
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url, {}, {})
@@ -48,8 +51,8 @@ const Overview=({detailProject,refreshDetailProject,handleDetailTaskOpen})=>{
             const task = allTasks[i];
             var estimationDate=moment(task[prop1],'YYYY-MM-DD');
             var realizationDate=moment(task[prop2],'YYYY-MM-DD');
-            estimations.push({ y: i , x:estimationDate.toDate(), data:task});
-            realizations.push({ y: i , x:realizationDate.toDate(), data:task});
+            estimations.push({ y: i+1 , x:estimationDate.toDate(), data:task});
+            realizations.push({ y: i+1 , x:realizationDate.toDate(), data:task});
         } 
 
         const results= {
@@ -63,7 +66,6 @@ const Overview=({detailProject,refreshDetailProject,handleDetailTaskOpen})=>{
         if(!detailProject.id && refreshDetailProject) refreshDetailProject()
         var startsData=restructureTaskData('start','actual_start');
         var endsData=restructureTaskData('end','actual_end');
-        console.log(endsData);
         setStarts({ estimations:startsData.estimations, realizations:startsData.realizations });
         setEnds({ estimations:endsData.estimations, realizations:endsData.realizations })
     },[detailProject.id,allTasks]);
@@ -148,37 +150,37 @@ const Overview=({detailProject,refreshDetailProject,handleDetailTaskOpen})=>{
             <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
                 <Typography variant="h5">Ends : </Typography>
                 <CustomedChart titleX="Date" titleY="Tasks"
-                        prop1={"estimations"} prop2={"realizations"}
-                        maximumX={moment(detailProject.end).add(1, 'weeks').toDate()}
-                        contentFormatter={(e)=>handleContentFormat(e,'ends')}
-                        data={taskComparisonData.ends}
-                        
-                        labelYFormatter={(e)=>{  
-                            var tasks= allTasks.filter((task,i)=>(e.value==i))
-                            if(tasks.length>0){
-                                var task_title=tasks[0].title
-                                var maxLength = 25;
-                                if(task_title.length>23){
-                                    task_title=task_title.substring(0, maxLength)+"...";
-                                }
-                                return task_title;
-                            }else return '';
-                        }}
-                        stripLinesX={[
-                            {
-                                value: moment(detailProject?.end,'YYYY-MM-DD').toDate(),
-                                label:`Estimation : ${moment(detailProject?.end).format('DD-MM-YYYY')}`,
-                                color:'blue'
-                            },
-                            {
-                                value: moment(detailProject.actual_end,'YYYY-MM-DD').toDate(),
-                                label:`Realization : ${moment(detailProject.actual_end).format('DD-MM-YYYY')}`,
-                                color:'red'
+                    prop1={"estimations"} prop2={"realizations"}
+                    maximumX={moment(detailProject.end).add(1, 'weeks').toDate()}
+                    contentFormatter={(e)=>handleContentFormat(e,'ends')}
+                    data={taskComparisonData.ends}
+                    labelYFormatter={(e)=>{  
+                        var tasks= allTasks.filter((task,i)=>(e.value==i))
+                        if(tasks.length>0){
+                            var task_title=tasks[0].title
+                            var maxLength = 25;
+                            if(task_title.length>23){
+                                task_title=task_title.substring(0, maxLength)+"...";
                             }
-                        ]}
-                    />
+                            return task_title;
+                        }else return '';
+                    }}
+                    stripLinesX={[
+                        {
+                            value: moment(detailProject?.end,'YYYY-MM-DD').toDate(),
+                            label:`Estimation : ${moment(detailProject?.end).format('DD-MM-YYYY')}`,
+                            color:'blue'
+                        },
+                        {
+                            value: moment(detailProject.actual_end,'YYYY-MM-DD').toDate(),
+                            label:`Realization : ${moment(detailProject.actual_end).format('DD-MM-YYYY')}`,
+                            color:'red'
+                        }
+                    ]}
+                    intervalY={1}
+                />
             </Grid> 
-            {([1,2].includes(global.state.occupation?.id))?(    
+            {([1,2,3].includes(global.state.occupation?.id))?(    
                 <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
                     <CostChart 
                         data={allTasks.sort((task1, task2)=> {
