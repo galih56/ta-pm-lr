@@ -5,25 +5,7 @@ import CustomedChart from './CustomedChart';
 const GroupedTasksChart = ({groupedTasks}) => {  
   const [data,setData]=useState([]);  
 
-  const options = useMemo(
-    () => [
-    {
-      scales: {
-        yAxes: [
-          {
-            ticks: {
-              beginAtZero: true,
-            },
-          },
-        ],
-      },
-      responsive:true,
-      maintainAspectRatio : false
-    }]
-  );
-
   useEffect(()=>{
-    var labels=[ 'Lebih cepat','Tepat waktu','Terlambat','Belum dilaksanakan','Belum selesai'];
     var datasets=[
         {
             name: `Mulai `,
@@ -31,7 +13,7 @@ const GroupedTasksChart = ({groupedTasks}) => {
             dataPoints: [ {y:groupedTasks.mulai_cepat, label:'Lebih cepat'}, {y:groupedTasks.mulai_tepat_waktu, label:'Tepat waktu'}, {y:groupedTasks.mulai_telat, label:'Terlambat'}, {y:groupedTasks.belum_dilaksanakan, label:'Belum dilaksanakan'}, {y:groupedTasks.belum_selesai, label:'Belum selesai'} ]
         },
         {
-            name: `Selesa `,
+            name: `Selesai `,
             showInLegend: true,
             dataPoints:[ {y:groupedTasks.selesai_cepat, label:'Lebih cepat'}, {y:groupedTasks.selesai_tepat_waktu, label:'Tepat waktu'},{ y:groupedTasks.selesai_telat, label:'Terlambat'},  {y:groupedTasks.belum_dilaksanakan, label:'Belum dilaksanakan'}, {y:groupedTasks.belum_selesai, label:'Belum selesai'} ]
         },
@@ -108,7 +90,8 @@ const GroupedTasksChart = ({groupedTasks}) => {
             </tbody>
         </table>
         
-        <CustomedChart titleX="Projects" 
+        <CustomedChart 
+                titleX="Projects" 
                 prop1={"Tasks"}
                 contentFormatter={ ( e )=> {
                     var dp1=e.entries[0].dataPoint
@@ -120,6 +103,7 @@ const GroupedTasksChart = ({groupedTasks}) => {
                         Finished : ${dp1.y}
                     </div>`
                 }}
+                intervalY={1}
                 data={data}/>
   </>
 )};

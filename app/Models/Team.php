@@ -23,6 +23,6 @@ class Team extends Model
     }
 
     public function projects(){
-        return $this->belongsToMany(Project::class,'teams_has_projects','projects_id','teams_id');
+        return $this->belongsToMany(Project::class,'teams_has_projects','teams_id','projects_id');
     }
 }

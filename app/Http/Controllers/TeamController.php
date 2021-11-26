@@ -37,7 +37,6 @@ class TeamController extends Controller
     public function show($id)
     {
         $team=Team::with('members.user')
-                    ->with('members.role')
                     ->with('projects')
                     ->where('id','=',$id)
                     ->firstOrFail()->toArray();
@@ -46,16 +45,10 @@ class TeamController extends Controller
             if($team['members'][$i]['user']){
                 $member=$team['members'][$i]['user'];
                 $member['team_members_id']=$team['members'][$i]['id'];
-                $member['role']=$team['members'][$i]['role'];
                 $members[]=$member;
             }
         }
-        $projects=[];
-        for ($i=0; $i < count($team['projects']); $i++) { 
-            $projects[]=$team['projects'][$i]['project'];
-        }
         $team['members']=$members;
-        $team['projects']=$projects;
         return response()->json($team);
     }
 

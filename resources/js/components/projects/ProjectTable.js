@@ -89,7 +89,7 @@ function EnhancedTableHead(props) {
     );
 }
 
-export default function EnhancedTable({data}) {
+export default function EnhancedTable({data,page_name}) {
     const classes = useStyles();
     const [rows, setRows] = useState([]);
     const [order, setOrder] = useState('asc');
@@ -175,7 +175,7 @@ export default function EnhancedTable({data}) {
                                                         style={{ cursor: 'pointer' }}
                                                         align="left"
                                                     >
-                                                        <Link to={`/projects/${row.id}/`} style={{ textDecoration: 'none', color: 'black', textAlign:"left" }}>
+                                                        <Link to={`/${page_name}/${row.id}/`} style={{ textDecoration: 'none', color: 'black', textAlign:"left" }}>
                                                             {row.title}
                                                         </Link>
                                                     </TableCell>

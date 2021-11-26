@@ -15,8 +15,6 @@ import FormAddNewMember from '../FormAddNewMember';
 import ModalDetailMember from './ModalDetailMember/ModalDetailMember';
 import CancelIcon from '@material-ui/icons/Cancel';
 import UserContext from '../../../context/UserContext';
-import axios from 'axios';
-import toast from 'react-hot-toast';
 
 const useStyles = makeStyles((theme) => ({
     root: { width: '100%', backgroundColor: theme.palette.background.paper, },
@@ -26,7 +24,7 @@ const useStyles = makeStyles((theme) => ({
 let initStateUser = { id: null, name: '', email: '', role: { id: null, name: '' },team_members_id:null }
 const MemberList = ({teamId,data}) => {
     const classes = useStyles();
-    const global=useContext(UserContext);
+    let global=useContext(UserContext);
     const [openFormCreate,setOpenFormCreate]=useState(false);
     const [rows,setRows]=useState([]); 
     const [clickedUser, setClickedUser] = useState(initStateUser);
@@ -84,15 +82,17 @@ const MemberList = ({teamId,data}) => {
                                     </React.Fragment>
                                 }
                             />
-                            <ListItemSecondaryAction>
-                                <IconButton
-                                    edge="end"
-                                    aria-label="Remove"
-                                    onClick={()=>removeMember(member)}
-                                    size="large">
-                                    <CancelIcon />
-                                </IconButton>
-                            </ListItemSecondaryAction>
+                            {[1,2,4].includes(global.state.occupation?.id)?(
+                                <ListItemSecondaryAction>
+                                    <IconButton
+                                        edge="end"
+                                        aria-label="Remove"
+                                        onClick={()=>removeMember(member)}
+                                        size="large">
+                                        <CancelIcon />
+                                    </IconButton>
+                                </ListItemSecondaryAction>
+                            ):null}
                         </ListItem>
                         <Divider variant="inset" component="li" />
                     </>;

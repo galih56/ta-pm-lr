@@ -52,7 +52,8 @@ const CustomedChart=({
         data , titleX , titleY , prop1 , prop2,
         contentFormatter , labelXFormatter,
         labelYFormatter , labelY2Formatter,
-        maximumX,maximumY, stripLinesX, stripLinesY
+        maximumX,maximumY, stripLinesX, stripLinesY,
+        intervalX, intervalY
     })=> {
     const [options,setOptions]=useState(initialStateOptions);
     useEffect(()=>{
@@ -87,6 +88,8 @@ const CustomedChart=({
         if(labelY2Formatter) config.axisY2.labelFormatter=labelY2Formatter;
         if(stripLinesX) config.axisX.stripLines=stripLinesX;
         if(stripLinesY) config.axisY.stripLines=stripLinesY;
+        if(intervalX) config.axisX.interval=intervalX;
+        if(intervalY) config.axisY.interval=intervalY;
         if(data)config.data=data
         if(contentFormatter)config.toolTip.contentFormatter=contentFormatter
         setOptions(config)

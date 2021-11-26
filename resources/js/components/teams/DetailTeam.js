@@ -146,13 +146,17 @@ function DetailTeam(props) {
                             ):(<Typography variant="h5">{data.name}</Typography>)}
                     </Grid>
                     <Grid item xl={12} lg={12} md={12} sm={12} style={{marginTop:'0.5em'}}>
-                        {(isEditing)?(
+                        {[1,2,4].includes(global.state.occupation?.id)?(
                             <>
-                                <Button onClick={handleEditingMode}>Cancel</Button>
-                                <Button variant="contained" color="primary" onClick={saveChanges} style={{marginLeft:'1em',marginRight:'1em'}}>Save</Button>
-                                <Button variant="contained" color="secondary" onClick={()=>setDeleteConfirmOpen(true)}>Delete</Button>
+                                {(isEditing)?(
+                                    <>
+                                        <Button onClick={handleEditingMode}>Cancel</Button>
+                                        <Button variant="contained" color="primary" onClick={saveChanges} style={{marginLeft:'1em',marginRight:'1em'}}>Save</Button>
+                                        <Button variant="contained" color="secondary" onClick={()=>setDeleteConfirmOpen(true)}>Delete</Button>
+                                    </>
+                                ):<Button onClick={handleEditingMode}>Edit</Button>}
                             </>
-                        ):<Button onClick={handleEditingMode}>Edit</Button>}
+                        ):null}
                     </Grid>
                 </Grid>
                 <ModalDeleteConfirm

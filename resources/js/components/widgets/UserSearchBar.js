@@ -67,7 +67,7 @@ export default function UserSearchbar(props) {
         else{
             filteredUsers=users.filter((option) => { 
                 if (!(checkExistingMember(option.id, (exceptedData?exceptedData:exceptedUsers))
-                    ||([1, 2].includes(option.id)))){ 
+                    ||(![1, 2].includes(option.id)))){ 
                         return option;
                     }
             });
