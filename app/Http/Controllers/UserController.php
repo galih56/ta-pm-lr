@@ -20,7 +20,7 @@ class UserController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['show','update','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['update','destroy']]); 
     }
 
     public function index()

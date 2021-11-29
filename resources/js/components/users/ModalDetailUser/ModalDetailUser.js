@@ -58,7 +58,21 @@ export default function ModalDetailUser(props) {
 
     useEffect(() => {
         setData(props.initialState);
+        getDetailUser()
     }, [props.initialState.id]);
+
+    const getDetailUser = () => {
+        const url = process.env.MIX_BACK_END_BASE_URL + `users/${props.initialState.id}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.get(url)
+        .then((result) => {
+            setData(result.data);
+            props.onUpdate(result.data, 'update');
+        }).catch((error) => {
+            console.error(error.response);
+        });
+    }
 
     const saveChanges = () => {
         let body = {

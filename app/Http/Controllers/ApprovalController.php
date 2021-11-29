@@ -7,6 +7,8 @@ use App\Models\Task;
 use App\Models\TaskList;
 use App\Models\Project;
 use App\Models\Approval;
+use App\Models\Notification;
+use App\Models\User;
 
 class ApprovalController extends Controller
 {
@@ -55,6 +57,16 @@ class ApprovalController extends Controller
         if($request->has('projects_id')) $approval->projects_id=$request->projects_id;
         $approval->status=$request->status;
         $approval->save();
+
+        $user=User::findOrFail($users_id);
+        $notif=new Notification();
+        $notif->notifiable_id=$approval->id;
+        $notif->notifiable_type='\App\Models\Approval';
+        $notif->title='A new approval created';
+        $notif->message=$user->name.' meminta perpanjangan waktu proyek';
+        $notif->route='\Approvals';
+        $notif->users_id=$user->id;
+        $notif->save();
         return response()->json($approval,200);
     }
 
@@ -77,6 +89,8 @@ class ApprovalController extends Controller
         if($request->has('tasks_id')) $approval->tasks_id=$request->tasks_id;
         if($request->has('lists_id')) $approval->lists_id=$request->lists_id;
         if($request->has('projects_id')) $approval->projects_id=$request->projects_id;
+        $status='';
+        $message='';
         if($request->has('status')){ 
             if($request->status=="accepted"){
                 if($approval->projects_id && !$approval->tasks_id && !$approval->lists_id){
@@ -102,9 +116,19 @@ class ApprovalController extends Controller
                 }
             }
             $approval->status=$request->status;
+            $message='Status permohonan telah diubah';
         }
-        
         $approval->save();
+        
+        $user=User::findOrFail($approval->users_id);
+        $notif=new Notification();
+        $notif->notifiable_id=$approval->id;
+        $notif->notifiable_type='\App\Models\Approval';
+        $notif->title='An approval is updated';
+        $notif->message=$message;
+        $notif->route='\Approvals';
+        $notif->users_id=$user->id;
+        $notif->save();
         $approval=$this->getDetailApproval($id);
         return response()->json($approval);
     }

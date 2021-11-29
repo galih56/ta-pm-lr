@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Typography from '@material-ui/core/Typography';
@@ -12,13 +12,9 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Paper from '@material-ui/core/Paper';
-import Checkbox from '@material-ui/core/Checkbox';
-import ModalDetailTask from './modalDetailTask/ModalDetailTask';
 import UserContext from '../../context/UserContext';
 import { visuallyHidden } from '@material-ui/utils';
-import toast, { Toaster } from 'react-hot-toast';
 import moment from 'moment';
-import axios from 'axios';
 
 function descendingComparator(a, b, orderBy) {
    if (b[orderBy] < a[orderBy]) return -1;
@@ -44,8 +40,7 @@ function stableSort(array, comparator) {
 
 const headCells = [
     { id: 'title', align: 'left', disablePadding: true, label: 'Title' },
-    { id: 'deadline', align: 'right', disablePadding: false, label: 'Start - End' },
-    { id: 'project', align: 'right', disablePadding: false, label: 'Project' },
+    { id: 'created_at', align: 'right', disablePadding: false, label: '' },
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -89,72 +84,22 @@ function EnhancedTableHead(props) {
     );
 }
 
-export default function EnhancedTable({data}) {
+export default function EnhancedTable() {
     const classes = useStyles();
     const [rows, setRows] = useState([]);
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('end');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [clickedTask, setClickedTask] = useState({ projects_id: null, lists_id: null, tasks_id: null,id:null });
-    const [modalOpen, setModalOpen] = useState(false);
-    let history=useHistory();
 
     let global = useContext(UserContext);
 
-    const handleModalOpen = (taskInfo) => {
-        const { projects_id, lists_id, tasks_id, open } = taskInfo;
-        setModalOpen(open);
-        setClickedTask({ projects_id: projects_id, lists_id: lists_id, tasks_id: tasks_id, id:tasks_id });
-    }
-
     useEffect(()=>{
-        setRows(data)
-    },[data])
-
-    const showModalDetailTask = () => {
-        if (clickedTask.tasks_id != null && clickedTask.tasks_id !== undefined && modalOpen == true) {
-            return (
-                <ModalDetailTask
-                    open={modalOpen}
-                    closeModalDetailTask={() => {
-                        handleModalOpen({ projects_id: null, lists_id: null, tasks_id: null, open: false })
-                    }}
-                    projects_id={clickedTask.projects_id}
-                    initialState={clickedTask} />
-            )
-        }
-    }
-
-    const handleCompleteTask = (tasks_id, isChecked) => {
-        var newRows = rows.map((row) => {
-            if (row.id == tasks_id) row.complete = isChecked;
-            return row;
-        });
-        setRows(newRows);
-        const body = { id: tasks_id, complete: isChecked };
-        if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${tasks_id}`;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            toast.promise(
-                axios.patch(url, body),
-                {
-                    loading: 'Updating...',
-                    success: (result)=>{
-                        return <b>Successfully updated</b>
-                    },
-                    error: (error)=>{
-                        console.error(error);
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                        return <b>{error.response.statusText}</b>;
-                    },
-                });
-        } else {
-
-        }
-    }
+        if(global.state.notifications){
+            setRows(global.state.notifications);
+        }else setRows([]);
+    },[global.state.notifications])
+    
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -170,8 +115,7 @@ export default function EnhancedTable({data}) {
 
     return (
         <div className={classes.root}>
-             
-            <Paper className={classes.paper}>
+            <Paper className={classes.paper} >
                 <TableContainer>
                     <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} >
                         <EnhancedTableHead
@@ -188,32 +132,16 @@ export default function EnhancedTable({data}) {
                                     if (row.progress >= 100) row.complete = true;
                                     return (
                                         <TableRow
-                                            hover
-                                            role="checkbox" key={row.title}
+                                            hover key={row.title}
                                         >
-                                            <TableCell padding="checkbox">
-                                                <Checkbox
-                                                    onChange={(event) => {
-                                                        var checked = event.target.checked;
-                                                        handleCompleteTask(row.id, checked)
-                                                    }}
-                                                    checked={row.complete}
-                                                />
-                                            </TableCell>
-                                            <TableCell component="th" scope="row" padding="none" style={{ cursor: 'pointer' }}
-                                                onClick={() => {
-                                                    var projects_id=(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id;
-                                                    var lists_id=(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id;
-                                                    handleModalOpen({  projects_id: projects_id,  lists_id: lists_id,  tasks_id: row.id,  open: true });
-                                                }}>
-                                                {row.title} ({row.progress}%)
-                                            </TableCell>
-                                            <TableCell align="right">{row.start ? moment(row.start).format('DD MMM YYYY') : ''} - {row.end ? moment(row.end).format('DD MMM YYYY') : ''}</TableCell>
-                                            <TableCell align="right">
-                                                <Link to={`/projects/${(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id}/`} style={{ textDecoration: 'none', color: 'black' }}>
-                                                    {(!row.is_subtask)?row.list.project.title:row.parent_task.list.project}
+                                            <TableCell component="th" scope="row" padding="none" style={{ cursor: 'pointer' }}>
+                                                <Link to={row.route} style={{ textDecoration: 'none', color: 'black' }}>
+                                                    {row.title}
+                                                    <br/>
+                                                    {row.message}
                                                 </Link>
                                             </TableCell>
+                                            <TableCell align="right">{row.created_at?moment(row.created_at).format('DD MMM YYYY') : ''}</TableCell>
                                         </TableRow>
                                     );
                                 }):(
@@ -236,7 +164,6 @@ export default function EnhancedTable({data}) {
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
             </Paper>
-            {showModalDetailTask()}
         </div>
     );
 }

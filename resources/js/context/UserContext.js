@@ -9,6 +9,7 @@ const initState = {
         code:'',  authenticated:false,  access_token:'',  scope:null
     }, 
     current_project_id:null,
+    notifications:[],
 };
 
 const getAuthDataFromStorage = () => {
@@ -27,6 +28,7 @@ const storeAuthData = (payload) => {
             code:'',  authenticated:false,  access_token:'',  scope:null
         }, 
         token: token, authenticated: true,
+        notifications:[]
     }
     localStorage.setItem("user", JSON.stringify(user));
     return { ...user };
@@ -80,7 +82,8 @@ const resetState = () => {
         githubAuth:{
             code:'',  authenticated:false,  access_token:'',  scope:null
         }, 
-        token: '', authenticated: false
+        token: '', authenticated: false,
+        notifications:[]
     }
     localStorage.setItem("user", JSON.stringify(user));
     return user;

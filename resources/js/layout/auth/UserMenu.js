@@ -7,6 +7,7 @@ import PersonIcon from '@material-ui/icons/Person';
 import LogoutConfirmDialog from './LogoutConfirmDialog';
 import ModalDetailUser from './../../components/users/ModalDetailUser/ModalDetailUser';
 
+
 const StyledMenu = withStyles({
     paper: { border: '1px solid #d3d4d5' },
 })((props) => (
