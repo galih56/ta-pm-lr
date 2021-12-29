@@ -29,7 +29,7 @@ const Notification = (props) => {
         const channel_name=`notifications`;
         const channel = window.Echo.channel(channel_name);
         channel.listen('NotificationEvent', function(data) {
-            if([1,2,4,5].includes(global.state.occupation?.id)){
+            if([1,2,4,5].includes(global.state.role?.id)){
                 
             }
         });

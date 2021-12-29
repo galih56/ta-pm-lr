@@ -124,7 +124,7 @@ export default function EnhancedTable({data,page_name}) {
             <Paper className={classes.paper}>
                 <Grid container spacing={2}>
                     <Grid item lg={12} md={12} sm={12} xs={12}>
-                        {([2].includes(global.state.occupation?.id) )?(
+                        {([1,2,4].includes(global.state.role?.id) )?(
                             <>
                                 <Button
                                     variant="contained"

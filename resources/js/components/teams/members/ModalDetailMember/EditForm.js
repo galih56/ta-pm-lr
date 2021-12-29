@@ -25,7 +25,7 @@ const OpenEditForm = ({ isEdit, data, setData}) => {
                     <Typography variant="body2">{data.email}</Typography>
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12} align="center">
-                    {data.occupation ? <Typography variant="body2">{data.occupation.name}</Typography> : <></>}
+                    {data.role ? <Typography variant="body2">{data.role.name}</Typography> : <></>}
                         <Typography variant="body2">Last login : {data.last_login ? moment(data.last_login).format('DD MMM YYYY') : ''}</Typography>
                 </Grid>
             </Grid>
@@ -39,7 +39,7 @@ const OpenEditForm = ({ isEdit, data, setData}) => {
                     <Typography variant="body2">{data.email}</Typography>
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12} align="center">
-                    {data.occupation ? <Typography variant="body2">{data.occupation.name}</Typography> : <></>}
+                    {data.role ? <Typography variant="body2">{data.role.name}</Typography> : <></>}
                     <Typography variant="body2">Last login : {data.last_login ? moment(data.last_login).format('DD MMM YYYY') : ''}</Typography>
                     {data.role ? <Typography variant="body2">Role : {data.role.name}</Typography> : <></>}
                </Grid>

@@ -4,7 +4,7 @@ import { Paper, Grid, ListItem, Collapse } from '@material-ui/core/';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import UserTable from './UserTable';
-import OccupationInformation from './../occupations/OccupationInformation';
+import RoleInformation from './../roles/RoleInformation';
 import makeStyles from '@material-ui/styles/makeStyles';
 import styleConfig from '../../layout/Theme';
 import Button from '@material-ui/core/Button';
@@ -17,9 +17,9 @@ const useStyles = makeStyles((theme) => (styleConfig(theme)));
 const UserInformation = (props) => {
     const classes = useStyles();
     const [userTableOpen, setUserTableOpen] = useState(true);
-    const [occupationTableOpen, setOccupationTableOpen] = useState(true);
+    const [roleTableOpen, setRoleTableOpen] = useState(true);
     const handleUserTableOpen = () => setUserTableOpen(!userTableOpen);
-    const handleOccupationTableOpen = () => setOccupationTableOpen(!occupationTableOpen);
+    const handleRoleTableOpen = () => setRoleTableOpen(!roleTableOpen);
 
     return (
         <React.Fragment>
@@ -48,9 +48,9 @@ const UserInformation = (props) => {
                 </Grid>
                 <Grid lg={12} md={12} sm={12} xs={12} item>
                     <Paper className={classes.paper}>
-                        <ListItem button dense font="small" onClick={handleOccupationTableOpen} style={{ paddingBottom: '1.2em' }}> {occupationTableOpen ? <ExpandLess /> : <ExpandMore />}Roles</ListItem>
-                        <Collapse in={occupationTableOpen} timeout="auto">
-                            <OccupationInformation />
+                        <ListItem button dense font="small" onClick={handleRoleTableOpen} style={{ paddingBottom: '1.2em' }}> {roleTableOpen ? <ExpandLess /> : <ExpandMore />}Roles</ListItem>
+                        <Collapse in={roleTableOpen} timeout="auto">
+                            <RoleInformation />
                         </Collapse>
                     </Paper>
                 </Grid>

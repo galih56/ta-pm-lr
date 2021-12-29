@@ -51,7 +51,7 @@ export default function ModalDetailUser(props) {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const global = useContext(UserContext);
     const [data, setData] = useState({
-        id: null, name: '', email: '', last_login: '', occupation: null, occupations_id:'',profilePicture: ''
+        id: null, name: '', email: '', last_login: '', role: null, roles_id:'',profilePicture: ''
     });
     const [isEditing, setIsEditing] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
@@ -77,51 +77,46 @@ export default function ModalDetailUser(props) {
     const saveChanges = () => {
         let body = {
             id: data.id, name: data.name, email: data.email, 
-            occupations_id: data.occupations_id, profile_picture_path: ''
+            roles_id: data.roles_id, profile_picture_path: ''
         };
-        
-        if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL + `users/${props.initialState.id}`;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            toast.promise(
-                axios.patch(url, body),
-                {
-                    loading: 'Updating...',
-                    success: (result)=>{
-                        setData(result.data);
-                        props.onUpdate(result.data, 'update');
-                        return <b>Successfully updated</b>
-                    },
-                    error: (error)=>{
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                        return <b>{error.response.statusText}</b>;
-                    },
-                });
-        }
+        const url = process.env.MIX_BACK_END_BASE_URL + `users/${props.initialState.id}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        toast.promise(
+            axios.patch(url, body),
+            {
+                loading: 'Updating...',
+                success: (result)=>{
+                    setData(result.data);
+                    props.onUpdate(result.data, 'update');
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
     }
 
     const deleteUser = () => {
-        if (window.navigator.onLine) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            const url = process.env.MIX_BACK_END_BASE_URL + `users/${data.id}`;
-            toast.promise(
-                axios.delete(url),
-                {
-                    loading: 'Deleting...',
-                    success: (result)=>{
-                        props.onUpdate(data, 'delete');
-                        return <b>Successfully deleted</b>
-                    },
-                    error: (error)=>{
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                        return <b>{error.response.statusText}</b>;
-                    },
-                });
-        }
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        const url = process.env.MIX_BACK_END_BASE_URL + `users/${data.id}`;
+        toast.promise(
+            axios.delete(url),
+            {
+                loading: 'Deleting...',
+                success: (result)=>{
+                    props.onUpdate(data, 'delete');
+                    return <b>Successfully deleted</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
     }
 
     return (
@@ -134,7 +129,7 @@ export default function ModalDetailUser(props) {
             <DialogActions>
                 <DialogActionButtons
                     isEdit={isEditing}
-                    deletable={!([1,2].includes(data.occupation?.id) || global.state.id==props.initialState.id)}
+                    deletable={!([1,2].includes(data.role?.id) || global.state.id==props.initialState.id)}
                     saveChanges={saveChanges}
                     setEditMode={handleEditingMode}
                     deleteUser={deleteUser}

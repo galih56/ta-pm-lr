@@ -98,7 +98,6 @@ export default function EnhancedTable({data}) {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [clickedTask, setClickedTask] = useState({ projects_id: null, lists_id: null, tasks_id: null,id:null });
     const [modalOpen, setModalOpen] = useState(false);
-    let history=useHistory();
 
     let global = useContext(UserContext);
 
@@ -133,6 +132,10 @@ export default function EnhancedTable({data}) {
         });
         setRows(newRows);
         const body = { id: tasks_id, complete: isChecked };
+        
+        if(!task.actual_end && event.target.checked){
+            task.actual_end=moment(task.end).format("YYYY-MM-DD HH:mm")
+        }
         if (window.navigator.onLine) {
             const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${tasks_id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;

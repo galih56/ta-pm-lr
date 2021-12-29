@@ -37,7 +37,7 @@ const UserMenu = (props) => {
         global.dispatch({ type: 'check-authentication', payload: { history: history } });
     }, []);
 
-    const {id,email,name,occupation,username,verified}=global.state;
+    const {id,email,name,role,username,verified}=global.state;
     return (
         <>
             <IconButton color="inherit" onClick={handleMenuOpen}>
@@ -58,10 +58,10 @@ const UserMenu = (props) => {
                             {global.state.name}
                             <br />
                             {global.state.email}
-                            {(global.state.occupation)?(
+                            {(global.state.role)?(
                                 <>
                                     <br />
-                                    {global.state.occupation.name}
+                                    {global.state.role.name}
                                 </>
                             ):<></>}
                         </ListItemText>
@@ -82,7 +82,7 @@ const UserMenu = (props) => {
             
             <ModalDetailUser
                 open={modalProfileOpen} id={id} 
-                initialState={{id:id,email:email,name:name,username:username,verified:verified,occupation:occupation}}
+                initialState={{id:id,email:email,name:name,username:username,verified:verified,role:role}}
                 closeModal={handleModalProfileOpen}
                 onUpdate={(data)=>global.dispatch({type:'store-user-information',payload:data})}
                 asProfile={true}

@@ -102,7 +102,7 @@ export default function EnhancedTable() {
 
     useEffect(() => {
         getClients();
-        if(!global.state.occupation?.id==8) history.push('/projects');
+        if(!global.state.role?.id==8) history.push('/projects');
     }, []);
 
     const getClients = () => {
@@ -155,7 +155,7 @@ export default function EnhancedTable() {
                 <Paper>
                     <div className={classes.root}>
                         <Typography variant="h6">Clients</Typography>
-                        {([1,2].includes(global.state.occupation?.id))?(
+                        {([1,2].includes(global.state.role?.id))?(
                             <>
                                 <Button variant="contained" color="primary" onClick={()=>setOpenFormCreate(true)}><b>+</b> Create a new client</Button>
                                 <FormCreateClient

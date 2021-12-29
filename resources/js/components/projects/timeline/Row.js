@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import UserContext from '../../../context/UserContext';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import TableTasks from './TableTasks';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
@@ -16,7 +16,10 @@ function Row(props) {
     let global = useContext(UserContext);
 
     const handleCompleteTask = (task,event) => {
-        const body = { complete: event.target.checked };
+        var body = { complete: event.target.checked };
+        // if(!task.actual_end && event.target.checked){
+        //     task.actual_end=moment(task.end).format("YYYY-MM-DD HH:mm")
+        // }
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${task.id}/complete`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';

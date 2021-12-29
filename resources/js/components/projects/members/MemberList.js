@@ -101,7 +101,7 @@ export default function EnhancedTable(props) {
     const data = props.data;
     let global = useContext(UserContext);
 
-    let initStateUser = { id: null, name: '', email: '', occupation: { id: null, name: '' } }
+    let initStateUser = { id: null, name: '', email: '', role: { id: null, name: '' } }
     const [clickedUser, setClickedUser] = useState(initStateUser);
     const [modalOpen, setModalOpen] = useState(false);
     const [newMemberOpen, setNewMemberOpen] = useState(false);
@@ -149,7 +149,6 @@ export default function EnhancedTable(props) {
         if(memberChange===true){
             getMembers()
         }
-        console.log(memberChange);
     },[memberChange])
 
     const getMembers=()=>{
@@ -184,7 +183,7 @@ export default function EnhancedTable(props) {
     return (
         <div className={classes.root}>
              
-            {([1,2,4,5].includes(global.state.occupation?.id))?(
+            {([1,2,4,5].includes(global.state.role?.id))?(
                 <Grid>
                     <Typography variant="h6">Members  <Button color="primary" component="span" 
                         onClick={() => setNewMemberOpen(true)}>+ Add new member</Button></Typography>
@@ -273,7 +272,7 @@ function Row(props) {
                     onClick={() => {
                         handleModalOpen(data, true);
                     }}> {data.name} <br />({data.email}) </TableCell>
-                <TableCell>{data.occupation?data.occupation?.name:'-'}</TableCell>
+                <TableCell>{data.role?data.role?.name:'-'}</TableCell>
                 <TableCell align="right">
                     {data.last_login ? moment(data.last_login).format('DD MMM YYYY') : ''}
                 </TableCell>

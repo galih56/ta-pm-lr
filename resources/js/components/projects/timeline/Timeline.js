@@ -33,7 +33,6 @@ function Timeline(props) {
     const [selectedList,setSelectedList]=useState(false)
     const [rows, setRows] = useState([]);
     const [keywords,setKeywords]=useState('');
-    const [searchTimeout, setSearchTimeout] = useState(null);
 
     let global = useContext(UserContext);
 
@@ -189,7 +188,7 @@ function Timeline(props) {
                                             key={row.id} data={row} handleDetailTaskOpen={handleDetailTaskOpen} 
                                             projects_id={projects_id} detailProject={detailProject} 
                                             onClick={()=>{ 
-                                                if([2,4].includes(global.state.occupation?.id)){
+                                                if([2,4].includes(global.state.role?.id)){
                                                     setSelectedList(row); 
                                                     setOpenEditList(true); 
                                                 }

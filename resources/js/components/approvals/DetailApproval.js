@@ -31,7 +31,7 @@ export default function DetailApproval(props) {
     let history=useHistory();
     
     useEffect(() => {
-        if(!([1,2,4,5].includes(global.state.occupation?.id) && global.state.current_project_id)) {
+        if(!([1,2,4,5].includes(global.state.role?.id) && global.state.current_project_id)) {
             history.push('/projects');
         }else{        
             getDetailApproval();

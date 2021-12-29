@@ -30,7 +30,7 @@ const Overview=({detailProject,refreshDetailProject,handleDetailTaskOpen})=>{
 
     const getReports = useCallback(() => {
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/reports`;
-        if(![1,2,3,4,5,6].includes(global.state.occupation?.id)){
+        if(![1,2,3,4,5,6].includes(global.state.role?.id)){
             url+=`?users_id=${global.state.id}`;
         }
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
@@ -180,7 +180,7 @@ const Overview=({detailProject,refreshDetailProject,handleDetailTaskOpen})=>{
                     intervalY={1}
                 />
             </Grid> 
-            {([1,2,3].includes(global.state.occupation?.id))?(    
+            {([1,2,3].includes(global.state.role?.id))?(    
                 <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
                     <CostChart 
                         data={allTasks.sort((task1, task2)=> {

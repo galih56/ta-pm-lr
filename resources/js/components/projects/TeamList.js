@@ -115,7 +115,7 @@ export default function TeamList({projects_id,callback}) {
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                 <Typography variant="h6">Teams </Typography>
             </Grid>
-            {([1,2,4,5].includes(global.state.occupation?.id))?( 
+            {([1,2,4,5].includes(global.state.role?.id))?( 
                 <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                     <form onSubmit={(e)=>{
                         e.preventDefault();

@@ -52,8 +52,8 @@ export default function ModalDetailMember(props) {
     const global = useContext(UserContext);
 
     const [data, setData] = useState({
-        id: null, name: '', email: '',  last_login: '', occupation: null, profile_picture_path: '' ,
-         occupation:{ id:null, name:'' }, team_members_id:null
+        id: null, name: '', email: '',  last_login: '',  profile_picture_path: '' ,
+         role:{ id:null, name:'' }, team_members_id:null
     });
     const [isEditing, setIsEditing] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
@@ -109,7 +109,7 @@ export default function ModalDetailMember(props) {
             <DialogContent dividers>
                 <EditForm isEdit={isEditing} data={data} setData={setData} />
             </DialogContent>
-            {[1,2,4].includes(global.state.occupation?.id)?(
+            {[1,2,4].includes(global.state.role?.id)?(
                 <DialogActions>
                     <DialogActionButtons
                         isEdit={isEditing}

@@ -47,12 +47,12 @@ const DialogContent = withStyles((theme) => ({
 const ModalCreateUser = (props) => {
     const open = props.open;
     const closeModal = props.closeModal;
-    const [occupations, setOccupations] = useState([]);
+    const [roles, setRoles] = useState([]);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [email, setEmail] = useState('');
-    const [occupationsId, setOccupationsId] = useState('');
+    const [rolesId, setRolesId] = useState('');
     const [inputRequireAlert, setInputRequireAlert] = useState(false);
     const [emailTaken, setEmailTaken] = useState(false);
     const [passwordConfirmAlert, setPasswordConfirmAlert] = useState(false);
@@ -61,8 +61,8 @@ const ModalCreateUser = (props) => {
     let [signUpSuccess, setSignUpSuccess] = useState(false);
     let global = useContext(UserContext);
 
-    const getOccupations = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'occupations';
+    const getRoles = () => {
+        const url = process.env.MIX_BACK_END_BASE_URL + 'roles';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
@@ -72,7 +72,7 @@ const ModalCreateUser = (props) => {
                         return item;
                     }
                 })
-                setOccupations(data);
+                setRoles(data);
             }).catch((error) => {
                 console.log(error);
                 switch(error.response.status){
@@ -84,7 +84,7 @@ const ModalCreateUser = (props) => {
     }
 
     useEffect(() => {
-        getOccupations();
+        getRoles();
     }, [])
 
     const handleSubmit = (e) => {
@@ -109,7 +109,7 @@ const ModalCreateUser = (props) => {
         const body = {
             name: username,
             password: password,
-            occupations_id: occupationsId,
+            roles_id: rolesId,
             password_confirmation: confirmPassword,
             email: email
         }
@@ -185,14 +185,14 @@ const ModalCreateUser = (props) => {
                         <Select 
                             variant="standard"
                             onChange={e => {
-                                setOccupationsId(e.target.value);
+                                setRolesId(e.target.value);
                             }}
-                            value={occupationsId}
+                            value={rolesId}
                             fullWidth
-                            placeholder="Occupation"
+                            placeholder="Role"
                         >
                             {
-                                occupations.map((occupation, index) =>(<MenuItem value={occupation?.id} key={occupation?.id}>{occupation?.name}</MenuItem>))
+                                roles.map((role, index) =>(<MenuItem value={role?.id} key={role?.id}>{role?.name}</MenuItem>))
                             } 
                         </Select>
                         <TextField

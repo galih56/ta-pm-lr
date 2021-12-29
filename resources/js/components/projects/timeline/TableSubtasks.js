@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useContext } from 'react';
+import UserContext from './../../../context/UserContext';
 import { Link, useHistory,useLocation } from 'react-router-dom';
 import Checkbox from '@material-ui/core/Checkbox';
 import moment from 'moment';
@@ -21,7 +22,8 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
     let history = useHistory();
     let pathname = location.pathname;
     let searchParams = new URLSearchParams(location.search);
-
+    let global=useContext(UserContext);
+    
     const handlePopoverOpen = (event,member) =>  {
         setMemberOnHover(member);
         setOpenPopOver(true);
@@ -50,12 +52,9 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
                                 <TableCell padding="checkbox"> 
                                 </TableCell>
                                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}> 
-                                
-                                <Checkbox
-                                        onChange={event=>handleCompleteTask(subtask,event)}
-                                        checked={subtask.complete}
-                                    />
-                                
+                                    {global.state.isAdmin?(
+                                        <Checkbox onChange={event=>handleCompleteTask(subtask,event)} checked={subtask.complete}/>
+                                    ):null}
                                     <Link 
                                     onClick={(e)=>{
                                         e.preventDefault()
@@ -75,7 +74,7 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
                                                     onMouseEnter={(event)=>handlePopoverOpen(event,member)}
                                                     onMouseLeave={handlePopoverClose} style={{margin:'1em'}}>
                                                     {member?.project_client?.client?(<Typography>{`Client ${`(${member.project_client?.client?.institution})`}`}</Typography>):null}
-                                                    {member?.occupation?<Typography>{member?.occupation?.name}</Typography>:null}
+                                                    {member?.role?<Typography>{member?.role?.name}</Typography>:null}
                                             </span>
                                             )
                                         }):<></>}
@@ -99,8 +98,8 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
                                                 {memberOnHover.project_client?.client?(<Typography>{`Client ${`(${memberOnHover.project_client?.client?.institution})`}`}</Typography>):null}
                                                 {memberOnHover.user?(<Typography>{memberOnHover?.user?.name}</Typography>):null}
                                                 {memberOnHover.name?(<Typography>{memberOnHover?.name}</Typography>):null}
-                                                {memberOnHover.member?.occupation?<Typography>{memberOnHover?.member?.occupation?.name}</Typography>:null}
-                                                {memberOnHover.occupation?<Typography>{memberOnHover?.occupation?.name}</Typography>:null}
+                                                {memberOnHover.member?.role?<Typography>{memberOnHover?.member?.role?.name}</Typography>:null}
+                                                {memberOnHover.role?<Typography>{memberOnHover?.role?.name}</Typography>:null}
                                             </div>
                                         </Popover>):<></>}
                                 </TableCell>

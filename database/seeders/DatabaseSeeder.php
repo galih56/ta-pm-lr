@@ -9,7 +9,7 @@ use DB;
 
 class DatabaseSeeder extends Seeder
 {
-    protected $toTruncate=['occupations'];
+    protected $toTruncate=['roles'];
 
     /**
      * Seed the application's database.

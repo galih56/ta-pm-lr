@@ -44,7 +44,7 @@ const Home = (props) => {
 
     const getProjects = () => {
         let url =''
-        if([1,2,3,4].includes(global.state.occupation?.id)){
+        if([1,2,3,4].includes(global.state.role?.id)){
             url = process.env.MIX_BACK_END_BASE_URL + 'projects';
         }else{
             url = process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';

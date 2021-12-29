@@ -29,6 +29,11 @@ class Project extends Model
         });
     }
 
+    public function scopeExclude($query, $value = []) 
+    {
+        return $query->select(array_diff($this->columns, (array) $value));
+    }
+
     public function members(){
         return $this->hasMany(ProjectMember::class,'projects_id');
     }

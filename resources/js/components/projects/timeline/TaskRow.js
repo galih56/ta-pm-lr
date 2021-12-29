@@ -1,4 +1,5 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useContext, useEffect, Suspense, lazy } from 'react';
+import UserContext from '../../../context/UserContext';
 import { Link, useLocation ,useHistory} from 'react-router-dom';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
@@ -15,6 +16,8 @@ const StatusChip = lazy(() => import('../../widgets/StatusChip'));
 const TableSubtask = lazy(() => import('./TableSubtasks'));
 
 const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
+    
+    let global = useContext(UserContext);
     const [openCollapsible, setOpenCollapsible] = useState(false);
     const [progress, setProgress] = useState(0);
 
@@ -67,7 +70,9 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
             <TableRow hover key={data.id} >
                 <TableCell> <IconButton size="small" onClick={() =>setOpenCollapsible(!openCollapsible)} > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton> </TableCell>
                 <TableCell padding="checkbox"> 
+                {global.state.isAdmin?(
                     <Checkbox onChange={event=> handleCompleteTask(data,event)} checked={data.complete}/>
+                ):null}
                 </TableCell>
                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}> 
                     <Link 
@@ -87,8 +92,8 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
                                 <span key={i} onMouseEnter={(event)=>handlePopoverOpen(event,member)} 
                                     onMouseLeave={handlePopoverClose}  style={{margin:'0.5em',float:'left'}}>
                                     {member?.project_client?.client?(<>{`Client ${`(${member.project_client?.client?.institution})`}`}</>):null}
-                                    {member?.occupation?<>{member?.occupation?.name}</>:null}
-                                    {member?.user?.occupation?<>{member?.user?.occupation?.name}</>:null}
+                                    {member?.role?<>{member?.role?.name}</>:null}
+                                    {member?.user?.role?<>{member?.user?.role?.name}</>:null}
                                 </span>
                             )
                         }):<></>}
@@ -101,8 +106,8 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
                                     {memberOnHover.project_client?.client?(<Typography>{`Client ${`(${memberOnHover.project_client?.client?.institution})`}`}</Typography>):null}
                                     {memberOnHover.user?(<Typography>{memberOnHover?.user?.name}</Typography>):null}
                                     {memberOnHover.name?(<Typography>{memberOnHover?.name}</Typography>):null}
-                                    {memberOnHover.member?.occupation?<Typography>{memberOnHover?.member?.occupation?.name}</Typography>:null}
-                                    {memberOnHover.occupation?<Typography>{memberOnHover?.occupation?.name}</Typography>:null}
+                                    {memberOnHover.member?.role?<Typography>{memberOnHover?.member?.role?.name}</Typography>:null}
+                                    {memberOnHover.role?<Typography>{memberOnHover?.role?.name}</Typography>:null}
                                 </div>
                         </Popover>):<></>}
                 </TableCell>

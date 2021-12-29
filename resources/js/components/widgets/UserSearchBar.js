@@ -66,10 +66,10 @@ export default function UserSearchbar(props) {
         }
         else{
             filteredUsers=users.filter((option) => { 
-                if (!(checkExistingMember(option.id, (exceptedData?exceptedData:exceptedUsers))
-                    ||(![1, 2].includes(option.id)))){ 
+                var check=checkExistingMember(option.id, (exceptedData?exceptedData:exceptedUsers));
+                if (!check && ![1, 2].includes(option.role.id)){ 
                         return option;
-                    }
+                }
             });
         }
 
@@ -107,8 +107,8 @@ export default function UserSearchbar(props) {
                 var label='';
                 if(option.is_user){
                     if(option?.role) label= `${option.name} (${option.role.name})`;
-                    if(option?.occupation) label= `${option.name} (${option.occupation.name})`; 
-                    if(!option.role && !option.occupation){ 
+                    if(option?.role) label= `${option.name} (${option.role.name})`; 
+                    if(!option.role && !option.role){ 
                         label= `${option.name} (${option.email})`;
                     }
                 }

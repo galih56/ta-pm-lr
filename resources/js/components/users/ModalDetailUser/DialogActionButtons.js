@@ -3,13 +3,14 @@ import ModalDeleteConfirm from './ModalDeleteConfirm';
 import Button from '@material-ui/core/Button';
 
 const dialogActionButtons = ({ isEdit, deletable,saveChanges, setEditMode, deleteUser, deleteConfirmOpen, setDeleteConfirmOpen, closeModal }) => {
+    const save=()=>{
+        saveChanges(); setEditMode(false); 
+    }
     if (isEdit) {
         return (
             <React.Fragment>
                 <Button onClick={() => setEditMode(false)} color="primary"> Cancel </Button>
-                <Button onClick={
-                    () => { saveChanges(); setEditMode(false); }
-                } variant="contained" color="primary"> Save</Button>
+                <Button onClick={save} variant="contained" color="primary"> Save</Button>
                 {(deletable)?(
                     <React.Fragment>
                         <Button onClick={
