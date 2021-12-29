@@ -42,6 +42,9 @@ class GanttChart extends React.Component {
                         complete:task.complete
                     }
                 };
+                //Jila tanggal selesai belum diinput, pakai tanggal estimasi terlebih dahulu
+                if(!task.actual_end){task_realization.end=task.end};
+
                 var new_subtasks=[];
                 var valuePerSubtask=100/task.cards.length;
                 var completeSubtaskCounter=0;

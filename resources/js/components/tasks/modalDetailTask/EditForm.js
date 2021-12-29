@@ -79,7 +79,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                         <Grid item lg={12} md={12} sm={12} xs={12} container spacing={2}>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
                                 <Typography style={{ whiteSpace: 'noWrap'}}>Estimation start/end at : {data.start ? moment(data.start).format('DD MMMM YYYY') : ''} - {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}</Typography> 
-                                {([1,2,4].includes(global.state.occupation?.id))?(
+                                {([1,2,4].includes(global.state.role?.id))?(
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                                         <MobileDateRangePicker
                                             required
@@ -114,7 +114,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                             <Grid item lg={12} md={12} sm={12} xs={12}>
                                 <Typography style={{ whiteSpace: 'noWrap'}}>Realization start/end at : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''} - {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</Typography> 
                                 <StatusChip status={data.start_label}/> - <StatusChip status={data.end_label}/>
-                                {([1,2].includes(global.state.occupation?.id))?(
+                                {([1,2].includes(global.state.role?.id))?(
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                                         <MobileDateRangePicker
                                             required
@@ -151,7 +151,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                             </Grid>
                         </Grid>
                         
-                        {([1,2].includes(global.state.occupation?.id))?(
+                        {([1,2].includes(global.state.role?.id))?(
                             <Grid item lg={12} md={12} sm={12} xs={12} container spacing={2}>
                                 <Grid item lg={12} md={12} sm={12} xs={12}>
                                     <Typography>Progress : </Typography>
@@ -163,7 +163,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                                 </Grid>
                             </Grid>
                         ):null} 
-                        {([1,2].includes(global.state.occupation?.id) && !data.is_subtask)?(
+                        {([1,2].includes(global.state.role?.id) && !data.is_subtask)?(
                             <Grid item lg={12} md={12} sm={12} xs={12} container spacing={2}>
                                 <Grid item lg={12} md={12} sm={12} xs={12}>
                                     <Typography>Cost estimation/realization : 
@@ -189,7 +189,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                         <Grid item lg={12} md={12} sm={12} xs={12} >
                             <StatusChip status={data.start_label}/> - <StatusChip status={data.end_label}/>
                         </Grid>
-                        {([1,2].includes(global.state.occupation?.id) && !data.is_subtask)?(
+                        {([1,2].includes(global.state.role?.id) && !data.is_subtask)?(
                             <Grid item lg={12} md={12} sm={12} xs={12} >
                                 <Typography  style={{ whiteSpace: 'noWrap',margin:'0.4em' }} >Cost estimation/realization : 
                                     {data.cost? <NumberFormat customInput={Typography} style={{ whiteSpace: 'noWrap',margin:'0.4em' }}thousandSeparator={true} displayType={'text'} value={isNaN(data.cost)?0:Number.parseInt(data.cost)}/>:'...'}/

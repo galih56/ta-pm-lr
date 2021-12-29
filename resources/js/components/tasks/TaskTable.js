@@ -96,16 +96,15 @@ export default function EnhancedTable({data}) {
     const [orderBy, setOrderBy] = useState('end');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [clickedTask, setClickedTask] = useState({ projects_id: null, lists_id: null, tasks_id: null });
+    const [clickedTask, setClickedTask] = useState({ projects_id: null, lists_id: null, tasks_id: null,id:null });
     const [modalOpen, setModalOpen] = useState(false);
-    let history=useHistory();
 
     let global = useContext(UserContext);
 
     const handleModalOpen = (taskInfo) => {
         const { projects_id, lists_id, tasks_id, open } = taskInfo;
         setModalOpen(open);
-        setClickedTask({ projects_id: projects_id, lists_id: lists_id, tasks_id: tasks_id });
+        setClickedTask({ projects_id: projects_id, lists_id: lists_id, tasks_id: tasks_id, id:tasks_id });
     }
 
     useEffect(()=>{
@@ -133,6 +132,10 @@ export default function EnhancedTable({data}) {
         });
         setRows(newRows);
         const body = { id: tasks_id, complete: isChecked };
+        
+        if(!task.actual_end && event.target.checked){
+            task.actual_end=moment(task.end).format("YYYY-MM-DD HH:mm")
+        }
         if (window.navigator.onLine) {
             const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${tasks_id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;

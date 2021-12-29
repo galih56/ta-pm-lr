@@ -146,7 +146,7 @@ function DetailTeam(props) {
                             ):(<Typography variant="h5">{data.name}</Typography>)}
                     </Grid>
                     <Grid item xl={12} lg={12} md={12} sm={12} style={{marginTop:'0.5em'}}>
-                        {[1,2,4].includes(global.state.occupation?.id)?(
+                        {[1,2,4].includes(global.state.role?.id)?(
                             <>
                                 {(isEditing)?(
                                     <>

@@ -17,7 +17,7 @@ import {
     storeDetailSubtask,storeSubtasks, createNewSubtask, removeSubtask,
     createNewAttachments, removeAttachment
 } from './context/TasksReducer';
-import { addNotification, storeNotifications, updateNotification, removeNotification } from './context/NotificationsReducer';
+// import { addNotification, storeNotifications, updateNotification, removeNotification } from './context/NotificationsReducer';
 import { addClientsToProject, storeClientsToProject, removeClientFromProject } from './context/ClientsReducer';
 import { LinearProgress } from '@material-ui/core/';
 import './index.css';
@@ -31,6 +31,7 @@ const TeamList = lazy(() => import("./components/teams/TeamList"));
 const DetailTeam = lazy(() => import("./components/teams/DetailTeam"));
 const ApprovalTable = lazy(() => import("./components/approvals/ApprovalTable"));
 const DetailApproval = lazy(() => import("./components/approvals/DetailApproval"));
+// const NotificationList = lazy(() => import("./layout/notifications/NotificationList"));
 const TaskList = lazy(() => import("./components/tasks/TaskList"));
 const UserInformation = lazy(() => import("./components/users/UserInformation"));
 const ModalAuthentication = lazy(() => import("./layout/auth/ModalAuthentication"));
@@ -180,6 +181,7 @@ const App = () => {
                                         </>
                                     )
                                 }} />
+                                {/* <Route path={`/notifications`} component={NotificationList} /> */}
                                 <Route path='/' exact ><Redirect to='/projects' /></Route>
                             </Switch>
                         </React.Suspense>

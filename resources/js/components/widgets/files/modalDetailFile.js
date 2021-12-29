@@ -45,7 +45,7 @@ const DialogActions = withStyles((theme) => ({
     root: { margin: 0, padding: theme.spacing(1) }
 }))(MuiDialogActions);
 
-export default function ModalDetailOccupation(props) {
+export default function ModalDetailRole(props) {
     const open = props.open;
     const closeModal = props.closeModal;
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -63,7 +63,7 @@ export default function ModalDetailOccupation(props) {
         if (window.navigator.onLine) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            const url = process.env.MIX_BACK_END_BASE_URL + `occupations/${props.initialState.id}`;
+            const url = process.env.MIX_BACK_END_BASE_URL + `roles/${props.initialState.id}`;
             
             toast.promise( 
                 axios.patch(url, body),
@@ -82,12 +82,12 @@ export default function ModalDetailOccupation(props) {
         }
     }
 
-    const deleteOccupation = () => {
+    const deleteRole = () => {
         if (window.navigator.onLine) {
             
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            const url = process.env.MIX_BACK_END_BASE_URL + `occupations/${data.id}`;
+            const url = process.env.MIX_BACK_END_BASE_URL + `roles/${data.id}`;
             toast.promise(
                 axios.delete(url,data),
                 {
@@ -107,7 +107,7 @@ export default function ModalDetailOccupation(props) {
 
     return (
         <Dialog onClose={closeModal} open={open} maxWidth={'lg'} fullwidth={"true"}>
-            <DialogTitle onClose={closeModal}>Occupation</DialogTitle>
+            <DialogTitle onClose={closeModal}>Role</DialogTitle>
             <DialogContent dividers>
                 <EditForm isEdit={isEditing} data={data} setData={setData}> </EditForm>
             </DialogContent>
@@ -117,7 +117,7 @@ export default function ModalDetailOccupation(props) {
                     deletable={!([1, 2,3,4,5,6].includes(data.id))}
                     saveChanges={saveChanges}
                     setEditMode={handleEditingMode}
-                    deleteOccupation={deleteOccupation}
+                    deleteRole={deleteRole}
                     deleteConfirmOpen={deleteConfirmOpen}
                     setDeleteConfirmOpen={setDeleteConfirmOpen}
                     closeModal={closeModal}

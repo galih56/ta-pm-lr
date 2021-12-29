@@ -13,9 +13,11 @@ class AlterMeetingsTable extends Migration
      */
     public function up()
     {
-        Schema::table('meetings', function (Blueprint $table) {
-            $table->json('google_calendar_info')->nullable()->change();
-        });
+        if(!Schema::hasColumn('meetings','google_calendar_info')){
+            Schema::table('meetings', function (Blueprint $table) {
+                $table->json('google_calendar_info')->nullable()->change();
+            });
+        }
     }
 
     /**

@@ -67,9 +67,9 @@ export const RestrictedAccessMenu = () => {
     },[ global.state.current_project_id,history]);
 
     useEffect(()=>{
-        if([1,2].includes(global.state.occupation?.id)) setAdminMenu(true);
+        if([1,2].includes(global.state.role?.id)) setAdminMenu(true);
         else setAdminMenu(false);
-    },[global.state.occupation]);
+    },[global.state.role]);
 
 
     return (

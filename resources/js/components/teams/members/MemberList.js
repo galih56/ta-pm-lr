@@ -70,19 +70,19 @@ const MemberList = ({teamId,data}) => {
                                 primary={member.name} 
                                 secondary={
                                     <React.Fragment>
-                                        {member.occupation?(
+                                        {member.role?(
                                             <Typography
                                                 component="span"
                                                 variant="body2"
                                                 className={classes.inline}
                                                 color="textPrimary"
-                                            > {member.occupation.name}  </Typography>
+                                            > {member.role.name}  </Typography>
                                         ):<></>}
                                         {member.role?member.role.name:null}
                                     </React.Fragment>
                                 }
                             />
-                            {[1,2,4].includes(global.state.occupation?.id)?(
+                            {[1,2,4].includes(global.state.role?.id)?(
                                 <ListItemSecondaryAction>
                                     <IconButton
                                         edge="end"

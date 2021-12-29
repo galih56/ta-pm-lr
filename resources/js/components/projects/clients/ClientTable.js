@@ -162,7 +162,7 @@ export default function EnhancedTable(props) {
         <Grid container>  
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12} >
                    
-            {([1,2,4,5].includes(global.state.occupation?.id ))?(    
+            {([1,2,4,5].includes(global.state.role?.id ))?(    
                     <FormAddClient
                         open={openFormAddClient}
                         handleClose={()=>setOpenFormAddClient(false)}
@@ -171,7 +171,7 @@ export default function EnhancedTable(props) {
                 ):<></>}
                 <div className={classes.root}>
                     <Typography variant="h6">Clients</Typography>
-                    {([1,2,4,5].includes(global.state.occupation?.id ))?(
+                    {([1,2,4,5].includes(global.state.role?.id ))?(
                         <Button variant="contained" color="primary" onClick={()=>setOpenFormAddClient(true)}>Add</Button>   
                         ):<></>}
                     <TableContainer>

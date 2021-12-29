@@ -13,7 +13,7 @@ const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteTask, del
                 <Button onClick={
                     () => { saveChanges()}
                 } variant="contained" color="primary"> Save</Button>
-                {([2,4].includes(global.state.occupation?.id))?(
+                {([2,4].includes(global.state.role?.id))?(
                     <Button onClick={
                         () => { setDeleteConfirmOpen(true); }
                     } variant="contained" color="secondary">

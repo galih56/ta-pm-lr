@@ -225,7 +225,7 @@ export default function EnhancedTable() {
                                                 {row.name} ({row.email})
                                             </Link>
                                         </TableCell>
-                                        <TableCell align="left">{row.occupation?.name}</TableCell>
+                                        <TableCell align="left">{row.role?.name}</TableCell>
                                         <TableCell align="right">{row.last_login ? moment(row.last_login).format('DD MMM YYYY') : ''}</TableCell>
                                     </TableRow>
                                 );

@@ -132,7 +132,7 @@ const DetailProject = (props) => {
 
     const getDetailProject = () => {
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
-        if(![1,2,3,4].includes(global.state.occupation?.id)){
+        if(![1,2,3,4].includes(global.state.role?.id)){
             url+='?users_id='+global.state.id;
         }
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
@@ -168,6 +168,7 @@ const DetailProject = (props) => {
         if (paramTaskId) handleDetailTaskOpen({ task:{...clickedTask, id: paramTaskId}, open: true });
         if (paramMeetingId) handleDetailMeetingOpen({ meeting : { id:paramMeetingId,...clickedMeeting }, open: true });
         getDetailProject();
+        console.log('detailProject : ',detailProject.columns);
     }, []);
 
     useEffect(()=>{
@@ -218,7 +219,7 @@ const DetailProject = (props) => {
                                     <Grid container >   
                                         <BreadCrumbs projectName={detailProject.title} tabName="Timeline" style={{marginTop:'1em'}}/>
                                         <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                                            {([2,4].includes(global.state.occupation?.id))?(
+                                            {([2,4].includes(global.state.role?.id))?(
                                                 <>
                                                     <Button
                                                         variant="contained"
@@ -226,7 +227,7 @@ const DetailProject = (props) => {
                                                         onClick={()=>handleModalCreateList(true)}
                                                         style={{ marginBottom: '1em' }}
                                                         startIcon={<AddIcon />}> Add new list </Button>
-                                                    {/* <Button
+                                                    <Button
                                                         href={`${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}/export`}
                                                         target="_blank"
                                                         variant="contained"
@@ -239,7 +240,7 @@ const DetailProject = (props) => {
                                                         onClick={()=>setShowModalImportExcel(true)}   
                                                         style={{ marginBottom: '1em' ,marginLeft:'1em'}}> 
                                                             Import 
-                                                    </Button> */}
+                                                    </Button>
                                                 </>
                                             ):<></>}
                                             

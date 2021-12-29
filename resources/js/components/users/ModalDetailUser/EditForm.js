@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
 const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
     const classes = useStyles();
     let global = useContext(UserContext);
-    const [occupations, setOccupations] = useState([]);
+    const [roles, setRoles] = useState([]);
     const [expanded, setExpanded] = useState(false);
     const handleChange = () => setExpanded(!expanded);
     const [passwordConfirmAlert, setPasswordConfirmAlert] = useState(false);
@@ -39,15 +39,15 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
     const [newPassword,setNewPassword]=useState('');
     const [confirmPassword,setConfirmPassword]=useState('');
 
-    const getOccupations = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'occupations';
+    const getRoles = () => {
+        const url = process.env.MIX_BACK_END_BASE_URL + 'roles';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 var data=result.data;
-                data=data.filter(occupation=>(![1,2].includes(occupation.id)))
-                setOccupations(data);
+                data=data.filter(role=>(![1,2].includes(role.id)))
+                setRoles(data);
             }).catch((error) => {
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
@@ -100,7 +100,7 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
 
     useEffect(() => {
         if(open===true)
-        getOccupations();
+        getRoles();
     }, [open])
     
     if (isEdit) {
@@ -125,37 +125,37 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
                 </Grid>
                 {(asProfile)?(
                     <Grid item lg={12} md={12} sm={12} xs={12} align="center">
-                        {data.occupation ? <Typography variant="body2">{data.occupation.name}</Typography> : <></>}
+                        {data.role ? <Typography variant="body2">{data.role.name}</Typography> : <></>}
                     </Grid>
                 ):(
                     <Grid item lg={12} md={12} sm={12} xs={12} align="center">
-                        {([1,2].includes(global.state.occupation?.id))?(
+                        {([1,2].includes(global.state.role?.id))?(
                                 <FormControl className={classes.textfield} >
-                                    <InputLabel>Occupations</InputLabel>
+                                    <InputLabel>Roles</InputLabel>
                                     <Select 
                                     variant="standard"
                                     onChange={e => {
                                         var choosenId= e.target.value;
-                                        var choosenData= occupations.filter(item=>item.id==choosenId)
+                                        var choosenData= roles.filter(item=>item.id==choosenId)
                                         if(choosenData.length>0){
-                                            setData({ ...data, occupation:choosenData[0],occupations_id:choosenData[0].id });
+                                            setData({ ...data, role:choosenData[0],roles_id:choosenData[0].id });
                                         }
                                     }}
                                     
-                                        defaultValue={data.occupation?.id}>
+                                        defaultValue={data.role?.id}>
                                         {
-                                            occupations.map((occupation, index) => (<MenuItem value={occupation.id} key={occupation.id}>{occupation.name}</MenuItem>))
+                                            roles.map((role, index) => (<MenuItem value={role.id} key={role.id}>{role.name}</MenuItem>))
                                         } 
                                     </Select>
                                 </FormControl>
                                 ):(
                             <>
-                                {data.occupation ? <Typography variant="body2">{data.occupation.name}</Typography> : <></>}
+                                {data.role ? <Typography variant="body2">{data.role.name}</Typography> : <></>}
                             </>
                         )}
                     </Grid>
                 )}
-                {global.state.id==data.id  || [1,2].includes(global.state.occupation.id)?(
+                {global.state.id==data.id  || [1,2].includes(global.state.role.id)?(
                     <Grid item lg={12} md={12} sm={12} xs={12}>
                         <Accordion expanded={expanded} onChange={handleChange}>
                             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -208,7 +208,7 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12} align="center">
                     <Typography variant="body2">Last login : {data.last_login ? moment(data.last_login).format('DD MMM YYYY') : ''}</Typography>
-                    {data.occupation ? <Typography variant="body2">{data.occupation?.name}</Typography> : <></>}
+                    {data.role ? <Typography variant="body2">{data.role?.name}</Typography> : <></>}
                 </Grid>
             </Grid>
         )

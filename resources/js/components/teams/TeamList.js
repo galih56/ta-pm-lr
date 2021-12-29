@@ -54,7 +54,7 @@ export default function TeamTable() {
                         </Grid>
                         <Grid item lg={12} md={12} sm={12} xs={12}>
                             <Typography variant="h5">Teams</Typography>
-                            {([1,2,4].includes(global.state.occupation?.id))?(
+                            {([1,2,4].includes(global.state.role?.id))?(
                                 <>
                                     <Button onClick={()=>setOpenFormCreate(true)}>Create a new team</Button>
                                     <FormCreateTeam 

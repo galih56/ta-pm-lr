@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\Occupation;
+use App\Models\Role;
 class RoleSeeder extends Seeder
 {
     /**
@@ -28,7 +28,7 @@ class RoleSeeder extends Seeder
             ['id'=>12,'name' => 'Designer']  
         ];
         foreach ($roles as $i => $role) {
-            $occ=new Occupation();
+            $occ=new Role();
             $occ->id=$role['id'];
             $occ->name=$role['name'];
             $occ->save();

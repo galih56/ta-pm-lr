@@ -55,13 +55,13 @@ const MemberList = ({teamId,data}) => {
                                 primary={member.name} 
                                 secondary={
                                     <React.Fragment>
-                                        {member.occupation?(
+                                        {member.role?(
                                             <Typography
                                                 component="span"
                                                 variant="body2"
                                                 className={classes.inline}
                                                 color="textPrimary"
-                                            > {member.occupation.name}  </Typography>
+                                            > {member.role.name}  </Typography>
                                         ):<></>}
                                         {member.email}
                                     </React.Fragment>

@@ -3,22 +3,28 @@ import { createContext } from 'react';
 const initState = {
     token: '', authenticated: false,
     id: '', username: '', email: '', profile_picture_path: '', 
-    occupation: null, projects: [], 
+    role: null, projects: [], 
     delayedRequest: [], googleAuth: null, 
-    githubAuth:{
-        code:'',  authenticated:false,  access_token:'',  scope:null
-    }, 
+    githubAuth:{ code:'',  authenticated:false,  access_token:'',  scope:null }, 
     current_project_id:null,
+    notifications:[],
+    isAdmin:false
 };
 
 const getAuthDataFromStorage = () => {
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) return initState;
-    const data = { ...user };
+    var data = { ...user };
+    if([1,2].includes(user.role?.id)){
+        data.isAdmin=true;
+    }else{
+        data.isAdmin=false;
+    }
     return data;
 }
 
 const storeAuthData = (payload) => {
+    console.log('payload storeAuthData',payload)
     var token=payload.token.split(' ')[1];
     const user = {
         ...payload.user,
@@ -27,6 +33,8 @@ const storeAuthData = (payload) => {
             code:'',  authenticated:false,  access_token:'',  scope:null
         }, 
         token: token, authenticated: true,
+        notifications:[],
+        isAdmin:false
     }
     localStorage.setItem("user", JSON.stringify(user));
     return { ...user };
@@ -50,7 +58,6 @@ const storeGoogleAuth = (payload, state) => {
 
 const storeCurrentSelectedProject = (payload, state) => {
     var user = JSON.parse(localStorage.getItem('user'));
-    console.log('payload : ',payload);
     if(user){ user.current_project_id = payload; }
     localStorage.setItem("user", JSON.stringify(user));
     return user;
@@ -75,12 +82,13 @@ const logout=()=>{
 const resetState = () => {
     const user = {
         id: '', username: '', email: '',
-        profilePicturePath: '', occupation: null, 
+        profilePicturePath: '', role: null, 
         last_login: '', projects: [], delayedRequest: [],
         githubAuth:{
             code:'',  authenticated:false,  access_token:'',  scope:null
         }, 
-        token: '', authenticated: false
+        token: '', authenticated: false,
+        notifications:[]
     }
     localStorage.setItem("user", JSON.stringify(user));
     return user;

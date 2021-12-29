@@ -60,37 +60,16 @@ const SignIn = (props) => {
             { inputRequireAlert ? <Alert severity="error"  style={{marginTop:'1em'}}>Please complete the form</Alert> : null}
             { offlineAlert ? <Alert severity="warning"  style={{marginTop:'1em'}}>You're currently offline. Please check your internet connection</Alert> : null}
             <form className={classes.form} style={{ textAlign: 'center' }} onSubmit={handleSubmit} >
-                <TextField
-                    variant="outlined"
-                    margin="normal"
-                    label="Email Address"
-                    name="email"
-                    autoComplete="email"
-                    value={email}
-                    onChange={(e) => { setEmail(e.target.value) }}
-                    fullWidth
-                    autoFocus
-                    required
+                <TextField variant="outlined" margin="normal" label="Email Address" name="email"
+                    autoComplete="email" value={email} onChange={(e) => { setEmail(e.target.value) }} fullWidth
+                    autoFocus required
                 />
-                <TextField
-                    variant="outlined"
-                    margin="normal"
-                    name="password"
-                    label="Password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => { setPassword(e.target.value) }}
-                    autoComplete="current-password"
-                    fullWidth
-                    required
+                <TextField variant="outlined" margin="normal" name="password" label="Password"
+                    type="password" value={password} onChange={(e) => { setPassword(e.target.value) }} autoComplete="current-password"
+                    fullWidth required
                 />
-                <Button
-                    type="submit"
-                    variant="contained"
-                    color="primary"
-                    className={classes.submit}
-                    onClick={handleSubmit}
-                    fullWidth
+                <Button type="submit" variant="contained" color="primary"
+                    className={classes.submit} onClick={handleSubmit} fullWidth
                 > Sign In  </Button>
             </form >
         </React.Fragment>

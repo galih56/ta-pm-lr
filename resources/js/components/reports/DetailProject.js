@@ -30,7 +30,7 @@ const DetailProject = (props) => {
     const getDetailProject = () => {
         const toast_loading = toast.loading('Loading...');
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
-        if(![1,2,3,4,5,6].includes(global.state.occupation?.id)){
+        if(![1,2,3,4,5,6].includes(global.state.role?.id)){
             url+=`?users_id=${global.state.id}`;
         }
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;

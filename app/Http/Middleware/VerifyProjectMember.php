@@ -18,7 +18,7 @@ class VerifyProjectMember
      */
     public function handle(Request $request, Closure $next)
     {
-        $user=User::with('occupation')->findOrFail($request->users_id);
+        $user=User::with('role')->findOrFail($request->users_id);
         $project_member=ProjectMember::where('projects_id','=',$request->projects_id)->where('users_id','=',$request->creator)->with('role')->first();
         if(!$project_member->role ){
             if(!$project_member->role ){

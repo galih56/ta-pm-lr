@@ -19,7 +19,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name', 'email', 'password', 'verified',
-        'token', 'profile_picture_path','occupations_id',
+        'token', 'profile_picture_path','roles_id',
     ];
 
     /**
@@ -45,8 +45,8 @@ class User extends Authenticatable
         return $this->hasMany(ProjectMember::class,'users_id');
     }
 
-    public function occupation(){
-        return $this->belongsTo(Occupation::class,'occupations_id');
+    public function role(){
+        return $this->belongsTo(Role::class,'roles_id');
     }
 
     public function comments(){
