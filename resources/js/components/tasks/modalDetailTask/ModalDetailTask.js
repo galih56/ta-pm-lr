@@ -284,15 +284,17 @@ export default function ModalDetailTask(props) {
                     <br/>
                     {data.creator?<span style={{fontSize:'0.7em'}}>Created by : {data.creator.name}</span>:null}
                     <br />      
-                    <FormControlLabel
-                        control={<Checkbox onChange={(event) => {
-                            var progress=data.progress         
-                            if(data.cards.length<=0 && data.complete==true) progress=100 ;
-                            else if(data.cards.length<=0 && data.complete==false)progress=0 ;
-                            setData({...data,complete:event.target.checked,progress:progress});
-                            handleCompleteTask(event.target.checked);
-                        }} fontSize="small" checked={data.complete} />}
-                        label={`Complete`}/>
+                    {(![1,2,4].includes(global.state.role?.id))?(
+                        <FormControlLabel
+                            control={<Checkbox onChange={(event) => {
+                                var progress=data.progress         
+                                if(data.cards.length<=0 && data.complete==true) progress=100 ;
+                                else if(data.cards.length<=0 && data.complete==false)progress=0 ;
+                                setData({...data,complete:event.target.checked,progress:progress});
+                                handleCompleteTask(event.target.checked);
+                            }} fontSize="small" checked={data.complete} />}
+                            label={`Complete`}/>
+                    ):null}
                     {(data.cards || !data.is_subtask)?<TaskProgress value={data.progress}></TaskProgress>:<></>}
                     {data.extended?(
                             <Chip

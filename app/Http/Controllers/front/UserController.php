@@ -197,7 +197,7 @@ class UserController extends Controller
         ]); 
 
         $user = User::where('email', $fields['email'])->with('role')->first();
-
+        
         if(!$user || !Hash::check($fields['password'], $user->password)) {
             return response([
                 'message' => 'Wrong credentials'

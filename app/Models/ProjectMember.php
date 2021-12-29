@@ -14,7 +14,6 @@ class ProjectMember extends Model
     protected $fillable = [
         'users_id',
         'projects_id',
-        'roles_id',
     ];
 
     public static function boot() {
@@ -39,9 +38,5 @@ class ProjectMember extends Model
 
     public function tasks(){
         return $this->belongsToMany(Task::class,'task_members','project_members_id','tasks_id');
-    }
-
-    public function role(){
-        return $this->belongsTo(MemberRole::class,'roles_id');
     }
 }

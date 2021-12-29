@@ -5,9 +5,7 @@ import axios from 'axios';
 import Button from '@material-ui/core/Button';
 import LinearProgress from '@material-ui/core/Button';
 import ModalDetailRole from './ModalDetailRole/ModalDetailRole';
-import toast, { Toaster } from 'react-hot-toast';
-
-// const RoleTree = React.lazy(() => import("./RoleTree"));
+import toast from 'react-hot-toast';
 const RoleTable = React.lazy(() => import("./RoleTable"));
 
 export default function RoleInformation() {
@@ -42,26 +40,8 @@ export default function RoleInformation() {
             });
     }
 
-    const getRoleTree = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'roles/tree';
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url)
-            .then((result) => {
-                console.log(result.data);
-                // setTree(result.data)
-            }).catch((error) => {
-                switch(error.response.status){
-                    case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
-                    default : toast.error(<b>{error.response.statusText}</b>); break
-                }
-            });
-    }
-
     useEffect(() => {
         getRoles();
-        // getRoleTree();
     }, []);
 
     function handleRoleUpdate(value) {
@@ -95,7 +75,6 @@ export default function RoleInformation() {
     return (
         <>
             <React.Suspense fallback={<LinearProgress />}>
-                {/* <RoleTree data={tree} modalOpen={handleModalOpen} /> */}
                 <Button variant="contained" onClick={() => setModalCreateOpen(true)}>+ Add</Button>
                 <RoleTable data={data} onUpdate={handleRoleUpdate} onDelete={handleRoleDelete} modalOpen={handleModalOpen} />
                 <ModalCreateRole
