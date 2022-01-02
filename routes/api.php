@@ -69,9 +69,6 @@ Route::group(['prefix'=>'project-members'],function(){
     Route::get('/{id}/tasks','App\Http\Controllers\front\ProjectMemberController@getTasks');
 });
 Route::resource('approvals', 'App\Http\Controllers\front\ApprovalController');
-Route::get('tes-echo',function(Request $request){
-    event(new \App\Events\NotificationEvent(['users_id'=>18]));
-});
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

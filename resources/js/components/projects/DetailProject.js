@@ -38,15 +38,6 @@ function TabPanel(props) {
     );
 }
 
-const getProjectFromState = (projects, projects_id) => {
-    var data = null;
-    for (let i = 0; i < projects.length; i++) {
-        const project = projects[i];
-        if (project.id == projects_id) {data = project;break;}
-    }
-    return data
-}
-
 const getCurrentTabIndex = (location, history, projects_id) => {
     var tabIndex = 0;
     var currentUrl = location.pathname;
@@ -116,20 +107,6 @@ const DetailProject = (props) => {
     const [detailMeetingOpen,setDetailMeetingOpen]=useState(false)
     const [clickedMeeting, setClickedMeeting] = useState(clickedMeetingInitialState);
 
-    const getUserMemberRole=(project)=>{
-        var user=null;
-        const members=project.members;
-        if(typeof members !== 'undefined'){
-            for (let i = 0; i < members.length; i++) {
-                const member = members[i];
-                if(member.id==global.state.id){
-                    user=member;
-                    break;
-                }
-            }
-        }
-    }
-
     const getDetailProject = () => {
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
         if(![1,2,3,4].includes(global.state.role?.id)){
@@ -141,7 +118,6 @@ const DetailProject = (props) => {
             .then((result) => {
                 const data = result.data;
                 setDetailProject(data);
-                getUserMemberRole(data);
                 global.dispatch({ type: 'store-detail-project', payload: data });
                 global.dispatch({type:'store-current-selected-project',payload:params.id});
             }).catch((error) => {
@@ -152,13 +128,6 @@ const DetailProject = (props) => {
                     default : toast.error(<b>{error.response.statusText}</b>); break
                 }
             });
-            
-        if (!window.navigator.onLine) {
-            const currentProject=getProjectFromState(global.state.projects, params.id);
-            getUserMemberRole(currentProject)
-            if(currentProject)setDetailProject(currentProject);
-            toast.error(`You're currently offline. Please check your internet connection.`);
-        }
     }
 
     useEffect(() => {
@@ -168,13 +137,7 @@ const DetailProject = (props) => {
         if (paramTaskId) handleDetailTaskOpen({ task:{...clickedTask, id: paramTaskId}, open: true });
         if (paramMeetingId) handleDetailMeetingOpen({ meeting : { id:paramMeetingId,...clickedMeeting }, open: true });
         getDetailProject();
-        console.log('detailProject : ',detailProject.columns);
     }, []);
-
-    useEffect(()=>{
-        const currentProject=getProjectFromState(global.state.projects, params.id);
-        if(currentProject) setDetailProject(currentProject);
-    },[global.state.projects]);
 
     const handleModalCreateList = (open) => setShowModalCreateList(open);
     const handleModalImportExcel = (open) => setShowModalImportExcel(open);

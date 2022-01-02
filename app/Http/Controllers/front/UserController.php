@@ -27,15 +27,7 @@ class UserController extends Controller
     public function index()
     {
         $users=User::with('role')
-                    ->with('asMember.project')->get()->toArray();
-
-        for ($i=0; $i < count($users); $i++) { 
-            $as_member=$users[$i]['as_member'];
-            for ($j=0; $j < count($as_member); $j++) { 
-                if($as_member[$j]['project']) $users[$i]['projects'][]=$as_member[$j]['project'];
-            }
-            unset($users[$i]['as_member']);
-        }
+                    ->with('projects.columns.cards.cards')->get()->toArray();
         return response()->json($users);
     }
 
@@ -63,12 +55,8 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $user=User::where('id',$id)->with('role')->with('asMember.project')->firstOrFail()->toArray();
-        $as_member=$user['as_member'];
-        for ($j=0; $j < count($as_member); $j++) { 
-            if($as_member[$j]['project']) $user['projects'][]=$as_member[$j]['project'];
-        }
-        unset($user['as_member']);
+        //Tidak pakai with('projects'). Karena data $user akan overwrite data project yang ada di client-side
+        $user=User::where('id',$id)->with('role')->firstOrFail()->toArray();
         return response()->json($user);
     }
     
@@ -197,7 +185,6 @@ class UserController extends Controller
         ]); 
 
         $user = User::where('email', $fields['email'])->with('role')->first();
-        
         if(!$user || !Hash::check($fields['password'], $user->password)) {
             return response([
                 'message' => 'Wrong credentials'
@@ -205,7 +192,6 @@ class UserController extends Controller
         }
 
         $token = $user->createToken('tugas-akhir-pm-project-management-2021')->plainTextToken;        
-        $project_members=ProjectMember::selectRaw('roles_id , count(roles_id)')->where('users_id',1)->groupBy('roles_id')->with('role')->get();
         $user=$user->toArray();
 
           

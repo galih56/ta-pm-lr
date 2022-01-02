@@ -52,6 +52,7 @@ const Home = (props) => {
         const toast_loading = toast.loading('Loading...',{ id: 'clipboard' });
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
+
         axios.get(url)
             .then((result) => {
                 global.dispatch({ type: 'store-projects', payload: result.data });
@@ -81,7 +82,6 @@ const Home = (props) => {
 
     return (
         <React.Fragment>
-             
             <Grid item xs={12}>
                 <Paper className={classes.paper}>
                     <ListItem button dense font="small" onClick={handleProjectListOpen} 

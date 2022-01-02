@@ -114,7 +114,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                             <Grid item lg={12} md={12} sm={12} xs={12}>
                                 <Typography style={{ whiteSpace: 'noWrap'}}>Realization start/end at : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''} - {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</Typography> 
                                 <StatusChip status={data.start_label}/> - <StatusChip status={data.end_label}/>
-                                {([1,2].includes(global.state.role?.id))?(
+                                {([1,2,4].includes(global.state.role?.id))?(
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                                         <MobileDateRangePicker
                                             required

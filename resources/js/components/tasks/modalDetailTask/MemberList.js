@@ -15,7 +15,7 @@ import UserContext from '../../../context/UserContext';
 import makeStyles from '@material-ui/styles/makeStyles';
 import UserSearchBar from '../../widgets/UserSearchBar';
 import axios from 'axios';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 const useStyles = makeStyles((theme) => ({
     root: {

@@ -17,8 +17,8 @@ const TaskProgress = ({ value }) => {
         value = 0;
     }
     return (
-        <Box display="flex">
-            <Box width="100%" mr={1}>
+        <Box display="flex" component={'div'}>
+            <Box width="100%" mr={1} component={'div'}>
                 <BorderLinearProgress variant="determinate" value={value} />
             </Box>
             <Box>

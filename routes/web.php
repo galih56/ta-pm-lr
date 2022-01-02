@@ -1,7 +1,20 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\User;
+Route::get('test',function(Request $request){
+    
+    $user=User::create([
+        'name'=> 'administrator 2',
+        'email'=> 'admin2@pttati.co.id',
+        'roles_id'=> 2,
+        'password'=> Hash::make('123456'),
+        'verified'=> true,
+    ]);
 
+    dd($user);
+    event(new \App\Events\NotificationEvent(['users_id'=>18]));
+});
 Route::group(['prefix' => 'master'],function(){
     Route::redirect('/', 'master/users')->name('home');
     Route::get('/login' , 'App\Http\Controllers\admin\UserController@loginForm')->name('login.form.admin');
