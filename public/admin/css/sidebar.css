@@ -98,12 +98,12 @@ a {
     line-height: 2em !important;
 }
 
-.show {
+.sidebar-show {
     left: 0
 }
 
 .body-pd {
-    padding-left: calc(var(--nav-width) + 1rem)
+    padding-left: calc(var(--nav-width) + 0.8rem)
 }
 
 .active {
@@ -151,7 +151,7 @@ a {
         padding: 1rem 1rem 0 0;
     }
 
-    .show {
+    .sidebar-show {
         width: calc(var(--nav-width) + 200px)
         /* width: calc(var(--nav-width) + 200px) */
     }

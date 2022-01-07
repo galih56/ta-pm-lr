@@ -82,35 +82,40 @@ setlocale(LC_TIME, 'id_ID');
             $('.basic-datatable').DataTable({
                 "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
             });
+
         });
         function hideMultiLevelCollapse(){
             const multiLevelCollapse = document.querySelectorAll('.multi-level.collapse.show');
             multiLevelCollapse.forEach(coll=> coll.classList.remove('show'))
         }
+
         document.addEventListener("DOMContentLoaded", function(event) {
-            const showNavbar = (toggleId, navId, bodyId, headerId) =>{
+            const toggleNavbar = (toggleId, navId, bodyId, headerId) =>{
                 const toggle = document.getElementById(toggleId);
                 const nav = document.getElementById(navId);
                 const bodypd = document.getElementById(bodyId);
                 const headerpd = document.getElementById(headerId);
-
+                
+                function showNavbar(){
+                    //show sidebar
+                    nav.classList.toggle('sidebar-show')
+                    // change icon
+                    toggle.classList.toggle('bx-x')
+                    // add padding to body
+                    bodypd.classList.toggle('body-pd')
+                    // add padding to header
+                    headerpd.classList.toggle('body-pd')
+                    hideMultiLevelCollapse()
+                }
+                
                 // Validate that all variables exist
                 if(toggle && nav && bodypd && headerpd){
-                    toggle.addEventListener('click', ()=>{
-                        // change icon
-                        toggle.classList.toggle('bx-x')
-                        // add padding to body
-                        bodypd.classList.toggle('body-pd')
-                        // add padding to header
-                        headerpd.classList.toggle('body-pd')
-                        hideMultiLevelCollapse()
-
-                    })
+                    toggle.addEventListener('click', showNavbar)
                 }
                 hideMultiLevelCollapse()
             }
 
-            showNavbar('sidebar-toggle','sidebarMenu','body-pd','header')
+            toggleNavbar('sidebar-toggle','sidebarMenu','body-pd','header')
 
             /*===== LINK ACTIVE =====*/
             const linkColor = document.querySelectorAll('.nav_link')
@@ -119,12 +124,11 @@ setlocale(LC_TIME, 'id_ID');
                 if(linkColor){
                     linkColor.forEach(l=> l.classList.remove('active'))
                     this.classList.add('active')
-                    showNavbar('sidebar-toggle','nav-bar','body-pd','header')
+                    toggleNavbar('sidebar-toggle','sidebarMenu','body-pd','header')
                 }
             }
             linkColor.forEach(l=> l.addEventListener('click', colorLink))
-
-            // Your code to run since DOM is loaded and ready
+            // Your code to run since DOM is loaded and ready            
         });
     </script>
     
