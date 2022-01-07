@@ -110,15 +110,24 @@ export default function ModalDetailTask(props) {
     }, [id,props.initialState.id]);
 
     useEffect(()=>{
+        getProgress();
+    },[]);
+    
+    useEffect(()=>{
+        console.log(detailProject);
         if(props.detailProject?.id)setDetailProject(props.detailProject)
         else {
-            var body={projects_id:detailProject.id,users_id:global.state.id}
-                var url =`${process.env.MIX_BACK_END_BASE_URL}projects/`;
+            var body={
+                projects_id : detailProject.id,
+                users_id:global.state.id
+            }
+            var url =`${process.env.MIX_BACK_END_BASE_URL}projects/`;
             if(data.list){
                  url+= data.list.project;
             }else if(data.is_subtask){
                 url+=data.parent_task.list.project;
             }
+
             const toast_loading = toast.loading('Loading...');
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -137,10 +146,6 @@ export default function ModalDetailTask(props) {
                 });
         }
     },[props.detailproject])
-
-    useEffect(()=>{
-        getProgress();
-    },[]);
 
     const getProgress=()=>{
         if(!data.is_subtask){
@@ -313,6 +318,7 @@ export default function ModalDetailTask(props) {
                         onTaskUpdate={onTaskUpdate}
                         onTaskDelete={onTaskDelete}
                         setStartConfirmOpen={setStartConfirmOpen}
+                        getDetailTask={getDetailTask}
                     /> 
                     <br/>
                 </DialogContent>                

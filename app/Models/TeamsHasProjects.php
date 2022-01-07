@@ -35,7 +35,6 @@ class TeamsHasProjects extends Model
                         ProjectMember::create([
                             'projects_id'=>$project_id,
                             'users_id'=>$member->user->id,
-                            'roles_id'=>$member->role->id
                         ]);
                     }
                 }

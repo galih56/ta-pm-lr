@@ -1,17 +1,11 @@
 import React, { useEffect, useContext, useState } from 'react';
-import { useHistory } from "react-router-dom";
 import UserContext from '../../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
-import makeStyles from '@material-ui/styles/makeStyles';
 import { Dialog, IconButton, Typography } from '@material-ui/core/';
-import TaskList from '../../../tasks/TaskList';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
-import Grid from '@material-ui/core/Grid';
 import CloseIcon from '@material-ui/icons/Close';
-import toast, { Toaster } from 'react-hot-toast';
-import DialogActionButtons from './DialogActionButtons';
+import toast from 'react-hot-toast';
 import EditForm from './EditForm';
 import axios from 'axios';
 
@@ -42,22 +36,15 @@ const DialogContent = withStyles((theme) => ({
     root: { padding: theme.spacing(2), },
 }))(MuiDialogContent);
 
-const DialogActions = withStyles((theme) => ({
-    root: { margin: 0, padding: theme.spacing(1), },
-}))(MuiDialogActions);
-
 export default function ModalDetailMember(props) {
     const { open, closeModal,onUpdate,onDelete } = props;
-    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const global = useContext(UserContext);
 
     const [data, setData] = useState({
         id: null, name: '', email: '',  last_login: '',  profile_picture_path: '' ,
          role:{ id:null, name:'' }, team_members_id:null
     });
-    const [isEditing, setIsEditing] = useState(false);
-    const handleEditingMode = (bool = false) => setIsEditing(bool);
-
+    
     useEffect(() => {
         setData(props.initialState);
     }, [props.initialState.id]);
@@ -109,20 +96,6 @@ export default function ModalDetailMember(props) {
             <DialogContent dividers>
                 <EditForm isEdit={isEditing} data={data} setData={setData} />
             </DialogContent>
-            {[1,2,4].includes(global.state.role?.id)?(
-                <DialogActions>
-                    <DialogActionButtons
-                        isEdit={isEditing}
-                        saveChanges={saveChanges}
-                        setEditMode={handleEditingMode}
-                        deleteMember={deleteMember}
-                        deleteConfirmOpen={deleteConfirmOpen}
-                        setDeleteConfirmOpen={setDeleteConfirmOpen}
-                        closeModal={closeModal}
-                    />
-                </DialogActions>
-            ):null}
-                     
         </Dialog>
     );
 }

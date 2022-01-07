@@ -22,6 +22,9 @@ import DoneIcon from '@material-ui/icons/Done';
 import toast, { Toaster } from 'react-hot-toast';
 
 function descendingComparator(a, b, orderBy) {
+    if (orderBy === 'created_at' || orderBy === 'created_at'  || orderBy === 'last_login' ) {
+        return (new Date(b[orderBy]).valueOf() - new Date(a[orderBy]).valueOf());
+    }
     if (b[orderBy] < a[orderBy]) return -1;
     if (b[orderBy] > a[orderBy]) return 1;
     return 0;
@@ -68,7 +71,7 @@ function EnhancedTableHead(props) {
                     <TableCell
                         key={headCell.id}
                         align={headCell.align}
-                        padding={headCell.disablePadding ? 'none' : 'default'}
+                        padding={headCell.disablePadding ? 'none' : 'normal'}
                         sortDirection={orderBy === headCell.id ? order : false}
                     >
                         <TableSortLabel

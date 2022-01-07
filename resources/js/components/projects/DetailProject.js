@@ -10,7 +10,7 @@ import BreadCrumbs from './BreadCrumbs';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import UserContext from '../../context/UserContext';
 import AddIcon from '@material-ui/icons/Add';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import axios from 'axios';
 
 const ModalCreateList = lazy(() => import('./ModalCreateList'));
@@ -104,7 +104,7 @@ const DetailProject = (props) => {
     const [detailProject, setDetailProject] = useState({ 
         id: null, title: null, description: null, 
         columns: [], members: [], clients:[],
-        createdAt: '', updatedAt: '' 
+        created_at: '', updated_at: '' 
     });
     const [showModalCreateList, setShowModalCreateList] = useState(false);
     const [showModalImportExcel, setShowModalImportExcel] = useState(false);
@@ -115,21 +115,6 @@ const DetailProject = (props) => {
     const [detailTaskOpen,setDetailTaskOpen]=useState(false)
     const [detailMeetingOpen,setDetailMeetingOpen]=useState(false)
     const [clickedMeeting, setClickedMeeting] = useState(clickedMeetingInitialState);
-
-    const getUserMemberRole=(project)=>{
-        var user=null;
-        const members=project.members;
-        if(typeof members !== 'undefined'){
-            for (let i = 0; i < members.length; i++) {
-                const member = members[i];
-                if(member.id==global.state.id){
-                    user=member;
-                    break;
-                }
-            }
-        }
-    }
-
     const getDetailProject = () => {
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
         if(![1,2,3,4].includes(global.state.role?.id)){
@@ -141,11 +126,9 @@ const DetailProject = (props) => {
             .then((result) => {
                 const data = result.data;
                 setDetailProject(data);
-                getUserMemberRole(data);
                 global.dispatch({ type: 'store-detail-project', payload: data });
                 global.dispatch({type:'store-current-selected-project',payload:params.id});
             }).catch((error) => {
-                console.log(error)
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
@@ -155,7 +138,6 @@ const DetailProject = (props) => {
             
         if (!window.navigator.onLine) {
             const currentProject=getProjectFromState(global.state.projects, params.id);
-            getUserMemberRole(currentProject)
             if(currentProject)setDetailProject(currentProject);
             toast.error(`You're currently offline. Please check your internet connection.`);
         }
@@ -168,7 +150,6 @@ const DetailProject = (props) => {
         if (paramTaskId) handleDetailTaskOpen({ task:{...clickedTask, id: paramTaskId}, open: true });
         if (paramMeetingId) handleDetailMeetingOpen({ meeting : { id:paramMeetingId,...clickedMeeting }, open: true });
         getDetailProject();
-        console.log('detailProject : ',detailProject.columns);
     }, []);
 
     useEffect(()=>{
@@ -290,7 +271,11 @@ const DetailProject = (props) => {
                                     <Grid container>
                                         <BreadCrumbs projectName={detailProject.title} tabName="Board"/>
                                         <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                                            <Board detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen}/>
+                                            <Board detailProject={{
+                                                id:detailProject.id,
+                                                title:detailProject.title,
+                                                members:detailProject.members,
+                                            }} handleDetailTaskOpen={handleDetailTaskOpen}/>
                                         </Grid>
                                     </Grid>
                                 </TabPanel>
@@ -382,6 +367,7 @@ const DetailProject = (props) => {
                             members:detailProject.members,
                             clients:detailProject.clients,
                         }}
+                        setDetailProject={setDetailProject}
                         initialState={clickedTask} 
                         onTaskUpdate={clickedTask.onTaskUpdate}
                         onTaskDelete={clickedTask.onTaskDelete}

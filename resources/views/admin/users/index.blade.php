@@ -27,12 +27,12 @@
         </div>
         <div class="row">
             <div class="col-12">
-                <a class="btn btn-secondary" href="{{route('users.create')}}" style="float:right"> + Tambah akun</a>
+                <a class="btn btn-secondary" href="{{route('users.create')}}" style="float:right"> + Tambah User</a>
             </div>
             <div class="col-12">
                 <div class="table-responsive mt-2">
                     @if(count($users)>0)
-                        <table class="table table-centered table-nowrap mb-0 rounded">
+                        <table class="table table-centered table-nowrap mb-0 rounded basic-datatable">
                             <thead class="thead-light">
                                 <tr>
                                     <th class="border-0 rounded-start">ID</th>
@@ -74,7 +74,6 @@
                 </div>
             </div>     
         </div>
-        @include('admin.layouts.pagination', ['data'=>$users])
     </div>
 </div>
 @endsection

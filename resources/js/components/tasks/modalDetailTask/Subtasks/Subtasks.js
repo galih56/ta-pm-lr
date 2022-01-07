@@ -45,7 +45,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
         label: '', progress: 0, start: null, end: null, 
         actualStart: null, actualEnd: null, creator:null,
         tags: [], users_id: global.state.id,
-        isSubtask:true, parent_task_id:parent_task_id
+        is_subtask:true, parent_task_id:parent_task_id
     }
 
     const [detailTaskOpen, setDetailTaskOpen] = useState(false);
@@ -169,7 +169,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                                         setNewTask={setNewTask}
                                         handleAddNewTask={handleAddNewTask}
                                         detailProject={detailProject}
-                                        isSubtask={true}
+                                        is_subtask={true}
                                         minDate={detailTask.start}
                                         maxDate={detailTask.end}
                                     />

@@ -53,13 +53,6 @@ class TaskController extends Controller
         $task->cost=$request->cost;
         $task->start=$request->start;
         $task->end=$request->end;
-        
-        // if($request->start && $request->end){
-        //     $start = Carbon::parse($request->start);
-        //     $end = Carbon::parse($request->end);
-        //     $days= $start->diffInDays($end);
-        //     $task->days=$days;
-        // }
         $task->lists_id=$request->lists_id;
         $task->is_subtask=$request->is_subtask;
         $task->users_id=$request->users_id;
@@ -162,23 +155,6 @@ class TaskController extends Controller
             if($actual_end>$end) $task->end_label='Selesai terlambat';
             if($actual_end==$end) $task->end_label='Selesai tepat waktu';
         }
-        /*
-        if(($request->has('start') && !empty($request->start)) 
-                && ($request->has('end')) && !empty($request->end)){
-            $start = Carbon::parse($request->start);
-            $end = Carbon::parse($request->end);
-            $days= $start->diffInDays($end);
-            $task->days=$days;
-        }       
-
-        if(($request->has('actual_start') && !empty($request->actual_start)) 
-                && ($request->has('actual_end')) && !empty($request->actual_end)){
-            $actual_start = Carbon::parse($request->actual_start);
-            $actual_end = Carbon::parse($request->actual_end);
-            $work_days= $actual_start->diffInDays($actual_end);
-            $task->work_days=$work_days;
-        }
-        */
         $task->save();
         
         if($task->is_subtask){
@@ -258,7 +234,6 @@ class TaskController extends Controller
         return response()->json($task);
     }
     public function updateComplete(Request $request,$id){
-        
         $task=Task::with('cards')->findOrFail($id);
         if($request->has('complete')){ 
             if($task->is_subtask){
@@ -273,14 +248,29 @@ class TaskController extends Controller
                 $parent_task->progress=$progress;
                 $parent_task->save();
             }
-            if($request->complete===true){
-                $current_date_time = Carbon::now()->toDateTimeString();
-                $task->actual_end=$current_date_time;
+
+            if($request->complete){
+                if(!$task->actual_end){
+                    $current_date_time = Carbon::now()->toDateTimeString();
+                    $task->actual_end=$current_date_time;
+                }
+                $task->progress=100;
+                $task->complete=true;
             }else{
-                $task->actual_end=null;
+                if($task->is_subtask===false && count($task->cards)>0){
+                    $valuePerSubtask=100/count($task->cards);
+                    $completeSubtaskCounter=0;
+                    for ($i = 0; $i < count($task->cards); $i++) {
+                        $subtask = $task->cards[$i];
+                        if($subtask->complete){ $completeSubtaskCounter++; }
+                    }
+                    $progress=$completeSubtaskCounter*$valuePerSubtask;
+                    $task->progress=round($progress);
+                    $task->save();
+                }                
                 $task->end_label='Belum Selesai';
+                $task->complete=false;
             }
-            $task->complete=$request->complete;
         }
 
         if(($task->actual_start && $task->actual_start!='Invalid date' && !empty($task->actual_start))){
@@ -316,8 +306,9 @@ class TaskController extends Controller
     function getDetailTask($id){
         $task=Task::findOrFail($id);
         
-        $task=Task::with('creator')->with('cards')->with('logs')->with('comments.creator')
-                    ->with('list')->with('members.user.role')
+        $task=Task::with('creator')->with('cards')
+                    ->with('comments.creator')
+                    ->with('list.project')->with('members.user.role')
                     ->with('members.project_client.client')
                     ->with('tags')
                     ->with(['parentTask'=>function($q){
@@ -382,12 +373,14 @@ class TaskController extends Controller
                             ->where('ta.tasks_id','=',$tasks_id)->with('user')->get()->toArray();
         return $attachments;
     }
+
     public function getMembers($id){
         $task=Task::with('members.user.role')
                     ->with('members.project_client.client')->findOrFail($id)->toArray();
         $members=$this->getTaskMembers($task);
         return response()->json($members);
     }
+    
     function getTaskMembers($task){
         $members=[];
         $task_members=$task['members'];

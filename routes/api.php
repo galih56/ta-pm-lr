@@ -23,13 +23,10 @@ Route::patch('meetings/add-meeting-members', 'App\Http\Controllers\front\Meeting
 Route::patch('meetings/remove-meeting-members', 'App\Http\Controllers\front\MeetingController@removeMembers');
 Route::resource('meetings', 'App\Http\Controllers\front\MeetingController');
 Route::resource('meeting-members', 'App\Http\Controllers\front\MeetingMemberController');
-Route::resource('member-roles', 'App\Http\Controllers\front\MemberRoleController');
 Route::resource('teams', 'App\Http\Controllers\front\TeamController');
 Route::resource('team-members', 'App\Http\Controllers\front\TeamMemberController');
 Route::resource('tags', 'App\Http\Controllers\front\TagController');
 Route::resource('comments', 'App\Http\Controllers\front\CommentController');
-// Route::resource('activity-logs', 'App\Http\Controllers\front\ActivityLogController');   
-// Route::resource('github-repositories', 'App\Http\Controllers\front\GithubRepositories');   
 Route::resource('users', 'App\Http\Controllers\front\UserController');
 
 Route::get('/roles/tree','App\Http\Controllers\front\RoleController@getTree');
@@ -60,7 +57,6 @@ Route::group(['prefix'=>'projects'],function(){
     Route::delete('/{id}/teams/{teams_id}','App\Http\Controllers\front\ProjectController@removeTeams');
     Route::get('/{id}/members','App\Http\Controllers\front\ProjectController@getMembers');
     Route::get('/{id}/files','App\Http\Controllers\front\ProjectController@getFiles');
-    Route::get('/{id}/github-repositories','App\Http\Controllers\front\ProjectController@getGithubRepos');
     Route::get('/{id}/gantt','App\Http\Controllers\front\ProjectController@getGanttDataSource');
 });
 
@@ -69,9 +65,6 @@ Route::group(['prefix'=>'project-members'],function(){
     Route::get('/{id}/tasks','App\Http\Controllers\front\ProjectMemberController@getTasks');
 });
 Route::resource('approvals', 'App\Http\Controllers\front\ApprovalController');
-Route::get('tes-echo',function(Request $request){
-    event(new \App\Events\NotificationEvent(['users_id'=>18]));
-});
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

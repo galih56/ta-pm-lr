@@ -10,6 +10,7 @@ import BarChartIcon from '@material-ui/icons/BarChart';
 import EmailIcon from '@material-ui/icons/Email';
 import BusinessCenterIcon from '@material-ui/icons/BusinessCenter';
 import UserContext from './../context/UserContext'
+import StorageIcon from '@material-ui/icons/Storage';
 
 export const MainListItems = () => (
     <React.Fragment>
@@ -40,12 +41,6 @@ export const RestrictedAccessMenu = () => {
     const global=useContext(UserContext);
     const history=useHistory();
 
-    /*
-        access levels
-        1. system administrator, ceo
-        2. project owner
-        3. project manager
-    */
     const [showAdminMenu,setAdminMenu]=useState(false);
     const [showApprovalMenu,setShowApprovalMenu]=useState(false);
     useEffect(()=>{
@@ -58,6 +53,18 @@ export const RestrictedAccessMenu = () => {
             } else{ 
                 setShowApprovalMenu(false);
                 global.dispatch({type:'remove-current-selected-project'});
+            }
+            switch (current_route) {
+                case 'projects':
+                    break;
+                case 'clients':
+                    break;
+                case 'users':
+                    break;
+                case 'projects':
+                    break;
+                default:
+                    break;
             }
         }
         checkCurrentSelectedProject(history.location);
@@ -77,6 +84,18 @@ export const RestrictedAccessMenu = () => {
             {(showAdminMenu || showApprovalMenu)?(
                 <ListSubheader inset>Restricted Access</ListSubheader>
             ):<></>}
+            
+            {(showApprovalMenu)?(
+                <React.Fragment>
+                    <ListItem button component={Link} to="/approvals" >
+                        <ListItemIcon>
+                            <EmailIcon />
+                        </ListItemIcon>
+                        <ListItemText> Approvals </ListItemText>
+                    </ListItem>
+                </React.Fragment>
+            ):<></>}
+            
             {(showAdminMenu)?(
                 <React.Fragment>
                     <ListItem button component={Link} to="/clients" >
@@ -91,43 +110,14 @@ export const RestrictedAccessMenu = () => {
                         </ListItemIcon>
                         <ListItemText> Employee </ListItemText>
                     </ListItem>
-                </React.Fragment>
-            ):<></>}
-            
-            {(showApprovalMenu)?(
-                <React.Fragment>
-                    <ListItem button component={Link} to="/approvals" >
+                    <ListItem component="a" href={`${process.env.MIX_FRONT_END_BASE_URL}master`} target="_blank" >
                         <ListItemIcon>
-                            <EmailIcon />
+                            <StorageIcon />
                         </ListItemIcon>
-                        <ListItemText> Approvals </ListItemText>
+                        <ListItemText> Master Data </ListItemText>
                     </ListItem>
                 </React.Fragment>
             ):<></>}
-            {/* 
-            <ListSubheader inset>Saved reports</ListSubheader>
-            <ListItem button component={Link} to="/my-tasks" >
-                <ListItemIcon>
-                    <AssignmentIcon />
-                </ListItemIcon>
-                <ListItemText primary="Last quarter" />
-            </ListItem>
-            <ListItem button component={Link} to="/my-tasks" >
-                <ListItemIcon>
-                    <AssignmentIcon />
-                </ListItemIcon>
-                <ListItemText primary="Year-end sale" />
-            </ListItem> 
-            */}
         </React.Fragment>
     )
 };
-
-{/* 
-<ListItem button component={Link} to="/my-tasks" >
-    <ListItemIcon>
-        <LayersIcon />
-    </ListItemIcon>
-    <ListItemText>Integrations</ListItemText>
-</ListItem>  
-*/}

@@ -24,6 +24,9 @@ import moment from 'moment';
 import axios from 'axios';
 
 function descendingComparator(a, b, orderBy) {
+    if (orderBy === 'updated_at' ||orderBy === 'created_at' ) {
+        return (new Date(b[orderBy]).valueOf() - new Date(a[orderBy]).valueOf());
+    }
     if (b[orderBy] < a[orderBy]) return -1;
     if (b[orderBy] > a[orderBy]) return 1;
     return 0;
@@ -49,7 +52,7 @@ const headCells = [
     { id: 'name', align: 'left', disablePadding: true, label: 'Name' },
     { id: 'project', align: 'left', disablePadding: false, label: 'Project' },
     { id: 'status', align: 'left', disablePadding: false, label: 'Status' },
-    { id: 'created_at', align: 'right', disablePadding: false, label: 'Created/Updated at' },
+    { id: 'created_at', align: 'right', disablePadding: false, label: 'Created at' },
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -70,7 +73,7 @@ function EnhancedTableHead(props) {
                     <TableCell
                         key={headCell.id}
                         align={headCell.align}
-                        padding={headCell.disablePadding ? 'none' : 'default'}
+                        padding={headCell.disablePadding ? 'none' : 'normal'}
                         sortDirection={orderBy === headCell.id ? order : false}
                     >
                         <TableSortLabel

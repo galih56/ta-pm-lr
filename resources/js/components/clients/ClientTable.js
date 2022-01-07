@@ -23,11 +23,13 @@ import FormCreateClient from './FormCreateClient';
 import toast,{Toaster} from 'react-hot-toast';
 
 function descendingComparator(a, b, orderBy) {
+    if (orderBy === 'updated_at' ||orderBy === 'created_at' ) {
+        return (new Date(b[orderBy]).valueOf() - new Date(a[orderBy]).valueOf());
+    }
     if (b[orderBy] < a[orderBy]) return -1;
     if (b[orderBy] > a[orderBy]) return 1;
     return 0;
 }
-
 function getComparator(order, orderBy) {
     return order === 'desc'
         ? (a, b) => descendingComparator(a, b, orderBy)
@@ -67,7 +69,7 @@ function EnhancedTableHead(props) {
                     <TableCell
                         key={headCell.id}
                         align={headCell.align}
-                        padding={headCell.disablePadding ? 'none' : 'default'}
+                        padding={headCell.disablePadding ? 'none' : 'normal'}
                         sortDirection={orderBy === headCell.id ? order : false}
                     >
                         <TableSortLabel

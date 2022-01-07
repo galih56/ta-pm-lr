@@ -30,12 +30,7 @@ class TeamController extends Controller
     public function index(Request $request)
     {
 
-        $teams=new Team;
-        if($request->has('search')){
-            $teams=$teams->where('name','like',"%$request->search%");
-        }
-        
-        $teams=$teams->paginate(10)->appends($request->all());
+        $teams=Team::orderBy('created_at','DESC')->get();
         return view('admin.teams.index',['teams'=>$teams]);
     }
 
@@ -95,7 +90,7 @@ class TeamController extends Controller
     public function edit(Request $request,$id)
     {
         $team=Team::with('users')->findOrFail($id);
-        $users=$team->users()->paginate(10)->appends($request->all());
+        $users=$team->users()->orderBy('created_at','DESC')->get();
         return view('admin.teams.edit')->with(compact('team','users'));
     }
 

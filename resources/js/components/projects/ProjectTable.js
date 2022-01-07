@@ -23,7 +23,10 @@ import ModalCreateProject from './ModalCreateProject';
 import UserContext from '../../context/UserContext';
 
 function descendingComparator(a, b, orderBy) {
-   if (b[orderBy] < a[orderBy]) return -1;
+    if (orderBy === 'updated_at' ||orderBy === 'created_at' ) {
+        return (new Date(b[orderBy]).valueOf() - new Date(a[orderBy]).valueOf());
+    }
+    if (b[orderBy] < a[orderBy]) return -1;
     if (b[orderBy] > a[orderBy]) return 1;
     return 0;
 }
@@ -45,9 +48,9 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-    { id: 'title', align: 'left', label: 'Title' },
-    { id: 'updated-at', align: 'right', disablePadding: false, label: 'Updated At' },
-    { id: 'created-at', align: 'right', disablePadding: false, label: 'Created At' },
+    { id: 'title', align: 'left', disablePadding: false, label: 'Title' },
+    { id: 'updated_at', align: 'right', disablePadding: false, label: 'Updated At' },
+    { id: 'created_at', align: 'right', disablePadding: false, label: 'Created At' },
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -67,7 +70,7 @@ function EnhancedTableHead(props) {
                     <TableCell
                         key={headCell.id}
                         align={headCell.align}
-                        padding={headCell.disablePadding ? 'none' : 'default'}
+                        padding={headCell.disablePadding ? 'none' : 'normal'}
                         sortDirection={orderBy === headCell.id ? order : false}
                     >
                         <TableSortLabel
@@ -89,11 +92,11 @@ function EnhancedTableHead(props) {
     );
 }
 
-export default function EnhancedTable({data,page_name}) {
+export default function EnhancedTable({data,page_name,showFormCreate}) {
     const classes = useStyles();
     const [rows, setRows] = useState([]);
     const [order, setOrder] = useState('asc');
-    const [orderBy, setOrderBy] = useState('end');
+    const [orderBy, setOrderBy] = useState('updated-at');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [keywords,setKeywords]=useState('');
@@ -124,7 +127,7 @@ export default function EnhancedTable({data,page_name}) {
             <Paper className={classes.paper}>
                 <Grid container spacing={2}>
                     <Grid item lg={12} md={12} sm={12} xs={12}>
-                        {([1,2,4].includes(global.state.role?.id) )?(
+                        {([1,2,4].includes(global.state.role?.id) && showFormCreate )?(
                             <>
                                 <Button
                                     variant="contained"
@@ -166,7 +169,6 @@ export default function EnhancedTable({data,page_name}) {
                                         })
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                         .map((row, index) => {
-                                            if (row.progress >= 100) row.complete = true;
                                             return (
                                                 <TableRow
                                                     hover key={row.title}

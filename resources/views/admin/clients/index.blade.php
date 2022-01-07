@@ -15,7 +15,7 @@
 
 <div class="card border-0 shadow mb-4">
     <div class="card-body">
-        <h1 class="h4">Daftar Client</h1>
+        <h1 class="h4">Daftar Klien</h1>
         <div class="row">
             <div class="col-12">
                 @if(Session::has('message'))
@@ -27,12 +27,12 @@
         </div>
         <div class="row">
             <div class="col-12">
-                <a class="btn btn-secondary" href="{{route('clients.create')}}" style="float:right"> + Tambah akun</a>
+                <a class="btn btn-secondary" href="{{route('clients.create')}}" style="float:right"> + Tambah Klien</a>
             </div>
             <div class="col-12">
                 <div class="table-responsive mt-2">
                     @if(count($clients)>0)
-                        <table class="table table-centered table-nowrap mb-0 rounded">
+                        <table class="table table-centered table-nowrap mb-0 rounded basic-datatable">
                             <thead class="thead-light">
                                 <tr>
                                     <th class="border-0 rounded-start">ID</th>
@@ -47,7 +47,7 @@
                                             {{$client->id}}
                                         </td>
                                         <td>
-                                            {{$client->name}}
+                                            {{$client->institution}}
                                         </td>
                                         <td style="text-align:left">
                                             <a class="btn btn-info m-2" 
@@ -66,7 +66,6 @@
                 </div>
             </div>     
         </div>
-        @include('admin.layouts.pagination', ['data'=>$clients])
     </div>
 </div>
 @endsection

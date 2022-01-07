@@ -15,7 +15,7 @@ import UserContext from '../../../context/UserContext';
 import makeStyles from '@material-ui/styles/makeStyles';
 import UserSearchBar from '../../widgets/UserSearchBar';
 import axios from 'axios';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -42,10 +42,10 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
             {
                 loading: 'Adding a new member',
                 success: (result)=>{
-                    const payload = { tasks_id:data.id, data: data };
-                    setData({...data,members:[...data.members,...result.data]});
-                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
-                    else global.dispatch({ type: 'store-detail-task', payload: payload })
+                    const newDetailTask={...data,members:result.data};
+                    setData(newDetailTask);
+                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: newDetailTask })
+                    else global.dispatch({ type: 'store-detail-task', payload: newDetailTask })
                     return <b>Successfuly updated</b>
                 },
                 error: (error)=>{
@@ -68,11 +68,12 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
                     var newMemberList=members.filter(function(member){
                         if(member.task_members_id!=user.task_members_id) return member;
                     });
+                    console.log(user,newMemberList);
                     setMembers(newMemberList);
-                    setData({...data,members:newMemberList});
-                    const payload = { tasks_id:data.id, data: data };
-                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
-                    else global.dispatch({ type: 'store-detail-task', payload: payload })
+                    const newDetailTask={...data,members:newMemberList};
+                    setData(newDetailTask);
+                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: newDetailTask })
+                    else global.dispatch({ type: 'store-detail-task', payload: newDetailTask })
                     return <b>Successfully deleted</b>
                 },
                 error: (error)=>{
@@ -88,7 +89,6 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
         <Grid container>
          {isEdit?(
              <>
-                 
                  <Grid item lg={12} md={12} sm={12} xs={12} style={{marginTop:'0.5em'}}>
                     <Typography>Assigned to : </Typography>
                  </Grid>

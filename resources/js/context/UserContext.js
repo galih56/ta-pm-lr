@@ -5,7 +5,6 @@ const initState = {
     id: '', username: '', email: '', profile_picture_path: '', 
     role: null, projects: [], 
     delayedRequest: [], googleAuth: null, 
-    githubAuth:{ code:'',  authenticated:false,  access_token:'',  scope:null }, 
     current_project_id:null,
     notifications:[],
     isAdmin:false
@@ -29,9 +28,6 @@ const storeAuthData = (payload) => {
     const user = {
         ...payload.user,
         projects: [], delayedRequest: [], googleAuth: null, 
-        githubAuth:{
-            code:'',  authenticated:false,  access_token:'',  scope:null
-        }, 
         token: token, authenticated: true,
         notifications:[],
         isAdmin:false
@@ -84,9 +80,6 @@ const resetState = () => {
         id: '', username: '', email: '',
         profilePicturePath: '', role: null, 
         last_login: '', projects: [], delayedRequest: [],
-        githubAuth:{
-            code:'',  authenticated:false,  access_token:'',  scope:null
-        }, 
         token: '', authenticated: false,
         notifications:[]
     }

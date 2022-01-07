@@ -29,13 +29,7 @@ class ClientController extends Controller
      */
     public function index(Request $request)
     {
-
-        $clients=new Client;
-        if($request->has('search')){
-            $clients=$clients->where('name','like',"%$request->search%");
-        }
-        
-        $clients=$clients->paginate(10)->appends($request->all());
+        $clients=Client::orderBy('institution','ASC')->get();
         return view('admin.clients.index',['clients'=>$clients]);
     }
 
@@ -95,7 +89,7 @@ class ClientController extends Controller
     public function edit(Request $request,$id)
     {
         $client=Client::with('users')->findOrFail($id);
-        $users=$client->users()->paginate(10)->appends($request->all());
+        $users=$client->users()->orderBy('created_at','DESC')->get();
         return view('admin.clients.edit')->with(compact('client','users'));
     }
 

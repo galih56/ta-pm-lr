@@ -27,15 +27,7 @@ class UserController extends Controller
     public function index()
     {
         $users=User::with('role')
-                    ->with('asMember.project')->get()->toArray();
-
-        for ($i=0; $i < count($users); $i++) { 
-            $as_member=$users[$i]['as_member'];
-            for ($j=0; $j < count($as_member); $j++) { 
-                if($as_member[$j]['project']) $users[$i]['projects'][]=$as_member[$j]['project'];
-            }
-            unset($users[$i]['as_member']);
-        }
+                    ->with('projects.columns.cards.cards')->get()->toArray();
         return response()->json($users);
     }
 
@@ -53,7 +45,6 @@ class UserController extends Controller
             'email'=> $fields['email'],
             'roles_id'=> $fields['roles_id'],
             'password'=> Hash::make($fields['password']),
-            'verified'=> false,
         ]);
 
         $user = User::where('email', $fields['email'])->with('role')->first();
@@ -63,12 +54,8 @@ class UserController extends Controller
 
     public function show($id)
     {
-        $user=User::where('id',$id)->with('role')->with('asMember.project')->firstOrFail()->toArray();
-        $as_member=$user['as_member'];
-        for ($j=0; $j < count($as_member); $j++) { 
-            if($as_member[$j]['project']) $user['projects'][]=$as_member[$j]['project'];
-        }
-        unset($user['as_member']);
+        //Tidak pakai with('projects'). Karena data $user akan overwrite data project yang ada di client-side
+        $user=User::where('id',$id)->with('role')->firstOrFail()->toArray();
         return response()->json($user);
     }
     
@@ -84,7 +71,6 @@ class UserController extends Controller
         if($request->has('token')) $user->token=$request->token;
         if($request->has('roles_id')) $user->roles_id=$request->roles_id;
         if($request->has('last_login')) $user->last_login=$request->last_login;
-        if($request->has('verified')) $user->verified=$request->verified;
         if($request->has('profile_picture_path')) $user->profile_picture_path=$request->profile_picture_path;
         $user->save();
 
@@ -141,7 +127,7 @@ class UserController extends Controller
     }
     
     public function getTasks(Request $request,$id){
-        $tasks=Task::select("t.*")
+        $tasks=Task::selectRaw("t.id, t.title, t.lists_id, t.start, t.end, t.actual_start, t.actual_end, t.created_at, t.updated_at, l.projects_id, t.progress, t.complete")
                     ->from('tasks AS t')
                     ->join('lists AS l','t.lists_id','=','l.id')
                     ->join('projects AS p','p.id','l.projects_id')
@@ -155,14 +141,21 @@ class UserController extends Controller
                     ->where('counter.counts','>=','1')
                     ->orWhere('t.users_id','=',$id)
                     ->orderBy('t.start','ASC')
-                        ->with('attachments')
-                        ->with(['list.project'=>function($query){
-                            return $query->select('id','title','start','end','progress','complete');
+                        ->with(['list'=>function($query){
+                            return $query->select('id','title','start','end','projects_id')
+                                    ->with(['project'=>function($query){
+                                        return $query->select('id','title','start','end','complete');
+                                    }]);
                         }])
-                        ->with(['parentTask.list.project'=>function($query){
-                            return $query->select('id','title','start','end','progress','complete');
+                        ->with(['parentTask.list'=>function($query){
+                            return $query->select('id','title','start','end','projects_id')
+                                    ->with(['project'=>function($query){
+                                        return $query->select('id','title','start','end','complete');
+                                    }]);
                         }])
-                        ->with('creator')->get();
+                        ->with(['creator'=>function($query){
+                            return $query->select('id','name','email');
+                        }])->get();
         return response()->json($tasks);
     }
 
@@ -197,7 +190,6 @@ class UserController extends Controller
         ]); 
 
         $user = User::where('email', $fields['email'])->with('role')->first();
-
         if(!$user || !Hash::check($fields['password'], $user->password)) {
             return response([
                 'message' => 'Wrong credentials'
@@ -205,20 +197,7 @@ class UserController extends Controller
         }
 
         $token = $user->createToken('tugas-akhir-pm-project-management-2021')->plainTextToken;        
-        $project_members=ProjectMember::selectRaw('roles_id , count(roles_id)')->where('users_id',1)->groupBy('roles_id')->with('role')->get();
         $user=$user->toArray();
-
-          
-        /*
-            access levels
-            1.  ceo/direktur (id=1), system administrator (id=8)
-            3. manager (id=2)
-            4. System analyst (id=5)
-            5. bendahara (id=9)
-        
-            6. project owner (id=1)
-            7. project manager (id=2)
-        */
         
         $response = [
             'user' => $user,
@@ -240,7 +219,6 @@ class UserController extends Controller
             'name'=> $fields['name'],
             'email'=> $fields['email'],
             'password'=> Hash::make($fields['password']),
-            'verified'=> false,
         ]);
 
         $user = User::where('email', $fields['email'])->with('role')->first();

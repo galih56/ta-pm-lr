@@ -44,7 +44,7 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
         const getProgress=()=>{
             if(!data.is_subtask){
                 try {
-                    if(data.cards.length>0){
+                    if(data.cards?.length>0){
                         var valuePerSubtask=100/data.cards.length;
                         var completeSubtaskCounter=0;
                         for (let i = 0; i < data.cards.length; i++) {

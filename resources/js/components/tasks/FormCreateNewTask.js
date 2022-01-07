@@ -14,13 +14,13 @@ import UserContext from './../../context/UserContext';
 import { parseISO } from 'date-fns'; 
 import NumberFormat from 'react-number-format';
 
-const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSubtask,minDate,maxDate})=>{
+const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,is_subtask,minDate,maxDate})=>{
     const global=useContext(UserContext);
     const [dateRange, setDateRange] = useState([null, null]);
     const [exceptedUsers,setExceptedUsers]=useState([]);
 
     useEffect(()=>{
-        setNewTask({...newTask,is_subtask:isSubtask});
+        setNewTask({...newTask,is_subtask:is_subtask});
         const checkLoggedInUserProjectMember=()=>{
             var logged_in_user={
                 id:global.state.id,
@@ -60,7 +60,7 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,isSu
                 />
             </Grid>
             <Grid item lg={6} md={6} sm={6} xs={12}>
-                {(!isSubtask)?
+                {(!is_subtask)?
                     <NumberFormat 
                         customInput={TextField} 
                         variant="standard"

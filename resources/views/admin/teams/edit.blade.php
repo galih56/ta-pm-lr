@@ -60,7 +60,7 @@
         <h1 class="h4">Daftar team</h1>
         <div class="row">
             <div class="table-responsive">
-                <table class="table table-centered table-nowrap mb-0 rounded">
+                <table class="table table-centered table-nowrap mb-0 rounded basic-datatable">
                     <thead class="thead-light">
                     <tr>
                         <th>Name</th>

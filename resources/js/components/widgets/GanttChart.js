@@ -19,7 +19,7 @@ class GanttChart extends React.Component {
             taskLabel: 'title'
         };
         this.toolbarOptions = ['ExpandAll', 'CollapseAll','ZoomIn','ZoomOut','ZoomToFit'];
-        this.state={dataSource:[],showRealization:true};
+        this.state={dataSource:[]};
     }
 
     getGanttDataSource(){
@@ -35,15 +35,17 @@ class GanttChart extends React.Component {
                 var task=column.cards[j];
                 var task_realization={
                     id: `realisasi-${task.id}`, title:``, subtitle:`Realisasi ${task.title}` ,
-                    start : task.actual_start, end : task.actual_end, realization:true, 
+                    start : task.start, end : task.end, 
+                    realization:true, 
                     metadata:{
                         start:task.start, end:task.end,
                         actual_start:task.actual_start, actual_end:task.actual_end,
                         complete:task.complete
                     }
                 };
-                //Jila tanggal selesai belum diinput, pakai tanggal estimasi terlebih dahulu
-                if(!task.actual_end){task_realization.end=task.end};
+                //Jika tanggal selesai belum diinput, pakai tanggal estimasi terlebih dahulu
+                if(task.actual_start) task_realization.start=task.actual_start;
+                if(task.actual_end) task_realization.end=task.actual_end;
 
                 var new_subtasks=[];
                 var valuePerSubtask=100/task.cards.length;
@@ -55,24 +57,26 @@ class GanttChart extends React.Component {
                     var subtask_realization={ 
                         id: `realisasi-${subtask.id}`, title:``,
                         subtitle:`Realisasi ${subtask.title}` ,
-                        start : subtask.actual_start, end : subtask.actual_end,
+                        start : subtask.start, end : subtask.end,
                         predecessor:`${task.id}SS`, realization:true,
                         metadata:{
-                            start:task.start, end:task.end,
-                            actual_start:task.actual_start, actual_end:task.actual_end,
-                            complete:task.complete
+                            start:subtask.start, end:subtask.end,
+                            actual_start:subtask.actual_start, actual_end:subtask.actual_end,
+                            complete:subtask.complete
                         }
                     };
-                    if(subtask.complete)completeSubtaskCounter++;
+                    if(subtask.actual_start) subtask_realization.start=subtask.actual_start;
+                    if(subtask.actual_end) subtask_realization.end=subtask.actual_end;
+                    if(subtask.complete) completeSubtaskCounter++;
                     new_subtasks.push(subtask);
-                    if(this.state.showRealization || 
-                        !(!subtask_realization.actual_start && !subtask_realization.actual_end)) new_subtasks.push(subtask_realization);
+                    new_subtasks.push(subtask_realization);
                 }
                 task.progress=completeSubtaskCounter*valuePerSubtask;
                 task.cards=new_subtasks;
                 // task.cards.unshift(task_realization);
                 new_column.cards.push(task);
-                if(this.state.showRealization || !(!subtask_realization.actual_start && !subtask_realization.actual_end)) new_column.cards.push(task_realization);
+                if(task_realization.actual_start && task_realization.actual_end) new_column.cards.push(task_realization);
+
             }
             data[i]=new_column;
         }
@@ -103,6 +107,7 @@ class GanttChart extends React.Component {
         var progressBarStyle={};
         var labelStyle={  position: "absolute", fontSize: "12px",  color: "white", top: "5px", left: "10px",  fontFamily: "Segoe UI", cursor: "move" }
         const task=props.taskData;
+        console.log(task)
         if(task.realization==true){
             if(!task.metadata.actual_start && !task.metadata.actual_end){
                 taskBarStyle={height: "100%" };
@@ -115,12 +120,12 @@ class GanttChart extends React.Component {
                 progressBarStyle={ backgroundColor:'#d4b11f', width: props.ganttProperties.progressWidth + "px", height: "100%" };    
             }
 
-            if(task.metadata.actual_start && !task.metadata.complete && task.metadata.actual_end){
+            if(task.metadata.actual_start && task.metadata.actual_end && !task.metadata.complete ){
                 taskBarStyle={ backgroundColor:'#d4b11f',height: "100%",border:'1px solid #07650b' }
                 progressBarStyle={ backgroundColor:'#43a047', width: props.ganttProperties.progressWidth + "px", height: "100%" };    
             }
 
-            if(task.metadata.actual_start && task.metadata.complete && task.metadata.actual_end){
+            if(task.metadata.actual_start && task.metadata.actual_end && task.metadata.complete){
                 taskBarStyle={ backgroundColor:'#43a047',height: "100%",border:'1px solid #07650b' }
                 progressBarStyle={ backgroundColor:'#43a047', width: props.ganttProperties.progressWidth + "px", height: "100%" };    
             }
@@ -150,7 +155,6 @@ class GanttChart extends React.Component {
         var labelStyle={  position: "absolute", fontSize: "12px",  color: "white", top: "5px", left: "10px",  fontFamily: "Segoe UI", cursor: "move" }
         const task=props.taskData;
         if(task.realization==true){
-            console.log(task);
             if(!task.metadata.actual_start && !task.metadata.actual_end){
                 taskBarStyle={height: "100%" };
                 progressBarStyle={ width: props.ganttProperties.progressWidth + "px", height: "100%" };
@@ -162,12 +166,12 @@ class GanttChart extends React.Component {
                 progressBarStyle={ backgroundColor:'#d4b11f', width: props.ganttProperties.progressWidth + "px", height: "100%" };    
             }
 
-            if(task.metadata.actual_start && !task.metadata.complete && task.metadata.actual_end){
+            if(task.metadata.actual_start && task.metadata.actual_end && !task.metadata.complete){
                 taskBarStyle={ backgroundColor:'#d4b11f',height: "100%",border:'1px solid #07650b' }
                 progressBarStyle={ backgroundColor:'#43a047', width: props.ganttProperties.progressWidth + "px", height: "100%" };    
             }
 
-            if(task.metadata.actual_start && task.metadata.complete && task.metadata.actual_end){
+            if(task.metadata.actual_start && task.metadata.actual_end && task.metadata.complete){
                 taskBarStyle={ backgroundColor:'#43a047',height: "100%",border:'1px solid #07650b' }
                 progressBarStyle={ backgroundColor:'#43a047', width: props.ganttProperties.progressWidth + "px", height: "100%" };    
             }

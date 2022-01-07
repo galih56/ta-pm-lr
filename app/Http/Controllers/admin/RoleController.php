@@ -29,13 +29,7 @@ class RoleController extends Controller
      */
     public function index(Request $request)
     {
-
-        $roles=new Role;
-        if($request->has('search')){
-            $roles=$roles->where('name','like',"%$request->search%");
-        }
-        
-        $roles=$roles->paginate(10)->appends($request->all());
+        $roles=Role::orderBy('name','DESC')->get();
         return view('admin.roles.index',['roles'=>$roles]);
     }
 
@@ -97,7 +91,7 @@ class RoleController extends Controller
     public function edit(Request $request,$id)
     {
         $role=Role::with('users')->findOrFail($id);
-        $users=$role->users()->paginate(10)->appends($request->all());
+        $users=$role->users()->get();
         return view('admin.roles.edit')->with(compact('role','users'));
     }
 

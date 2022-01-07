@@ -5,7 +5,7 @@ import TextField from '@material-ui/core/TextField';
 import { Chip, Autocomplete } from '@material-ui/core';
 import axios from 'axios';
 import UserContext from '../../context/UserContext';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 function RoleSearchBar(props) {
     const { label, exceptedData, defaultValue } = props;

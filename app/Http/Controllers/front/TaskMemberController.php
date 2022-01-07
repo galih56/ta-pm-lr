@@ -4,6 +4,7 @@ namespace App\Http\Controllers\front;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Task;
 use App\Models\TaskMember;
 use App\Models\User;
 use App\Models\ClientsHasProjects;
@@ -47,26 +48,38 @@ class TaskMemberController extends Controller
             $task_member->save();
             $inserted_members[]=$task_member->toArray();
         }
-        
-        for ($i=0; $i < count($inserted_members); $i++) { 
-            $inserted_member=$inserted_members[$i];
-            if($inserted_member['users_id']!==null && $inserted_member['project_clients_id']===null){
-                $user=User::find($inserted_member['users_id'])->toArray();
-                if(!empty($user)){
-                    $user['task_members_id']=$inserted_member['id'];
-                    $inserted_members[$i]=$user;
-                }
+                
+        $task=Task::with('creator')->with('list')->with('members.user.role')
+                    ->with('members.project_client.client')->findOrFail($request->tasks_id);
+
+        $members=[];
+        $task_members=$task['members'];
+        for ($i=0; $i < count($task_members); $i++) { 
+            $task_member=$task_members[$i];
+            if($task_member['user']){
+                $user=$task_member['user'];
+                $user['project_members_id']=$task_member['project_members_id'];
+                $user['tasks_id']=$task_member['tasks_id'];
+                $user['task_members_id']=$task_member['id'];
+                $user['is_user']=true;
+                $user['is_client']=false;
+                $members[]=$user;
             }
-            if($inserted_member['users_id']===null && $inserted_member['project_clients_id']!==null){
-                $project_client=ClientsHasProjects::with('client')->find($inserted_member['project_clients_id'])->toArray();
-                if(!empty($project_client['client'])){
-                    $client=$project_client['client'];
-                    $client['task_members_id']=$inserted_member['id'];
-                    $inserted_members[$i]=$client;
-                }
-            }    
+            if($task_member['project_client']){
+                $client=[];
+                $client=$task_member['project_client']['client'];
+                $client['project_clients_id']=$task_member['project_client']['id'];
+                $client['clients_id']=$task_member['project_client']['client']['id'];
+                $client['tasks_id']=$task_member['tasks_id'];
+                $client['task_members_id']=$task_member['id'];
+                $client['is_client']=true;
+                $client['is_user']=false;
+                $members[]=$client;
+            }
+
         }
-        return response()->json($inserted_members);
+    
+        return response()->json($members);
     }
 
     public function show($id)

@@ -54,10 +54,6 @@ class Project extends Model
         return $this->hasMany(Meeting::class,'projects_id');
     }
     
-    public function github_repositories(){
-        return $this->hasMany(GithubRepository::class,'projects_id');
-    }
-    
     public function teams(){
         return $this->belongsToMany(Team::class,'teams_has_projects','projects_id','teams_id');
     }

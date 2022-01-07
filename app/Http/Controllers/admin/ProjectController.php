@@ -33,15 +33,7 @@ class ProjectController extends Controller
     public function index(Request $request)
     {
 
-        $projects=new Project;
-        if($request->has('search')){
-            $projects=$projects->where('title','like',"%$request->search%");
-        }
-        // if($request->ajax()) {
-        //     $projects=$projects->exclude(['description','content','created_at','updated_at'])->orderBy('created_at','DESC')->paginate(10)->appends($request->all());
-        //     return response()->json($projects);
-        // }
-        $projects=$projects->orderBy('created_at','DESC')->paginate(10)->appends($request->all());
+        $projects=Project::orderBy('created_at','DESC')->get();
         return view('admin.projects.index',['projects'=>$projects]);
     }
 
@@ -152,7 +144,10 @@ class ProjectController extends Controller
     public function edit($id)
     {
         $project=Project::findOrFail($id);
-        return view('admin.projects.edit')->with(compact('project'));
+        $users=User::orderBy('name','asc')->get();
+        $clients=Client::orderBy('institution','asc')->get();
+        $teams=Team::orderBy('name','asc')->get();
+        return view('admin.projects.edit')->with(compact('project','users','clients','teams'));
     }
 
     /**

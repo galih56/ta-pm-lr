@@ -11,7 +11,6 @@ import toast from 'react-hot-toast';
 const GoogleDriveButton = (props) => {
     const global = useContext(UserContext);
     const payload = props.payload;
-    console.log('googledriveclient ',payload)
     var developerKey = process.env.MIX_GOOGLE_API_KEY;
     var clientId = process.env.MIX_GOOGLE_CLIENT_ID;
     var appId = "tugas-akhir-288302";

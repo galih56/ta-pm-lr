@@ -88,7 +88,8 @@ class TeamMemberController extends Controller
     public function update(Request $request, $id)
     {
         $team_member=TeamMember::findOrFail($id);
-        $team_member->roles_id=$request->roles_id;
+        if($request->has('teams_id')) $team_member->teams_id=$request->teams_id;
+        if($request->has('users_id')) $team_member->users_id=$request->users_id;
         $team_member->save();
         return response()->json("",200);
     }

@@ -45,7 +45,7 @@ const MemberList = ({teamId,data}) => {
             <List className={classes.root}>
                 {rows?rows.map(function(member){
                     return <>
-                        <ListItem alignItems="flex-start">
+                        <ListItem alignItems="flex-start" key={member.id}>
                             {(member.profilePicturePath && member.name)?(
                             <ListItemAvatar>
                                     <Avatar alt={"Photo profile " + member.name} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:

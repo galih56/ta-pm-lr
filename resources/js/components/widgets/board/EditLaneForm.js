@@ -219,7 +219,7 @@ const EditLaneForm = (props) => {
                             setNewTask={setNewCard}
                             handleAddNewTask={handleAddCard}
                             detailProject={detailProject}
-                            isSubtask={false}
+                            is_subtask={false}
                             minDate={laneDetail.start}
                             maxDate={laneDetail.end}
                         />

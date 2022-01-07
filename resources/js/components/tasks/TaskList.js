@@ -12,11 +12,26 @@ import makeStyles from '@material-ui/styles/makeStyles';
 import { visuallyHidden } from '@material-ui/utils';
 import moment from 'moment';
 
+
 function descendingComparator(a, b, orderBy) {
-    if (b[orderBy] < a[orderBy]) return -1;
-     if (b[orderBy] > a[orderBy]) return 1;
-     return 0;
- }
+    try {
+        if (orderBy === 'start' ||orderBy === 'end' ||
+            orderBy === 'actual_start' ||orderBy === 'actual_end' || 
+            orderBy === 'created_at' ||orderBy === 'updated_at' ) {
+            return (new Date(b[orderBy]).valueOf() - new Date(a[orderBy]).valueOf());
+        }
+        if(orderBy=='creator'){
+            if (b['creator'][orderBy] < a['creator'][orderBy]) return -1;
+            if (b['creator'][orderBy] > a['creator'][orderBy]) return 1;   
+        }
+        if (b[orderBy] < a[orderBy]) return -1;
+        if (b[orderBy] > a[orderBy]) return 1;
+        return 0;   
+    } catch (error) {
+        console.error(error);
+        return 0;
+    }
+}
  
  function getComparator(order, orderBy) {
      return order === 'desc'
@@ -36,7 +51,8 @@ function descendingComparator(a, b, orderBy) {
  
  const headCells = [
      { id: 'title', align: 'left', disablePadding: true, label: 'Title' },
-     { id: 'deadline', align: 'left', disablePadding: false, label: 'Start - End' },
+     { id: 'start', align: 'left', disablePadding: false, label: 'Start' },
+     { id: 'end', align: 'left', disablePadding: false, label: 'End' },
      { id: 'creator', align: 'left', disablePadding: false, label: 'Creator' },
  ];
  
@@ -58,7 +74,7 @@ function EnhancedTableHead(props) {
                     <TableCell
                         key={headCell.id}
                         align={headCell.align}
-                        padding={headCell.disablePadding ? 'none' : 'default'}
+                        padding={headCell.disablePadding ? 'none' : 'normal'}
                         sortDirection={orderBy === headCell.id ? order : false}
                     >
                         <TableSortLabel
@@ -128,11 +144,21 @@ const TaskList = (props) => {
                                 </TableCell>
                                 <TableCell>
                                     {task.start ? moment(task.start).format('DD MMM YYYY') : ''} - {task.end ? moment(task.end).format('DD MMM YYYY') : ''}
-                                    {(task.actual_start && task.actual_end)?(
+                                    {(task.actual_start)?(
                                         <>
                                             <br/>
-                                            Actual start/end : 
-                                            {task.actual_start ? moment(task.actual_start).format('DD MMM YYYY') : ''} - {task.actual_end ? moment(task.actual_end).format('DD MMM YYYY') : ''}
+                                            Actual start : {task.actual_start ? moment(task.actual_start).format('DD MMM YYYY') : ''} 
+                                        </>
+                                    ):''}
+                                    
+                                </TableCell>
+                                <TableCell>
+                                    {task.start ? moment(task.start).format('DD MMM YYYY') : ''} - {task.end ? moment(task.end).format('DD MMM YYYY') : ''}
+                                    {(task.actual_end && task.actual_end)?(
+                                        <>
+                                            <br/>
+                                            Actual end : 
+                                            {task.actual_end ? moment(task.actual_end).format('DD MMM YYYY') : ''} - {task.actual_end ? moment(task.actual_end).format('DD MMM YYYY') : ''}
                                         </>
                                     ):''}
                                     

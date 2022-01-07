@@ -287,6 +287,16 @@ export default function ModalCreateProject(props) {
                                             />
                                         </Grid>
                                         <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <UserSearchBar required={true} userOnly={true}
+                                                inputLabel={"Members"}
+                                                onChange={(values)=> setMembers(values)}/>
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <UserSearchBar required={true} clientOnly={true}
+                                                inputLabel={"Clients"}
+                                                onChange={(values)=>setProjectClients(values)}/>
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
                                             <Autocomplete
                                                 multiple freeSolo options={teams}
                                                 getOptionLabel={(option) => option.name}
@@ -302,19 +312,6 @@ export default function ModalCreateProject(props) {
                                                         <Chip variant="outlined" label={option.name} {...getTagProps({ index })} />
                                                     ))}
                                             />
-                                        </Grid>
-                                        <Grid item lg={12} md={12} sm={12} xs={12}>
-                                            <UserSearchBar required={true} userOnly={true}
-                                                inputLabel={"Project Owner"}
-                                                onChange={(values)=>{
-                                                    console.log(values);
-                                                    setMembers(values)
-                                                }}/>
-                                        </Grid>
-                                        <Grid item lg={12} md={12} sm={12} xs={12}>
-                                            <UserSearchBar required={true} clientOnly={true}
-                                                inputLabel={"Clients"}
-                                                onChange={(values)=>setProjectClients(values)}/>
                                         </Grid>
                                         <Grid item lg={12} md={12} sm={12} xs={12}>
                                             <TextField variant="standard"
