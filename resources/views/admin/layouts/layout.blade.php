@@ -14,6 +14,7 @@ setlocale(LC_TIME, 'id_ID');
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
      <!-- Volt CSS -->
     <link type="text/css" href="{{asset('admin/css/volt.css')}}" rel="stylesheet">
+    <link type="text/css" href="{{asset('admin/css/sidebar.css')}}" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .nav-item.active a.nav-link{
@@ -21,9 +22,10 @@ setlocale(LC_TIME, 'id_ID');
         }
     </style>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">  
+    
     @yield('css')
 </head>
-<body>
+<body id="body-pd">
     @switch(request()->route()->getName())
         @case('login.form.admin')
             @yield('content')
@@ -80,6 +82,49 @@ setlocale(LC_TIME, 'id_ID');
             $('.basic-datatable').DataTable({
                 "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
             });
+        });
+        function hideMultiLevelCollapse(){
+            const multiLevelCollapse = document.querySelectorAll('.multi-level.collapse.show');
+            multiLevelCollapse.forEach(coll=> coll.classList.remove('show'))
+        }
+        document.addEventListener("DOMContentLoaded", function(event) {
+            const showNavbar = (toggleId, navId, bodyId, headerId) =>{
+                const toggle = document.getElementById(toggleId);
+                const nav = document.getElementById(navId);
+                const bodypd = document.getElementById(bodyId);
+                const headerpd = document.getElementById(headerId);
+
+                // Validate that all variables exist
+                if(toggle && nav && bodypd && headerpd){
+                    toggle.addEventListener('click', ()=>{
+                        // change icon
+                        toggle.classList.toggle('bx-x')
+                        // add padding to body
+                        bodypd.classList.toggle('body-pd')
+                        // add padding to header
+                        headerpd.classList.toggle('body-pd')
+                        hideMultiLevelCollapse()
+
+                    })
+                }
+                hideMultiLevelCollapse()
+            }
+
+            showNavbar('sidebar-toggle','sidebarMenu','body-pd','header')
+
+            /*===== LINK ACTIVE =====*/
+            const linkColor = document.querySelectorAll('.nav_link')
+
+            function colorLink(){
+                if(linkColor){
+                    linkColor.forEach(l=> l.classList.remove('active'))
+                    this.classList.add('active')
+                    showNavbar('sidebar-toggle','nav-bar','body-pd','header')
+                }
+            }
+            linkColor.forEach(l=> l.addEventListener('click', colorLink))
+
+            // Your code to run since DOM is loaded and ready
         });
     </script>
     

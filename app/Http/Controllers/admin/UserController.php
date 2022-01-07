@@ -175,39 +175,10 @@ class UserController extends Controller
         return response()->json($tasks);
     }
 
-    public function getGithubAccessToken(Request $request){
-        try {    
-            $client = new Client();
-            $GITHUB_AUTH_ACCESSTOKEN_URL = 'https://github.com/login/oauth/access_token';
-            $CLIENT_ID = '60c4703444a36d8057ac';
-            $CLIENT_SECRET = '5747b8f92feeb7bf03b8519511a1239ee7ea19bf';
-            $CODE = $request->code;
-
-            $http_request = $client->request('POST', $GITHUB_AUTH_ACCESSTOKEN_URL, [
-                'body' => [
-                    'client_id'=>$CLIENT_ID,
-                    'client_secret'=>$CLIENT_SECRET,
-                    'code'=>$CODE
-                ]
-            ]);
-            
-            $response = $client->send($request, ['timeout' => 2]);
-
-            return response()->json($response);
-        } catch (RequestException $ex) {
-            abort(500, $ex);
-        }
-    }
-
     public function login(Request $request){
-        $validator=$this->validator($request, [
-            'email' => ['required'],
-            'password' => ['required'],
-        ],
-        [   
-            'email.required' => 'Email dibutuhkan',
-            'password.required' => 'Password dibutuhkan',
-        ]);
+        $validator=$this->validator($request, 
+        [ 'email' => ['required'], 'password' => ['required'] ],
+        [ 'email.required' => 'Email dibutuhkan', 'password.required' => 'Password dibutuhkan' ]);
         if($validator->fails()){
             return redirect()->back()->withErrors($validator);
         }else{
@@ -282,7 +253,7 @@ class UserController extends Controller
     public function logout()
     {
         Session::flush();
-        Auth::guard('users')->logout();
+        Auth::guard('admins')->logout();
         return redirect(route('home'));
     }
 }
