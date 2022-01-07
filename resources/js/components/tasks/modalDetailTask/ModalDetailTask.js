@@ -110,15 +110,24 @@ export default function ModalDetailTask(props) {
     }, [id,props.initialState.id]);
 
     useEffect(()=>{
+        getProgress();
+    },[]);
+    
+    useEffect(()=>{
+        console.log(detailProject);
         if(props.detailProject?.id)setDetailProject(props.detailProject)
         else {
-            var body={projects_id:detailProject.id,users_id:global.state.id}
-                var url =`${process.env.MIX_BACK_END_BASE_URL}projects/`;
+            var body={
+                projects_id : detailProject.id,
+                users_id:global.state.id
+            }
+            var url =`${process.env.MIX_BACK_END_BASE_URL}projects/`;
             if(data.list){
                  url+= data.list.project;
             }else if(data.is_subtask){
                 url+=data.parent_task.list.project;
             }
+
             const toast_loading = toast.loading('Loading...');
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -137,10 +146,6 @@ export default function ModalDetailTask(props) {
                 });
         }
     },[props.detailproject])
-
-    useEffect(()=>{
-        getProgress();
-    },[]);
 
     const getProgress=()=>{
         if(!data.is_subtask){
@@ -284,17 +289,15 @@ export default function ModalDetailTask(props) {
                     <br/>
                     {data.creator?<span style={{fontSize:'0.7em'}}>Created by : {data.creator.name}</span>:null}
                     <br />      
-                    {(![1,2,4].includes(global.state.role?.id))?(
-                        <FormControlLabel
-                            control={<Checkbox onChange={(event) => {
-                                var progress=data.progress         
-                                if(data.cards.length<=0 && data.complete==true) progress=100 ;
-                                else if(data.cards.length<=0 && data.complete==false)progress=0 ;
-                                setData({...data,complete:event.target.checked,progress:progress});
-                                handleCompleteTask(event.target.checked);
-                            }} fontSize="small" checked={data.complete} />}
-                            label={`Complete`}/>
-                    ):null}
+                    <FormControlLabel
+                        control={<Checkbox onChange={(event) => {
+                            var progress=data.progress         
+                            if(data.cards.length<=0 && data.complete==true) progress=100 ;
+                            else if(data.cards.length<=0 && data.complete==false)progress=0 ;
+                            setData({...data,complete:event.target.checked,progress:progress});
+                            handleCompleteTask(event.target.checked);
+                        }} fontSize="small" checked={data.complete} />}
+                        label={`Complete`}/>
                     {(data.cards || !data.is_subtask)?<TaskProgress value={data.progress}></TaskProgress>:<></>}
                     {data.extended?(
                             <Chip
@@ -315,6 +318,7 @@ export default function ModalDetailTask(props) {
                         onTaskUpdate={onTaskUpdate}
                         onTaskDelete={onTaskDelete}
                         setStartConfirmOpen={setStartConfirmOpen}
+                        getDetailTask={getDetailTask}
                     /> 
                     <br/>
                 </DialogContent>                

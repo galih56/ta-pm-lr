@@ -18,7 +18,6 @@ use App\Models\TaskAttachment;
 use App\Models\Approval;
 use App\Models\Client;
 use App\Models\ClientsHasProjects;
-use App\Models\GithubRepository;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ProjectExport;
 use App\Imports\ProjectImport;
@@ -68,7 +67,7 @@ class ProjectController extends Controller
             }
 
             if($request->has('members')){
-                $project->users()->sync($request->members,['roles_id'=>1]);
+                $project->users()->sync($request->members);
             }
 
             
@@ -82,41 +81,44 @@ class ProjectController extends Controller
         }
         
     }
-
-    public function show(Request $request,$id)
-    {
+    function getDetailProject($id,$request){
         $project=Project::with(['columns'=>function($q) use($request){
-                        return $q->orderBy('end','ASC')
-                            ->with(['cards'=>function($q1) use($request){
-                                $q1=$q1->orderBy('end','ASC');
+            return $q->orderBy('end','ASC')
+                ->with(['cards'=>function($q1) use($request){
+                    $q1=$q1->orderBy('end','ASC');
+                    if($request->has('users_id')){
+                        $users_id=$request->users_id;
+                        $q1=$q1->orWhereHas('members',function($members_q) use($users_id){
+                            return $members_q->where('users_id',$users_id);
+                        });
+                    }
+                    $q1=$q1->with(['cards'=>function($q2) use($request){
+                            $q2=$q2->orderBy('end','ASC');
                                 if($request->has('users_id')){
                                     $users_id=$request->users_id;
-                                    $q1=$q1->orWhereHas('members',function($members_q) use($users_id){
+                                    $q2=$q2->whereHas('members',function($members_q) use($users_id){
                                         return $members_q->where('users_id',$users_id);
                                     });
                                 }
-                                $q1=$q1->with(['cards'=>function($q2) use($request){
-                                        $q2=$q2->orderBy('end','ASC');
-                                            if($request->has('users_id')){
-                                                $users_id=$request->users_id;
-                                                $q2=$q2->whereHas('members',function($members_q) use($users_id){
-                                                    return $members_q->where('users_id',$users_id);
-                                                });
-                                            }
-                                        $q2=$q2->with('members.user.role')
-                                            ->with('members.project_client.client')
-                                            ->with('tags');
-                                        return $q2;
-                                    }])
-                                ->with('members.user.role')
+                            $q2=$q2->with('members.user.role')
                                 ->with('members.project_client.client')
                                 ->with('tags');
-                                return $q1;
-                            }]);
-                    }])
+                            return $q2;
+                        }])
                     ->with('members.user.role')
-                    ->with('meetings')
-                    ->findOrFail($id)->toArray();
+                    ->with('members.project_client.client')
+                    ->with('tags');
+                    return $q1;
+                }]);
+        }])
+        ->with('members.user.role')
+        ->with('meetings')
+        ->findOrFail($id);
+        return $project;
+    }
+    public function show(Request $request,$id)
+    {
+        $project=$this->getDetailProject($id,$request)->toArray();
 
         $members=$project['members'];
         $project_members=[];
@@ -451,7 +453,8 @@ class ProjectController extends Controller
     }
 
     public function getoverallProjectReports(Request $request){
-        $projects=Project::select('id','title','start','end','actual_start','actual_end','progress','complete');
+        $projects=Project::select('id','title','start','end',
+            'actual_start','actual_end','progress','complete','created_at','updated_at');
         if($request->has('users_id')){
             $users_id=$request->users_id;
             $projects=$projects->whereHas('members',function($members_q) use($users_id){
@@ -492,11 +495,6 @@ class ProjectController extends Controller
         }
         $projects=$new_projects;
         return response()->json($projects);
-    }
-
-    public function getGithubRepos(Request $request,$id){
-        $repos=GithubRepository::where('projects_id','=',$id)->get();
-        return response()->json($repos);
     }
 
     public function getGanttDataSource(Request $request,$id){
@@ -671,15 +669,6 @@ class ProjectController extends Controller
                     if($request->has('teams')){
                         $project->teams()->sync($request->teams);
                     }
-    
-                    $inserted_members=[];
-                    if($request->has('project_owners')){
-                        $project->users()->sync($request->project_owners,['roles_id'=>1]);
-                    }
-    
-                    if($request->has('project_managers')){
-                        $project->users()->sync($request->project_managers,['roles_id'=>2]);
-                    }
                     
                     if($request->has('clients')){
                         $project->clients()->sync($request->clients);
@@ -718,50 +707,37 @@ class ProjectController extends Controller
     }
 
     public function getKanban(Request $request,$id){
-        $tasks=Task::selectRaw('t.*,t.parent_task_id AS parentTask,l.projects_id')
-                        ->from('tasks AS t')
-                        ->leftJoin('lists AS l','t.lists_id','=','l.id')
-                        ->where('l.projects_id','=',$id);
-        if($request->has('users_id')){
-            $tasks=$tasks->whereHas('t.members',function($members_q) use($users_id){
-                return $members_q->where('users_id',$users_id);
-            });
-        }
-        $tasks= $tasks->orderBy('t.end','ASC')->get($id);
+        $project=$this->getDetailProject($id,$request);
+    
         $custom_columns=[
-            [ 'title'=>'To do','cards'=>[] ],
-            [ 'title'=>'In progress','cards'=>[] ],
-            [ 'title'=>'Finish','cards'=>[] ],
+            [ 'id'=>'planned', 'title'=>'Plan', 'cards'=>[] ],
+            [ 'id'=>'started','title'=>'Started', 'cards'=>[] ],
+            [ 'id'=>'in-progress', 'title'=>'In progress', 'cards'=>[] ],
+            [ 'id'=>'finished', 'title'=>'Finished', 'cards'=>[] ],
         ];
 
-        for ($i=0; $i < count($tasks); $i++) { 
-            $task=$tasks[$i];
-            if(!$task->actual_start && !$task->actual_end){
-                //plan  
-                $custom_columns[0]['cards'][]=$task;
-            }
-            
-            if($task->actual_start && !$task->actual_end){
-                // in progress
-                $custom_columns[1]['cards'][]=$task;
-            }
-
-            if($task->actual_start && !$task->complete && $task->actual_end){
-                // in progress
-                $custom_columns[2]['cards'][]=$task;
-            }
-
-            if($task->actual_start && $task->complete && $task->actual_end){
-                //finish    
-                $custom_columns[2]['cards'][]=$task;
+        for ($i=0; $i < $project->lists->count(); $i++) { 
+            $list=$project->lists[$i];
+            for ($j=0; $j < $list->cards->count(); $j++) { 
+                $task=$list->cards[$j];       
+                if(!$task->actual_start && !$task->actual_end){
+                    $custom_columns[0]['cards'][]=$task;
+                }
+                
+                if($task->actual_start && !$task->actual_end){ 
+                    $custom_columns[1]['cards'][]=$task;
+                }
+    
+                if($task->actual_start && $task->actual_end && !$task->complete){   
+                    $custom_columns[2]['cards'][]=$task;
+                }
+    
+                if($task->actual_start && $task->actual_end && $task->complete){
+                    $custom_columns[3]['cards'][]=$task;
+                }
             }
         }
-        return response()->json(['data'=>$custom_columns,'counter'=>[
-            'todo'=>count($custom_columns[0]['cards']),
-            'inprogress'=>count($custom_columns[1]['cards']),
-            'finish'=>count($custom_columns[2]['cards']),
-            'all_tasks'=>count($tasks)
-        ]]);
+        return response()->json($custom_columns);
     }
 }
 

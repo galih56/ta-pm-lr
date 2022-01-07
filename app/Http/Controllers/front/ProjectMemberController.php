@@ -35,7 +35,6 @@ class ProjectMemberController extends Controller
                 $project_member=new ProjectMember();
                 $project_member->users_id=$new_member['id'];
                 $project_member->projects_id=$request->projects_id;
-                $project_member->roles_id=$request->roles_id;
                 $project_member->save();
 
                 $inserted_members[]=$project_member->id;
@@ -69,8 +68,8 @@ class ProjectMemberController extends Controller
     public function update(Request $request, $id)
     {
         $project_member=ProjectMember::findOrFail($id);
-        if($request->has('roles_id')) $project_member->roles_id=$request->roles_id;
-        if($request->has('role')) $project_member->roles_id=$request->role['id'];
+        if($request->has('projects_id')) $project_member->projects_id=$request->projects_id;
+        if($request->has('users_id')) $project_member->users_id=$request->users_id;
         $project_member->save();
         
         $project_member=$this->getDetailProjectMember($id);
@@ -86,7 +85,8 @@ class ProjectMemberController extends Controller
     public function getTasks($id){
         $task_members=TaskMember::where('project_members_id','=',$id)
                                 ->with('task.creator',function($q){
-                                    return $q->select('id','name','email')->with('role',function($q2){
+                                    return $q->select('id','name','email')
+                                        ->with('role',function($q2){
                                         return $q2->select('id','name');
                                     });
                                 })->get();
@@ -100,7 +100,8 @@ class ProjectMemberController extends Controller
     }
 
     function getDetailProjectMember($id){
-        $member=ProjectMember::with('project')->with('role')->with('user')->with('taskMembers.task')
+        $member=ProjectMember::with('project')
+                                ->with('user')->with('taskMembers.task')
                                 ->findOrFail($id)->toArray();
                                 
         $task_members=$member['task_members'];
@@ -113,7 +114,6 @@ class ProjectMemberController extends Controller
         $user['tasks']=$tasks;
         $user['project_members_id']=$member['id'];
         $user['projects_id']=$member['project']['id'];
-        $user['role']=$member['role'];
         return $user;
 
     }

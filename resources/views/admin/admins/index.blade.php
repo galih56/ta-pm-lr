@@ -40,7 +40,7 @@
             <div class="col-12">
                 <div class="table-responsive mt-2">
                     @if(count($admins)>0)
-                        <table class="table table-centered table-nowrap mb-0 rounded">
+                        <table class="table table-centered table-nowrap mb-0 rounded basic-datatable">
                             <thead class="thead-light">
                                 <tr>
                                     <th class="border-0 rounded-start">ID</th>
@@ -86,7 +86,6 @@
                 </div>
             </div>     
         </div>
-        @include('admin.layouts.pagination', ['data'=>$admins])
         
     </div>
 </div>

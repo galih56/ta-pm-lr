@@ -13,17 +13,16 @@
                     <svg class="icon icon-xxs" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 </a>
             </li>
-            <li class="breadcrumb-item" aria-current="page"><a href="{{route('admins.index')}}">Daftar Admin</a></li>
-            <li class="breadcrumb-item active" aria-current="page"><a href="{{route('admins.edit',['admin'=>$admin->id ])}}">{{$admin->name}}</a></li>
+            <li class="breadcrumb-item" aria-current="page"><a href="{{route('projects.index')}}">Daftar Proyek</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><a href="{{route('projects.edit',['project'=>$project->id ])}}">{{$project->title}}</a></li>
         </ol>
     </nav>
 </div>
 
 <div class="card border-0 shadow mb-4">
     <div class="card-body">
-        <form class="mt-4"action="{{ route('admins.update',['admin'=>$admin->id]) }}" method="POST">
+        <form class="mt-4"action="{{ route('projects.update',['project'=>$project->id]) }}" method="POST">
             @csrf
-            @method('PATCH')
             @if(Session::has('message'))
                 <div class="alert {{Session::get('alert-class')}}" role="alert">
                     {{Session::get('message')}}
@@ -38,9 +37,8 @@
                     </span>
                     <input type="name" 
                         name="name"
-                        class="form-control" 
-                        placeholder="John doe" id="name" 
-                        value="{{$admin->name}}"
+                        class="form-control"  id="name" 
+                        value="{{$project->name}}"
                         autofocus required>
                 
                     @error('name')
@@ -62,7 +60,7 @@
                         name="email" class="form-control" 
                         placeholder="example@company.com" id="email" 
                         autofocus required
-                        value="{{$admin->email}}"
+                        value="{{$project->email}}"
                     >
                     @error('email')
                     <span class="invalid-feedback" role="alert">
@@ -79,69 +77,15 @@
 
 <div class="card border-0 shadow mb-4">
     <div class="card-body">
-        <h1 class="h4">Ubah Kata Sandi</h1>
-        <form action="{{route('admins.change-password',['id'=>$admin->id])}}" method="POST" 
-            id="form-change-password-admin">
-            @if(Session::has('change-password-message'))
-                <div class="alert {{Session::get('change-password-alert-class')}}" role="alert">
-                    {{Session::get('change-password-message')}}
-                </div>
-            @endif
-            @csrf
-            <div class="form-group">
-                <div class="form-group mb-4">
-                    <label for="password">Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text" id="basic-addon2">
-                            <svg class="icon icon-xs text-gray-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
-                        </span>
-                        <input type="password" name="password" 
-                            placeholder="Password" 
-                            class="form-control" id="password" required>
-                        @error('password')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                        @enderror
-                    </div>  
-                </div>
-                <div class="form-group mb-4">
-                    <label for="confirm_password">Confirm Password</label>
-                    <div class="input-group">
-                        <span class="input-group-text" id="basic-addon2">
-                            <svg class="icon icon-xs text-gray-600" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
-                        </span>
-                        <input type="password" 
-                            placeholder="Confirm Password" 
-                            name="password_confirmation"
-                            class="form-control" id="confirm_password" required>
-                        @error('password_confirmation')
-                        <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                        @enderror
-                    </div>  
-                </div>
-            </div>
-            <button type="submit" class="btn btn-danger" 
-                id="button-change-password-admin"
-                style="float:right">Simpan</button>
-        </form>
-    </div>
-</div>
-
-
-<div class="card border-0 shadow mb-4">
-    <div class="card-body">
-        <form action="{{route('admins.destroy',['admin'=>$admin->id])}}" 
-            method="POST" id="form-delete-admin"
+        <form action="{{route('projects.destroy',['project'=>$project->id])}}" 
+            method="POST" id="form-delete-role-{{$project->id}}"
             >
             @csrf
             @method('DELETE')
             <div class="alert alert-danger" role="alert">
                Data akun yang dihapus tidak dapat dikembalikan lagi.
             </div>
-            <button type="submit" class="btn btn-danger" id="button-delete-admin" style="float:right">hapus</button>
+            <button type="submit" class="btn btn-danger" style="float:right">hapus</button>
         </form>
     </div>
 </div>
@@ -150,13 +94,13 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
-        $('#select-roles').select2();
+        $('#select-projects').select2();
     });
     
-    $('#button-delete-admin').on('click', function (e) {
+    $('.button-delete-role').on('click', function (e) {
         e.preventDefault();
         var swal_config={
-            title: `Anda yakin ingin menghapus admin {{$admin->name}}?`,
+            title: `Anda yakin ingin menghapus role {{$project->name}}?`,
             confirmButtonClass: "btn-danger",
             confirmButtonText: "Ya!",
             cancelButtonText: "Batal",
@@ -165,15 +109,15 @@
         }
         Swal.fire(swal_config).then((result) => {
             if (result.isConfirmed) {
-                $(`#form-delete-admin`).submit();
+                $(`#form-delete-role-{{$project->id}}`).submit();
             } 
         });
     });
     
-    $('#button-change-password-admin').on('click', function (e) {
+    $('.form-change-password-role-{{$project->id}}').on('click', function (e) {
         e.preventDefault();
         var swal_config={
-            title: `Anda yakin ingin mengubah kata sandi akun ini?`,
+            title: `Anda yakin ingin menghapus role {{$project->name}}?`,
             confirmButtonClass: "btn-danger",
             confirmButtonText: "Ya!",
             cancelButtonText: "Batal",
@@ -183,7 +127,7 @@
         
         Swal.fire(swal_config).then((result) => {
             if (result.isConfirmed) {
-                $(`#form-change-password-admin`).submit();
+                $(`#form-change-password-role-{{$project->id}}`).submit();
             } 
         });
     });

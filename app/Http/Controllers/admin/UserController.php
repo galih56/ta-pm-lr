@@ -31,11 +31,7 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $users=new User;
-        if($request->has('search')){
-            $users=$users->where('title','like',"%$request->search%");
-        }
-        $users=$users->orderBy('created_at','DESC')->paginate(10)->appends($request->all());
+        $users=User::orderBy('created_at','DESC')->get();
         return view('admin.users.index',['users'=>$users]);
     }
 
@@ -53,7 +49,6 @@ class UserController extends Controller
             'email'=> $fields['email'],
             'roles_id'=> $fields['roles_id'],
             'password'=> Hash::make($fields['password']),
-            'verified'=> true,
         ]);
 
         $user = User::where('email', $fields['email'])->with('Role')->first();
@@ -82,7 +77,7 @@ class UserController extends Controller
     
     public function edit(Request $request,$id){
         $user=User::where('id',$id)->with('role')->with('projects')->firstOrFail();
-        $projects=$user->projects()->paginate(10)->appends($request->all());
+        $projects=$user->projects()->get();
         $roles=Role::all();
         return view('admin.users.edit')->with(compact('user','projects','roles'));
     }
@@ -95,7 +90,6 @@ class UserController extends Controller
         if($request->has('token')) $user->token=$request->token;
         if($request->has('roles_id')) $user->roles_id=$request->roles_id;
         if($request->has('last_login')) $user->last_login=$request->last_login;
-        if($request->has('verified')) $user->verified=$request->verified;
         if($request->has('profile_picture_path')) $user->profile_picture_path=$request->profile_picture_path;
         $user->save();
 
@@ -253,7 +247,6 @@ class UserController extends Controller
             'name'=> $fields['name'],
             'email'=> $fields['email'],
             'password'=> Hash::make($fields['password']),
-            'verified'=> false,
         ]);
 
         $user = User::where('email', $fields['email'])->with('Role')->first();

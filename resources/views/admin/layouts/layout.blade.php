@@ -20,6 +20,7 @@ setlocale(LC_TIME, 'id_ID');
             color: #fb503b !important
         }
     </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">  
     @yield('css')
 </head>
 <body>
@@ -48,7 +49,7 @@ setlocale(LC_TIME, 'id_ID');
     <!-- Jquery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <!-- Vendor JS -->
-    <script src="{{asset('admin/assets/js/on-screen.umd.min.js')}}"></script>
+    {{-- <script src="{{asset('admin/assets/js/on-screen.umd.min.js')}}"></script> --}}
 
     <!-- Slider -->
     <script src="{{asset('admin/assets/js/nouislider.min.js')}}"></script>
@@ -64,13 +65,23 @@ setlocale(LC_TIME, 'id_ID');
 
     <!-- Volt JS -->
     <script src="{{asset('admin/assets/js/volt.js')}}"></script>
-
+    
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
+    
+    @yield('plugins')
+    
     <script>
         $(document).ready(function() {
             $('.basic-select2').select2();
         });
+        
+        $(document).ready( function () {
+            $('.basic-datatable').DataTable({
+                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+            });
+        });
     </script>
-    @yield('plugins')
+    
     @yield('scripts')
 </html>

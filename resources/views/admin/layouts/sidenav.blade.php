@@ -24,17 +24,7 @@
                 <a href="{{route('projects.index')}}" class="nav-link">
                     <span class="sidebar-text">Proyek</span>
                 </a>
-            </li>       
-            <li class="nav-item {{ Request::segment(2)=='roles' ? 'active' : '' }}">
-                <a href="{{route('roles.index')}}" class="nav-link">
-                    <span class="sidebar-text">Role</span>
-                </a>
-            </li>   
-            <li class="nav-item {{ Request::segment(2)=='users' ? 'active' : '' }}">
-                <a href="{{route('users.index')}}" class="nav-link">
-                    <span class="sidebar-text">User</span>
-                </a>
-            </li>
+            </li> 
             <li class="nav-item {{ Request::segment(2)=='clients' ? 'active' : '' }}">
                 <a href="{{route('clients.index')}}" class="nav-link">
                     <span class="sidebar-text">Client</span>
@@ -43,6 +33,16 @@
             <li class="nav-item {{ Request::segment(2)=='teams' ? 'active' : '' }}">
                 <a href="{{route('teams.index')}}" class="nav-link">
                     <span class="sidebar-text">Team</span>
+                </a>
+            </li>   
+            <li class="nav-item {{ Request::segment(2)=='users' ? 'active' : '' }}">
+                <a href="{{route('users.index')}}" class="nav-link">
+                    <span class="sidebar-text">User</span>
+                </a>
+            </li>      
+            <li class="nav-item {{ Request::segment(2)=='roles' ? 'active' : '' }}">
+                <a href="{{route('roles.index')}}" class="nav-link">
+                    <span class="sidebar-text">Role</span>
                 </a>
             </li>           
             {{-- 

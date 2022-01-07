@@ -4,7 +4,6 @@ import { Paper, Grid, ListItem, Collapse } from '@material-ui/core/';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import UserTable from './UserTable';
-import RoleInformation from './../roles/RoleInformation';
 import makeStyles from '@material-ui/styles/makeStyles';
 import styleConfig from '../../layout/Theme';
 import Button from '@material-ui/core/Button';
@@ -44,14 +43,6 @@ const UserInformation = (props) => {
                                 </Collapse>
                             </Grid>
                         </Grid>
-                    </Paper>
-                </Grid>
-                <Grid lg={12} md={12} sm={12} xs={12} item>
-                    <Paper className={classes.paper}>
-                        <ListItem button dense font="small" onClick={handleRoleTableOpen} style={{ paddingBottom: '1.2em' }}> {roleTableOpen ? <ExpandLess /> : <ExpandMore />}Roles</ListItem>
-                        <Collapse in={roleTableOpen} timeout="auto">
-                            <RoleInformation />
-                        </Collapse>
                     </Paper>
                 </Grid>
         </React.Fragment>

@@ -6,14 +6,16 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use App\Models\Project;
-use App\Models\User;
-use App\Models\Client;
-use App\Models\Team;
+use App\Models\TaskList;
+use App\Models\Task;
+use App\Models\File;
+use App\Models\Attachment;
 use Session;
 use Auth;
 
-class ProjectController extends Controller
+class ListController extends Controller
 {
+    
      /**
      * Get a validator for an incoming registration request.
      *
@@ -33,8 +35,8 @@ class ProjectController extends Controller
     public function index(Request $request)
     {
 
-        $projects=Project::orderBy('created_at','DESC')->get();
-        return view('admin.projects.index',['projects'=>$projects]);
+        $lists=TaskList::orderBy('created_at','DESC')->get();
+        return view('admin.lists.index',['lists'=>$lists]);
     }
 
     /**
@@ -42,12 +44,18 @@ class ProjectController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request)
     {
-        $users=User::with('role')->orderBy('name','asc')->get();
-        $teams=Team::orderBy('name','asc')->get();
-        $clients=Client::orderBy('institution','asc')->get();
-        return view('admin.projects.create')->with(compact('users','teams','clients'));
+        $users=Auth::user();
+        
+        $project=null;
+        $projects=[];
+        if($request->has('project')){
+            $project=Project::find($request->project);
+        }else{
+            $projects=Project::orderBy('title','asc')->get();
+        }
+        return view('admin.lists.create')->with(compact('users','projects','project',));
     }
 
     /**
@@ -73,7 +81,7 @@ class ProjectController extends Controller
         if($validator->fails()){
             return redirect()->back()->withErrors($validator);
         }else{
-            $project=new Project();
+            $project=new TaskList();
             $project->title=$request->title;
             $project->description=$request->description;
             $project->start=$request->start;
@@ -94,7 +102,7 @@ class ProjectController extends Controller
                     return response()->json($project);
                 }
             }else{
-                $project=new Project();
+                $project=new TaskList();
                 $project->title=$request->title;
                 $project->description=$request->description;
                 $project->start=$request->start;
@@ -116,7 +124,7 @@ class ProjectController extends Controller
                 
                 Session::flash('message', 'Proyek baru telah dibuat'); 
                 Session::flash('alert-class', 'alert-success'); 
-                return redirect(route('projects.edit',['project'=>$project->id]));
+                return redirect(route('lists.edit',['project'=>$project->id]));
           
             }
           
@@ -131,8 +139,8 @@ class ProjectController extends Controller
      */
     public function show($id)
     {
-        $project=Project::findOrFail($id);
-        return view('admin.projects.show')->with(compact('project'));
+        $project=TaskList::findOrFail($id);
+        return view('admin.lists.show')->with(compact('project'));
     }
 
     /**
@@ -141,13 +149,15 @@ class ProjectController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Request $request,$id)
     {
-        $project=Project::findOrFail($id);
-        $users=User::orderBy('name','asc')->get();
-        $clients=Client::orderBy('institution','asc')->get();
-        $teams=Team::orderBy('name','asc')->get();
-        return view('admin.projects.edit')->with(compact('project','users','clients','teams'));
+        $project=null;
+        if($request->has('project')){
+            $project=Project::find($request->project);
+        }
+        $list=TaskList::findOrFail($id);
+
+        return view('admin.lists.edit')->with(compact('list','project'));
     }
 
     /**
@@ -171,7 +181,7 @@ class ProjectController extends Controller
                 'end.required'=>'Tanggal selesai harus diisi' 
             ]
         );
-        $project=Project::findOrFail($id);
+        $project=TaskList::findOrFail($id);
         $project->title=$request->title;
         $project->description=$request->description;
         $project->start=$request->start;
@@ -185,7 +195,7 @@ class ProjectController extends Controller
 
         Session::flash('message', 'Proyek "'.$request->title.'" berhasil diubah'); 
         Session::flash('alert-class', 'alert-success'); 
-        return redirect(route('projects.edit',['project'=>$project->id]));
+        return redirect(route('lists.edit',['project'=>$project->id]));
     }
 
     /**
@@ -196,10 +206,10 @@ class ProjectController extends Controller
      */
     public function destroy($id)
     {
-        $project=Project::findOrFail($id);
+        $project=TaskList::findOrFail($id);
         Session::flash('message', 'Proyek"'.$project->title.'" berhasil dihapus'); 
         Session::flash('alert-class', 'alert-success'); 
         $project->delete();
-        return redirect(route('projects.index'));
+        return redirect(route('lists.index'));
     }
 }

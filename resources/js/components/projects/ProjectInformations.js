@@ -102,13 +102,15 @@ const ProjectInfo = (props) => {
                     <Grid item lg={6} md={6} sm={12} xs={12}  style={{ padding: '1em' }}>
                         <Typography style={{ whiteSpace: 'noWrap'}} component="div">
                             Estimation start/end at : {detailProject.start ? moment(detailProject.start).format('DD MMMM YYYY') : ''} - {detailProject.end ? moment(detailProject.end).format('DD MMMM YYYY') : ''}
-                            <Button variant="contained" color="primary" onClick={()=>setShowExtendDeadlineForm(true)} style={{ margin: '1em' }}>Extend deadline</Button>
+                            {(![1,2,4].includes(global.state.role?.id))?(
+                                <Button variant="contained" color="primary" onClick={()=>setShowExtendDeadlineForm(true)} style={{ margin: '1em' }}>Extend deadline</Button>
+                            ):null}        
                         </Typography> 
                         <Typography style={{ whiteSpace: 'noWrap'}} component="div">
                             Realization start/end at : {detailProject.actual_start ? moment(detailProject.actual_start).format('DD MMMM YYYY') : ''} - {detailProject.actual_end ? moment(detailProject.actual_end).format('DD MMMM YYYY') : ''}
                         </Typography> 
                     </Grid>
-                    {([1,2].includes(global.state.role?.id))?(
+                    {([1,2,4].includes(global.state.role?.id))?(
                         <Grid item lg={12} md={12} sm={12} xs={12} style={{padding:'1em'}}>
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
                                 <MobileDateRangePicker

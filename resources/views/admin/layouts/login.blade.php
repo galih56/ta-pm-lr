@@ -20,7 +20,8 @@
                 <div class="col-12 d-flex align-items-center justify-content-center">
                     <div class="bg-white shadow border-0 rounded border-light p-4 p-lg-5 w-100 fmxw-500">
                         <div class="text-center text-md-center mb-4 mt-md-0">
-                            <h1 class="mb-0 h3">Welcome back</h1>
+                            <h1 class="mb-0 h3">Master Data</h1>
+                            <p>Hanya user admin yang bisa login</p>
                         </div>
                         <form method="POST" class="mt-4" action="{{ route('login.admin') }}">
                             @csrf

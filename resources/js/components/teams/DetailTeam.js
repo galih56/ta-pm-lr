@@ -13,11 +13,10 @@ import Button from '@material-ui/core/Button';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import MemberList from './members/MemberList';
-import ProjectList from './ProjectList';
+import ProjectTable from '../projects/ProjectTable';
 import UserContext from './../../context/UserContext';
 import toast from 'react-hot-toast';
 import TextField from '@material-ui/core/TextField';
-import EditIcon from '@material-ui/icons/Edit';
 
 const ModalDeleteConfirm = (props) => {
     const open = props.open;
@@ -165,13 +164,14 @@ function DetailTeam(props) {
                     handleClose={() => { setDeleteConfirmOpen(false);}}
                 />
             </Paper>
-            <Paper style={{ margin:'1em', padding: '1em',width:'100%' }}>
-                <Grid container>
-                    <Grid item xl={12} lg={12} md={12} sm={12}>
-                        <ProjectList teamId={params.id} data={data.projects}/>
-                    </Grid>
+            <Grid container >
+                <Grid item xl={12} lg={12} md={12} sm={12}>
+                    <div style={{ margin:'1em',width:'100%' }}>
+                        <ProjectTable 
+                            data={data.projects} page_name="teams" showFormCreate={false}/>
+                    </div>
                 </Grid>
-            </Paper>
+            </Grid>
             <Paper style={{ margin:'1em', padding: '1em',width:'100%' }}>
                 <Grid container>
                     <Grid item xl={12} lg={12} md={12} sm={12}>

@@ -58,7 +58,9 @@ const MemberList = ({teamId,data}) => {
             <List className={classes.root}>
                 {rows.length?rows.map(function(member){
                     return <>
-                        <ListItem alignItems="flex-start" style={{cursor:'pointer'}} onClick={()=>{
+                        <ListItem alignItems="flex-start" 
+                            key={member.id}
+                            style={{cursor:'pointer'}} onClick={()=>{
                             handleModalOpen(member, true) 
                         }}>
                             {(member.profile_picture_path && member.name)?(

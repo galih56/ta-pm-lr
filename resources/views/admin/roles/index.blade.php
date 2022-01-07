@@ -27,16 +27,17 @@
         </div>
         <div class="row">
             <div class="col-12">
-                <a class="btn btn-secondary" href="{{route('roles.create')}}" style="float:right"> + Tambah akun</a>
+                <a class="btn btn-secondary" href="{{route('roles.create')}}" style="float:right"> + Tambah Role</a>
             </div>
             <div class="col-12">
                 <div class="table-responsive mt-2">
                     @if(count($roles)>0)
-                        <table class="table table-centered table-nowrap mb-0 rounded">
+                        <table class="table table-centered table-nowrap mb-0 rounded basic-datatable">
                             <thead class="thead-light">
                                 <tr>
                                     <th class="border-0 rounded-start">ID</th>
                                     <th class="border-0">Nama</th>
+                                    <th class="border-0 rounded-end">Dibuat</th>
                                     <th class="border-0 rounded-end"></th>
                                 </tr>
                             </thead>
@@ -69,7 +70,6 @@
                 </div>
             </div>     
         </div>
-        @include('admin.layouts.pagination', ['data'=>$roles])
     </div>
 </div>
 @endsection

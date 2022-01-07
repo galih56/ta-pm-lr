@@ -78,7 +78,7 @@ export default function UserSearchbar(props) {
                     return option;
                 }
         });
-        console.log('before map',filteredUsers,filteredClients);
+
         filteredUsers = filteredUsers.map((option) => {
             const firstLetter = option.name[0].toUpperCase();
             option.is_user=true;
@@ -93,7 +93,6 @@ export default function UserSearchbar(props) {
             option.name=option.institution;
             return { firstLetter: /[0-9]/.test(firstLetter) ? '0-9' : firstLetter, ...option };
         });
-        console.log('before map',filteredUsers,filteredClients);
 
         setOptions([...filteredUsers,...filteredClients]);
     }, [users,clients]);

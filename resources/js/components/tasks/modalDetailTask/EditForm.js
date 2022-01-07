@@ -20,12 +20,12 @@ const ExtendDeadlineForm = lazy(() => import('./../../widgets/ExtendDeadlineForm
 const SelectTag = lazy(() => import('./../../widgets/SelectTag'));
 const StatusChip = lazy(() => import('./../../widgets/StatusChip'));
 
-const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUpdate,onTaskDelete,setStartConfirmOpen }) => {
+const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetailTask,onTaskUpdate,onTaskDelete,setStartConfirmOpen }) => {
     const global = useContext(UserContext);
     const [showExtendDeadlineForm,setShowExtendDeadlineForm]=useState(false);
     const [estimationDateRange,setEstimationDateRange]=useState([null,null]);
     const [realizationDateRange,setRealizationDateRange]=useState([null,null]);
-    const [exceptedData,setExceptedData]=useState([]);
+    const [exceptedMembers,setExceptedMembers]=useState([]);
     // const [minDate,setMinDate]=useState(null);
     // const [maxDate,setMaxDate]=useState(null);
 
@@ -50,13 +50,18 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
             username:global.state.username, email:global.state.email, 
         }
         var registered=false
-        for (let i = 0; i < detailProject.members.length; i++) {
-            const member = detailProject.members[i];
-            if(member.id==logged_in_user.id){ registered=true; }
-        }
-        
-        if(!registered){
-            setExceptedData([...data.members,logged_in_user]);
+        try {
+            for (let i = 0; i < detailProject.members.length; i++) {
+                const member = detailProject.members[i];
+                if(member.id==logged_in_user.id){ registered=true; }
+            }
+            
+            if(!registered){
+                setExceptedMembers([...data.members,logged_in_user]);
+            }   
+        } catch (error) {
+            console.error(error)
+            console.log(detailProject)
         }
 
     }
@@ -245,9 +250,11 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,onTaskUp
                     )}
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12}>
-                    <MemberList detailProject={detailProject} 
-                        exceptedData={exceptedData} 
-                        data={data} setData={setData} isEdit={isEdit}/>
+                    <MemberList 
+                        detailProject={detailProject} 
+                        exceptedData={exceptedMembers} 
+                        data={data} setData={setData} isEdit={isEdit}
+                        getDetailTask={getDetailTask}/>
                 </Grid>
                 <ExtendDeadlineForm 
                     open={showExtendDeadlineForm} 

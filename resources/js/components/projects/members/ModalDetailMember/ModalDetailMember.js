@@ -144,7 +144,7 @@ export default function ModalDetailMember(props) {
                     deleteConfirmOpen={deleteConfirmOpen}
                     setDeleteConfirmOpen={setDeleteConfirmOpen}
                     closeModal={closeModal}
-                > </DialogActionButtons>
+                />
             </DialogActions>
                      
         </Dialog>

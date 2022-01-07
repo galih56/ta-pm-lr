@@ -17,7 +17,10 @@ import { visuallyHidden } from '@material-ui/utils';
 import moment from 'moment';
 
 function descendingComparator(a, b, orderBy) {
-   if (b[orderBy] < a[orderBy]) return -1;
+    if (orderBy === 'created_at' || orderBy === 'updated_at' ) {
+        return (new Date(b[orderBy]).valueOf() - new Date(a[orderBy]).valueOf());
+    }
+    if (b[orderBy] < a[orderBy]) return -1;
     if (b[orderBy] > a[orderBy]) return 1;
     return 0;
 }
@@ -129,7 +132,6 @@ export default function EnhancedTable() {
                             {rows.length?stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
-                                    if (row.progress >= 100) row.complete = true;
                                     return (
                                         <TableRow
                                             hover key={row.title}

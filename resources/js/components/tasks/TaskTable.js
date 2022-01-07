@@ -116,47 +116,36 @@ export default function EnhancedTable({data}) {
             return (
                 <ModalDetailTask
                     open={modalOpen}
-                    closeModalDetailTask={() => {
-                        handleModalOpen({ projects_id: null, lists_id: null, tasks_id: null, open: false })
-                    }}
+                    closeModalDetailTask={() =>handleModalOpen({ projects_id: null, lists_id: null, tasks_id: null, open: false })}
                     projects_id={clickedTask.projects_id}
                     initialState={clickedTask} />
             )
         }
     }
 
-    const handleCompleteTask = (tasks_id, isChecked) => {
-        var newRows = rows.map((row) => {
-            if (row.id == tasks_id) row.complete = isChecked;
-            return row;
-        });
-        setRows(newRows);
-        const body = { id: tasks_id, complete: isChecked };
-        
-        if(!task.actual_end && event.target.checked){
-            task.actual_end=moment(task.end).format("YYYY-MM-DD HH:mm")
-        }
-        if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${tasks_id}`;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            toast.promise(
-                axios.patch(url, body),
-                {
-                    loading: 'Updating...',
-                    success: (result)=>{
-                        return <b>Successfully updated</b>
-                    },
-                    error: (error)=>{
-                        console.error(error);
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                        return <b>{error.response.statusText}</b>;
-                    },
-                });
-        } else {
-
-        }
+    const handleCompleteTask = (tasks_id, event) => {
+        const body = { id: tasks_id, complete: event.target.checked };
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${tasks_id}/complete`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        toast.promise(
+            axios.patch(url, body),
+            {
+                loading: 'Updating...',
+                success: (result)=>{
+                    var newRows = rows.map((row) => {
+                        if (row.id == tasks_id) row = result.data;
+                        return row;
+                    });
+                    setRows(newRows);
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
     }
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -173,7 +162,6 @@ export default function EnhancedTable({data}) {
 
     return (
         <div className={classes.root}>
-             
             <Paper className={classes.paper}>
                 <TableContainer>
                     <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} >
@@ -188,33 +176,29 @@ export default function EnhancedTable({data}) {
                             {rows.length?stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
-                                    if (row.progress >= 100) row.complete = true;
                                     return (
                                         <TableRow
                                             hover
-                                            role="checkbox" key={row.title}
+                                            role="checkbox" key={row.id}
                                         >
                                             <TableCell padding="checkbox">
                                                 <Checkbox
-                                                    onChange={(event) => {
-                                                        var checked = event.target.checked;
-                                                        handleCompleteTask(row.id, checked)
-                                                    }}
+                                                    onChange={event =>handleCompleteTask(row.id, event)}
                                                     checked={row.complete}
                                                 />
                                             </TableCell>
                                             <TableCell component="th" scope="row" padding="none" style={{ cursor: 'pointer' }}
                                                 onClick={() => {
-                                                    var projects_id=(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id;
-                                                    var lists_id=(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id;
+                                                    var projects_id=(!row.is_subtask)?row.list.projects_id:row.parent_task.list.projects_id;
+                                                    var lists_id=(!row.is_subtask)?row.list.projects_id:row.parent_task.list.projects_id;
                                                     handleModalOpen({  projects_id: projects_id,  lists_id: lists_id,  tasks_id: row.id,  open: true });
                                                 }}>
-                                                {row.title} ({row.progress}%)
+                                                {row.title} ({row.progress?row.progress:'0'}%)
                                             </TableCell>
                                             <TableCell align="right">{row.start ? moment(row.start).format('DD MMM YYYY') : ''} - {row.end ? moment(row.end).format('DD MMM YYYY') : ''}</TableCell>
                                             <TableCell align="right">
-                                                <Link to={`/projects/${(!row.is_subtask)?row.list.project.id:row.parent_task.list.project.id}/`} style={{ textDecoration: 'none', color: 'black' }}>
-                                                    {(!row.is_subtask)?row.list.project.title:row.parent_task.list.project}
+                                                <Link to={`/projects/${(!row.is_subtask)?row.list.projects_id:row.parent_task.list.projects_id}/`} style={{ textDecoration: 'none', color: 'black' }}>
+                                                    {(!row.is_subtask)?row.list.project.title:row.parent_task.list.project.title}
                                                 </Link>
                                             </TableCell>
                                         </TableRow>
