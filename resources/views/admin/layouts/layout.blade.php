@@ -18,7 +18,7 @@ setlocale(LC_TIME, 'id_ID');
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .nav-item.active a.nav-link{
-            color: #fb503b !important
+            color: #fb503b !important;
         }
     </style>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">  
