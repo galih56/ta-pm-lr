@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\User;
 use App\Models\Client;
 use App\Models\Team;
+use Response;
 use Session;
 use Auth;
 
@@ -200,5 +201,11 @@ class ProjectController extends Controller
         Session::flash('alert-class', 'alert-success'); 
         $project->delete();
         return redirect(route('projects.index'));
+    }
+
+    public function downloadImportFormat(){
+        $response=Response::make(public_path('admin/format-import.xlsx'));
+        $response->header('Content-Type', 'application/xls');
+        return $response;
     }
 }

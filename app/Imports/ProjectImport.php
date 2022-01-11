@@ -37,6 +37,7 @@ class ProjectImport implements ToCollection, WithHeadingRow, WithValidation
             'days' => [ 'required' ],
             'actual_start' => [ 'nullable','date' ],
             'actual_end' => [ 'nullable','date' ],
+            'work_days' => [ 'nullable' ],
         ];
     }
 }
