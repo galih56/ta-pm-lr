@@ -70,9 +70,7 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
             <TableRow hover key={data.id} >
                 <TableCell> <IconButton size="small" onClick={() =>setOpenCollapsible(!openCollapsible)} > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton> </TableCell>
                 <TableCell padding="checkbox"> 
-                {global.state.isAdmin?(
                     <Checkbox onChange={event=> handleCompleteTask(data,event)} checked={data.complete}/>
-                ):null}
                 </TableCell>
                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}> 
                     <Link 
