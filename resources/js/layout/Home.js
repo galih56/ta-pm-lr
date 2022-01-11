@@ -87,7 +87,7 @@ const Home = (props) => {
                     <ListItem button dense font="small" onClick={handleProjectListOpen} 
                     style={{ paddingBottom: '1.2em' }}> {projectListOpen ? <ExpandLess /> : <ExpandMore />}Your projects </ListItem>
                     <Collapse in={projectListOpen} timeout="auto">
-                        <a href={`${process.env.MIX_FRONT_END_BASE_URL}/projects/download-import-format`} target="_blank">Download format import</a>
+                        <a style={{padding:'1em'}} href={`${process.env.MIX_FRONT_END_BASE_URL}/projects/download-import-format`} target="_blank">Download format import</a>
                         <ProjectTable data={global.state.projects} page_name="projects" showFormCreate={true}/>
                     </Collapse>
                 </Paper>

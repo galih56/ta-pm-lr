@@ -98,7 +98,7 @@ class UserController extends Controller
                                                         return $members_q->where('users_id',$id);
                                                     })->with('cards');
                                             });
-                                        })->with('role')->get();
+                                        })->get();
         $projects=[];
         for ($i=0; $i < count($project_members); $i++) {
             $project=$project_members[$i]['project'];
