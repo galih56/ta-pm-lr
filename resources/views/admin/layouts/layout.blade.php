@@ -13,19 +13,22 @@ setlocale(LC_TIME, 'id_ID');
     <meta name="theme-color" content="#563d7c">
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
      <!-- Volt CSS -->
-    <link type="text/css" href="{{asset('admin/css/volt.css')}}" rel="stylesheet">
-    <link type="text/css" href="{{asset('admin/css/sidebar.css')}}" rel="stylesheet">
+    <link type="text/css" href="{{asset('admin/css/volt-pro.css')}}" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .nav-item.active a.nav-link{
             color: #fb503b !important;
+        }
+        .sidebar-inner{
+            /* untuk sidebar */
+            overflow-x:hidden !important
         }
     </style>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">  
     
     @yield('css')
 </head>
-<body id="body-pd">
+<body>
     @switch(request()->route()->getName())
         @case('login.form.admin')
             @yield('content')
@@ -66,7 +69,7 @@ setlocale(LC_TIME, 'id_ID');
     <script src="{{asset('admin/assets/js/sweetalert2.all.min.js')}}"></script>
 
     <!-- Volt JS -->
-    <script src="{{asset('admin/assets/js/volt.js')}}"></script>
+    <script src="{{asset('admin/assets/js/volt-pro.js')}}"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
@@ -84,52 +87,29 @@ setlocale(LC_TIME, 'id_ID');
             });
 
         });
+        
         function hideMultiLevelCollapse(){
-            const multiLevelCollapse = document.querySelectorAll('.multi-level.collapse.show');
-            multiLevelCollapse.forEach(coll=> coll.classList.remove('show'))
+            const multiLevelCollapse = $('.multi-level.collapse.show');
+            multiLevelCollapse.each(function() {
+                $( this ).removeClass( "show" );
+            });
         }
-
-        document.addEventListener("DOMContentLoaded", function(event) {
-            const toggleNavbar = (toggleId, navId, bodyId, headerId) =>{
-                const toggle = document.getElementById(toggleId);
-                const nav = document.getElementById(navId);
-                const bodypd = document.getElementById(bodyId);
-                const headerpd = document.getElementById(headerId);
-                
-                function showNavbar(){
-                    //show sidebar
-                    nav.classList.toggle('sidebar-show')
-                    // change icon
-                    toggle.classList.toggle('bx-x')
-                    // add padding to body
-                    bodypd.classList.toggle('body-pd')
-                    // add padding to header
-                    headerpd.classList.toggle('body-pd')
-                    hideMultiLevelCollapse()
-                }
-                
-                // Validate that all variables exist
-                if(toggle && nav && bodypd && headerpd){
-                    toggle.addEventListener('click', showNavbar)
-                }
-                hideMultiLevelCollapse()
+        $('#sidebar-toggle').click(function(){
+            var sidebarMenu=$('#sidebar-menu');
+            if(sidebarMenu.hasClass('contracted')){
+                sidebarMenu.removeClass('contracted');
+            }else{
+                hideMultiLevelCollapse();
+                sidebarMenu.addClass('contracted');
             }
-
-            toggleNavbar('sidebar-toggle','sidebarMenu','body-pd','header')
-
-            /*===== LINK ACTIVE =====*/
-            const linkColor = document.querySelectorAll('.nav_link')
-
-            function colorLink(){
-                if(linkColor){
-                    linkColor.forEach(l=> l.classList.remove('active'))
-                    this.classList.add('active')
-                    toggleNavbar('sidebar-toggle','sidebarMenu','body-pd','header')
-                }
-            }
-            linkColor.forEach(l=> l.addEventListener('click', colorLink))
-            // Your code to run since DOM is loaded and ready            
         });
+
+        $('.nav-link.collapsed').click(function(){
+            var sidebarMenu=$('#sidebar-menu');
+            if(sidebarMenu.hasClass('contracted')){
+                sidebarMenu.removeClass('contracted');
+            }
+        })
     </script>
     
     @yield('scripts')

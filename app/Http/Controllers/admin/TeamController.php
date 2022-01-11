@@ -5,6 +5,8 @@ namespace App\Http\Controllers\admin;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Team;
+use App\Models\User;
+use App\Models\Project;
 use Session;
 use Auth;
 use Illuminate\Support\Facades\Validator;
@@ -30,7 +32,7 @@ class TeamController extends Controller
     public function index(Request $request)
     {
 
-        $teams=Team::orderBy('created_at','DESC')->get();
+        $teams=Team::orderBy('name','ASC')->get();
         return view('admin.teams.index',['teams'=>$teams]);
     }
 
@@ -41,7 +43,8 @@ class TeamController extends Controller
      */
     public function create()
     {
-        return view('admin.teams.create');
+        $users=User::orderBy('name','ASC')->get();
+        return view('admin.teams.create')->with(compact('users'));
     }
 
     /**
@@ -53,16 +56,18 @@ class TeamController extends Controller
     public function store(Request $request)
     {
         $validator=$this->validator($request,
-            [ 'name'=>'required', 'content'=>'required', ],
-            [ 'name.required'=>'Judul harus diisi']
+            [ 'name'=>'required', 'users'=>'required|array', ],
+            [ 'name.required'=>'Nama harus diisi','users.required'=>'Anggota proyek harus diisi']
         );
+
         if($validator->fails()){
             return redirect()->back()->withErrors($validator);
         }else{
             $team=new Team();
             $team->name=$request->name;
             $team->save();
-                
+            
+            $team->users()->sync($request->users);
             Session::flash('message', 'Team baru telah dibuat'); 
             Session::flash('alert-class', 'alert-success'); 
             return redirect(route('teams.edit',['team'=>$team->id]));
@@ -76,9 +81,8 @@ class TeamController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    {
-        $team=Team::findOrFail($id);
-        return view('admin.teams.show')->with(compact('team'));
+    {        
+        return redirect(url("master/teams/$id/edit"));
     }
 
     /**
@@ -90,8 +94,9 @@ class TeamController extends Controller
     public function edit(Request $request,$id)
     {
         $team=Team::with('users')->findOrFail($id);
-        $users=$team->users()->orderBy('created_at','DESC')->get();
-        return view('admin.teams.edit')->with(compact('team','users'));
+        $users=User::orderBy('name','ASC')->get();
+        $projects=Project::orderBy('title','ASC')->get();
+        return view('admin.teams.edit')->with(compact('team','users','projects'));
     }
 
     /**
@@ -105,12 +110,14 @@ class TeamController extends Controller
     {
         $request->validate(
             [ 'name'=>'required', ],
-            [ 'name.required'=>'Judul harus diisi']
+            [ 'name.required'=>'Nama harus diisi']
         );
 
         $team=Team::findOrFail($id);
         $team->name=$request->name;
         $team->save();
+        
+        $team->users()->sync($request->users);
 
         Session::flash('message', 'Team "'.$request->name.'" berhasil diubah'); 
         Session::flash('alert-class', 'alert-success'); 

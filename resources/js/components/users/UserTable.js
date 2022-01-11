@@ -3,6 +3,7 @@ import { Link, useLocation, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -107,6 +108,7 @@ export default function EnhancedTable() {
     const [modalOpen, setModalOpen] = useState(false);
     const [modalCreateOpen,setModalCreateOpen]=useState(false);
     let global = useContext(UserContext);
+    const [keywords,setKeywords]=useState('');
 
     const removeUserIdQueryString=()=>{
         const queryParams = new URLSearchParams(history.location.search)
@@ -204,6 +206,14 @@ export default function EnhancedTable() {
                 onClick={()=>{setModalCreateOpen(true)}}>
                     <b style={{marginRight:'0.5em',fontStyle:'1.2em'}}>+</b> Create a new user
             </Button>
+            
+            <TextField 
+                variant="standard" InputProps={{endAdornment:<SearchIcon/>}} 
+                style={{ margin:'1em', float:'right', minWidth:'300px' }}
+                placeholder="Search by title"
+                onInput={e=>setKeywords(e.target.value)}
+                onKeyUp={e=>setKeywords(e.target.value)}
+            />
             <TableContainer>
                 <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} padding="normal" >
                     <EnhancedTableHead classes={classes} order={order} orderBy={orderBy}
@@ -212,6 +222,15 @@ export default function EnhancedTable() {
                     />
                     <TableBody>
                         {rows.length?stableSort(rows, getComparator(order, orderBy))
+                            .filter(row=>{
+                                if(
+                                    row.name?.toLowerCase().includes(keywords.toLowerCase()) 
+                                        || row.email?.toLowerCase().includes(keywords.toLowerCase())
+                                        || row.role?.name?.toLowerCase().includes(keywords.toLowerCase())
+                                    ){
+                                    return row;
+                                }
+                            })
                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((row, index) => {
                                 let searchParams = new URLSearchParams(location.search);

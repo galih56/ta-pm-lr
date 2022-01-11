@@ -1,6 +1,6 @@
 @extends('admin.layouts.layout')
 @section('content')
-<div class="py-4">
+<div class="py-2">
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
         <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
             <li class="breadcrumb-item">
@@ -35,10 +35,8 @@
                         <table class="table table-centered table-nowrap mb-0 rounded basic-datatable">
                             <thead class="thead-light">
                                 <tr>
-                                    <th class="border-0 rounded-start">ID</th>
-                                    <th class="border-0">Nama</th>
-                                    <th class="border-0">Dibuat</th>
-                                    <th class="border-0">Diubah</th>
+                                    <th class="border-0 rounded-start">Nama</th>
+                                    <th class="border-0">Start - End</th>
                                     <th class="border-0 rounded-end"></th>
                                 </tr>
                             </thead>
@@ -46,16 +44,12 @@
                                 @foreach ($lists as $i => $list)
                                     <tr>
                                         <td>
-                                            {{$list->id}}
-                                        </td>
-                                        <td>
                                             {{$list->title}}
+                                            <br/>
+                                            {{$list->project?"Proyek : ".$list->project->title:""}}
                                         </td>
                                         <td>
-                                            {{ \Carbon\Carbon::parse($list->created_at)->isoformat('D MMMM Y')}}
-                                        </td>
-                                        <td>
-                                            {{ \Carbon\Carbon::parse($list->updated_at)->isoformat('D MMMM Y')}}
+                                            {{ \Carbon\Carbon::parse($list->start)->isoformat('D MMMM Y')}} - {{ \Carbon\Carbon::parse($list->end)->isoformat('D MMMM Y')}}
                                         </td>
                                         <td style="text-align:left">
                                             <a class="btn btn-info m-2" 

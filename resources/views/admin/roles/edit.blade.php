@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-<div class="py-4">
+<div class="py-2">
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
         <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
             <li class="breadcrumb-item">
@@ -14,7 +14,7 @@
                 </a>
             </li>
             <li class="breadcrumb-item" aria-current="page"><a href="{{route('roles.index')}}">Role</a></li>
-            <li class="breadcrumb-item active" aria-current="page"><a href="{{route('roles.edit',['role'=>$role->id ])}}">{{$role->title}}</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><a href="{{route('roles.edit',['role'=>$role->id ])}}">{{$role->name}}</a></li>
         </ol>
     </nav>
 </div>
@@ -54,33 +54,26 @@
         </form>
     </div>
 </div> 
+@endsection
 
-<div class="card border-0">
-    <div class="card-body">
-        <h1 class="h4">Daftar role</h1>
-        <div class="row">
-            <div class="table-responsive">
-                <table class="table table-centered table-nowrap mb-0 rounded basic-datatable">
-                    <thead class="thead-light">
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($role->users as $user)
-                            <tr>
-                                <td>{{$user->name}}</td>
-                                <td>{{$user->email}}</td>
-                                <td><a href="{{url('/master/users/'.$user->id)}}" class="btn btn-primary">Ubah</a></td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
 
+@section('scripts')
+<script>
+    $('.button-delete').on('click', function (e) {
+        e.preventDefault();
+        var swal_config={
+            title: `Anda yakin ingin menghapus {{$role->name}}?`,
+            confirmButtonClass: "btn-danger",
+            confirmButtonText: "Ya!",
+            cancelButtonText: "Batal",
+            showCancelButton: true,
+            buttons: {  cancel: true, confirm: true },
+        }
+        Swal.fire(swal_config).then((result) => {
+            if (result.isConfirmed) {
+                $(`#form-delete`).submit();
+            } 
+        });
+    });
+</script>
 @endsection

@@ -52,14 +52,16 @@ class ClientController extends Controller
     public function store(Request $request)
     {
         $validator=$this->validator($request,
-            [ 'name'=>'required', 'content'=>'required', ],
-            [ 'name.required'=>'Judul harus diisi']
+            [ 'institution'=>'required',  ],
+            [ 'institution.required'=>'Nama institusi harus diisi']
         );
         if($validator->fails()){
             return redirect()->back()->withErrors($validator);
         }else{
             $client=new Client();
-            $client->name=$request->name;
+            $client->institution=$request->institution;
+            $client->city=$request->city;
+            $client->description=$request->description;
             $client->save();
                 
             Session::flash('message', 'Klien baru telah dibuat'); 
@@ -76,8 +78,7 @@ class ClientController extends Controller
      */
     public function show($id)
     {
-        $client=Client::findOrFail($id);
-        return view('admin.clients.show')->with(compact('client'));
+        return redirect(url("master/clients/$id/edit"));
     }
 
     /**
@@ -88,9 +89,8 @@ class ClientController extends Controller
      */
     public function edit(Request $request,$id)
     {
-        $client=Client::with('users')->findOrFail($id);
-        $users=$client->users()->orderBy('created_at','DESC')->get();
-        return view('admin.clients.edit')->with(compact('client','users'));
+        $client=Client::findOrFail($id);
+        return view('admin.clients.edit')->with(compact('client'));
     }
 
     /**
@@ -103,15 +103,17 @@ class ClientController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate(
-            [ 'name'=>'required', ],
-            [ 'name.required'=>'Judul harus diisi']
+            [ 'institution'=>'required', ],
+            [ 'institution.required'=>'Judul harus diisi']
         );
 
         $client=Client::findOrFail($id);
-        $client->name=$request->name;
+        $client->institution=$request->institution;
+        $client->description=$request->description;
+        $client->city=$request->city;
         $client->save();
 
-        Session::flash('message', 'Klien "'.$request->name.'" berhasil diubah'); 
+        Session::flash('message', 'Klien "'.$request->institution.'" berhasil diubah'); 
         Session::flash('alert-class', 'alert-success'); 
         return redirect(route('clients.edit',['client'=>$client->id]));
     }

@@ -1,6 +1,6 @@
 @extends('admin.layouts.layout')
 @section('content')
-<div class="py-4">
+<div class="py-2">
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
         <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
             <li class="breadcrumb-item">
@@ -8,22 +8,87 @@
                     <svg class="icon icon-xxs" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 </a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page"><a href="{{route('projects.index')}}">Daftar Proyek</a></li>
+            @if ($project)
+                <li class="breadcrumb-item"><a href="{{route('projects.index')}}">Daftar Proyek</a></li>
+                <li class="breadcrumb-item"><a href="{{route('projects.edit',['project'=>$project->id])}}">{{$project->title}}</a></li>
+                <li class="breadcrumb-item"><a href="{{route('projects.edit',['project'=>$project->id])}}#daftartugas">Daftar tugas</a></li>
+                <li class="breadcrumb-item"><a href="{{route('lists.edit',['list'=>$list->id,'project'=>$project->id])}}">{{$list->title}}</a></li>
+                @if ($list)
+                    <li class="breadcrumb-item active" aria-current="page"><a href="{{route('tasks.create',['list'=>$list->id,'project'=>$project->id])}}">Form tambah tugas</a></li>
+                @endif
+            @else
+                <li class="breadcrumb-item"><a href="{{route('tasks.index')}}">Tugas</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><a href="{{route('tasks.create')}}">Form tambah tugas</a></li>    
+            @endif    
         </ol>
     </nav>
     <div class="card border-0 shadow mb-4">
         <div class="card-body">
-            <form action="{{route('projects.store')}}" method="POST">
+            @if(Session::has('message'))
+            <div class="alert {{Session::get('alert-class')}}" role="alert">
+                {{Session::get('message')}}
+            </div>
+            @endif
+            <form action="{{route('tasks.store')}}" method="POST">
                 @csrf
                 <div class="row">
-                    <h1 class="h4">Form Tambah Proyek</h1>
+                    <h1 class="h4">Form Tambah Tugas</h1>
                     <div class="col-12">
                         <div class="mb-2">
-                            <label class="my-1 me-2" for="title">Nama</label>
+                            <label class="my-1 me-2" for="title">Judul</label>
                             <input type="text" name="title" id="title" 
                                 class="form-control @error('title') is-invalid @enderror"
                                 value="{{old('title')}}" required>
                             @error('title')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                            @enderror    
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="mb-2">
+                            @php
+                                $project_id=$project?$project->id:null;
+                            @endphp
+                            <label class="my-1 me-2" for="projects_id">Proyek</label>
+                            <select name="projects_id" id="projects-select"class="form-control basic-select2 w-100"
+                                @if ($project_id) disabled @endif
+                                required
+                            >
+                                <option value=""> Pilih daftar tugas </option>
+                                @foreach ($projects as $item)
+                                <option value="{{$item->id}}"  
+                                    @if (old('projects_id'))
+                                        {{(old('projects_id')==$item->id)? 'selected' : ''}}
+                                    @else
+                                        {{$project_id==$item->id?'selected':''}}
+                                    @endif
+                                >{{$item->title}}</option>
+                                @endforeach
+                            </select>
+                            @error('projects_id')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                            @enderror    
+                        </div>
+                    </div>
+                    
+                    <div class="col-6">
+                        <div class="mb-2">
+                            @php
+                                $project_id=$project?$project->id:null;
+                            @endphp
+                            <label class="my-1 me-2" for="lists_id">Daftar Tugas (List)</label>
+                            <select name="lists_id" class="form-control w-100" 
+                                id="dynamic-select2-list"
+                                @if ($project_id) disabled @endif
+                                required
+                            >
+                                <option value=""> Pilih proyek </option>
+                            </select>
+                            @error('lists_id')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
                             </span>
@@ -85,7 +150,7 @@
                     <div class="col-12">
                         <div class="mb-2">
                             <label class="my-1 me-2" for="users">Anggota proyek</label>
-                            <select name="users" id="" class="form-control basic-select2" multiple>
+                            <select name="users[]" id="" class="form-control basic-select2" multiple>
                                 @foreach ($users as $user)
                                     <option value="{{$user->id}}"  
                                         @if(old('users'))
@@ -120,16 +185,16 @@
                     </div> 
                     <div class="col-12">
                         <div class="mb-2">
-                            <label class="my-1 me-2" for="teams">Tim</label>
-                            <select name="teams" id="" class="form-control basic-select2" multiple>
-                                @foreach ($teams as $team)
-                                    <option value="{{$team->id}}"  
-                                        @if(old('teams'))
-                                            {{collect(old('teams'))->contains($item->id)? 'selected' : ''}}
-                                        @endif>{{$team->name}}</option>
+                            <label class="my-1 me-2" for="tags">Tag (Kategori)</label>
+                            <select name="tags" id="" class="form-control basic-select2" multiple>
+                                @foreach ($tags as $tag)
+                                    <option value="{{$tag->id}}"  
+                                        @if(old('tags'))
+                                            {{collect(old('tags'))->contains($item->id)? 'selected' : ''}}
+                                        @endif>{{$tag->title}}</option>
                                 @endforeach
                             </select>
-                            @error('team')
+                            @error('tags')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
                             </span>
@@ -138,10 +203,10 @@
                     </div>
                     <div class="col-12">
                         <div class="mb-2">
-                            <label class="my-1 me-2" for="teams">Deskripsi</label>
+                            <label class="my-1 me-2" for="description">Deskripsi</label>
                             <textarea name="description" class="form-control" 
                                 cols="20" rows="4">{{old('description')}}</textarea>
-                            @error('team')
+                            @error('description')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
                             </span>
@@ -153,4 +218,45 @@
             </form>
         </div>
     </div>  
+@endsection
+
+@section('scripts')
+    <script>
+        @if($project)
+            const default_projects_id={{$project->id}};
+            const default_lists_id={{$list->id}};
+            function loadLists(projects_id){
+                var url='';
+                if(projects_id){
+                    url="{{url('master/projects')}}/"+projects_id+"/lists";
+                }else{
+                    url="{{url('master/lists')}}";
+                }
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json', // added data type
+                    success: function(data) {
+                        var html='';
+                        data.forEach(list => {
+                            html+=`<option value="${list.id}">${list.title}</option>`
+                        });
+                        $('#dynamic-select2-list').html(html);
+                        $('#dynamic-select2-list').select2();
+                        console.log(data);
+                    }
+                });
+            }
+
+            $(document).ready(function(){
+                loadLists(default_projects_id);
+            });
+
+            //  dynamic-select2-list
+            $('#projects-select').change(function(){
+                loadLists(default_projects_id);
+            })
+        @else
+        @endif
+    </script>
 @endsection

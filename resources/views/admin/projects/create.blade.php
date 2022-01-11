@@ -1,6 +1,6 @@
 @extends('admin.layouts.layout')
 @section('content')
-<div class="py-4">
+<div class="py-2">
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
         <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
             <li class="breadcrumb-item">
@@ -13,6 +13,11 @@
     </nav>
     <div class="card border-0 shadow mb-4">
         <div class="card-body">
+            @if(Session::has('message'))
+            <div class="alert {{Session::get('alert-class')}}" role="alert">
+                {{Session::get('message')}}
+            </div>
+            @endif
             <form action="{{route('projects.store')}}" method="POST">
                 @csrf
                 <div class="row">
@@ -85,7 +90,7 @@
                     <div class="col-12">
                         <div class="mb-2">
                             <label class="my-1 me-2" for="users">Anggota proyek</label>
-                            <select name="users" id="" class="form-control basic-select2" multiple>
+                            <select name="users[]" id="" class="form-control basic-select2" multiple>
                                 @foreach ($users as $user)
                                     <option value="{{$user->id}}"  
                                         @if(old('users'))
@@ -103,7 +108,7 @@
                     <div class="col-12">
                         <div class="mb-2">
                             <label class="my-1 me-2" for="clients">Klien</label>
-                            <select name="clients" id="" class="form-control basic-select2" multiple>
+                            <select name="clients[]" id="" class="form-control basic-select2" multiple>
                                 @foreach ($clients as $client)
                                     <option value="{{$client->id}}"
                                         @if(old('clients'))
@@ -121,7 +126,7 @@
                     <div class="col-12">
                         <div class="mb-2">
                             <label class="my-1 me-2" for="teams">Tim</label>
-                            <select name="teams" id="" class="form-control basic-select2" multiple>
+                            <select name="teams[]" id="" class="form-control basic-select2" multiple>
                                 @foreach ($teams as $team)
                                     <option value="{{$team->id}}"  
                                         @if(old('teams'))

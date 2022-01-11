@@ -1,6 +1,6 @@
 @extends('admin.layouts.layout')
 @section('content')
-<div class="py-4">
+<div class="py-2">
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
         <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
             <li class="breadcrumb-item">
@@ -13,15 +13,36 @@
     </nav>
     <div class="card border-0 shadow mb-4">
         <div class="card-body">
+            @if(Session::has('message'))
+            <div class="alert {{Session::get('alert-class')}}" role="alert">
+                {{Session::get('message')}}
+            </div>
+            @endif
             <form action="{{route('clients.store')}}" method="POST">
                 @csrf
                 <div class="row">
-                    <h1 class="h4">Form Tambah Client</h1>
+                    <h1 class="h4">Form Tambah Klien</h1>
                     <div class="col-12">
                         <div class="mb-2">
-                            <label class="my-1 me-2" for="name">Nama</label>
-                            <input type="text" name="name" id="name" class="form-control @error('name') is-invalid @enderror" required>
-                            @error('name')
+                            <label class="my-1 me-2" for="institution">Nama institusi</label>
+                            <input type="text" name="institution" id="institution" 
+                                value="{{old('institution')}}"
+                                class="form-control @error('institution') is-invalid @enderror" required>
+                            @error('institution')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                            @enderror    
+                        </div>
+                    </div>
+                    
+                    <div class="col-12">
+                        <div class="mb-2">
+                            <label class="my-1 me-2" for="city">Kota</label>
+                            <input type="text" name="city" id="city" 
+                                value="{{old('city')}}"
+                                class="form-control @error('city') is-invalid @enderror" required>
+                            @error('city')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
                             </span>
@@ -32,7 +53,7 @@
                         <div class="my-4">
                             <label for="textarea-description">Deskripsi</label>
                             <textarea name="description" class="form-control @error('description') is-invalid @enderror" 
-                                placeholder="Isi deskripsi disini..."  rows="4"></textarea>
+                                placeholder="Isi deskripsi disini..."  rows="4">{{old('description')}}</textarea>
                             @error('description')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>

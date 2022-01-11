@@ -202,7 +202,6 @@ class UserController extends Controller
                     Session::flash('alert-class', 'alert-danger'); 
                     return redirect()->back()->withInput($request->input());
                 }
-            
             }
         }
     }

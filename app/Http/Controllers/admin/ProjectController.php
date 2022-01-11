@@ -131,8 +131,7 @@ class ProjectController extends Controller
      */
     public function show($id)
     {
-        $project=Project::findOrFail($id);
-        return view('admin.projects.show')->with(compact('project'));
+        return redirect(url("master/projects/$id/edit"));
     }
 
     /**

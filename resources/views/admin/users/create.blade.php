@@ -1,6 +1,6 @@
 @extends('admin.layouts.layout')
 @section('content')
-<div class="py-4">
+<div class="py-2">
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
         <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
             <li class="breadcrumb-item">
@@ -13,6 +13,11 @@
     </nav>
     <div class="card border-0 shadow mb-4">
         <div class="card-body">
+            @if(Session::has('message'))
+            <div class="alert {{Session::get('alert-class')}}" role="alert">
+                {{Session::get('message')}}
+            </div>
+            @endif
             <form action="{{route('users.store')}}" method="POST">
                 @csrf
                 <div class="row">
