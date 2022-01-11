@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-<div class="py-4">
+<div class="py-2">
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
         <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
             <li class="breadcrumb-item">
@@ -100,7 +100,7 @@
                 <div class="col-12">
                     <div class="mb-2">
                         <label class="my-1 me-2" for="users">Anggota proyek</label>
-                        <select name="users" class="form-control basic-select2 w-100" multiple>
+                        <select name="users[]" class="form-control basic-select2 w-100" multiple>
                             @foreach ($users as $user)
                                 <option value="{{$user->id}}"  
                                     @if(count($project->users))
@@ -118,7 +118,7 @@
                 <div class="col-12">
                     <div class="mb-2">
                         <label class="my-1 me-2" for="clients">Klien</label>
-                        <select name="clients" class="form-control basic-select2" multiple>
+                        <select name="clients[]" class="form-control basic-select2" multiple>
                             @foreach ($clients as $client)
                                 <option value="{{$client->id}}"
                                     @if($project->clients)
@@ -228,14 +228,14 @@
 <div class="card border-0 shadow mb-4">
     <div class="card-body">
         <form action="{{route('projects.destroy',['project'=>$project->id])}}" 
-            method="POST" id="form-delete-role-{{$project->id}}"
+            method="POST" id="form-delete"
             >
             @csrf
             @method('DELETE')
             <div class="alert alert-danger" role="alert">
                Data yang dihapus tidak dapat dikembalikan lagi.
             </div>
-            <button type="submit" class="btn btn-danger" style="float:right">hapus</button>
+            <button type="submit" class="btn btn-danger  button-delete" style="float:right">hapus</button>
         </form>
     </div>
 </div>
@@ -243,10 +243,10 @@
 
 @section('scripts')
 <script>
-    $('.button-delete-role').on('click', function (e) {
+    $('.button-delete').on('click', function (e) {
         e.preventDefault();
         var swal_config={
-            title: `Anda yakin ingin menghapus role {{$project->name}}?`,
+            title: `Anda yakin ingin menghapus {{$project->name}}?`,
             confirmButtonClass: "btn-danger",
             confirmButtonText: "Ya!",
             cancelButtonText: "Batal",
@@ -255,27 +255,10 @@
         }
         Swal.fire(swal_config).then((result) => {
             if (result.isConfirmed) {
-                $(`#form-delete-role-{{$project->id}}`).submit();
+                $(`#form-delete`).submit();
             } 
         });
     });
     
-    $('.form-change-password-role-{{$project->id}}').on('click', function (e) {
-        e.preventDefault();
-        var swal_config={
-            title: `Anda yakin ingin menghapus role {{$project->name}}?`,
-            confirmButtonClass: "btn-danger",
-            confirmButtonText: "Ya!",
-            cancelButtonText: "Batal",
-            showCancelButton: true,
-            buttons: {  cancel: true, confirm: true }
-        }
-        
-        Swal.fire(swal_config).then((result) => {
-            if (result.isConfirmed) {
-                $(`#form-change-password-role-{{$project->id}}`).submit();
-            } 
-        });
-    });
 </script>
 @endsection

@@ -1,11 +1,7 @@
 @extends('admin.layouts.layout')
 
-@section('css')
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-@endsection
-
 @section('content')
-<div class="py-4">
+<div class="py-2">
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
         <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
             <li class="breadcrumb-item">
@@ -112,14 +108,14 @@
 <div class="card border-0 shadow mb-4">
     <div class="card-body">
         <form action="{{route('users.destroy',['user'=>$user->id])}}" 
-            method="POST" id="form-delete-user-{{$user->id}}"
+            method="POST" id="form-delete"
             >
             @csrf
             @method('DELETE')
             <div class="alert alert-danger" role="alert">
                Data akun yang dihapus tidak dapat dikembalikan lagi.
             </div>
-            <button type="submit" class="btn btn-danger" style="float:right">hapus</button>
+            <button type="submit" class="btn btn-danger button-delete" style="float:right">hapus</button>
         </form>
     </div>
 </div>
@@ -127,14 +123,10 @@
 
 @section('scripts')
 <script>
-    $(document).ready(function() {
-        $('#select-users').select2();
-    });
-    
-    $('.button-delete-role').on('click', function (e) {
+    $('.button-delete').on('click', function (e) {
         e.preventDefault();
         var swal_config={
-            title: `Anda yakin ingin menghapus role {{$user->name}}?`,
+            title: `Anda yakin ingin menghapus {{$user->name}}?`,
             confirmButtonClass: "btn-danger",
             confirmButtonText: "Ya!",
             cancelButtonText: "Batal",

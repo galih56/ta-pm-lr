@@ -13,14 +13,19 @@ setlocale(LC_TIME, 'id_ID');
     <meta name="theme-color" content="#563d7c">
     <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
      <!-- Volt CSS -->
-    <link type="text/css" href="{{asset('admin/css/volt.css')}}" rel="stylesheet">
+    <link type="text/css" href="{{asset('admin/css/volt-pro.css')}}" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .nav-item.active a.nav-link{
-            color: #fb503b !important
+            color: #fb503b !important;
+        }
+        .sidebar-inner{
+            /* untuk sidebar */
+            overflow-x:hidden !important
         }
     </style>
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">  
+    
     @yield('css')
 </head>
 <body>
@@ -64,7 +69,7 @@ setlocale(LC_TIME, 'id_ID');
     <script src="{{asset('admin/assets/js/sweetalert2.all.min.js')}}"></script>
 
     <!-- Volt JS -->
-    <script src="{{asset('admin/assets/js/volt.js')}}"></script>
+    <script src="{{asset('admin/assets/js/volt-pro.js')}}"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
@@ -80,7 +85,31 @@ setlocale(LC_TIME, 'id_ID');
             $('.basic-datatable').DataTable({
                 "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
             });
+
         });
+        
+        function hideMultiLevelCollapse(){
+            const multiLevelCollapse = $('.multi-level.collapse.show');
+            multiLevelCollapse.each(function() {
+                $( this ).removeClass( "show" );
+            });
+        }
+        $('#sidebar-toggle').click(function(){
+            var sidebarMenu=$('#sidebar-menu');
+            if(sidebarMenu.hasClass('contracted')){
+                sidebarMenu.removeClass('contracted');
+            }else{
+                hideMultiLevelCollapse();
+                sidebarMenu.addClass('contracted');
+            }
+        });
+
+        $('.nav-link.collapsed').click(function(){
+            var sidebarMenu=$('#sidebar-menu');
+            if(sidebarMenu.hasClass('contracted')){
+                sidebarMenu.removeClass('contracted');
+            }
+        })
     </script>
     
     @yield('scripts')

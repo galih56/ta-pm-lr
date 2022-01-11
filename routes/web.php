@@ -17,7 +17,12 @@ Route::group(['prefix' => 'master'],function(){
         });
         Route::resource('/projects','App\Http\Controllers\admin\ProjectController');
         Route::group(['prefix'=>'projects'],function(){
-            Route::get('{project}/lists/{list}','App\Http\Controllers\admin\ListController@edit')->name('projects.lists.create');
+            Route::get('{project}/lists','App\Http\Controllers\admin\ListController@index')->name('projects.lists');
+            Route::get('{project}/lists/create','App\Http\Controllers\admin\ListController@create')->name('projects.lists.create');
+            Route::get('{project}/lists/{list}','App\Http\Controllers\admin\ListController@edit')->name('projects.lists.edit');
+            Route::get('{project}/lists/{list}/tasks/create','App\Http\Controllers\admin\TaskController@index')->name('projects.lists.tasks');
+            Route::get('{project}/lists/{list}/tasks/create','App\Http\Controllers\admin\TaskController@create')->name('projects.lists.tasks.create');
+            Route::get('{project}/lists/{list}/tasks/{task}','App\Http\Controllers\admin\TaskController@edit')->name('projects.lists.tasks.edit');
         });
         Route::resource('/lists','App\Http\Controllers\admin\ListController');
         Route::resource('/tasks','App\Http\Controllers\admin\TaskController');

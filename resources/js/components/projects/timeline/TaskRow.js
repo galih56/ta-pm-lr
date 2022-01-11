@@ -83,7 +83,7 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
                         handleDetailTaskOpen(taskInfo);
                     }}  
                     to={{ pathname: pathname, search: searchParams.toString() }} style={{ textDecoration: 'none', color: '#393939' }}>
-                        {data.title} ({progress}%)
+                        {data.title} ({Math.round(progress).toFixed(2)}%)
                     </Link>
                 </TableCell>
                 <TableCell style={{maxWidth:'100px'}}>

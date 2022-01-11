@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\list;
+namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use App\Models\Client;
+use App\Models\User;
+use App\Models\Tag;
 use App\Models\Project;
 use App\Models\TaskList;
 use App\Models\Task;
@@ -31,10 +34,16 @@ class TaskController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request,$project=null,$list=null)
     {
-
-        $tasks=Task::orderBy('created_at','DESC')->get();
+        $tasks=Task::orderBy('created_at','DESC')->with('list.project')->with('parentTask.list.project')->get();
+        if($project){
+            $project=Project::findOrFail($project);
+        }
+        if($list){
+            $list=TaskList::findOrFail($list);
+            $tasks=$list->tasks()->orderBy('created_at','DESC')->with('list.project')->with('parentTask.list.project');
+        }
         return view('admin.tasks.index',['tasks'=>$tasks]);
     }
 
@@ -43,12 +52,19 @@ class TaskController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Request $request,$project=null,$list=null)
     {
+        if($project){
+            $project=Project::findOrFail($project);
+        }
+        if($list){
+            $list=TaskList::findOrFail($list);
+        }
         $users=User::with('role')->orderBy('name','asc')->get();
-        $teams=Team::orderBy('name','asc')->get();
         $clients=Client::orderBy('institution','asc')->get();
-        return view('admin.tasks.create')->with(compact('users','teams','clients'));
+        $tags=Tag::orderBy('title','asc')->get();
+        $projects=Project::orderBy('title','asc')->get();
+        return view('admin.tasks.create')->with(compact('projects','project','list','users','clients','tags'));
     }
 
     /**
@@ -102,12 +118,9 @@ class TaskController extends Controller
                 $task->end=$request->end;
                 $task->save();
                 
-                if($request->has('teams')){
-                    $task->teams()->sync($request->teams);
-                }
     
                 if($request->has('users')){
-                    $task->users()->sync($request->users,['roles_id'=>1]);
+                    $task->users()->sync($request->users);
                 }
     
                 
@@ -115,12 +128,14 @@ class TaskController extends Controller
                     $task->clients()->sync($request->clients);
                 }
                 
-                Session::flash('message', 'Proyek baru telah dibuat'); 
-                Session::flash('alert-class', 'alert-success'); 
-                return redirect(route('tasks.edit',['task'=>$task->id]));
-          
+                if($request->has('tags')){
+                    $task->tags()->sync($request->tags);
+                }
             }
-          
+            
+            Session::flash('message', 'Tugas baru telah dibuat'); 
+            Session::flash('alert-class', 'alert-success'); 
+            return redirect(route('tasks.edit',['task'=>$task->id]));    
         }
     }
 
@@ -132,8 +147,7 @@ class TaskController extends Controller
      */
     public function show($id)
     {
-        $task=Task::findOrFail($id);
-        return view('admin.tasks.show')->with(compact('task'));
+        return redirect(url("master/tasks/$id/edit"));
     }
 
     /**
@@ -147,8 +161,7 @@ class TaskController extends Controller
         $task=Task::findOrFail($id);
         $users=User::orderBy('name','asc')->get();
         $clients=Client::orderBy('institution','asc')->get();
-        $teams=Team::orderBy('name','asc')->get();
-        return view('admin.tasks.edit')->with(compact('task','users','clients','teams'));
+        return view('admin.tasks.edit')->with(compact('task','users','clients'));
     }
 
     /**
@@ -184,7 +197,20 @@ class TaskController extends Controller
         $task->complete=$request->complete;
         $task->save();
 
-        Session::flash('message', 'Proyek "'.$request->title.'" berhasil diubah'); 
+        if($request->has('users')){
+            $task->users()->sync($request->users);
+        }
+
+        
+        if($request->has('clients')){
+            $task->clients()->sync($request->clients);
+        }
+        
+        if($request->has('tags')){
+            $task->tags()->sync($request->tags);
+        }
+
+        Session::flash('message', 'Tugas  "'.$request->title.'" berhasil diubah'); 
         Session::flash('alert-class', 'alert-success'); 
         return redirect(route('tasks.edit',['task'=>$task->id]));
     }
@@ -198,7 +224,7 @@ class TaskController extends Controller
     public function destroy($id)
     {
         $task=Task::findOrFail($id);
-        Session::flash('message', 'Proyek"'.$task->title.'" berhasil dihapus'); 
+        Session::flash('message', 'Tugas "'.$task->title.'" berhasil dihapus'); 
         Session::flash('alert-class', 'alert-success'); 
         $task->delete();
         return redirect(route('tasks.index'));

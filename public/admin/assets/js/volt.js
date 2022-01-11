@@ -67,7 +67,7 @@ d.addEventListener("DOMContentLoaded", function(event) {
         xl: 1140
     };
 
-    var sidebar = document.getElementById('sidebarMenu')
+    var sidebar = document.getElementById('sidebar-menu')
     if(sidebar && d.body.clientWidth < breakpoints.lg) {
         sidebar.addEventListener('shown.bs.collapse', function () {
             document.querySelector('body').style.position = 'fixed';

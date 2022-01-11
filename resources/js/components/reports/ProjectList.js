@@ -78,8 +78,8 @@ const ProjectList = (props) => {
                         return`
                         <div>
                             ${dp1.label}
-                            Complete Tasks :  ${dp1.y}
-                            Incomplete Tasks :  ${dp2.y}
+                            Completed Tasks :  ${dp1.y}
+                            Incompleted Tasks :  ${dp2.y}
                         </div>`
                     }}
                     data={[{

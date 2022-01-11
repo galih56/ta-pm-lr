@@ -1,6 +1,6 @@
 @extends('admin.layouts.layout')
 @section('content')
-<div class="py-4">
+<div class="py-2">
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block">
         <ol class="breadcrumb breadcrumb-dark breadcrumb-transparent">
             <li class="breadcrumb-item">
@@ -16,7 +16,7 @@
             <form action="{{route('roles.store')}}" method="POST">
                 @csrf
                 <div class="row">
-                    <h1 class="h4">Form Tambah Peran Admin</h1>
+                    <h1 class="h4">Form Tambah Peran User</h1>
                     <div class="col-12">
                         <div class="mb-2">
                             <label class="my-1 me-2" for="name">Nama</label>
