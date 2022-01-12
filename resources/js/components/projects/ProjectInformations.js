@@ -180,7 +180,7 @@ const ProjectInfo = (props) => {
                         <Button onClick={() => { setIsEditing(false) }} style={{ marginRight: '1.5em' }}>Cancel</Button>
                         <Button variant="contained" color="primary" onClick={saveChanges} style={{ marginRight: '3em' }}> Save </Button>
                     </Grid>
-                    {([2,4].includes(global.state.role?.id))?(
+                    {([1,2,4].includes(global.state.role?.id))?(
                         <>
                             <Grid item container xl={4} md={4} sm={4} xs={4} style={{ padding: '1em' }}
                                 justifyContent="flex-end"
@@ -224,7 +224,7 @@ const ProjectInfo = (props) => {
                     <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>
                         <Typography variant="body1" >{detailProject.description}</Typography>
                     </Grid>
-                    {([2,4].includes(global.state.role?.id))?(
+                    {([1,2,4].includes(global.state.role?.id))?(
                         <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>
                             <Button onClick={() => { setIsEditing(true) }} variant="contained" color="primary">Edit</Button>
                         </Grid>

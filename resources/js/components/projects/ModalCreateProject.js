@@ -164,10 +164,9 @@ export default function ModalCreateProject(props) {
                         closeModal();
                         toast.dismiss(toast_loading);
                     }else{
-                        console.log(result.data);
-                        console.log(result.data.error,result.data.messages);
                         if(result.data.error==true && result.data.messages.length>0){
                             setImportErrors(result.data.messages);
+                            toast.dismiss(toast_loading);
                             return 'Failed to import excel file';
                         }
                     }
@@ -277,6 +276,9 @@ export default function ModalCreateProject(props) {
                                 <TabPanel value={tabIndex} index={1}>
                                     <Grid container>
                                         <Grid item lg={12} md={12} sm={12} xs={12} >
+                                            <a href={`${process.env.MIX_FRONT_END_BASE_URL}api/import-format`}>Download format import</a>
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12} >
                                             <TextField variant="standard"
                                                 label="Title : "
                                                 placeholder="example : Project A"
@@ -328,9 +330,9 @@ export default function ModalCreateProject(props) {
                                             {importErrors.length?
                                             <Alert severity="error">
                                                 <AlertTitle>Error</AlertTitle>
-                                                <ul>
-                                                {(showImportErrors)?importErrors.map(error=><li>Row {error.row} : {error.title}</li>):importErrors.slice(3).map(error=><li>{error.title}</li>)}
-                                                </ul>
+                                                {(showImportErrors)?<ul>
+                                                    {importErrors.map(error=><li>Row {error.row} : {error.title}</li>)}
+                                                </ul>:null}
                                                 {(showImportErrors)?
                                                     <a onClick={handleShowMoreErrors}>Hide...</a>:
                                                     <a onClick={handleShowMoreErrors}>Show more...</a>}

@@ -200,7 +200,7 @@ const DetailProject = (props) => {
                                     <Grid container >   
                                         <BreadCrumbs projectName={detailProject.title} tabName="Timeline" style={{marginTop:'1em'}}/>
                                         <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                                            {([2,4].includes(global.state.role?.id))?(
+                                            {([1,2,4].includes(global.state.role?.id))?(
                                                 <>
                                                     <Button
                                                         variant="contained"
