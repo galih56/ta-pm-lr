@@ -133,7 +133,7 @@ export default function EnhancedTable({data,page_name,showFormCreate}) {
                                     variant="contained"
                                     color="primary"
                                     onClick={openModalCreateProject}
-                                    style={{ marginBottom: '1em' }}
+                                    style={{ margin: '1em' }}
                                     startIcon={<AddIcon />}> Add new project </Button> 
                                 <ModalCreateProject open={modalOpen} closeModal={() => setModalOpen(false)}/>
                             </>

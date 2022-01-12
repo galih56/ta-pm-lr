@@ -18,7 +18,7 @@
                 {{Session::get('message')}}
             </div>
             @endif
-            <form action="{{route('projects.store')}}" method="POST">
+            <form action="{{route('projects.store')}}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="row">
                     <h1 class="h4">Form Tambah Proyek</h1>
@@ -153,6 +153,17 @@
                             @enderror    
                         </div>
                     </div>
+
+                    <div class="col-12 mt-3">
+                        <a href="{{url('api/import-format')}}">Download format import</a>
+                    </div>
+                    <div class="col-12 mt-1">
+                        <div class="mb-2">
+                            <label class="my-1 me-2" for="teams">Import excel</label>
+                            <input type="file" name="file" id="file">   
+                        </div>
+                    </div>
+                    
                 </div>
                 <button class="btn btn-secondary" style="float:right" type="submit">Simpan</button>
             </form>

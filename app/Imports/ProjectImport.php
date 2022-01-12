@@ -30,14 +30,11 @@ class ProjectImport implements ToCollection, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            'wbs' => [ 'required' ],
-            'title' => [ 'required' ],
+            'wbs' => [ 'required|string' ],
+            'title' => [ 'required|string' ],
             'start' => [ 'required','date' ],
             'end' => [ 'required','date' ],
             'days' => [ 'required' ],
-            'actual_start' => [ 'nullable','date' ],
-            'actual_end' => [ 'nullable','date' ],
-            'work_days' => [ 'nullable' ],
         ];
     }
 }

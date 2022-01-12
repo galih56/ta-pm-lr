@@ -83,9 +83,9 @@ class ProjectController extends Controller
     }
     function getDetailProject($id,$request){
         $project=Project::with(['columns'=>function($q) use($request){
-            return $q->orderBy('end','ASC')
+            return $q->orderBy('title','ASC')
                 ->with(['cards'=>function($q1) use($request){
-                    $q1=$q1->orderBy('end','ASC');
+                    $q1=$q1->orderBy('title','ASC');
                     if($request->has('users_id')){
                         $users_id=$request->users_id;
                         $q1=$q1->orWhereHas('members',function($members_q) use($users_id){
@@ -93,7 +93,7 @@ class ProjectController extends Controller
                         });
                     }
                     $q1=$q1->with(['cards'=>function($q2) use($request){
-                            $q2=$q2->orderBy('end','ASC');
+                            $q2=$q2->orderBy('title','ASC');
                                 if($request->has('users_id')){
                                     $users_id=$request->users_id;
                                     $q2=$q2->whereHas('members',function($members_q) use($users_id){
@@ -592,6 +592,7 @@ class ProjectController extends Controller
     }
 
     public function import(Request $request,$id=null){
+        // https://github.com/SpartnerNL/Laravel-Excel/issues/1226#issuecomment-306734223
         $project=null;
         try {
             $import = new ProjectImport();
@@ -617,10 +618,10 @@ class ProjectController extends Controller
                         $errors['error']=true;
                         $errors['messages'][]=['row'=>$i,'title'=> 'start/end column must be a valid date (yyyy-mm-dd)'];
                     }
-                    if(gettype($row['actual_start'])=='integer' || gettype($row['actual_end'])=='integer') {
-                        $errors['error']=true;
-                        $errors['messages'][]=['row'=>$i,'title'=> 'actual_start/actual_end column must be a valid date (yyyy-mm-dd)'];
-                    }
+                    // if(gettype($row['actual_start'])=='integer' || gettype($row['actual_end'])=='integer') {
+                    //     $errors['error']=true;
+                    //     $errors['messages'][]=['row'=>$i,'title'=> 'actual_start/actual_end column must be a valid date (yyyy-mm-dd)'];
+                    // }
                     
                     $start = Carbon::parse($row['start'])->format('Y-m-d');
                     $end = Carbon::parse($row['end'])->format('Y-m-d');
@@ -653,6 +654,7 @@ class ProjectController extends Controller
                         $data[$wbs[0]]['tasks'][$wbs[1]]['subtasks'][$wbs[2]]=$row;
                     }
                 }
+
                 if($errors['error']==true){
                     return $errors;
                 }
