@@ -618,10 +618,6 @@ class ProjectController extends Controller
                         $errors['error']=true;
                         $errors['messages'][]=['row'=>$i,'title'=> 'start/end column must be a valid date (yyyy-mm-dd)'];
                     }
-                    // if(gettype($row['actual_start'])=='integer' || gettype($row['actual_end'])=='integer') {
-                    //     $errors['error']=true;
-                    //     $errors['messages'][]=['row'=>$i,'title'=> 'actual_start/actual_end column must be a valid date (yyyy-mm-dd)'];
-                    // }
                     
                     $start = Carbon::parse($row['start'])->format('Y-m-d');
                     $end = Carbon::parse($row['end'])->format('Y-m-d');
