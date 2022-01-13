@@ -12,7 +12,7 @@ class Project extends Model
     protected $table = 'projects';
 
     protected $columns = [
-        'title', 'description', 'actual_start', 'actual_end',
+        'id','title', 'description', 'actual_start', 'actual_end',
         'start', 'end','created_at','updated_at'
     ];
 

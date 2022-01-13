@@ -497,8 +497,7 @@ class ProjectController extends Controller
         return response()->json($projects);
     }
 
-    public function getGanttDataSource(Request $request,$id){
-        
+    public function getGanttDataSource(Request $request,$id){    
         $project=Project::with(['columns'=>function($q1) use($request){
             return $q1->orderBy('start','ASC')
                     ->with(['cards'=>function($q1) use($request){
@@ -591,6 +590,22 @@ class ProjectController extends Controller
         return Excel::download(new ProjectExport($project), str_slug($project->title).'.xlsx');
     }
 
+
+    function checkWBSFormat($row){  
+        $wbs=explode('.',$row['wbs'].'');
+        if($row['wbs'])
+        $first_item=$wbs[array_key_first($wbs)];
+        $last_item=$wbs[array_key_last($wbs)];
+        if($first_item='' || $last_item=='') return false;
+        for ($i=0; $i < count($wbs); $i++) { 
+            $check=$wbs[$i];
+            if(empty($check) || !is_numeric($check)){
+                return false;
+            }
+        }
+        return $wbs;
+    }
+
     public function import(Request $request,$id=null){
         // https://github.com/SpartnerNL/Laravel-Excel/issues/1226#issuecomment-306734223
         $project=null;
@@ -610,15 +625,23 @@ class ProjectController extends Controller
                         $errors['error']=true;
                         $errors['messages'][]=['row'=>$i,'title'=> 'Title column is required'];
                     }
+
                     if(empty($row['wbs'])) {
                         $errors['error']=true;
                         $errors['messages'][]=['row'=>$i,'title'=> 'WBS column is required'];
                     }
+
                     if(gettype($row['start'])=='integer' || gettype($row['end'])=='integer') {
                         $errors['error']=true;
                         $errors['messages'][]=['row'=>$i,'title'=> 'start/end column must be a valid date (yyyy-mm-dd)'];
                     }
-
+                    
+                    $wbs=$this->checkWBSFormat($row);
+                    if(!$wbs){
+                        $errors['error']=true;
+                        $errors['messages'][]=['row'=>$i,'title'=> 'WBS format is invalid'];
+                    }
+                    
                     $start = Carbon::parse($row['start'])->format('Y-m-d');
                     $end = Carbon::parse($row['end'])->format('Y-m-d');
                     
@@ -627,30 +650,31 @@ class ProjectController extends Controller
                     }else if($earliest_date>$start){
                         $earliest_date=$start;   
                     }
-    
+                    
                     if(!empty($row['end'])){
                         $latest_date=$end;   
                     } else if($latest_date<$end){
                         $latest_date=$end;   
                     }
-                                    
-                    $wbs=explode('.',$row['wbs'].'');
-                    if(count($wbs) == 1){
-                        //create list
-                        $data[$wbs[0]]=$row;
-                    }
-                    
-                    if(count($wbs) == 2){
-                        //create task
-                        $data[$wbs[0]]['tasks'][$wbs[1]]=$row;
-                    }
-    
-                    if(count($wbs) == 3){
-                        //create subtask
-                        $data[$wbs[0]]['tasks'][$wbs[1]]['subtasks'][$wbs[2]]=$row;
+
+                    if($wbs){
+                        if(count($wbs) == 1){
+                            //create list
+                            $data[$wbs[0]]=$row;
+                        }
+                        
+                        if(count($wbs) == 2){
+                            //create task
+                            $data[$wbs[0]]['tasks'][$wbs[1]]=$row;
+                        }
+        
+                        if(count($wbs) == 3){
+                            //create subtask
+                            $data[$wbs[0]]['tasks'][$wbs[1]]['subtasks'][$wbs[2]]=$row;
+                        }
                     }
                 }
-
+                
                 if($errors['error']==true){
                     return $errors;
                 }
@@ -703,6 +727,7 @@ class ProjectController extends Controller
             return response()->json($failures,500);
         } 
     }
+    // https://stackoverflow.com/questions/57212305/how-to-skip-blank-rows-in-maatwebsite-excel-3-1-for-model-way-import-on-laravel
 
     public function getKanban(Request $request,$id){
         $project=$this->getDetailProject($id,$request);

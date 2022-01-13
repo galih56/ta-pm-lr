@@ -211,7 +211,22 @@ class ProjectController extends Controller
             exit('Requested file does not exist on our server!');
         }
     }
-    
+
+    function checkWBSFormat($row){  
+        $wbs=explode('.',$row['wbs'].'');
+        if($row['wbs'])
+        $first_item=$wbs[array_key_first($wbs)];
+        $last_item=$wbs[array_key_last($wbs)];
+        if($first_item='' || $last_item=='') return false;
+        for ($i=0; $i < count($wbs); $i++) { 
+            $check=$wbs[$i];
+            if(empty($check) || !is_numeric($check)){
+                return false;
+            }
+        }
+        return $wbs;
+    }
+
     public function import(Request $request,$id=null){
         // https://github.com/SpartnerNL/Laravel-Excel/issues/1226#issuecomment-306734223
         $project=null;
@@ -226,7 +241,8 @@ class ProjectController extends Controller
             if($imported_data->count()){
                 $rows=$imported_data[0];
                 for ($i=0; $i < $rows->count(); $i++) { 
-                    $row=$rows[$i]->toArray();
+                    $row=$rows[$i]->toArray();          
+                    
                     if(empty($row['title'])) {
                         $errors['error']=true;
                         $errors['messages'][]=['row'=>$i,'title'=> 'Title column is required'];
@@ -235,14 +251,17 @@ class ProjectController extends Controller
                         $errors['error']=true;
                         $errors['messages'][]=['row'=>$i,'title'=> 'WBS column is required'];
                     }
+
                     if(gettype($row['start'])=='integer' || gettype($row['end'])=='integer') {
                         $errors['error']=true;
                         $errors['messages'][]=['row'=>$i,'title'=> 'start/end column must be a valid date (yyyy-mm-dd)'];
                     }
-                    // if(gettype($row['actual_start'])=='integer' || gettype($row['actual_end'])=='integer') {
-                    //     $errors['error']=true;
-                    //     $errors['messages'][]=['row'=>$i,'title'=> 'actual_start/actual_end column must be a valid date (yyyy-mm-dd)'];
-                    // }
+                    
+                    $wbs=$this->checkWBSFormat($row);
+                    if(!$wbs){
+                        $errors['error']=true;
+                        $errors['messages'][]=['row'=>$i,'title'=> 'WBS format is invalid','data'=>$row];
+                    }
                     
                     $start = Carbon::parse($row['start'])->format('Y-m-d');
                     $end = Carbon::parse($row['end'])->format('Y-m-d');
@@ -252,31 +271,33 @@ class ProjectController extends Controller
                     }else if($earliest_date>$start){
                         $earliest_date=$start;   
                     }
-    
+                    
                     if(!empty($row['end'])){
                         $latest_date=$end;   
                     } else if($latest_date<$end){
                         $latest_date=$end;   
                     }
-                                    
-                    $wbs=explode('.',$row['wbs'].'');
-                    if(count($wbs) == 1){
-                        //create list
-                        $data[$wbs[0]]=$row;
-                    }
-                    
-                    if(count($wbs) == 2){
-                        //create task
-                        $data[$wbs[0]]['tasks'][$wbs[1]]=$row;
-                    }
-    
-                    if(count($wbs) == 3){
-                        //create subtask
-                        $data[$wbs[0]]['tasks'][$wbs[1]]['subtasks'][$wbs[2]]=$row;
+
+                    if($wbs){
+                        if(count($wbs) == 1){
+                            //create list
+                            $data[$wbs[0]]=$row;
+                        }
+                        
+                        if(count($wbs) == 2){
+                            //create task
+                            $data[$wbs[0]]['tasks'][$wbs[1]]=$row;
+                        }
+        
+                        if(count($wbs) == 3){
+                            //create subtask
+                            $data[$wbs[0]]['tasks'][$wbs[1]]['subtasks'][$wbs[2]]=$row;
+                        }
                     }
                 }
 
                 if($errors['error']==true){
+                    // dd($imported_data,$data);
                     return $errors;
                 }
                 if($id){
