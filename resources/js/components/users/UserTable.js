@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Link, useLocation, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
+import SearchIcon from '@material-ui/icons/Search';
+import TextField from '@material-ui/core/TextField';    
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';

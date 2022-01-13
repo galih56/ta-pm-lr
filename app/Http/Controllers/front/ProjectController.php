@@ -34,7 +34,7 @@ class ProjectController extends Controller
 
     public function index()
     {
-        $projects=Project::with('columns.cards.cards')->get();
+        $projects=Project::exclude(['description','extended','old_deadline','cost','actual_cost'])->with('columns.cards.cards')->get();
         return response()->json($projects);
     }
 
@@ -618,7 +618,7 @@ class ProjectController extends Controller
                         $errors['error']=true;
                         $errors['messages'][]=['row'=>$i,'title'=> 'start/end column must be a valid date (yyyy-mm-dd)'];
                     }
-                    
+
                     $start = Carbon::parse($row['start'])->format('Y-m-d');
                     $end = Carbon::parse($row['end'])->format('Y-m-d');
                     

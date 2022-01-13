@@ -193,7 +193,7 @@ export default function EnhancedTable({data}) {
                                                     var lists_id=(!row.is_subtask)?row.list.projects_id:row.parent_task.list.projects_id;
                                                     handleModalOpen({  projects_id: projects_id,  lists_id: lists_id,  tasks_id: row.id,  open: true });
                                                 }}>
-                                                {row.title} ({row.progress?row.progress:'0'}%)
+                                                {row.title} ({row.progress?Math.round(row.progress):'0'}%)
                                             </TableCell>
                                             <TableCell align="right">{row.start ? moment(row.start).format('DD MMM YYYY') : ''} - {row.end ? moment(row.end).format('DD MMM YYYY') : ''}</TableCell>
                                             <TableCell align="right">

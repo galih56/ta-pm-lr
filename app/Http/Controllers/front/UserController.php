@@ -26,8 +26,8 @@ class UserController extends Controller
 
     public function index()
     {
-        $users=User::with('role')
-                    ->with('projects.columns.cards.cards')->get()->toArray();
+        $users=User::exclude(['created_at', 'updated_at'])
+                    ->with('role')->get()->toArray();
         return response()->json($users);
     }
 
