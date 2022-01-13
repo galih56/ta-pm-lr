@@ -20,6 +20,10 @@ class Task extends Model
         'progress', 'is_subtask', 'lists_id','parent_task_id'
     ];
 
+    protected $casts = [
+        'progress' => 'double',
+    ];
+    
     public static function boot() {
         parent::boot();
         static::saving(function($task){

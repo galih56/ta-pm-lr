@@ -250,11 +250,9 @@ class TaskController extends Controller
             }
 
             if($request->complete){
-                if(!$task->actual_end){
-                    $current_date_time = Carbon::now()->toDateTimeString();
-                    $task->actual_end=$current_date_time;
+                if(!count($task->cards)){
+                    $task->progress=100;
                 }
-                $task->progress=100;
                 $task->complete=true;
             }else{
                 if($task->is_subtask===false && count($task->cards)>0){
@@ -270,34 +268,11 @@ class TaskController extends Controller
                 }                
                 $task->end_label='Belum Selesai';
                 $task->complete=false;
+                if(!count($task->cards)){
+                    $task->progress=0;
+                }
             }
         }
-
-        if(($task->actual_start && $task->actual_start!='Invalid date' && !empty($task->actual_start))){
-            $start = Carbon::parse($task->start)->format('Y-m-d');
-            $actual_start = Carbon::parse($task->actual_start)->format('Y-m-d');
-            if($actual_start<$start) $task->start_label='Mulai lebih cepat';
-            if($actual_start>$start) $task->start_label='Mulai terlambat';
-            if($actual_start==$start) $task->start_label='Mulai tepat waktu';
-        }
-        
-        if(($task->actual_end && $task->actual_end!='Invalid date') && !empty($task->actual_end)){
-            $end = Carbon::parse($task->end)->format('Y-m-d');
-            $actual_end = Carbon::parse($task->actual_end)->format('Y-m-d');
-            if($actual_end<$end) $task->end_label='Selesai lebih cepat';
-            if($actual_end>$end) $task->end_label='Selesai terlambat';
-            if($actual_end==$end) $task->end_label='Selesai tepat waktu';
-        }
-        
-        if(($task->actual_start && $task->actual_start!='Invalid date' && !empty($task->actual_start)) 
-                && ($task->actual_end && $task->actual_end!='Invalid date') && !empty($task->actual_end)){
-            $actual_start = Carbon::parse($task->actual_start);
-            $actual_end = Carbon::parse($task->actual_end);
-            $days= $actual_start->diffInDays($actual_end);
-            $work_days= $actual_start->diffInDays($actual_end);
-            $task->work_days=$work_days;
-        }
-
         $task->save();
         $task=$this->getDetailTask($task->id);
         return response()->json($task);
