@@ -15,7 +15,7 @@ class Task extends Model
     public $timestamps = true;
 
     protected $fillable = [
-        'users_id', 'title', 'description', 'complete', 'end', 'start',
+        'id','users_id', 'title', 'description', 'complete', 'end', 'start',
         'actual_start', 'actual_end', 'start_label', 'end_label', 
         'progress', 'is_subtask', 'lists_id','parent_task_id'
     ];

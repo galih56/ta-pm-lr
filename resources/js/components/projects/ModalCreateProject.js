@@ -155,6 +155,7 @@ export default function ModalCreateProject(props) {
             const toast_loading = toast.loading('Loading...');
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
+            
             axios.post(url,body)
                 .then((result) => {
                     if(!result.data?.error){
@@ -163,6 +164,7 @@ export default function ModalCreateProject(props) {
                         setDescription('');
                         closeModal();
                         toast.dismiss(toast_loading);
+                        setImportErrors([]);
                     }else{
                         if(result.data.error==true && result.data.messages.length>0){
                             setImportErrors(result.data.messages);
@@ -170,7 +172,11 @@ export default function ModalCreateProject(props) {
                             return 'Failed to import excel file';
                         }
                     }
-                }).catch(console.log);
+                }).catch((e)=>{
+                    console.log(e)
+                    setImportErrors([{'row':0,'title':'File has changed'}]);
+                    toast.dismiss(toast_loading);
+                });
         }
     }
     
