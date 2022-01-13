@@ -12,6 +12,10 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $columns = [
+        'name', 'email', 'password', 'profile_picture_path','roles_id',
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -40,6 +44,11 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    public function scopeExclude($query, $value = []) 
+    {
+        return $query->select(array_diff($this->columns, (array) $value));
+    }
+    
     public function asMember(){
         return $this->hasMany(ProjectMember::class,'users_id');
     }

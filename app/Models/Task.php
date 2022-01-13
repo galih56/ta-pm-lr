@@ -47,6 +47,11 @@ class Task extends Model
         });
     }
 
+    public function scopeExclude($query, $value = []) 
+    {
+        return $query->select(array_diff($this->fillable, (array) $value));
+    }
+    
     public function logs(){
         return $this->hasMany(ActivityLog::class,'tasks_id');
     }
