@@ -62,7 +62,7 @@ class ClientController extends Controller
         ]);
 
         $client=Client::findOrFail($id);
-        $client->description='';
+        $client->description=$request->description;
         $client->city=$request->city;
         $client->institution=$request->institution;
         $client->save();
