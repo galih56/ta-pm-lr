@@ -143,12 +143,13 @@ export default function DetailClient(props) {
                     {(editing)?(
                         <TextField variant="standard"
                             label="Description : "
-                            onChange={(e) => setData({...data, description:e.target.value}) }
-                            value={data.description}
+                            defaultValue={data.description} fullWidth
+                            onChange={(e) => setData({ ...data, description: e.target.value })}
                             multiline
                             fullWidth
                             rows={4}
                         />
+                        
                     ):(
                         <>
                             <Typography variant="body1" component="div"><b>Description : </b></Typography>

@@ -241,9 +241,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                             label="Description : "
                             multiline rows={4}
                             defaultValue={data.description} fullWidth
-                            onChange={(e) => {
-                                setData({ ...data, description: e.target.value })
-                            }} />
+                            onChange={(e) => setData({ ...data, description: e.target.value })} />
                     ):(
                         <>
                             <Typography>Description : </Typography>
