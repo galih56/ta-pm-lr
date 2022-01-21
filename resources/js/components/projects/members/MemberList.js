@@ -99,6 +99,7 @@ export default function EnhancedTable(props) {
     const handleDetailTaskOpen = props.handleDetailTaskOpen;
     const projects_id = props.projects_id;
     const memberChange = props.memberChange;
+    const refreshProject= props.refreshProject;
     const setMemberChange = props.setMemberChange;
     const data = props.data;
     let global = useContext(UserContext);
@@ -228,6 +229,7 @@ export default function EnhancedTable(props) {
                 onCreate={(newMembers)=>{
                     setRows([...rows,...newMembers])
                 }}
+                refreshProject={refreshProject}
             />
             {showUserProfile()}
         </div>
