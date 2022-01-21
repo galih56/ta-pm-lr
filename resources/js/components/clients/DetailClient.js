@@ -95,7 +95,7 @@ export default function DetailClient(props) {
     return (
         <Paper style={{ padding: '1em',width:'100%' }}>
              
-            <Grid container component="form" spacing={1} onSubmit={handleSubmit}>
+            <Grid container component="form" spacing={1}>
                 <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                     <Router>
                         <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="projects">
@@ -162,8 +162,11 @@ export default function DetailClient(props) {
                 <Grid item xl={12} lg={12} md={12} sm={12} >
                     {(editing)?(
                         <>
-                            <Button style={{marginRight:'1em'}} onClick={()=>setEditing(false)}>Cancel</Button>
-                            <Button variant="contained" color="primary" type="submit" style={{marginRight:'1em'}}>Save</Button>
+                            <Button type="button" style={{marginRight:'1em'}} onClick={(e)=>{
+                                e.preventDefault();
+                                setEditing(false);
+                            }}>Cancel</Button>
+                            <Button variant="contained" color="primary"  onClick={handleSubmit}style={{marginRight:'1em'}}>Save</Button>
                             <Button variant="contained" color="secondary" 
                                 onClick={()=>setOpenModalConfirm(true)}>Delete</Button>
                             <ModalConfirm 

@@ -325,7 +325,7 @@ const DetailProject = (props) => {
                                     index={5}
                                     style={{  padding: '0.5em', minHeight:'500px !important' } }>
                                     <BreadCrumbs projectName={detailProject.title} tabName="Others" style={{marginTop:'1em'}}/>
-                                    <Others detailProject={detailProject}   handleDetailTaskOpen={handleDetailTaskOpen}/>
+                                    <Others refreshProject={getDetailProject} detailProject={detailProject}   handleDetailTaskOpen={handleDetailTaskOpen}/>
                                 </TabPanel>
                             )
                         }} />

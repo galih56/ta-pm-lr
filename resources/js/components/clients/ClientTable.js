@@ -179,6 +179,7 @@ export default function EnhancedTable() {
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                         .map((row) => {
                                             return (
+                                                <>
                                                 <TableRow hover key={row.id}>
                                                     <TableCell align="left">
                                                          <Link to={`/clients/${row.id}`} style={{textDecoration:'none'}}>
@@ -189,6 +190,14 @@ export default function EnhancedTable() {
                                                         {row.city}
                                                     </TableCell>
                                                 </TableRow>
+                                                {row.description?(
+                                                    <TableRow>
+                                                        <TableCell align="left"  colSpan="2">
+                                                        {row.description}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ):null}
+                                                </>
                                             );
                                         }):(    
                                             <TableRow>

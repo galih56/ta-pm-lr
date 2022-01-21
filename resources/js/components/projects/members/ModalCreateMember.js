@@ -43,7 +43,7 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 export default function ModalCreateMember(props) {
-    var { open, projects_id, exceptedUsers,onCreate } = props;
+    var { open, projects_id, exceptedUsers,onCreate,refreshProject } = props;
     var closeModal = props.handleClose;
     const [newMembers, setNewMembers] = useState([]);
     const [showAlert, setShowAlert] = useState(false);
@@ -68,6 +68,7 @@ export default function ModalCreateMember(props) {
                         onCreate(result.data)
                         setNewMembers([]);
                         closeModal();
+                        refreshProject();
                         return <b>A new member successfully created</b>
                     },
                     error: (error)=>{

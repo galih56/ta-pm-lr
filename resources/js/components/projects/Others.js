@@ -6,7 +6,7 @@ const ProjectInformations = lazy(() => import('./ProjectInformations'));
 const ClientTable = lazy(() => import('./clients/ClientTable'));
 const TeamList = lazy(() => import('./TeamList'));
 
-const Others = ({detailProject,handleDetailTaskOpen}) => {
+const Others = ({detailProject,handleDetailTaskOpen, refreshProject}) => {
     const [memberChange,setMemberChange]=useState(false);
 
     return (
@@ -22,13 +22,14 @@ const Others = ({detailProject,handleDetailTaskOpen}) => {
                         handleDetailTaskOpen={handleDetailTaskOpen} 
                         memberChange={memberChange}
                         setMemberChange={setMemberChange}
+                        refreshProject={refreshProject}
                     />
                 </Grid>
                 <Grid item xl={12} md={12} sm={12} xs={12}>
-                    <ClientTable detailProject={{id:detailProject.id,clients:detailProject.clients}}/>
+                    <ClientTable detailProject={{id:detailProject.id,clients:detailProject.clients}} refreshProject={refreshProject}/>
                 </Grid>
                 <Grid item xl={12} md={12} sm={12} xs={12}>
-                    <TeamList projects_id={detailProject.id} callback={()=>setMemberChange(true)}/>
+                    <TeamList projects_id={detailProject.id} callback={()=>setMemberChange(true)} refreshProject={refreshProject}/>
                 </Grid>
             </Suspense>
         </Grid >
