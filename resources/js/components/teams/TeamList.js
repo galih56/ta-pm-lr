@@ -75,6 +75,7 @@ export default function TeamTable() {
                                 </TableHead>
                                 <TableBody>
                                     {(rows.length)?rows.map((row) => (
+                                        <>
                                         <TableRow key={row.id} style={onHoveredStyle}>
                                             <TableCell>
                                                 <Typography variant="body2" display="block">
@@ -85,6 +86,14 @@ export default function TeamTable() {
                                                 </Typography>
                                             </TableCell>
                                         </TableRow>
+                                        {row.description?(
+                                            <TableRow>
+                                                <TableCell align="left"  colSpan="2">
+                                                {row.description}
+                                                </TableCell>
+                                            </TableRow>
+                                        ):null}
+                                        </>
                                     )):(
                                         <Grid item xl={12} md={12} sm={12} xs={12}>
                                             <Alert severity="info">
