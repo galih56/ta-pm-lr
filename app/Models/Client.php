@@ -17,15 +17,10 @@ class Client extends Authenticatable
      *
      * @var array
      */
-    protected $fillable = [
-        'email','description','city','institution', 
-    ];
+    protected $fillable = ['description','city','institution'];
     
     protected static function boot(){
         parent::boot();
-        static::creating(function ($client) {
-            $client->description = $query->description ?? " ";
-        });
     }
 
     public function projects(){
