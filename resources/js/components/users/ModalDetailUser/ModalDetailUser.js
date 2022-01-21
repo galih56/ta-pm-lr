@@ -63,7 +63,7 @@ export default function ModalDetailUser(props) {
 
     const getDetailUser = () => {
         if(props.initialState.id){
-            const url = process.env.MIX_BACK_END_BASE_URL + `users/${props.initialState.id}`;
+            const url = `${process.env.MIX_BACK_END_BASE_URL}users/${props.initialState.id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.get(url)

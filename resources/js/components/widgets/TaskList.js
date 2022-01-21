@@ -122,15 +122,15 @@ export default function EnhancedTable({detailProject}) {
         }
     }
 
-    const handleCompleteTask = (tasks_id, isChecked) => {
+    const handleCompleteTask = (task, isChecked) => {
         var oldRows = rows;
         var newRows = rows.map((row) => {
-            if (row.id == tasks_id) row.complete = isChecked;
+            if (row.id == task.id) row.complete = isChecked;
             return row;
         });
         setRows(newRows);
-        const body = { id: tasks_id, complete: isChecked };
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${tasks_id}`;
+        const body = { id: task.id, complete: isChecked };
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${task.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         toast.promise(
@@ -191,7 +191,7 @@ export default function EnhancedTable({detailProject}) {
                                                 <Checkbox
                                                     onChange={(event) => {
                                                         var checked = event.target.checked;
-                                                        handleCompleteTask(row.id, checked)
+                                                        handleCompleteTask(row, checked)
                                                     }}
                                                     checked={row.complete}
                                                 />

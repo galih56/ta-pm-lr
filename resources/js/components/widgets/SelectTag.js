@@ -16,7 +16,7 @@ const SelectTag = (props) => {
     
     const getTags = () => {
         if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL+'tags';
+            const url = `${process.env.MIX_BACK_END_BASE_URL}tags`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.get(url)

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\front;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\Project;
 use App\Models\Task;
 use App\Models\TaskMember;
 use App\Models\Meeting;
@@ -91,20 +92,15 @@ class UserController extends Controller
 
     public function getProjects(Request $request,$id){
         $user=User::findOrFail($id);
-        $project_members=ProjectMember::where('users_id',$id)
-                                        ->with('project.columns',function($columns_q) use($id){
-                                            return $columns_q->with('cards',function($tasks_q) use($id){
-                                                return $tasks_q->whereHas('members',function($members_q) use($id){
-                                                        return $members_q->where('users_id',$id);
-                                                    })->with('cards');
-                                            });
-                                        })->get();
-        $projects=[];
-        for ($i=0; $i < count($project_members); $i++) {
-            $project=$project_members[$i]['project'];
-            if($project) $projects[]=$project;
-        }
-
+        $projects=Project::whereHas('users',function($query) use($id){
+            $query=$query->where('users.id','=',$id);
+        })->with('columns',function($columns_q) use($id){
+            return $columns_q->with('cards',function($tasks_q) use($id){
+                return $tasks_q->whereHas('members',function($members_q) use($id){
+                        return $members_q->where('users_id',$id);
+                    })->with('cards');
+            });
+        })->get();
         return response()->json($projects);
     }
 

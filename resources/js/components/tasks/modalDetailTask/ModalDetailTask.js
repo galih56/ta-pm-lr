@@ -86,7 +86,7 @@ export default function ModalDetailTask(props) {
 
     const getDetailTask = () => {
         var body={projects_id:detailProject.id,users_id:global.state.id}
-        const url = process.env.MIX_BACK_END_BASE_URL + 'tasks/' + id;
+        const url = `${process.env.MIX_BACK_END_BASE_URL}tasks/${id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url,body)
@@ -114,7 +114,6 @@ export default function ModalDetailTask(props) {
     },[]);
     
     useEffect(()=>{
-        console.log(detailProject);
         if(props.detailProject?.id)setDetailProject(props.detailProject)
         else {
             var body={
@@ -190,6 +189,11 @@ export default function ModalDetailTask(props) {
 
     const handleCompleteTask = (check) => {
         const body = { complete: check };
+        
+        if(!data.actual_start){
+            toast.error("This task hasn't started yet");
+            return;
+        }
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/complete`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -313,6 +317,7 @@ export default function ModalDetailTask(props) {
                         isEdit={isEditing}
                         data={data}
                         setData={setData}
+                        isAdmin={global.state.isAdmin}
                         detailProject={detailProject}
                         getProgress={getProgress}
                         onTaskUpdate={onTaskUpdate}

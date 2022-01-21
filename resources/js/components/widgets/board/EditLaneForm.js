@@ -113,7 +113,7 @@ const EditLaneForm = (props) => {
         if(list){
             setLaneDetail(list);
         }else{
-            const url = process.env.MIX_BACK_END_BASE_URL+'lists/' + laneId;
+            const url = `${process.env.MIX_BACK_END_BASE_URL}lists/${laneId}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.get(url)
                 .then((result) => {

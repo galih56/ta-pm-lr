@@ -123,9 +123,14 @@ export default function EnhancedTable({data}) {
         }
     }
 
-    const handleCompleteTask = (tasks_id, event) => {
-        const body = { id: tasks_id, complete: event.target.checked };
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${tasks_id}/complete`;
+    const handleCompleteTask = (task, event) => {
+        
+        if(!task.actual_start){
+            toast.error("This task hasn't started yet");
+            return;
+        }
+        const body = { id: task.id, complete: event.target.checked };
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${task.id}/complete`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         toast.promise(
@@ -134,7 +139,7 @@ export default function EnhancedTable({data}) {
                 loading: 'Updating...',
                 success: (result)=>{
                     var newRows = rows.map((row) => {
-                        if (row.id == tasks_id) row = result.data;
+                        if (row.id == task.id) row = result.data;
                         return row;
                     });
                     setRows(newRows);
@@ -183,7 +188,7 @@ export default function EnhancedTable({data}) {
                                         >
                                             <TableCell padding="checkbox">
                                                 <Checkbox
-                                                    onChange={event =>handleCompleteTask(row.id, event)}
+                                                    onChange={event =>handleCompleteTask(row, event)}
                                                     checked={row.complete}
                                                 />
                                             </TableCell>

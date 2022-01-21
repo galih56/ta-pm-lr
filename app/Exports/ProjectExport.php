@@ -7,19 +7,20 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\withHeadings;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
-use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\RegistersEventListeners;
 use Maatwebsite\Excel\Concerns\AfterSheet;
+use Maatwebsite\Excel\Concerns\WithMapping;
+use Carbon\Carbon;
 
-// WithColumnFormatting, WithEvents
-class ProjectExport implements FromView,WithHeadingRow, WithTitle
+class ProjectExport implements FromCollection,withHeadings,WithHeadingRow, WithTitle,WithMapping
 {
     use Exportable;
     protected $project;
@@ -28,44 +29,77 @@ class ProjectExport implements FromView,WithHeadingRow, WithTitle
         $this->project = $project;
     }
 
-    public function view(): View
+    public function collection()
     {
-        $project=$this->project;
-        return view('exports.project')->with(compact('project'));
+        return $this->project;
     }
-    /*
-    public function registerEvents(): array
+    
+    
+    /**
+    * @var $project
+    */
+    public function map($project): array
+    {
+        $data=[];
+        foreach ($project->columns as $i => $column) {
+            $i=$i+1;
+            $list=$column->toArray();
+            $list['wbs']=$i.'';
+            if($list['start']) $list['start'] = Carbon::parse($list['start'])->format('d/m/Y');
+            if($list['end']) $list['end'] = Carbon::parse($list['end'])->format('d/m/Y');
+            $data[]=[
+                'wbs'=>$list['wbs'], 'title'=>$list['title'],
+                'start'=>$list['start'], 'end'=>$list['end'], 
+                'progress'=>$list['progress'], 
+            ];
+            foreach ($column->cards as $j => $card) {
+                $j=$j+1;
+                $task=$card->toArray();
+                $task['wbs']="$i.$j";
+                if($task['start']) $task['start']= Carbon::parse($task['start'])->format('d/m/Y');
+                if($task['end']) $task['end']= Carbon::parse($task['end'])->format('d/m/Y');
+                if($task['actual_start']) $task['actual_start']= Carbon::parse($task['actual_start'])->format('d/m/Y');
+                if($task['actual_end']) $task['actual_end']= Carbon::parse($task['actual_end'])->format('d/m/Y');    
+                $data[]=[
+                    'wbs'=>$task['wbs'], 'title'=>$task['title'],
+                    'start'=>$task['start'], 'end'=>$task['end'], 'days'=>$task['days'],
+                    'actual_start'=>$task['actual_start'], 'actual_end'=>$task['actual_end'],
+                    'work_days' => $task['work_days'],
+                ];
+                foreach ($card->cards as $k => $sub_card) {
+                    $k=$k+1;
+                    $subtask=$sub_card->toArray();
+                    $subtask['wbs']="$i.$j.$k";
+                    if($subtask['start']) $subtask['start']= Carbon::parse($subtask['start'])->format('d/m/Y');
+                    if($subtask['end']) $subtask['end']= Carbon::parse($subtask['end'])->format('d/m/Y');
+                    if($subtask['actual_start']) $subtask['actual_start']= Carbon::parse($subtask['actual_start'])->format('d/m/Y');
+                    if($subtask['actual_end']) $subtask['actual_end']= Carbon::parse($subtask['actual_end'])->format('d/m/Y');        
+                    $data[]=[
+                        'wbs'=>$subtask['wbs'], 'title'=>$subtask['title'],
+                        'start'=>$subtask['start'], 'end'=>$subtask['end'], 'days'=>$subtask['days'],
+                        'actual_start'=>$subtask['actual_start'], 'actual_end'=>$subtask['actual_end'],
+                        'work_days' => $subtask['work_days'],
+                    ];
+                }
+            }
+        }
+        return $data;
+    }
+
+    public function headings(): array
     {
         return [
-            BeforeExport::class  => function(BeforeExport $event) {
-                $event->sheet->setColumnFormat(array(
-                    'B' => '0',
-                    'C' => 'yyyy-mm-dd',
-                    'D' => 'yyyy-mm-dd',
-                    'F' => 'yyyy-mm-dd',
-                    'G' => 'yyyy-mm-dd',
-                ));
-            },
-        ]
-    } 
-     public function columnFormats(): array
-    {
-        return [
-            'A' => DataType::TYPE_STRING,
-            'B' => DataType::TYPE_STRING,
-            'C' => DataType::TYPE_STRING,
-            'D' => DataType::TYPE_STRING,
-            'E' => DataType::TYPE_STRING,
-            'F' => DataType::TYPE_STRING,
-            'G' => DataType::TYPE_STRING,
-            'H' => DataType::TYPE_STRING,
-            'I' => DataType::TYPE_STRING,
-            'J' => DataType::TYPE_STRING,
-            'K' => DataType::TYPE_STRING,
-            'L' => DataType::TYPE_STRING,
+            'wbs', 
+            'title', 
+            'start',
+            'end',
+            'days',
+            'actual_start',
+            'actual_end',
+            'work_days',
         ];
     }
-    */   
+
     public function title(): string
     {
         return 'detail-project';

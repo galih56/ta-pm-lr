@@ -71,7 +71,8 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
                                                     key={i}
                                                     onMouseEnter={(event)=>handlePopoverOpen(event,member)}
                                                     onMouseLeave={handlePopoverClose} style={{margin:'1em'}}>
-                                                    {member?.project_client?.client?(<Typography>{`Client ${`(${member.project_client?.client?.institution})`}`}</Typography>):null}
+                                                    {member?.project_client?.client?(<>{`Client ${`(${member.project_client?.client?.institution})`}`}</>):null}
+                                                    {member?.is_client?(<Typography>{`Client ${`(${memberOnHover?.institution})`}`}</Typography>):null}                                    
                                                     {member?.role?<Typography>{member?.role?.name}</Typography>:null}
                                             </span>
                                             )
@@ -82,18 +83,13 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
                                             style={{ pointerEvents: 'none', zIndex:'1200',padding:'1em' }}
                                             open={openPopOver}
                                             anchorEl={anchorEl}
-                                            anchorOrigin={{
-                                                vertical: 'bottom',
-                                                horizontal: 'center',
-                                            }}
-                                            transformOrigin={{
-                                                vertical: 'top',
-                                                horizontal: 'center',
-                                            }}
+                                            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                                            transformOrigin={{ vertical: 'top', horizontal: 'center', }}
                                             onClose={handlePopoverClose}
                                         >
                                             <div style={{padding:'0.3em'}}>
                                                 {memberOnHover.project_client?.client?(<Typography>{`Client ${`(${memberOnHover.project_client?.client?.institution})`}`}</Typography>):null}
+                                                {memberOnHover?.is_client?(<Typography>{`Client ${`(${memberOnHover?.institution})`}`}</Typography>):null}
                                                 {memberOnHover.user?(<Typography>{memberOnHover?.user?.name}</Typography>):null}
                                                 {memberOnHover.name?(<Typography>{memberOnHover?.name}</Typography>):null}
                                                 {memberOnHover.member?.role?<Typography>{memberOnHover?.member?.role?.name}</Typography>:null}

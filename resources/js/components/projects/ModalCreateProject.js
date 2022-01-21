@@ -1,4 +1,5 @@
-import React, { useEffect, useContext,useState } from 'react';
+import React, { useEffect,useState,useContext } from 'react';
+import toast from 'react-hot-toast';
 import axios from 'axios';
 import Box from '@material-ui/core/Box';
 import Tabs from '@material-ui/core/Tabs';
@@ -8,7 +9,6 @@ import Alert from '@material-ui/core/Alert';
 import AlertTitle from '@material-ui/core/AlertTitle';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
-import UserContext from '../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
 import makeStyles from '@material-ui/styles/makeStyles';
 import IconButton from '@material-ui/core/IconButton';
@@ -21,16 +21,15 @@ import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import CloseIcon from '@material-ui/icons/Close';
-import toast from 'react-hot-toast';
-import moment from 'moment';
 import UserSearchBar from './../widgets/UserSearchBar';
-import Autocomplete from '@material-ui/core/Autocomplete';
-import Chip from '@material-ui/core/Chip';
+import TeamSearchbar from './../widgets/TeamSearchbar';
+import moment from 'moment';
+import UserContext from '../../context/UserContext';
 
 const styles = (theme) => {
     return({
-    root: { margin: 0, padding: theme.spacing(2) },
-    closeButton: { position: 'absolute !important', right: theme.spacing(1), top: theme.spacing(1), color: theme.palette.grey[500], },
+        root: { margin: 0, padding: theme.spacing(2) },
+        closeButton: { position: 'absolute !important', right: theme.spacing(1), top: theme.spacing(1), color: theme.palette.grey[500], },
 })};
 
 const DialogTitle = withStyles(styles)((props) => {
@@ -78,6 +77,7 @@ export default function ModalCreateProject(props) {
     const classes = useStyles();
     var open = props.open;
     var closeModal = props.closeModal;
+    const global = useContext(UserContext);
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -86,7 +86,6 @@ export default function ModalCreateProject(props) {
     const [dateRange, setDateRange] = useState([null,null]);
     const [members, setMembers] = useState([]);
     const [projectClients, setProjectClients] = useState([]);
-    const [teams, setTeams] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
     const [choosenTeams, setChoosenTeams] = useState([]);
     const [showImportErrors,setShowImportErrors]=useState(false);
@@ -99,30 +98,11 @@ export default function ModalCreateProject(props) {
         e.preventDefault();
         setShowImportErrors(!showImportErrors);
     }
-    const global = useContext(UserContext);
-    
-    const getTeams = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + `teams`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url)
-            .then((result) => {
-                setTeams(result.data);
-            }).catch((error) => {
-                switch(error.response?.status){
-                    case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
-                    default : toast.error(<b>{error.response.statusText}</b>); break
-                }
-            });
-    }
 
     useEffect(() => {
         if (end === '') setEnd(null);
         if (start === '') setStart(null);
-        getTeams();
     }, [end,start]);
-
 
     const submitData = () => {
         let body = new FormData();
@@ -165,6 +145,7 @@ export default function ModalCreateProject(props) {
                         closeModal();
                         toast.dismiss(toast_loading);
                         setImportErrors([]);
+                        toast.success('A new project has been created')
                     }else{
                         if(result.data.error==true && result.data.messages.length>0){
                             setImportErrors(result.data.messages);
@@ -183,7 +164,7 @@ export default function ModalCreateProject(props) {
     return (
         <Dialog aria-labelledby="Create a project" open={open}>
             <DialogTitle onClose={
-                () => { closeModal(); }}>Create a Project</DialogTitle>
+                () => closeModal()}>Create a Project</DialogTitle>
             {(global.state.authenticated === true)?(
                 <form onSubmit={(e)=>{
                     e.preventDefault();
@@ -237,24 +218,7 @@ export default function ModalCreateProject(props) {
                                             </LocalizationProvider> 
                                         </Grid>
                                         <Grid item lg={12} md={12} sm={12} xs={12}>
-                                            <Autocomplete
-                                                multiple freeSolo options={teams}
-                                                getOptionLabel={(option) => option.name}
-                                                renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    variant="standard"
-                                                    label="Teams"
-                                                />)}
-                                                onChange={(event, options)=> {
-                                                    console.log(options)
-                                                    setChoosenTeams(options)
-                                                }}
-                                                renderTags={(value, getTagProps) =>
-                                                    value.map((option, index) => (
-                                                        <Chip variant="outlined" label={option.name} {...getTagProps({ index })} />
-                                                    ))}
-                                            />
+                                            <TeamSearchbar onChange={(event, options)=> setChoosenTeams(options)}/>
                                         </Grid>
                                         <Grid item lg={12} md={12} sm={12} xs={12}>
                                             <UserSearchBar required={true} userOnly={true}
@@ -305,21 +269,7 @@ export default function ModalCreateProject(props) {
                                                 onChange={(values)=>setProjectClients(values)}/>
                                         </Grid>
                                         <Grid item lg={12} md={12} sm={12} xs={12}>
-                                            <Autocomplete
-                                                multiple freeSolo options={teams}
-                                                getOptionLabel={(option) => option.name}
-                                                renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    variant="standard"
-                                                    label="Teams"
-                                                />)}
-                                                onChange={(event, options)=>setChoosenTeams(options)}
-                                                renderTags={(value, getTagProps) =>
-                                                    value.map((option, index) => (
-                                                        <Chip variant="outlined" label={option.name} {...getTagProps({ index })} />
-                                                    ))}
-                                            />
+                                            <TeamSearchbar onChange={(event, options)=>setChoosenTeams(options)}/>
                                         </Grid>
                                         <Grid item lg={12} md={12} sm={12} xs={12}>
                                             <TextField variant="standard"

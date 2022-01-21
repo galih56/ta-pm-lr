@@ -25,7 +25,7 @@ export default function TeamList({projects_id,callback}) {
 
     const getTeams = () => {
         const toast_loading = toast.loading('Loading...');
-        const url = process.env.MIX_BACK_END_BASE_URL + `projects/${projects_id}/teams`;
+        const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${projects_id}/teams`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
@@ -43,7 +43,7 @@ export default function TeamList({projects_id,callback}) {
     }
 
     const getAllTeams = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + `teams`;
+        const url = `${process.env.MIX_BACK_END_BASE_URL}teams`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url, {})

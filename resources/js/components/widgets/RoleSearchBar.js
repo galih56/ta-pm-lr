@@ -16,7 +16,7 @@ function RoleSearchBar(props) {
     let history = useHistory();
 
     const getRoles = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'roles';
+        const url = `${process.env.MIX_BACK_END_BASE_URL}roles`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)

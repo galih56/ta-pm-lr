@@ -154,7 +154,7 @@ export default function EnhancedTable(props) {
     },[memberChange])
 
     const getMembers=()=>{
-        const url = process.env.MIX_BACK_END_BASE_URL + 'projects/' + projects_id + '/members';
+        const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${projects_id}/members`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
@@ -242,7 +242,7 @@ function Row(props) {
     let global = useContext(UserContext);
 
     const getTasks = (id) => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'project-members/' + id + '/tasks';
+        const url = `${process.env.MIX_BACK_END_BASE_URL}project-members/${id}/tasks`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)

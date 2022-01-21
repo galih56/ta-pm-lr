@@ -27,18 +27,16 @@ Route::resource('teams', 'App\Http\Controllers\front\TeamController');
 Route::resource('team-members', 'App\Http\Controllers\front\TeamMemberController');
 Route::resource('tags', 'App\Http\Controllers\front\TagController');
 Route::resource('comments', 'App\Http\Controllers\front\CommentController');
-Route::resource('users', 'App\Http\Controllers\front\UserController');
-
-Route::get('/roles/tree','App\Http\Controllers\front\RoleController@getTree');
-Route::resource('roles', 'App\Http\Controllers\front\RoleController');
 
 Route::group(['prefix'=>'users'],function(){
     Route::get('/{id}/projects','App\Http\Controllers\front\UserController@getProjects');
     Route::get('/{id}/meetings','App\Http\Controllers\front\UserController@getMeetings');
     Route::get('/{id}/tasks','App\Http\Controllers\front\UserController@gettasks');
     Route::post('/{id}/get-github-access-token','App\Http\Controllers\front\UserController@getGithubAccessToken');
+    Route::patch('/{id}/changepassword','App\Http\Controllers\front\UserController@changePassword');
 });
-
+Route::resource('users', 'App\Http\Controllers\front\UserController');
+Route::resource('roles', 'App\Http\Controllers\front\RoleController');
 Route::get('projects-overview','App\Http\Controllers\front\ProjectController@getoverallProjectReports');
 Route::get('import-format','App\Http\Controllers\admin\ProjectController@downloadImportFormat')->name('projects.download-import-format');
 Route::resource('projects', 'App\Http\Controllers\front\ProjectController');

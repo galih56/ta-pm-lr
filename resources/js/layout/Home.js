@@ -45,9 +45,9 @@ const Home = (props) => {
     const getProjects = () => {
         let url =''
         if([1,2,3,4].includes(global.state.role?.id)){
-            url = process.env.MIX_BACK_END_BASE_URL + 'projects';
+            url = `${process.env.MIX_BACK_END_BASE_URL}projects`;
         }else{
-            url = process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/projects';
+            url = `${process.env.MIX_BACK_END_BASE_URL}users/${global.state.id}/projects`;
         }
         const toast_loading = toast.loading('Loading...',{ id: 'clipboard' });
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
@@ -68,7 +68,7 @@ const Home = (props) => {
     }
 
     const getTasks = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'users/' + global.state.id + '/tasks';
+        const url = `${process.env.MIX_BACK_END_BASE_URL}users/${global.state.id}/tasks`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
