@@ -12,7 +12,7 @@ class ClientController extends Controller
 {
     public function __construct(Request $request)
     {
-        // $this->middleware('auth:sanctum',['only'=>['index','update','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['index','update','store','destroy']]); 
     }
 
     public function index()
@@ -43,14 +43,9 @@ class ClientController extends Controller
 
     public function show($id)
     {
-        $client=Client::with('projects.project')
+        $client=Client::with('projects')
                     ->where('id','=',$id)
-                    ->firstOrFail()->toArray();
-        $projects=[];
-        for ($i=0; $i < count($client['projects']); $i++) { 
-            $projects[]=$client['projects'][$i]['project'];
-        }
-        $client['projects']=$projects;
+                    ->firstOrFail();
         return response()->json($client);
     }
 

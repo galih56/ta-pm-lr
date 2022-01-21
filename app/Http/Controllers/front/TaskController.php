@@ -19,7 +19,7 @@ class TaskController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['index','update','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['index','update','show','store','destroy']]); 
     }
 
     public function index()

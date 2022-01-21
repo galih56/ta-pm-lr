@@ -35,6 +35,9 @@ class ProjectImport implements ToCollection, WithHeadingRow, WithValidation
             'start' => [ 'required','date' ],
             'end' => [ 'required','date' ],
             'days' => [ 'required' ],
+            'start' => [ 'date' ],
+            'end' => [ 'date' ],
+            // dateformat:d/m/Y
         ];
     }
 }

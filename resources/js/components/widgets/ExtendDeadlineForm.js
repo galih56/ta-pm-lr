@@ -1,6 +1,6 @@
 import axios from 'axios';
 import moment from 'moment';
-import React, { useContext,useState } from 'react';
+import React, { useContext,useState,useEffect } from 'react';
 import UserContext from '../../context/UserContext';
 import SendIcon from '@material-ui/icons/Send';
 import withStyles from '@material-ui/styles/withStyles';
@@ -56,7 +56,9 @@ export default function ModalExtendDeadline({open,handleClose,task,detailProject
     }else{
         minDate=parseISO(moment(detailProject.start).format('YYYY-MM-DD HH:mm:ss'));
     }
-    
+    useEffect(()=>{
+        console.log(minDate,maxDate)
+    })
     const handleSubmit=(e)=>{
         e.preventDefault();     
         var body=null;

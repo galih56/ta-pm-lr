@@ -23,7 +23,7 @@ const ProjectList = (props) => {
 
     const getProjects = () => {
         const toast_loading = toast.loading('Loading...');
-        let url = process.env.MIX_BACK_END_BASE_URL + 'projects-overview';
+        let url = `${process.env.MIX_BACK_END_BASE_URL}projects-overview`;
         if(![1,2,3,4,5,6].includes(global.state.role?.id)){
             url+=`?users_id=${global.state.id}`;
         }

@@ -17,15 +17,8 @@ const TableTasks=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, onTa
             <TableBody>
                 {rows?rows.map((task)=>{
                     return(
-                        <TaskRow 
-                            key={task.id}
-                            data={task} 
-                            handleCompleteTask={handleCompleteTask}
-                            handleDetailTaskOpen={handleDetailTaskOpen}
-                            headCells={headCells}
-                            onTaskUpdate={onTaskUpdate}
-                            onTaskDelete={onTaskDelete}
-                            />
+                        <TaskRow key={task.id} data={task} handleCompleteTask={handleCompleteTask} handleDetailTaskOpen={handleDetailTaskOpen}
+                            headCells={headCells} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete} />
                     )
                 }):<></>}
             </TableBody>

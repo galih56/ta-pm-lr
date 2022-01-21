@@ -10,8 +10,6 @@
             <th>actual_end</th>
             <th>progress</th>
             <th>work days</th>
-            <th>start_label</th>
-            <th>end_label</th>
         </tr>
     </thead>
     <tbody>

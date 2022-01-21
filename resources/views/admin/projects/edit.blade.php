@@ -32,6 +32,11 @@
             <!-- Form -->
             <div class="row">
                 <h1 class="h4">Form Edit Proyek</h1>
+                <div class="col-1">
+                    <a class="btn btn-primary" href="{{url('api/projects/'.$project->id.'/export')}}">
+                        Export
+                    </a>
+                </div>
                 <div class="col-12">
                     <div class="mb-2">
                         <label class="my-1 me-2" for="title">Nama</label>

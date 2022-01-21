@@ -10,12 +10,12 @@ class RoleController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['show','update','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['index','update','show','store','destroy']]); 
     }
 
     public function index()
     {
-        $roles=Role::with('users')->get();
+        $roles=Role::orderBy('name','ASC')->get();
         return response($roles); 
     }
 

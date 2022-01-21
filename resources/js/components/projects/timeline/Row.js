@@ -17,9 +17,10 @@ function Row(props) {
 
     const handleCompleteTask = (task,event) => {
         var body = { complete: event.target.checked };
-        // if(!task.actual_end && event.target.checked){
-        //     task.actual_end=moment(task.end).format("YYYY-MM-DD HH:mm")
-        // }
+        if(!task.actual_start){
+            toast.error("This task hasn't started yet");
+            return;
+        }
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${task.id}/complete`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -49,7 +50,8 @@ function Row(props) {
                 <TableCell>
                     <IconButton size="small"
                         onClick={() => setOpenCollapsible(!openCollapsible)}
-                    > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton>
+                    > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} 
+                    </IconButton>
                 </TableCell>
                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }} onClick={onClick}>{data.title}</TableCell>
                 <TableCell> </TableCell>

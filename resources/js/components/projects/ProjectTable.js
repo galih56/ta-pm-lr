@@ -49,8 +49,6 @@ function stableSort(array, comparator) {
 
 const headCells = [
     { id: 'title', align: 'left', disablePadding: false, label: 'Title' },
-    { id: 'updated_at', align: 'right', disablePadding: false, label: 'Updated At' },
-    { id: 'created_at', align: 'right', disablePadding: false, label: 'Created At' },
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -158,15 +156,7 @@ export default function EnhancedTable({data,page_name,showFormCreate}) {
                                 />
                                 <TableBody>
                                     {rows.length?stableSort(rows, getComparator(order, orderBy))
-                                        .filter(row=>{
-                                            if(
-                                                row.title?.toLowerCase().includes(keywords.toLowerCase()) 
-                                                    || row.created_at?.toLowerCase().includes(keywords.toLowerCase())
-                                                    || row.updated_at?.toLowerCase().includes(keywords.toLowerCase())
-                                                ){
-                                                return row;
-                                            }
-                                        })
+                                        .filter(row=>row.title?.toLowerCase().includes(keywords.toLowerCase()))
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                         .map((row, index) => {
                                             return (
@@ -180,12 +170,6 @@ export default function EnhancedTable({data,page_name,showFormCreate}) {
                                                         <Link to={`/${page_name}/${row.id}/`} style={{ textDecoration: 'none', color: 'black', textAlign:"left" }}>
                                                             {row.title}
                                                         </Link>
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        {moment(row.updated_at).format('DD MMM YYYY')}
-                                                    </TableCell>
-                                                    <TableCell align="right">
-                                                        {moment(row.created_at).format('DD MMM YYYY')}
                                                     </TableCell>
                                                 </TableRow>
                                             );

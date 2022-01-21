@@ -110,12 +110,14 @@ export const RestrictedAccessMenu = () => {
                         </ListItemIcon>
                         <ListItemText> Employee </ListItemText>
                     </ListItem>
-                    <ListItem component="a" href={`${process.env.MIX_FRONT_END_BASE_URL}master`} target="_blank" >
-                        <ListItemIcon>
-                            <StorageIcon />
-                        </ListItemIcon>
-                        <ListItemText> Master Data </ListItemText>
-                    </ListItem>
+                    {/* 
+                        <ListItem component="a" href={`${process.env.MIX_FRONT_END_BASE_URL}master`} target="_blank" >
+                            <ListItemIcon>
+                                <StorageIcon />
+                            </ListItemIcon>
+                            <ListItemText> Master Data </ListItemText>
+                        </ListItem> 
+                    */}
                 </React.Fragment>
             ):<></>}
         </React.Fragment>

@@ -167,7 +167,7 @@ const Files = (props) => {
 
     const getFiles = () => {
         const toast_loading = toast.loading('Loading...');
-        const url = process.env.MIX_BACK_END_BASE_URL + 'projects/' + projects_id + '/files';
+        const url = `${process.env.MIX_BACK_END_BASE_URL}projects/'${projects_id}/files`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {

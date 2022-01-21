@@ -40,7 +40,7 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
     const [confirmPassword,setConfirmPassword]=useState('');
 
     const getRoles = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'roles';
+        const url = `${process.env.MIX_BACK_END_BASE_URL}roles`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
@@ -66,6 +66,7 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
         
         if (newPassword.trim() === '' || confirmPassword.trim()==='') {
             setChangePasswordInputsEmpty(true);
+            return;
         }else{
             setChangePasswordInputsEmpty(false);
         }
@@ -73,6 +74,7 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
             setPasswordConfirmAlert(false);
         } else {
             setPasswordConfirmAlert(true);
+            return;
         }
         const url=`${process.env.MIX_BACK_END_BASE_URL}users/${data.id}/changepassword`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;

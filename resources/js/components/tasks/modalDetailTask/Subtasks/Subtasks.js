@@ -94,9 +94,14 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
             });
     }
 
-    const handleCompleteTask = (id,event) => {
-        const body = { id: id, complete: event.target.checked };
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${id}/complete`;
+    const handleCompleteTask = (task,event) => {
+        
+        if(!task.actual_start){
+            toast.error("This task hasn't started yet");
+            return;
+        }
+        const body = { id: task.id, complete: event.target.checked };
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${task.id}/complete`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         toast.promise(
@@ -105,7 +110,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                 loading: 'Updating...',
                 success: (result)=>{
                     var newSubtasks=data.map(item=>{
-                        if(item.id==id) item.complete=event.target.checked;
+                        if(item.id==task.id) item.complete=event.target.checked;
                         return item
                     })
                     console.log(body,newSubtasks,id,result.data)
@@ -242,7 +247,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                                     style={{cursor:'pointer'}}
                                 >        
                                     <Checkbox
-                                        onChange={(event)=>handleCompleteTask(item.id,event)}
+                                        onChange={(event)=>handleCompleteTask(item,event)}
                                         checked={item.complete}
                                     />
                                     <span onClick={()=> handleDetailTaskOpen({task:item,open:true})} > 

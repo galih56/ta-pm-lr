@@ -227,6 +227,44 @@ class ProjectController extends Controller
         return $wbs;
     }
 
+    function validateDateTime($str)
+    {   
+        try {
+            $str1=Carbon::createFromFormat('d/m/Y', $str)->format('d/m/Y');
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+        return false;
+        
+        // d/m/Y
+        if(strlen($str)>=8){
+            return false;
+        }
+        // if (preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/",$str)) return true;  
+    }
+    
+
+    function makeLabel($data){
+        if(!empty($data['actual_start'])){
+            $start = Carbon::createFromFormat('d/m/Y', $data['start'])->format('d/m/Y');
+            $actual_start = Carbon::createFromFormat('d/m/Y', $data['actual_start'])->format('d/m/Y');
+            if($actual_start<$start) $data['start_label']='Mulai lebih cepat';
+            if($actual_start>$start) $data['start_label']='Mulai terlambat';
+            if($actual_start==$start) $data['start_label']='Mulai tepat waktu';
+        }
+        
+        if(!empty($data['actual_end'])){
+            $end = Carbon::createFromFormat('d/m/Y', $data['end'])->format('d/m/Y');
+            $actual_end = Carbon::createFromFormat('d/m/Y', $data['actual_end'])->format('d/m/Y');
+            if($actual_end<$end) $data['end_label']='Selesai lebih cepat';
+            if($actual_end>$end) $data['end_label']='Selesai terlambat';
+            if($actual_end==$end) $data['end_label']='Selesai tepat waktu';
+        }
+        return $data;
+    }
+
+
     public function import(Request $request,$id=null){
         // https://github.com/SpartnerNL/Laravel-Excel/issues/1226#issuecomment-306734223
         $project=null;
@@ -245,37 +283,58 @@ class ProjectController extends Controller
                     
                     if(empty($row['title'])) {
                         $errors['error']=true;
-                        $errors['messages'][]=['row'=>$i,'title'=> 'Title column is required'];
+                        $errors['messages'][]=['row'=>$i,'title'=> 'Title column is required','data'=>$row];
                     }
                     if(empty($row['wbs'])) {
                         $errors['error']=true;
-                        $errors['messages'][]=['row'=>$i,'title'=> 'WBS column is required'];
+                        $errors['messages'][]=['row'=>$i,'title'=> 'WBS column is required','data'=>$row];
                     }
 
-                    if(gettype($row['start'])=='integer' || gettype($row['end'])=='integer') {
+                    if(!$this->validateDateTime($row['start']) || !$this->validateDateTime($row['end'])) {
                         $errors['error']=true;
-                        $errors['messages'][]=['row'=>$i,'title'=> 'start/end column must be a valid date (yyyy-mm-dd)'];
+                        $errors['messages'][]=['row'=>$i,'title'=> 'start/end column must be a valid date (d/m/Y)','data'=>$row];
                     }
                     
+                    if(array_key_exists('actual_start',$row)){ 
+                        if(!empty($row['actual_start']) ){
+                            if(!$this->validateDateTime($row['actual_start'])) {
+                                $errors['error']=true;
+                                $errors['messages'][]=['row'=>$i,'title'=> 'actual_start column must be a valid date (d/m/Y)','data'=>$row];
+                            }
+                        }   
+                    }
+                    
+                    if(array_key_exists('actual_end',$row)){ 
+                        if(!empty($row['actual_end'])){
+                            if(!$this->validateDateTime($row['actual_end'])) {
+                                $errors['error']=true;
+                                $errors['messages'][]=['row'=>$i,'title'=> 'actual_end column must be a valid date (d/m/Y)','data'=>$row];
+                            }
+                        }   
+                    }
+
                     $wbs=$this->checkWBSFormat($row);
                     if(!$wbs){
                         $errors['error']=true;
                         $errors['messages'][]=['row'=>$i,'title'=> 'WBS format is invalid','data'=>$row];
                     }
                     
-                    $start = Carbon::parse($row['start'])->format('Y-m-d');
-                    $end = Carbon::parse($row['end'])->format('Y-m-d');
-                    
-                    if(!empty($row['start'])){
-                        $earliest_date=$start;   
-                    }else if($earliest_date>$start){
-                        $earliest_date=$start;   
-                    }
-                    
-                    if(!empty($row['end'])){
-                        $latest_date=$end;   
-                    } else if($latest_date<$end){
-                        $latest_date=$end;   
+                    if($this->validateDateTime($row['start'])) {  
+                        $start = Carbon::createFromFormat('d/m/Y', $row['start']);
+                        if(empty($earliest_date)){
+                            $earliest_date=$start;   
+                        }else if($earliest_date->gt($start))
+                        {
+                            $earliest_date=$start;   
+                        }
+                    }   
+                    if($this->validateDateTime($row['end'])){
+                        $end = Carbon::createFromFormat('d/m/Y', $row['end']);
+                        if(empty($latest_date)){
+                            $latest_date=$end;   
+                        } else if($latest_date->lt($start)){
+                            $latest_date=$end;   
+                        }    
                     }
 
                     if($wbs){
@@ -297,9 +356,9 @@ class ProjectController extends Controller
                 }
 
                 if($errors['error']==true){
-                    // dd($imported_data,$data);
                     return $errors;
                 }
+                
                 if($id){
                     $project=Project::findOrFail($id);
                 }  else{
@@ -323,16 +382,30 @@ class ProjectController extends Controller
                     $list['projects_id']=$project->id;
                     $tasks=[];
                     if(array_key_exists('tasks',$list)) $tasks= $list['tasks'];
+                    $list['start']=Carbon::createFromFormat('d/m/Y', $list['start'])->format('Y-m-d');
+                    $list['end']=Carbon::createFromFormat('d/m/Y', $list['end'])->format('Y-m-d');
+                    if($list['actual_start']) $list['actual_start']=Carbon::createFromFormat('d/m/Y', $list['actual_start'])->format('Y-m-d');
+                    if($list['actual_end']) $list['actual_end']=Carbon::createFromFormat('d/m/Y', $list['actual_end'])->format('Y-m-d');
                     $list=TaskList::create($list);
                     foreach ($tasks as $j => $task) {
                         $task['lists_id']=$list->id;
                         $task['is_subtask']=true;
                         $subtasks=[];
                         if(array_key_exists('subtasks',$task)) $subtasks=$task['subtasks'];
+                        $task['start']=Carbon::createFromFormat('d/m/Y', $task['start'])->format('Y-m-d');
+                        $task['end']=Carbon::createFromFormat('d/m/Y', $task['end'])->format('Y-m-d');
+                        if($task['actual_start']) $task['actual_start']=Carbon::createFromFormat('d/m/Y', $task['actual_start'])->format('Y-m-d');
+                        if($task['actual_end']) $task['actual_end']=Carbon::createFromFormat('d/m/Y', $task['actual_end'])->format('Y-m-d');
+                        $task=$this->makeLabel($task);
                         $task=Task::create($task);
                         foreach ($subtasks as $k => $subtask) {
                             $subtask['parent_task_id']=$task->id;
                             $subtask['is_subtask']=true;
+                            $subtask=$this->makeLabel($subtask);
+                            $subtask['start']=Carbon::createFromFormat('d/m/Y', $subtask['start'])->format('Y-m-d');
+                            $subtask['end']=Carbon::createFromFormat('d/m/Y', $subtask['end'])->format('Y-m-d');
+                            if($subtask['actual_start']) $subtask['actual_start']=Carbon::createFromFormat('d/m/Y', $subtask['actual_start'])->format('Y-m-d');
+                            if($subtask['actual_end']) $subtask['actual_end']=Carbon::createFromFormat('d/m/Y', $subtask['actual_end'])->format('Y-m-d');
                             Task::create($subtask);
                         }
                     }
