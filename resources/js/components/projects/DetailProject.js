@@ -116,6 +116,7 @@ const DetailProject = (props) => {
     const [detailMeetingOpen,setDetailMeetingOpen]=useState(false)
     const [clickedMeeting, setClickedMeeting] = useState(clickedMeetingInitialState);
     const getDetailProject = () => {
+        const toast_loading = toast.loading('Loading...');
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
         if(![1,2,3,4].includes(global.state.role?.id)){
             url+='?users_id='+global.state.id;
@@ -128,7 +129,9 @@ const DetailProject = (props) => {
                 setDetailProject(data);
                 global.dispatch({ type: 'store-detail-project', payload: data });
                 global.dispatch({type:'store-current-selected-project',payload:params.id});
+                toast.dismiss(toast_loading);   
             }).catch((error) => {
+                toast.dismiss(toast_loading);   
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
@@ -149,8 +152,11 @@ const DetailProject = (props) => {
         const paramMeetingId = query.get('meetings_id');
         if (paramTaskId) handleDetailTaskOpen({ task:{...clickedTask, id: paramTaskId}, open: true });
         if (paramMeetingId) handleDetailMeetingOpen({ meeting : { id:paramMeetingId,...clickedMeeting }, open: true });
-        getDetailProject();
     }, []);
+
+    useEffect(()=>{
+        getDetailProject();
+    },[]);
 
     useEffect(()=>{
         const currentProject=getProjectFromState(global.state.projects, params.id);

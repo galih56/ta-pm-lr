@@ -68,13 +68,16 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
     return(
         <Suspense fallback={null}>
             <TableRow hover key={data.id} >
-                <TableCell> <IconButton size="small" onClick={() =>setOpenCollapsible(!openCollapsible)} > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton> </TableCell>
+                <TableCell> 
+                    {data.cards?.length?( <IconButton size="small" onClick={() =>setOpenCollapsible(!openCollapsible)} > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton> ):null}
+                </TableCell>
                 <TableCell padding="checkbox"> 
-                    <Checkbox onChange={event=> handleCompleteTask(data,event)} checked={data.complete}/>
+                    {data.actual_start?(
+                        <Checkbox onChange={event=> handleCompleteTask(data,event)} checked={data.complete}/>
+                    ):null}
                 </TableCell>
                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}> 
-                    <Link 
-                    onClick={(e)=>{
+                    <Link  onClick={(e)=>{
                         e.preventDefault();
                         history.push({ pathname: pathname, search: searchParams.toString() });
                         var taskInfo={task:{...data,onTaskUpdate:onTaskUpdate,onTaskDelete:onTaskDelete},open:true}
@@ -118,17 +121,17 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
                 <TableCell align="left">  {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY'):null}<br/> {data.end_label?<StatusChip status={data.end_label}/>:null} </TableCell>
                 <TableCell align="right"> {(data.actual_start && data.actual_end)?Math.round(moment.duration(moment(data.actual_start).diff(moment(data.actual_end))).asDays())*(-1):null} </TableCell>
             </TableRow>
-            <TableRow >
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={headCells.length+1}>
-                    <Collapse in={openCollapsible} timeout="auto">
-                        <TableSubtask 
-                            tasks={data.cards}  headCells={headCells} handleCompleteTask={handleCompleteTask}
-                            handleDetailTaskOpen={handleDetailTaskOpen} onTaskUpdate={onTaskUpdate}
-                            onTaskDelete={onTaskDelete}
-                        />
-                    </Collapse>
-                </TableCell>
-            </TableRow>
+            {data.cards?.length?(
+                <TableRow >
+                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={headCells.length+1}>
+                        <Collapse in={openCollapsible} timeout="auto">
+                            <TableSubtask tasks={data.cards} headCells={headCells} handleCompleteTask={handleCompleteTask}
+                                handleDetailTaskOpen={handleDetailTaskOpen} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete}
+                            />
+                        </Collapse>
+                    </TableCell>
+                </TableRow>
+            ):null}
         </Suspense>
     )
 }

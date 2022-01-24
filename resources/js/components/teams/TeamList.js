@@ -16,24 +16,35 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
 import Alert from '@material-ui/core/Alert';
 import AlertTitle from '@material-ui/core/AlertTitle';
+import toast from 'react-hot-toast';
 
 export default function TeamTable() {
     const [openFormCreate,setOpenFormCreate]=useState(false);
     const [rows,setRows]=useState([])
     const global = useContext(UserContext);
+    let history=useHistory();
+
     const getTeams = () => {
+        const toast_loading=toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}teams`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setRows(result.data);
-            }).catch(console.log);
+                toast.dismiss(toast_loading);
+            }).catch(e=>{
+                toast.dismiss(toast_loading);
+                console.error(e);
+            });
     }
 
     useEffect(()=>{
         getTeams()
-    },[]);
+        return history.listen(location=>{
+            getTeams();
+        });
+    },[history]);
 
     const onHoveredStyle = { cursor: 'pointer' };
     return (

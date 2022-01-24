@@ -173,9 +173,12 @@ export default function EnhancedTable() {
         removeUserIdQueryString()
     }
 
-    useEffect(() => {
-        getUsers();
-    }, []);
+    useEffect(()=>{
+        getUsers()
+        return history.listen(location=>{
+            getUsers();
+        });
+    },[history]);
 
     useEffect(()=>{
         const query = new URLSearchParams(location.search);

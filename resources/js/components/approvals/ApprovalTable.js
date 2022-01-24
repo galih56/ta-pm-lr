@@ -19,7 +19,7 @@ import { visuallyHidden } from '@material-ui/utils';
 import ApprovalStatus from './../widgets/ApprovalStatus';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import moment from 'moment';
 import axios from 'axios';
 
@@ -106,32 +106,35 @@ export default function EnhancedTable() {
     let global = useContext(UserContext);
     let history=useHistory();
 
-    useEffect(() => {
+    useEffect(()=>{
+        getApprovals()
+        return history.listen(location=>{
+            getApprovals();
+        });
+    },[history]);
+
+    const getApprovals = () => {
         if(!([1,2,4,5].includes(global.state.role?.id) && global.state.current_project_id)) {
             history.push('/projects');
         }else{
-            getApprovals();
+            const toast_loading = toast.loading('Loading...');
+            const url = `${process.env.MIX_BACK_END_BASE_URL}approvals?projects_id=${global.state.current_project_id}`;
+            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+            axios.defaults.headers.post['Content-Type'] = 'application/json';
+            axios.get(url)
+                .then((result) => {
+                    setRows(result.data);
+                    toast.dismiss(toast_loading);
+                }).catch((error) => {
+                    toast.dismiss(toast_loading);
+                    console.error(error.response);
+                    switch(error.response?.status){
+                        case 401 : toast.error(<b>Unauthenticated</b>); break;
+                        case 422 : toast.error(<b>Some required inputs are empty</b>); break;
+                        default : toast.error(<b>{error.response.statusText}</b>); break
+                    }
+                });    
         }
-    }, []);
-
-    const getApprovals = () => {
-        const toast_loading = toast.loading('Loading...');
-        const url = `${process.env.MIX_BACK_END_BASE_URL}approvals?projects_id=${global.state.current_project_id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url)
-            .then((result) => {
-                setRows(result.data);
-                toast.dismiss(toast_loading);
-            }).catch((error) => {
-                toast.dismiss(toast_loading);
-                console.error(error.response);
-                switch(error.response?.status){
-                    case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
-                    default : toast.error(<b>{error.response.statusText}</b>); break
-                }
-            });
     }
 
     const handleRequestSort = (event, property) => {

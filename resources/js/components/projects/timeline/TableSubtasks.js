@@ -52,7 +52,7 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
                                 <TableCell padding="checkbox"> 
                                 </TableCell>
                                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}> 
-                                        <Checkbox onChange={event=>handleCompleteTask(subtask,event)} checked={subtask.complete}/>
+                                    {subtask.actual_start?(<Checkbox onChange={event=>handleCompleteTask(subtask,event)} checked={subtask.complete}/>):null}
                                     <Link 
                                     onClick={(e)=>{
                                         e.preventDefault()

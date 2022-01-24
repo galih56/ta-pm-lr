@@ -22,7 +22,7 @@ const ProjectList = (props) => {
     },[projects])
 
     const getProjects = () => {
-        const toast_loading = toast.loading('Loading...');
+        const toast_loading=toast.loading('Loading...');
         let url = `${process.env.MIX_BACK_END_BASE_URL}projects-overview`;
         if(![1,2,3,4,5,6].includes(global.state.role?.id)){
             url+=`?users_id=${global.state.id}`;
@@ -46,8 +46,11 @@ const ProjectList = (props) => {
     useEffect(() => {
         global.dispatch({ type: 'remember-authentication' });
         if (!global.state.authenticated === true) history.push('/auth');
-        getProjects();
     }, []);
+
+    useEffect(()=>{
+        getProjects();
+    },[]);
 
     return (
         <Grid container spacing={2}>

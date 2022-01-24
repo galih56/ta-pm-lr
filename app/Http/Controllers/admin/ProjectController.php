@@ -196,12 +196,12 @@ class ProjectController extends Controller
         return redirect(route('projects.index'));
     }
 
-    public function downloadImportFormat(){
-        $file_path = public_path('admin/format-import.xlsx');
+    public function getImportFormat(){
+        $file_path = public_path('admin/import-format.xlsx');
         if (file_exists($file_path))
         {
             // Send Download
-            return Response::download($file_path, 'format-import.xlsx', [
+            return Response::download($file_path, 'import-format.xlsx', [
                 'Content-Length: '. filesize($file_path)
             ]);
         }

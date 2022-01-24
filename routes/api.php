@@ -38,7 +38,7 @@ Route::group(['prefix'=>'users'],function(){
 Route::resource('users', 'App\Http\Controllers\front\UserController');
 Route::resource('roles', 'App\Http\Controllers\front\RoleController');
 Route::get('projects-overview','App\Http\Controllers\front\ProjectController@getoverallProjectReports');
-Route::get('import-format','App\Http\Controllers\admin\ProjectController@downloadImportFormat')->name('projects.download-import-format');
+Route::get('import-format','App\Http\Controllers\admin\ProjectController@getImportFormat')->name('projects.download-import-format');
 Route::resource('projects', 'App\Http\Controllers\front\ProjectController');
 Route::group(['prefix'=>'projects'],function(){
     Route::post('/{id}/extend-deadline', 'App\Http\Controllers\front\ProjectController@extendDeadline');

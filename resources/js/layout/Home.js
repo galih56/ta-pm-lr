@@ -38,21 +38,31 @@ const Home = (props) => {
             var codeResponse=queryParams.get('code');
             global.dispatch({type:'store-github-auth',payload:{code:codeResponse}})
         }
+    },[])
+
+    useEffect(()=>{
         getProjects();
         getTasks();
-    },[])
+        console.log(history.location);
+    },[]);
+
+    useEffect(()=>{
+        return history.listen(location=>{
+                getProjects();
+                getTasks();
+        });
+    },[history]);
 
     const getProjects = () => {
         let url =''
+        const toast_loading=toast.loading('Loading...');
         if([1,2,3,4].includes(global.state.role?.id)){
             url = `${process.env.MIX_BACK_END_BASE_URL}projects`;
         }else{
             url = `${process.env.MIX_BACK_END_BASE_URL}users/${global.state.id}/projects`;
         }
-        const toast_loading = toast.loading('Loading...',{ id: 'clipboard' });
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-
         axios.get(url)
             .then((result) => {
                 global.dispatch({ type: 'store-projects', payload: result.data });

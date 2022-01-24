@@ -182,15 +182,9 @@ export default function EnhancedTable({data}) {
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
                                     return (
-                                        <TableRow
-                                            hover
-                                            role="checkbox" key={row.id}
-                                        >
+                                        <TableRow hover role="checkbox" key={row.id}>
                                             <TableCell padding="checkbox">
-                                                <Checkbox
-                                                    onChange={event =>handleCompleteTask(row, event)}
-                                                    checked={row.complete}
-                                                />
+                                                {row.actual_start? <Checkbox onChange={event =>handleCompleteTask(row, event)} checked={row.complete} />:null}
                                             </TableCell>
                                             <TableCell component="th" scope="row" padding="none" style={{ cursor: 'pointer' }}
                                                 onClick={() => {

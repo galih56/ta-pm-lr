@@ -95,6 +95,7 @@ export default function ModalDetailTask(props) {
                 const payload = { projects_id: data.projects_id, lists_id: data.lists_id, ...result.data };
                 if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
                 else global.dispatch({ type: 'store-detail-task', payload: payload })
+                getProgress();
             }).catch((error) => {
                 console.error(error);
                 switch(error.response?.status){
@@ -108,11 +109,15 @@ export default function ModalDetailTask(props) {
     useEffect(() => {
         getDetailTask()
     }, [id,props.initialState.id]);
-
-    useEffect(()=>{
-        getProgress();
-    },[]);
     
+    useEffect(()=>{
+        const interval=setInterval(()=>{
+            getProjects();
+            getTasks();
+        },7000);
+        return()=>clearInterval(interval)
+    },[]);
+
     useEffect(()=>{
         if(props.detailProject?.id)setDetailProject(props.detailProject)
         else {
@@ -292,16 +297,19 @@ export default function ModalDetailTask(props) {
                     {data.title} {data.label ? `(${data.label})` : ''}
                     <br/>
                     {data.creator?<span style={{fontSize:'0.7em'}}>Created by : {data.creator.name}</span>:null}
-                    <br />      
-                    <FormControlLabel
-                        control={<Checkbox onChange={(event) => {
-                            var progress=data.progress         
-                            if(data.cards.length<=0 && data.complete==true) progress=100 ;
-                            else if(data.cards.length<=0 && data.complete==false)progress=0 ;
-                            setData({...data,complete:event.target.checked,progress:progress});
-                            handleCompleteTask(event.target.checked);
-                        }} fontSize="small" checked={data.complete} />}
-                        label={`Complete`}/>
+                    <br /> 
+                    {data.actual_start?(
+                        <FormControlLabel
+                            control={<Checkbox onChange={(event) => {
+                                var progress=data.progress         
+                                if(data.cards.length<=0 && data.complete==true) progress=100 ;
+                                else if(data.cards.length<=0 && data.complete==false)progress=0 ;
+                                setData({...data,complete:event.target.checked,progress:progress});
+                                handleCompleteTask(event.target.checked);
+                            }} fontSize="small" checked={data.complete} />}
+                            label={`Complete`}/>
+
+                    ):null}  
                     {(data.cards || !data.is_subtask)?<TaskProgress value={data.progress}></TaskProgress>:<></>}
                     {data.extended?(
                             <Chip

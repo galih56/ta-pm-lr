@@ -28,7 +28,7 @@ const DetailProject = (props) => {
     const [clickedTask, setClickedTask] = useState(clickedTaskInitialState);
 
     const getDetailProject = () => {
-        const toast_loading = toast.loading('Loading...');
+        const toast_loading=toast.loading('Loading...');
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
         if(![1,2,3,4,5,6].includes(global.state.role?.id)){
             url+=`?users_id=${global.state.id}`;
@@ -40,8 +40,8 @@ const DetailProject = (props) => {
                 setDetailData(result.data)
                 toast.dismiss(toast_loading);
             }).catch((error) => {
-                toast.dismiss(toast_loading);
                 console.error(error);
+                toast.dismiss(toast_loading);
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
@@ -50,11 +50,11 @@ const DetailProject = (props) => {
             });
     }
 
+
     useEffect(() => {
         const query = new URLSearchParams(props.location.search);
         const paramTaskId = query.get('tasks_id');
         if (paramTaskId) handleDetailTaskOpen({ ...clickedTask, taskId: paramTaskId, open: true });
-        getDetailProject();
     }, []);
 
     const handleDetailTaskOpen = (taskInfo) => {
@@ -63,6 +63,9 @@ const DetailProject = (props) => {
         setClickedTask({ taskId: taskId,onCardDelete:onCardDelete });
     };
 
+    useEffect(()=>{
+        getDetailProject();
+    },[]);
 
     const showModalDetailTask = useCallback(() => {
         if ((clickedTask.id || clickedTask.taskId) && detailTaskOpen == true) {

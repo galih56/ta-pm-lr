@@ -58,7 +58,7 @@ export default function ModalExtendDeadline({open,handleClose,task,detailProject
     }
     useEffect(()=>{
         console.log(minDate,maxDate)
-    })
+    },[])
     const handleSubmit=(e)=>{
         e.preventDefault();     
         var body=null;

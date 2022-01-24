@@ -188,13 +188,12 @@ export default function EnhancedTable({detailProject}) {
                                             role="checkbox" key={row.title}
                                         >
                                             <TableCell padding="checkbox">
-                                                <Checkbox
-                                                    onChange={(event) => {
-                                                        var checked = event.target.checked;
-                                                        handleCompleteTask(row, checked)
-                                                    }}
-                                                    checked={row.complete}
-                                                />
+                                                {row.actual_start?(
+                                                    <Checkbox onChange={(event) => {
+                                                            var checked = event.target.checked;
+                                                            handleCompleteTask(row, checked)
+                                                            }} checked={row.complete} />
+                                                ):null}
                                             </TableCell>
                                             <TableCell component="th" scope="row" padding="none" style={{ cursor: 'pointer' }}
                                                 onClick={() => {

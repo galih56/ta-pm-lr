@@ -18,7 +18,7 @@ function Row(props) {
     const handleCompleteTask = (task,event) => {
         var body = { complete: event.target.checked };
         if(!task.actual_start){
-            toast.error("This task hasn't started yet");
+            toast.warning("This task hasn't started yet");
             return;
         }
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${task.id}/complete`;
@@ -48,10 +48,12 @@ function Row(props) {
              
             <TableRow hover key={data.id} style={{ color:'#393939', backgroundColor:'#e3e3e3' }}>
                 <TableCell>
-                    <IconButton size="small"
-                        onClick={() => setOpenCollapsible(!openCollapsible)}
-                    > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} 
-                    </IconButton>
+                    {data.cards?.length?(
+                        <IconButton size="small"
+                            onClick={() => setOpenCollapsible(!openCollapsible)}
+                        > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} 
+                        </IconButton>
+                    ):null}
                 </TableCell>
                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }} onClick={onClick}>{data.title}</TableCell>
                 <TableCell> </TableCell>
@@ -63,20 +65,19 @@ function Row(props) {
                 <TableCell align="right"> </TableCell>
                 <TableCell> </TableCell>
             </TableRow>
-            <TableRow >
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={headCells.length+2}>
-                    <Collapse in={openCollapsible} timeout="auto">
-                        <TableTasks
-                            headCells={headCells}
-                            tasks={data.cards} 
-                            handleCompleteTask={handleCompleteTask}
-                            handleDetailTaskOpen={handleDetailTaskOpen}
-                            onTaskUpdate={onTaskUpdate}
-                            onTaskDelete={onTaskDelete}
-                            />
-                    </Collapse>
-                </TableCell>
-            </TableRow>
+            {data.cards?.length?(
+                <TableRow >
+                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={headCells.length+2}>
+                        <Collapse in={openCollapsible} timeout="auto">
+                            <TableTasks headCells={headCells}
+                                tasks={data.cards}  handleCompleteTask={handleCompleteTask}
+                                handleDetailTaskOpen={handleDetailTaskOpen}
+                                onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete}
+                                />
+                        </Collapse>
+                    </TableCell>
+                </TableRow>
+            ):null}
         </React.Fragment>
     );
 }

@@ -246,10 +246,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                                 <Grid item xl={12} md={12} sm={12} xs={12} 
                                     style={{cursor:'pointer'}}
                                 >        
-                                    <Checkbox
-                                        onChange={(event)=>handleCompleteTask(item,event)}
-                                        checked={item.complete}
-                                    />
+                                    {item.actual_start?(<Checkbox onChange={(event)=>handleCompleteTask(item,event)} checked={item.complete}/>):null}
                                     <span onClick={()=> handleDetailTaskOpen({task:item,open:true})} > 
                                         {item.title} {item.start ? moment(item.start).format('DD MMMM YYYY') : ''} - {item.end ? moment(item.end).format('DD MMMM YYYY') : ''}
                                     </span>
