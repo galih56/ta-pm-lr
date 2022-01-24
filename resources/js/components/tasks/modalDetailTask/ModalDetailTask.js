@@ -112,8 +112,7 @@ export default function ModalDetailTask(props) {
     
     useEffect(()=>{
         const interval=setInterval(()=>{
-            getProjects();
-            getTasks();
+            getDetailTask()
         },7000);
         return()=>clearInterval(interval)
     },[]);
