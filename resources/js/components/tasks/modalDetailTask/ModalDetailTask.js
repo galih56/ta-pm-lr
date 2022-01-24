@@ -18,8 +18,7 @@ import Chip from '@material-ui/core/Chip';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import moment from 'moment';
 import DialogConfirm from './DialogConfirm';
-import toast, { Toaster } from 'react-hot-toast';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import toast from 'react-hot-toast';
 
 // https://stackoverflow.com/questions/35352638/react-how-to-get-parameter-value-from-query-string
 const styles = (theme) => ({
@@ -97,7 +96,6 @@ export default function ModalDetailTask(props) {
                 else global.dispatch({ type: 'store-detail-task', payload: payload })
                 getProgress();
             }).catch((error) => {
-                console.error(error);
                 switch(error.response?.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
@@ -110,13 +108,6 @@ export default function ModalDetailTask(props) {
         getDetailTask()
     }, [id,props.initialState.id]);
     
-    useEffect(()=>{
-        const interval=setInterval(()=>{
-            getDetailTask()
-        },7000);
-        return()=>clearInterval(interval)
-    },[]);
-
     useEffect(()=>{
         if(props.detailProject?.id)setDetailProject(props.detailProject)
         else {
