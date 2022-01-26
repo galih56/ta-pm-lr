@@ -5,7 +5,6 @@ import UserContext from '../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
 import Dialog from '@material-ui/core/Dialog';
 import Checkbox from '@material-ui/core/Checkbox';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
 import IconButton from '@material-ui/core/IconButton';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
@@ -18,8 +17,7 @@ import Chip from '@material-ui/core/Chip';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import moment from 'moment';
 import DialogConfirm from './DialogConfirm';
-import toast, { Toaster } from 'react-hot-toast';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import toast from 'react-hot-toast';
 
 // https://stackoverflow.com/questions/35352638/react-how-to-get-parameter-value-from-query-string
 const styles = (theme) => ({
@@ -96,11 +94,13 @@ export default function ModalDetailTask(props) {
                 if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
                 else global.dispatch({ type: 'store-detail-task', payload: payload })
             }).catch((error) => {
-                console.error(error);
                 switch(error.response?.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
-                    default : toast.error(<b>{error.response.statusText}</b>); break
+                    default : {
+                        toast.error('Something went wrong');
+                        console.error(error); break;
+                    }
                 }
             });
     }
@@ -108,11 +108,9 @@ export default function ModalDetailTask(props) {
     useEffect(() => {
         getDetailTask()
     }, [id,props.initialState.id]);
-
     useEffect(()=>{
         getProgress();
-    },[]);
-    
+    },[data.cards])    
     useEffect(()=>{
         if(props.detailProject?.id)setDetailProject(props.detailProject)
         else {
@@ -164,29 +162,6 @@ export default function ModalDetailTask(props) {
         }
     }
     
-    const handleStartTask = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/start`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    var result=result.data;
-                    setData(result);
-                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
-                    else global.dispatch({ type: 'store-detail-task', payload: result });
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
-    }
-
     const handleCompleteTask = (check) => {
         const body = { complete: check };
         
@@ -215,7 +190,30 @@ export default function ModalDetailTask(props) {
                 },
             });
     }
-
+    
+    const handleStartTask = () => {
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/start`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        toast.promise(
+            axios.patch(url),
+            {
+                loading: 'Updating...',
+                success: (result)=>{
+                    var result=result.data;
+                    setData(result);
+                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                    else global.dispatch({ type: 'store-detail-task', payload: result });
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
+    }
+    
     const saveChanges = (body) => {
         if(!body) body= {
             id:data.id,complete:data.complete, title:data.title, 
@@ -289,24 +287,21 @@ export default function ModalDetailTask(props) {
                     removeTaskIdQueryString(history)
                     closeModalDetailTask();
                 }}>
-                    {data.title} {data.label ? `(${data.label})` : ''}
-                    <br/>
-                    {data.creator?<span style={{fontSize:'0.7em'}}>Created by : {data.creator.name}</span>:null}
-                    <br />      
-                    <FormControlLabel
-                        control={<Checkbox onChange={(event) => {
+                    {data.title}
+                    
+                    {data.parent_task?<Checkbox fontSize="small" onChange={(event) => {
                             var progress=data.progress         
                             if(data.cards.length<=0 && data.complete==true) progress=100 ;
                             else if(data.cards.length<=0 && data.complete==false)progress=0 ;
                             setData({...data,complete:event.target.checked,progress:progress});
                             handleCompleteTask(event.target.checked);
-                        }} fontSize="small" checked={data.complete} />}
-                        label={`Complete`}/>
+                        }}checked={data.complete}/>:null}
+                    <br/>
+                    {data.creator?<span style={{fontSize:'0.7em'}}>Created by : {data.creator.name}</span>:null}
+                    <br /> 
                     {(data.cards || !data.is_subtask)?<TaskProgress value={data.progress}></TaskProgress>:<></>}
                     {data.extended?(
-                            <Chip
-                                variant="outlined"
-                                size="small"
+                            <Chip variant="outlined" size="small"
                                 label={`Deadline extended (${moment(data.old_deadline).format('DD MMMM YYYY')} >>> ${moment(data.end).format('DD MMMM YYYY')})`}
                                 color="secondary"
                             /> 

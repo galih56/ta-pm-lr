@@ -85,6 +85,9 @@ export default function ModalImportExcel(props) {
                     <DialogContent dividers>
                         <Grid container spacing={2} style={{ paddingLeft: 3, paddingRight: 3 }} >
                             <Grid item lg={12} md={12} sm={12} xs={12}>
+                                <a href={`${process.env.MIX_FRONT_END_BASE_URL}api/import-format`}>Download format import</a>
+                            </Grid>
+                            <Grid item lg={12} md={12} sm={12} xs={12}>
                                 <input type="file" onChange={e=> setSelectedFile(e.target.files)}/>
                             </Grid>
                         </Grid>

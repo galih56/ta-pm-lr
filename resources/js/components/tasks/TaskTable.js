@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import { green, grey} from "@material-ui/core/colors";
 import makeStyles from '@material-ui/styles/makeStyles';
 import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
@@ -122,7 +123,6 @@ export default function EnhancedTable({data}) {
             )
         }
     }
-
     const handleCompleteTask = (task, event) => {
         
         if(!task.actual_start){
@@ -182,10 +182,7 @@ export default function EnhancedTable({data}) {
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
                                     return (
-                                        <TableRow
-                                            hover
-                                            role="checkbox" key={row.id}
-                                        >
+                                        <TableRow hover role="checkbox" key={row.id}>
                                             <TableCell padding="checkbox">
                                                 <Checkbox
                                                     onChange={event =>handleCompleteTask(row, event)}

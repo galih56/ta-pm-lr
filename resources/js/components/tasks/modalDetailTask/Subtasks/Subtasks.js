@@ -21,6 +21,7 @@ import UserContext from '../../../../context/UserContext';
 import toast from 'react-hot-toast';
 import ModalDetailTask from './../ModalDetailTask';
 import moment from 'moment';
+import StatusChip from './../../../widgets/StatusChip';
 import axios from 'axios';
 
 const useStyles = makeStyles((theme) => ({
@@ -94,9 +95,8 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
             });
     }
 
-    const handleCompleteTask = (task,event) => {
-        
-        if(!task.actual_start){
+    const handleCompleteTask = (task,event) => {    
+        if(!task.actual_start || task.actual_end){
             toast.error("This task hasn't started yet");
             return;
         }
@@ -128,6 +128,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                 },
             });
     }
+
     const handleRemoveSubtask = (subtask) => {
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${subtask.id}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -246,12 +247,13 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                                 <Grid item xl={12} md={12} sm={12} xs={12} 
                                     style={{cursor:'pointer'}}
                                 >        
-                                    <Checkbox
-                                        onChange={(event)=>handleCompleteTask(item,event)}
-                                        checked={item.complete}
-                                    />
+                                    <Checkbox checked={item.complete} onChange={(event)=>handleCompleteTask(item,event)}/>
                                     <span onClick={()=> handleDetailTaskOpen({task:item,open:true})} > 
-                                        {item.title} {item.start ? moment(item.start).format('DD MMMM YYYY') : ''} - {item.end ? moment(item.end).format('DD MMMM YYYY') : ''}
+                                        {item.title}
+                                        <br/>
+                                        <span style={{paddingLeft:'2em'}}>{item.start ? moment(item.start).format('DD MMMM YYYY') : ''} - {item.end ? moment(item.end).format('DD MMMM YYYY') : ''}</span>
+                                        <br/>
+                                        <span style={{paddingLeft:'2em'}}><StatusChip status={item.start_label}/> - <StatusChip status={item.end_label}/></span>
                                     </span>
                                 </Grid>
                                 <Grid item xl={6} md={6} sm={12} xs={12}>

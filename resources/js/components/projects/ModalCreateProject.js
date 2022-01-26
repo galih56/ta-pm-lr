@@ -135,7 +135,7 @@ export default function ModalCreateProject(props) {
             const toast_loading = toast.loading('Loading...');
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
-            
+           
             axios.post(url,body)
                 .then((result) => {
                     if(!result.data?.error){
@@ -150,13 +150,14 @@ export default function ModalCreateProject(props) {
                         if(result.data.error==true && result.data.messages.length>0){
                             setImportErrors(result.data.messages);
                             toast.dismiss(toast_loading);
-                            return 'Failed to import excel file';
+                            toast.error('Failed to import excel file')
                         }
                     }
                 }).catch((e)=>{
-                    console.log(e)
-                    setImportErrors([{'row':0,'title':'File has changed'}]);
+                    console.error(e)
                     toast.dismiss(toast_loading);
+                    var error_message=error?.response?.statusText? error?.response?.statusText:'Something went wrong'
+                    toast.error(error_message)
                 });
         }
     }
@@ -288,15 +289,13 @@ export default function ModalCreateProject(props) {
                                                 <AlertTitle>Error</AlertTitle>
                                                 {(showImportErrors)?<ul>
                                                     {importErrors.map(error=><li>Row {error.row} : {error.title}</li>)}
-                                                </ul>:null}
+                                                </ul>:<ul><li>Invalid format</li></ul>}
                                                 {(showImportErrors)?
                                                     <a onClick={handleShowMoreErrors}>Hide...</a>:
                                                     <a onClick={handleShowMoreErrors}>Show more...</a>}
                                             </Alert>:null}
-                                            <input 
-                                                accept=".csv, .xls, .xlsx, text/csv, application/csv, text/comma-separated-values, application/csv, application/excel, application/vnd.msexcel, text/anytext, application/vnd. ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                                type="file"
-                                                onChange={(e)=>setSelectedFile(e.target.files)}
+                                            <input accept=".csv, .xls, .xlsx, text/csv, application/csv, text/comma-separated-values, application/csv, application/excel, application/vnd.msexcel, text/anytext, application/vnd. ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                                type="file" onChange={(e)=>setSelectedFile(e.target.files)}
                                             />
                                         </Grid>
                                     </Grid>

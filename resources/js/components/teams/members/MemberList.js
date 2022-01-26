@@ -1,4 +1,5 @@
 import React,{useState,useEffect,useContext} from 'react';
+import axios from 'axios';
 import makeStyles from '@material-ui/styles/makeStyles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -15,6 +16,7 @@ import FormAddNewMember from '../FormAddNewMember';
 import ModalDetailMember from './ModalDetailMember/ModalDetailMember';
 import CancelIcon from '@material-ui/icons/Cancel';
 import UserContext from '../../../context/UserContext';
+import toast from 'react-hot-toast';
 
 const useStyles = makeStyles((theme) => ({
     root: { width: '100%', backgroundColor: theme.palette.background.paper, },
@@ -36,9 +38,24 @@ const MemberList = ({teamId,data}) => {
     }
 
     const removeMember=(member)=>{
-        setRows(rows.filter((row)=>{
-            if(row.id!=member.id) return row;
-        }));
+        const url = `${process.env.MIX_BACK_END_BASE_URL}team-members/${member.team_members_id}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        toast.promise(axios.delete(url),
+        {
+            loading: 'Deleting...',
+            success: (result)=>{                        
+                setRows(rows.filter((row)=>{
+                    if(row.id!=member.id) return row;
+                }));
+                return <b>Successfully deleted</b>
+            },
+            error: (error)=>{
+                if(error.response.status==401) return <b>Unauthenticated</b>;
+                if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                return <b>{error.response.statusText}</b>;
+            },
+        });
     }
     
     useEffect(()=> {
@@ -60,9 +77,9 @@ const MemberList = ({teamId,data}) => {
                     return <>
                         <ListItem alignItems="flex-start" 
                             key={member.id}
-                            style={{cursor:'pointer'}} onClick={()=>{
-                            handleModalOpen(member, true) 
-                        }}>
+                            style={{cursor:'pointer'}} 
+                            // onClick={()=> handleModalOpen(member, true)}
+                            >
                             {(member.profile_picture_path && member.name)?(
                             <ListItemAvatar>
                                     <Avatar alt={"Photo profile " + member.name} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:

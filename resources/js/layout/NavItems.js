@@ -11,10 +11,11 @@ import EmailIcon from '@material-ui/icons/Email';
 import BusinessCenterIcon from '@material-ui/icons/BusinessCenter';
 import UserContext from './../context/UserContext'
 import StorageIcon from '@material-ui/icons/Storage';
-
+import uuid from 'uuid';
+// https://stackoverflow.com/questions/60416677/how-to-re-render-a-component-with-react-router-link-pointing-to-the-same-url
 export const MainListItems = () => (
     <React.Fragment>
-        <ListItem button component={Link} to="/projects" >
+        <ListItem button component={Link} to={'/projects'} key={uuid()}>
             <ListItemIcon>
                 <DashboardIcon />
             </ListItemIcon>
@@ -22,13 +23,13 @@ export const MainListItems = () => (
                 Home
             </ListItemText>
         </ListItem>
-        <ListItem button component={Link} to="/teams" >
+        <ListItem button component={Link} to="/teams"  key={uuid()}>
             <ListItemIcon>
                 <PeopleIcon />
             </ListItemIcon>
             <ListItemText> Teams </ListItemText>
         </ListItem>
-        <ListItem button component={Link} to="/reports" >
+        <ListItem button component={Link} to="/reports"  key={uuid()}>
             <ListItemIcon>
                 <BarChartIcon />
             </ListItemIcon>
@@ -87,7 +88,7 @@ export const RestrictedAccessMenu = () => {
             
             {(showApprovalMenu)?(
                 <React.Fragment>
-                    <ListItem button component={Link} to="/approvals" >
+                    <ListItem button component={Link} to="/approvals"  key={uuid()}>
                         <ListItemIcon>
                             <EmailIcon />
                         </ListItemIcon>
@@ -98,13 +99,13 @@ export const RestrictedAccessMenu = () => {
             
             {(showAdminMenu)?(
                 <React.Fragment>
-                    <ListItem button component={Link} to="/clients" >
+                    <ListItem button component={Link} to="/clients"  key={uuid()}>
                         <ListItemIcon>
                             <BusinessCenterIcon />
                         </ListItemIcon>
                         <ListItemText> Clients </ListItemText>
                     </ListItem>
-                    <ListItem button component={Link} to="/users" >
+                    <ListItem button component={Link} to="/users"  key={uuid()}>
                         <ListItemIcon>
                             <PeopleIcon />
                         </ListItemIcon>

@@ -5,7 +5,7 @@ import TableCell from '@material-ui/core/TableCell';
 
 function EnhancedTableHead({headCells,extraHeadCells,tablesubtasks}) {
     return (
-        <TableHead style={{display:((tablesubtasks)?'none':'table-header-group')}}>
+        <TableHead style={{display:(tablesubtasks?'none':'table-header-group')}}>
             <TableRow>
                 {extraHeadCells?extraHeadCells:<></>}
                 <TableCell  padding="checkbox"></TableCell>

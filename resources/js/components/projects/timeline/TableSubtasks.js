@@ -11,8 +11,9 @@ import TableRow from '@material-ui/core/TableRow';
 import Popover from '@material-ui/core/Popover';
 import Typography from '@material-ui/core/Typography';
 import EnhancedTableHead from './EnhancedTableHead';
+import { green, grey} from "@material-ui/core/colors";
 
-const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
+const TableSubtask=({tasks,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
     const [subtasks,setSubtasks]=useState([])
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [openPopOver, setOpenPopOver] = React.useState(null);
@@ -52,7 +53,7 @@ const TableSubtask=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, on
                                 <TableCell padding="checkbox"> 
                                 </TableCell>
                                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}> 
-                                        <Checkbox onChange={event=>handleCompleteTask(subtask,event)} checked={subtask.complete}/>
+                                    {subtask.complete?<Checkbox disabled checked={subtask.complete} />:<Checkbox disabled checked={subtask.complete} />}
                                     <Link 
                                     onClick={(e)=>{
                                         e.preventDefault()

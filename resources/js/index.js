@@ -130,7 +130,9 @@ const App = () => {
             <ThemeProvider theme={theme}>
                 <Router>
                     <Layout>
-                        <Toaster/>
+                        <Toaster 
+                            position="bottom-right"
+                            reverseOrder={false}/>
                         <React.Suspense fallback={<LinearProgress />}>
                             <Switch>
                                 <Route path="/my-tasks" render={(props) => (<TaskList {...props} ></TaskList>)} />

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { BrowserRouter as Router, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Link,useHistory } from 'react-router-dom';
 import UserContext from '../../context/UserContext';
 import axios from 'axios';
 import PropTypes from 'prop-types';
@@ -99,13 +99,15 @@ export default function EnhancedTable() {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [openFormCreate,setOpenFormCreate]=useState(false);
-
+    let history=useHistory();
     let global = useContext(UserContext);
 
-    useEffect(() => {
-        getClients();
-        if(!global.state.role?.id==8) history.push('/projects');
-    }, []);
+    useEffect(()=>{
+        getClients()
+        return history.listen(location=>{
+            getClients();
+        });
+    },[history]);
 
     const getClients = () => {
         const toast_loading = toast.loading('Loading...');
@@ -124,6 +126,8 @@ export default function EnhancedTable() {
                     default : toast.error(<b>{error.response.statusText}</b>); break
                 }
             });
+            
+        if(!global.state.role?.id==8) history.push('/projects');
     }
 
     const handleRequestSort = (event, property) => {
@@ -139,6 +143,30 @@ export default function EnhancedTable() {
         setPage(0);
     };
     
+    const CustomRow=(data)=>{
+        return (
+            <>
+            <TableRow hover key={data.id}>
+                <TableCell align="left">
+                     <Link to={`/clients/${data.id}`} style={{textDecoration:'none'}}>
+                    {data.institution}
+                    </Link>
+                </TableCell>
+                <TableCell align="left">
+                    {data.city}
+                </TableCell>
+            </TableRow>
+            {data.description?(
+                <TableRow>
+                    <TableCell align="left"  colSpan="2">
+                    {data.description}
+                    </TableCell>
+                </TableRow>
+            ):null}
+            </>
+        );
+    }
+
     return (
         <Grid container>  
            
@@ -177,29 +205,7 @@ export default function EnhancedTable() {
                                 <TableBody>
                                     {(rows.length>0)?stableSort(rows, getComparator(order, orderBy))
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                        .map((row) => {
-                                            return (
-                                                <>
-                                                <TableRow hover key={row.id}>
-                                                    <TableCell align="left">
-                                                         <Link to={`/clients/${row.id}`} style={{textDecoration:'none'}}>
-                                                        {row.institution}
-                                                        </Link>
-                                                    </TableCell>
-                                                    <TableCell align="left">
-                                                        {row.city}
-                                                    </TableCell>
-                                                </TableRow>
-                                                {row.description?(
-                                                    <TableRow>
-                                                        <TableCell align="left"  colSpan="2">
-                                                        {row.description}
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ):null}
-                                                </>
-                                            );
-                                        }):(    
+                                        .map((row) =><CustomRow data={row}/>):(    
                                             <TableRow>
                                                 <TableCell  colSpan={headCells.length} align="center">
                                                     <Typography variant="body1">There is no data to show</Typography>

@@ -78,7 +78,7 @@ function DetailTeam(props) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         toast.promise(
-            axios.patch(url, { id:data.id, name:data.name }),
+            axios.patch(url,data),
             {
                 loading: 'Updating...',
                 success: (result)=>{
@@ -101,14 +101,14 @@ function DetailTeam(props) {
             {
                 loading: 'Deleting',
                 success: (result)=>{
-                        props.onDelete(data);
                         history.push('/teams');
                         return <b>Successfully deleted</b>
                     },
                     error: (error)=>{
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                        return <b>{error.response.statusText}</b>;
+                        console.log(error)
+                        if(error?.response?.status==401) return <b>Unauthenticated</b>;
+                        if(error?.response.status==422) return <b>Some required inputs are empty</b>;
+                        return <b>{error?.response?.statusText}</b>;
                     },
                 });
     }
@@ -135,14 +135,30 @@ function DetailTeam(props) {
                     </Grid>
                     <Grid item xl={12} lg={12} md={12} sm={12}>
                         {isEditing?(
-                                <TextField variant="standard"
-                                    label="Name : "
-                                    onChange={(e) => setData({...data,name:e.target.value})}
-                                    style={{ width: '100%' }}
-                                    required
-                                    defaultValue={data.name}
-                                />
-                            ):(<Typography variant="h5">{data.name}</Typography>)}
+                                <>
+                                    <TextField variant="standard"
+                                        label="Name : "
+                                        onChange={(e) => setData({...data,name:e.target.value})}
+                                        style={{ width: '100%' }}
+                                        required
+                                        defaultValue={data.name}
+                                    />
+                                    
+                                    <TextField variant="standard"
+                                        label="Description : "
+                                        defaultValue={data.description} fullWidth
+                                        onChange={(e) => setData({ ...data, description: e.target.value })}
+                                        multiline
+                                        fullWidth
+                                        rows={4}
+                                    />
+                                </>
+                            ):(
+                                <>
+                                    <Typography variant="h5">{data.name}</Typography>
+                                    <Typography variant="body">{data.description}</Typography>
+                                </>
+                            )}
                     </Grid>
                     <Grid item xl={12} lg={12} md={12} sm={12} style={{marginTop:'0.5em'}}>
                         {[1,2,4].includes(global.state.role?.id)?(

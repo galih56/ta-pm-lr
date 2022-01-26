@@ -10,14 +10,14 @@ import IconButton from '@material-ui/core/IconButton';
 import Popover from '@material-ui/core/Popover';
 import Typography from '@material-ui/core/Typography';
 import Checkbox from '@material-ui/core/Checkbox';
+import { green, grey} from "@material-ui/core/colors";
 import moment from 'moment';
 
 const StatusChip = lazy(() => import('../../widgets/StatusChip'));
 const TableSubtask = lazy(() => import('./TableSubtasks'));
 
-const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
-    
-    let global = useContext(UserContext);
+
+const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
     const [openCollapsible, setOpenCollapsible] = useState(false);
     const [progress, setProgress] = useState(0);
 
@@ -68,13 +68,14 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
     return(
         <Suspense fallback={null}>
             <TableRow hover key={data.id} >
-                <TableCell> <IconButton size="small" onClick={() =>setOpenCollapsible(!openCollapsible)} > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton> </TableCell>
+                <TableCell> 
+                    {data.cards?.length?( <IconButton size="small" onClick={() =>setOpenCollapsible(!openCollapsible)} > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton> ):null}
+                </TableCell>
                 <TableCell padding="checkbox"> 
-                    <Checkbox onChange={event=> handleCompleteTask(data,event)} checked={data.complete}/>
+                    {/* {data.complete?<Checkbox disabled checked={data.complete} />:<Checkbox disabled checked={data.complete}/>} */}
                 </TableCell>
                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}> 
-                    <Link 
-                    onClick={(e)=>{
+                    <Link  onClick={(e)=>{
                         e.preventDefault();
                         history.push({ pathname: pathname, search: searchParams.toString() });
                         var taskInfo={task:{...data,onTaskUpdate:onTaskUpdate,onTaskDelete:onTaskDelete},open:true}
@@ -118,17 +119,17 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
                 <TableCell align="left">  {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY'):null}<br/> {data.end_label?<StatusChip status={data.end_label}/>:null} </TableCell>
                 <TableCell align="right"> {(data.actual_start && data.actual_end)?Math.round(moment.duration(moment(data.actual_start).diff(moment(data.actual_end))).asDays())*(-1):null} </TableCell>
             </TableRow>
-            <TableRow >
-                <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={headCells.length+1}>
-                    <Collapse in={openCollapsible} timeout="auto">
-                        <TableSubtask 
-                            tasks={data.cards}  headCells={headCells} handleCompleteTask={handleCompleteTask}
-                            handleDetailTaskOpen={handleDetailTaskOpen} onTaskUpdate={onTaskUpdate}
-                            onTaskDelete={onTaskDelete}
-                        />
-                    </Collapse>
-                </TableCell>
-            </TableRow>
+            {data.cards?.length?(
+                <TableRow >
+                    <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={headCells.length+1}>
+                        <Collapse in={openCollapsible} timeout="auto">
+                            <TableSubtask tasks={data.cards} headCells={headCells}
+                                handleDetailTaskOpen={handleDetailTaskOpen} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete}
+                            />
+                        </Collapse>
+                    </TableCell>
+                </TableRow>
+            ):null}
         </Suspense>
     )
 }

@@ -33,11 +33,19 @@ class GanttChart extends React.Component {
                 column.cards[j].realization=false;
                 column.cards[j].isManual=true;
                 var task=column.cards[j];
+                task.metadata={
+                    title:task.title, 
+                    start:task.start, end:task.end,
+                    actual_start:task.actual_start, actual_end:task.actual_end,
+                    complete:task.complete
+                };
+
                 var task_realization={
                     id: `realisasi-${task.id}`, title:``, subtitle:`Realisasi ${task.title}` ,
                     start : task.start, end : task.end, 
                     realization:true, 
                     metadata:{
+                        title:task.title, 
                         start:task.start, end:task.end,
                         actual_start:task.actual_start, actual_end:task.actual_end,
                         complete:task.complete
@@ -60,6 +68,7 @@ class GanttChart extends React.Component {
                         start : subtask.start, end : subtask.end,
                         predecessor:`${task.id}SS`, realization:true,
                         metadata:{
+                            title:task.title, 
                             start:subtask.start, end:subtask.end,
                             actual_start:subtask.actual_start, actual_end:subtask.actual_end,
                             complete:subtask.complete
@@ -103,29 +112,29 @@ class GanttChart extends React.Component {
     }
     
     TaskbarTemplate(props) {
-        var taskBarStyle={};
-        var progressBarStyle={};
+        var taskBarStyle={height: "100%" };
+        var progressBarStyle={
+            width: props.ganttProperties.progressWidth + "px",
+            height: "100%"
+        };
         var labelStyle={  position: "absolute", fontSize: "12px",  color: "white", top: "5px", left: "10px",  fontFamily: "Segoe UI", cursor: "move" }
         const task=props.taskData;
-        console.log(task)
+
         if(task.realization==true){
             if(!task.metadata.actual_start && !task.metadata.actual_end){
                 taskBarStyle={height: "100%" };
+                labelStyle.color='black';
                 progressBarStyle={ width: props.ganttProperties.progressWidth + "px", height: "100%" };
             }
             
-            if(task.metadata.actual_start && !task.metadata.actual_end){
+            if(task.metadata.actual_start && !task.metadata.actual_end){      
                 taskBarStyle={ backgroundColor:'#ccdc27',height: "100%"}
                 labelStyle.color='black';
                 progressBarStyle={ backgroundColor:'#d4b11f', width: props.ganttProperties.progressWidth + "px", height: "100%" };    
             }
 
-            if(task.metadata.actual_start && task.metadata.actual_end && !task.metadata.complete ){
-                taskBarStyle={ backgroundColor:'#d4b11f',height: "100%",border:'1px solid #07650b' }
-                progressBarStyle={ backgroundColor:'#43a047', width: props.ganttProperties.progressWidth + "px", height: "100%" };    
-            }
 
-            if(task.metadata.actual_start && task.metadata.actual_end && task.metadata.complete){
+            if(task.metadata.actual_start && task.metadata.actual_end){
                 taskBarStyle={ backgroundColor:'#43a047',height: "100%",border:'1px solid #07650b' }
                 progressBarStyle={ backgroundColor:'#43a047', width: props.ganttProperties.progressWidth + "px", height: "100%" };    
             }
@@ -150,13 +159,17 @@ class GanttChart extends React.Component {
       </div>);
     }
     ParentTaskbarTemplate(props) {
-        var taskBarStyle={};
-        var progressBarStyle={};
+        var taskBarStyle={height: "100%" };
+        var progressBarStyle={
+            width: props.ganttProperties.progressWidth + "px",
+            height: "100%"
+        };
         var labelStyle={  position: "absolute", fontSize: "12px",  color: "white", top: "5px", left: "10px",  fontFamily: "Segoe UI", cursor: "move" }
         const task=props.taskData;
-        if(task.realization==true){
+        if(task.metadata){
             if(!task.metadata.actual_start && !task.metadata.actual_end){
                 taskBarStyle={height: "100%" };
+                labelStyle.color='black';
                 progressBarStyle={ width: props.ganttProperties.progressWidth + "px", height: "100%" };
             }
             
@@ -165,24 +178,12 @@ class GanttChart extends React.Component {
                 labelStyle.color='black';
                 progressBarStyle={ backgroundColor:'#d4b11f', width: props.ganttProperties.progressWidth + "px", height: "100%" };    
             }
-
-            if(task.metadata.actual_start && task.metadata.actual_end && !task.metadata.complete){
-                taskBarStyle={ backgroundColor:'#d4b11f',height: "100%",border:'1px solid #07650b' }
-                progressBarStyle={ backgroundColor:'#43a047', width: props.ganttProperties.progressWidth + "px", height: "100%" };    
-            }
-
-            if(task.metadata.actual_start && task.metadata.actual_end && task.metadata.complete){
+    
+            if(task.metadata.actual_start && task.metadata.actual_end){
                 taskBarStyle={ backgroundColor:'#43a047',height: "100%",border:'1px solid #07650b' }
                 progressBarStyle={ backgroundColor:'#43a047', width: props.ganttProperties.progressWidth + "px", height: "100%" };    
-            }
-        }else{
-            taskBarStyle={height: "100%" };
-            progressBarStyle={
-                width: props.ganttProperties.progressWidth + "px",
-                height: "100%"
-            };
+            }    
         }
-
         return (
             <div className="e-gantt-child-taskbar-inner-div e-gantt-child-taskbar" style={taskBarStyle}>
                 <div className="e-gantt-child-progressbar-inner-div e-row-expand e-gantt-child-progressbar" 
@@ -241,10 +242,6 @@ class GanttChart extends React.Component {
                             <div style={{display:'inline-flex',marginRight:'0,5em'}}>
                                 <div style={{width: '1em',padding: '1em',backgroundColor: '#3f51b5'}}></div>
                                 <span style={{marginLeft:'1em',marginRight:'1em'}}>Plan</span>
-                            </div>
-                            <div style={{display:'inline-flex',marginRight:'0,5em'}}>
-                                <div style={{width: '1em',padding: '1em',backgroundColor: '#616161de'}}></div>
-                                <span style={{marginLeft:'1em',marginRight:'1em'}}>Started</span>
                             </div>
                             <div style={{display:'inline-flex',marginRight:'0,5em'}}>
                                 <div style={{width: '1em',padding: '1em',backgroundColor: '#ccdc27'}}></div>
