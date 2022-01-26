@@ -51,6 +51,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
         }
         var registered=false
         try {
+            console.log(detailProject);
             for (let i = 0; i < detailProject.members.length; i++) {
                 const member = detailProject.members[i];
                 if(member.id==logged_in_user.id){ registered=true; }

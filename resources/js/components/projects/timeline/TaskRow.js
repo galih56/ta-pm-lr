@@ -10,14 +10,14 @@ import IconButton from '@material-ui/core/IconButton';
 import Popover from '@material-ui/core/Popover';
 import Typography from '@material-ui/core/Typography';
 import Checkbox from '@material-ui/core/Checkbox';
+import { green, grey} from "@material-ui/core/colors";
 import moment from 'moment';
 
 const StatusChip = lazy(() => import('../../widgets/StatusChip'));
 const TableSubtask = lazy(() => import('./TableSubtasks'));
 
-const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
-    
-    let global = useContext(UserContext);
+
+const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
     const [openCollapsible, setOpenCollapsible] = useState(false);
     const [progress, setProgress] = useState(0);
 
@@ -72,9 +72,7 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
                     {data.cards?.length?( <IconButton size="small" onClick={() =>setOpenCollapsible(!openCollapsible)} > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton> ):null}
                 </TableCell>
                 <TableCell padding="checkbox"> 
-                    {data.actual_start?(
-                        <Checkbox onChange={event=> handleCompleteTask(data,event)} checked={data.complete}/>
-                    ):null}
+                    {/* {data.complete?<Checkbox disabled checked={data.complete} />:<Checkbox disabled checked={data.complete}/>} */}
                 </TableCell>
                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}> 
                     <Link  onClick={(e)=>{
@@ -125,7 +123,7 @@ const TaskRow=({data,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUp
                 <TableRow >
                     <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={headCells.length+1}>
                         <Collapse in={openCollapsible} timeout="auto">
-                            <TableSubtask tasks={data.cards} headCells={headCells} handleCompleteTask={handleCompleteTask}
+                            <TableSubtask tasks={data.cards} headCells={headCells}
                                 handleDetailTaskOpen={handleDetailTaskOpen} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete}
                             />
                         </Collapse>

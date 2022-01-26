@@ -115,8 +115,8 @@ const DetailProject = (props) => {
     const [detailTaskOpen,setDetailTaskOpen]=useState(false)
     const [detailMeetingOpen,setDetailMeetingOpen]=useState(false)
     const [clickedMeeting, setClickedMeeting] = useState(clickedMeetingInitialState);
+
     const getDetailProject = () => {
-        const toast_loading = toast.loading('Loading...');
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
         if(![1,2,3,4].includes(global.state.role?.id)){
             url+='?users_id='+global.state.id;
@@ -129,10 +129,9 @@ const DetailProject = (props) => {
                 setDetailProject(data);
                 global.dispatch({ type: 'store-detail-project', payload: data });
                 global.dispatch({type:'store-current-selected-project',payload:params.id});
-                toast.dismiss(toast_loading);   
             }).catch((error) => {
-                toast.dismiss(toast_loading);   
-                switch(error.response.status){
+                console.error(error);
+                switch(error?.response?.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
                     default : toast.error(<b>{error.response.statusText}</b>); break

@@ -143,10 +143,10 @@ export default function EnhancedTable(props) {
             )
         }
     }
-
+    
     useEffect(() => {
-        setRows(data);
-    }, [data]);
+        getMembers()
+    },[])
 
     useEffect(()=>{
         if(memberChange===true){

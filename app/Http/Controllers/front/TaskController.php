@@ -125,7 +125,7 @@ class TaskController extends Controller
 
     public function update(Request $request, $id)
     {
-        $task=Task::findOrFail($id);
+        $task=Task::with('parentTask')->findOrFail($id);
         if($request->has('title')) $task->title=$request->title;
         if($request->has('description')) $task->description=$request->description;
         if($request->has('lists_id')) $task->lists_id=$request->lists_id;
@@ -157,7 +157,7 @@ class TaskController extends Controller
         }
         $task->save();
         
-        if($task->is_subtask){
+        if($task->parent_task){
             $parent_task=Task::with('cards')->findOrFail($task->parent_task_id);
             $valuePerSubtask=100/count($parent_task->cards);
             $completeSubtaskCounter=0;
@@ -254,6 +254,13 @@ class TaskController extends Controller
                     $task->progress=100;
                 }
                 $task->complete=true;
+                    
+                $end = Carbon::parse($task->end)->format('Y-m-d');
+                $actual_end = Carbon::now()->toDateTimeString();
+                if($actual_end<$end) $task->end_label='Selesai lebih cepat';
+                if($actual_end>$end) $task->end_label='Selesai terlambat';
+                if($actual_end==$end) $task->end_label='Selesai tepat waktu';
+
             }else{
                 if($task->is_subtask===false && count($task->cards)>0){
                     $valuePerSubtask=100/count($task->cards);

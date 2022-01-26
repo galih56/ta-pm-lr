@@ -91,8 +91,7 @@ export default function TeamTable() {
                                             <TableCell>
                                                 <Typography variant="body2" display="block">
                                                     <Link to={`/teams/` + row.id} style={{ textDecoration: 'none', color: 'black' }}>
-                                                        <strong>{row.name}</strong><br />
-                                                        {row.description}
+                                                        <strong>{row.name}</strong>
                                                     </Link>
                                                 </Typography>
                                             </TableCell>

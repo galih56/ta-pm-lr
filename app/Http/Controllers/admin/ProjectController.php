@@ -17,6 +17,8 @@ use Auth;
 use App\Exports\ProjectExport;
 use App\Imports\ProjectImport;
 use Carbon\Carbon;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProjectController extends Controller
 {
@@ -227,21 +229,25 @@ class ProjectController extends Controller
         return $wbs;
     }
 
-    function validateDateTime($str)
-    {   
+    function validateDateTime($data)
+    {       
         try {
-            $str1=Carbon::createFromFormat('d/m/Y', $str)->format('d/m/Y');
-            return true;
+            $date=null;
+            switch (gettype($data)) {
+                case 'integer':
+                    $date=Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data))->format('d/m/Y');
+                    break;
+                case 'string':
+                    $date=Carbon::createFromFormat('d/m/Y', $data)->format('d/m/Y');
+                    break;
+                default:
+                    $date=Carbon::createFromFormat('d/m/Y', $data)->format('d/m/Y');
+                    break;
+            }
+            return $date;
         } catch (\Exception $e) {
-            return false;
+            return null;
         }
-        return false;
-        
-        // d/m/Y
-        if(strlen($str)>=8){
-            return false;
-        }
-        // if (preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/",$str)) return true;  
     }
     
 
@@ -266,20 +272,25 @@ class ProjectController extends Controller
 
 
     public function import(Request $request,$id=null){
+        // Excel::Import(new ProjectImport, $request->file('file')->store('temp'));        
         // https://github.com/SpartnerNL/Laravel-Excel/issues/1226#issuecomment-306734223
         $project=null;
         try {
             $import = new ProjectImport();
             $imported_data = $import->toCollection($request->file('file')->store('temp'));
-    
             $data=[];
             $earliest_date=null;
             $latest_date=null;
             $errors=['error'=>false,'messages'=>[],'data'=>null];
             if($imported_data->count()){
                 $rows=$imported_data[0];
+
                 for ($i=0; $i < $rows->count(); $i++) { 
                     $row=$rows[$i]->toArray();          
+                    $start=$this->validateDateTime($row['start']);
+                    $end=$this->validateDateTime($row['end']);
+                    $actual_start=$this->validateDateTime($row['actual_start']);
+                    $actual_end=$this->validateDateTime($row['actual_end']);
                     
                     if(empty($row['title'])) {
                         $errors['error']=true;
@@ -290,14 +301,14 @@ class ProjectController extends Controller
                         $errors['messages'][]=['row'=>$i,'title'=> 'WBS column is required','data'=>$row];
                     }
 
-                    if(!$this->validateDateTime($row['start']) || !$this->validateDateTime($row['end'])) {
+                    if(!$start || !$end) {
                         $errors['error']=true;
                         $errors['messages'][]=['row'=>$i,'title'=> 'start/end column must be a valid date (d/m/Y)','data'=>$row];
                     }
-                    
+
                     if(array_key_exists('actual_start',$row)){ 
                         if(!empty($row['actual_start']) ){
-                            if(!$this->validateDateTime($row['actual_start'])) {
+                            if(!$actual_start) {
                                 $errors['error']=true;
                                 $errors['messages'][]=['row'=>$i,'title'=> 'actual_start column must be a valid date (d/m/Y)','data'=>$row];
                             }
@@ -306,7 +317,7 @@ class ProjectController extends Controller
                     
                     if(array_key_exists('actual_end',$row)){ 
                         if(!empty($row['actual_end'])){
-                            if(!$this->validateDateTime($row['actual_end'])) {
+                            if(!$actual_end) {
                                 $errors['error']=true;
                                 $errors['messages'][]=['row'=>$i,'title'=> 'actual_end column must be a valid date (d/m/Y)','data'=>$row];
                             }
@@ -319,8 +330,8 @@ class ProjectController extends Controller
                         $errors['messages'][]=['row'=>$i,'title'=> 'WBS format is invalid','data'=>$row];
                     }
                     
-                    if($this->validateDateTime($row['start'])) {  
-                        $start = Carbon::createFromFormat('d/m/Y', $row['start']);
+                    if($start) {  
+                        $start = Carbon::createFromFormat('d/m/Y', $start);
                         if(empty($earliest_date)){
                             $earliest_date=$start;   
                         }else if($earliest_date->gt($start))
@@ -328,15 +339,33 @@ class ProjectController extends Controller
                             $earliest_date=$start;   
                         }
                     }   
-                    if($this->validateDateTime($row['end'])){
-                        $end = Carbon::createFromFormat('d/m/Y', $row['end']);
+                    if($end){
+                        $end = Carbon::createFromFormat('d/m/Y',$end);
                         if(empty($latest_date)){
                             $latest_date=$end;   
-                        } else if($latest_date->lt($start)){
+                        } else if($latest_date->lt($end)){
                             $latest_date=$end;   
                         }    
                     }
 
+                    if($start  && $end){
+                        $date_1 = Carbon::parse($start);
+                        $date_2 = Carbon::parse($end);
+                        $days= $date_1->diffInDays($date_2);
+                        $row['days']=$days;
+                    }            
+
+                    if($actual_start  && $actual_end){
+                        $date_1 = Carbon::parse($actual_start);
+                        $date_2 = Carbon::parse($actual_end);
+                        $days= $date_1->diffInDays($date_2);
+                        $row['work_days']=$days;
+                    }            
+
+                    if($start) $row['start']=$start->format('Y-m-d');
+                    if($end) $row['end']=$end->format('Y-m-d');
+                    if($actual_start) $row['actual_start']=$actual_start->format('Y-m-d');
+                    if($actual_end) $row['actual_end']=$actual_end->format('Y-m-d');
                     if($wbs){
                         if(count($wbs) == 1){
                             //create list
@@ -354,7 +383,7 @@ class ProjectController extends Controller
                         }
                     }
                 }
-
+                
                 if($errors['error']==true){
                     return $errors;
                 }
@@ -381,31 +410,32 @@ class ProjectController extends Controller
                 foreach ($data as $i => $list) {
                     $list['projects_id']=$project->id;
                     $tasks=[];
+                    
                     if(array_key_exists('tasks',$list)) $tasks= $list['tasks'];
-                    $list['start']=Carbon::createFromFormat('d/m/Y', $list['start'])->format('Y-m-d');
-                    $list['end']=Carbon::createFromFormat('d/m/Y', $list['end'])->format('Y-m-d');
-                    if($list['actual_start']) $list['actual_start']=Carbon::createFromFormat('d/m/Y', $list['actual_start'])->format('Y-m-d');
-                    if($list['actual_end']) $list['actual_end']=Carbon::createFromFormat('d/m/Y', $list['actual_end'])->format('Y-m-d');
+                    $list['start']=$list['start'];
+                    $list['end']=$list['end'];
+                    if($list['actual_start']) $list['actual_start']=$list['actual_start'];
+                    if($list['actual_end']) $list['actual_end']=$list['actual_end'];
                     $list=TaskList::create($list);
                     foreach ($tasks as $j => $task) {
                         $task['lists_id']=$list->id;
                         $task['is_subtask']=true;
                         $subtasks=[];
                         if(array_key_exists('subtasks',$task)) $subtasks=$task['subtasks'];
-                        $task['start']=Carbon::createFromFormat('d/m/Y', $task['start'])->format('Y-m-d');
-                        $task['end']=Carbon::createFromFormat('d/m/Y', $task['end'])->format('Y-m-d');
-                        if($task['actual_start']) $task['actual_start']=Carbon::createFromFormat('d/m/Y', $task['actual_start'])->format('Y-m-d');
-                        if($task['actual_end']) $task['actual_end']=Carbon::createFromFormat('d/m/Y', $task['actual_end'])->format('Y-m-d');
+                        $task['start']=$task['start'];
+                        $task['end']=$task['end'];
+                        if($task['actual_start']) $task['actual_start']=$task['actual_start'];
+                        if($task['actual_end']) $task['actual_end']=$task['actual_end'];
                         $task=$this->makeLabel($task);
                         $task=Task::create($task);
                         foreach ($subtasks as $k => $subtask) {
                             $subtask['parent_task_id']=$task->id;
                             $subtask['is_subtask']=true;
                             $subtask=$this->makeLabel($subtask);
-                            $subtask['start']=Carbon::createFromFormat('d/m/Y', $subtask['start'])->format('Y-m-d');
-                            $subtask['end']=Carbon::createFromFormat('d/m/Y', $subtask['end'])->format('Y-m-d');
-                            if($subtask['actual_start']) $subtask['actual_start']=Carbon::createFromFormat('d/m/Y', $subtask['actual_start'])->format('Y-m-d');
-                            if($subtask['actual_end']) $subtask['actual_end']=Carbon::createFromFormat('d/m/Y', $subtask['actual_end'])->format('Y-m-d');
+                            $subtask['start']=$subtask['start'];
+                            $subtask['end']=$subtask['end'];
+                            if($subtask['actual_start']) $subtask['actual_start']=$subtask['actual_start'];
+                            if($subtask['actual_end']) $subtask['actual_end']=$subtask['actual_end'];
                             Task::create($subtask);
                         }
                     }
@@ -420,3 +450,15 @@ class ProjectController extends Controller
     }
     // https://stackoverflow.com/questions/57212305/how-to-skip-blank-rows-in-maatwebsite-excel-3-1-for-model-way-import-on-laravel
 }
+
+
+
+// $validator=Validator::make($row, [
+//     'wbs' => 'required|string', 
+//     'title' => 'required|string', 
+//     'start' => 'required|date|date_format:d/m/y' ,
+//     'end' => 'required|date|date_format:d/m/y' ,
+//     'actual_start' => 'required|date|date_format:d/m/y' ,
+//     'actual_end' => 'date|date_format:d/m/y' ,
+// ]);
+// dd($row,$validator->fails(),$validator->errors());

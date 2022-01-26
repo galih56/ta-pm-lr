@@ -4,7 +4,7 @@ import TableBody from '@material-ui/core/TableBody';
 import EnhancedTableHead from './EnhancedTableHead';
 import TaskRow from './TaskRow';
 
-const TableTasks=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
+const TableTasks=({tasks,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
     const [rows,setRows]=useState([]);
     
     useEffect(()=>{
@@ -17,8 +17,7 @@ const TableTasks=({tasks,handleCompleteTask,handleDetailTaskOpen,headCells, onTa
             <TableBody>
                 {rows?rows.map((task)=>{
                     return(
-                        <TaskRow key={task.id} data={task} handleCompleteTask={handleCompleteTask} handleDetailTaskOpen={handleDetailTaskOpen}
-                            headCells={headCells} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete} />
+                        <TaskRow key={task.id} data={task} headCells={headCells} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete} handleDetailTaskOpen={handleDetailTaskOpen} />
                     )
                 }):<></>}
             </TableBody>

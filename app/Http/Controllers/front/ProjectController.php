@@ -24,12 +24,13 @@ use App\Imports\ProjectImport;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
 
 class ProjectController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['index','update','show','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['index','update','store','destroy']]); 
     }
 
     public function index()
@@ -47,11 +48,23 @@ class ProjectController extends Controller
     {
         if($request->hasFile('file')){
             $project=$this->import($request);
+            if($request->has('teams')){
+                $project->teams()->sync($request->teams);
+            }
+
+            if($request->has('members')){
+                $project->users()->sync($request->members);
+            }
+
+            
+            if($request->has('clients')){
+                $project->clients()->sync($request->clients);
+            }
+              
             if($project['error']==true){   
                 return response()->json($project);
             }else{
-                $project=$project->toArray();
-                $project['columns']=[];    
+                $project=$this->getDetailProject($project->id,$request); 
                 return response()->json($project);
             }
         }else{
@@ -74,18 +87,17 @@ class ProjectController extends Controller
             if($request->has('clients')){
                 $project->clients()->sync($request->clients);
             }
-            
-            $project=$project->toArray();
-            $project['columns']=[];    
+              
+            $project=$this->getDetailProject($project->id,$request); 
             return response()->json($project);
         }
         
     }
     function getDetailProject($id,$request){
         $project=Project::with(['columns'=>function($q) use($request){
-            return $q->orderBy('title','ASC')
+            return $q->orderBy('start','ASC')
                 ->with(['cards'=>function($q1) use($request){
-                    $q1=$q1->orderBy('title','ASC');
+                    $q1=$q1->orderBy('start','ASC');
                     if($request->has('users_id')){
                         $users_id=$request->users_id;
                         $q1=$q1->orWhereHas('members',function($members_q) use($users_id){
@@ -93,7 +105,7 @@ class ProjectController extends Controller
                         });
                     }
                     $q1=$q1->with(['cards'=>function($q2) use($request){
-                            $q2=$q2->orderBy('title','ASC');
+                            $q2=$q2->orderBy('start','ASC');
                                 if($request->has('users_id')){
                                     $users_id=$request->users_id;
                                     $q2=$q2->whereHas('members',function($members_q) use($users_id){
@@ -119,21 +131,7 @@ class ProjectController extends Controller
     public function show(Request $request,$id)
     {
         $project=$this->getDetailProject($id,$request)->toArray();
-
-        $members=$project['members'];
-        $project_members=[];
-        for ($i=0; $i < count($members); $i++) { 
-            $member=$members[$i];
-            $project_members_id=$member['id'];
-            $user=$member['user'];
-            $projects_id=$member['projects_id'];
-            $member=$user;
-            $member['is_user']=true;
-            $member['is_client']=false;
-            $member['project_members_id']=$project_members_id;
-            $project_members[]=$member;
-        }
-        $project['members']=$project_members;
+        $project['members']=$this->getMembers($id);
 
         $clients=Client::select('c.*','cp.id as project_clients_id')->from('clients as c')
                         ->join('clients_has_projects AS cp','c.id','=','cp.clients_id')
@@ -243,19 +241,25 @@ class ProjectController extends Controller
     }
 
     public function getMembers($id){
-        $project_members=ProjectMember::where('projects_id','=',$id)->with('user.role')->get()->toArray();
-
-        $members=[];
-        for ($i=0; $i < count($project_members); $i++) { 
-            $member=$project_members[$i];
+        $project=Project::with('members.user.role')->findOrFail($id);
+        $members=$project['members'];
+        $project_members=[];
+        for ($i=0; $i < count($members); $i++) { 
+            $member=$members[$i];
+            $project_members_id=$member['id'];
             $user=$member['user'];
-            $user['project_members_id']=$member['id'];
-            if(array_key_exists('role',$member['user'])) $user['role']=$member['user']['role'];
-            else $user['role']=['id'=>'','name'=>"-"]; 
-            unset($user['role']);
-            $members[]=$user;
+            $projects_id=$member['projects_id'];
+            $member=$user;
+            $member['is_user']=true;
+            $member['is_client']=false;
+            $member['project_members_id']=$project_members_id;
+            $project_members[]=$member;
         }
-        return response()->json($members);
+
+        return $project_members;
+
+        $project=Project::with('users.role')->findOrFail($id);
+        return response()->json($project->users()->get());
     }
 
     public function addClients(Request $request,$id){
@@ -606,24 +610,27 @@ class ProjectController extends Controller
     }
     
 
-    function validateDateTime($str)
-    {   
+    function validateDateTime($data)
+    {       
         try {
-            $str1=Carbon::createFromFormat('d/m/Y',$str)->format('d/m/Y');
-            return true;
+            $date=null;
+            switch (gettype($data)) {
+                case 'integer':
+                    $date=Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data))->format('d/m/Y');
+                    break;
+                case 'string':
+                    $date=Carbon::createFromFormat('d/m/Y', $data)->format('d/m/Y');
+                    break;
+                default:
+                    $date=Carbon::createFromFormat('d/m/Y', $data)->format('d/m/Y');
+                    break;
+            }
+            return $date;
         } catch (\Exception $e) {
-            return false;
+            return null;
         }
-        return false;
-        
-        // d/m/Y
-        if(strlen($str)>=8){
-            return false;
-        }
-        // if (preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/",$str)) return true;  
     }
     
-
     function makeLabel($data){
         if(!empty($data['actual_start'])){
             $start = Carbon::parse($data['start'])->format('Y-m-d');
@@ -649,15 +656,19 @@ class ProjectController extends Controller
         try {
             $import = new ProjectImport();
             $imported_data = $import->toCollection($request->file('file')->store('temp'));
-    
             $data=[];
             $earliest_date=null;
             $latest_date=null;
             $errors=['error'=>false,'messages'=>[],'data'=>null];
             if($imported_data->count()){
                 $rows=$imported_data[0];
+
                 for ($i=0; $i < $rows->count(); $i++) { 
                     $row=$rows[$i]->toArray();          
+                    $start=$this->validateDateTime($row['start']);
+                    $end=$this->validateDateTime($row['end']);
+                    $actual_start=$this->validateDateTime($row['actual_start']);
+                    $actual_end=$this->validateDateTime($row['actual_end']);
                     
                     if(empty($row['title'])) {
                         $errors['error']=true;
@@ -668,14 +679,14 @@ class ProjectController extends Controller
                         $errors['messages'][]=['row'=>$i,'title'=> 'WBS column is required','data'=>$row];
                     }
 
-                    if(!$this->validateDateTime($row['start']) || !$this->validateDateTime($row['end'])) {
+                    if(!$start || !$end) {
                         $errors['error']=true;
                         $errors['messages'][]=['row'=>$i,'title'=> 'start/end column must be a valid date (d/m/Y)','data'=>$row];
                     }
                     
                     if(array_key_exists('actual_start',$row)){ 
                         if(!empty($row['actual_start']) ){
-                            if(!$this->validateDateTime($row['actual_start'])) {
+                            if(!$actual_start) {
                                 $errors['error']=true;
                                 $errors['messages'][]=['row'=>$i,'title'=> 'actual_start column must be a valid date (d/m/Y)','data'=>$row];
                             }
@@ -684,7 +695,7 @@ class ProjectController extends Controller
                     
                     if(array_key_exists('actual_end',$row)){ 
                         if(!empty($row['actual_end'])){
-                            if(!$this->validateDateTime($row['actual_end'])) {
+                            if(!$actual_end) {
                                 $errors['error']=true;
                                 $errors['messages'][]=['row'=>$i,'title'=> 'actual_end column must be a valid date (d/m/Y)','data'=>$row];
                             }
@@ -697,8 +708,8 @@ class ProjectController extends Controller
                         $errors['messages'][]=['row'=>$i,'title'=> 'WBS format is invalid','data'=>$row];
                     }
                     
-                    if($this->validateDateTime($row['start'])) {  
-                        $start = Carbon::createFromFormat('d/m/Y', $row['start']);
+                    if($start) {  
+                        $start = Carbon::createFromFormat('d/m/Y', $start);
                         if(empty($earliest_date)){
                             $earliest_date=$start;   
                         }else if($earliest_date->gt($start))
@@ -706,14 +717,19 @@ class ProjectController extends Controller
                             $earliest_date=$start;   
                         }
                     }   
-                    if($this->validateDateTime($row['end'])){
-                        $end = Carbon::createFromFormat('d/m/Y', $row['end']);
+                    if($end){
+                        $end = Carbon::createFromFormat('d/m/Y',$end);
                         if(empty($latest_date)){
                             $latest_date=$end;   
-                        } else if($latest_date->lt($start)){
+                        } else if($latest_date->lt($end)){
                             $latest_date=$end;   
                         }    
                     }
+
+                    if($start) $row['start']=$start->format('Y-m-d');
+                    if($end) $row['end']=$end->format('Y-m-d');
+                    if($actual_start) $row['actual_start']=$actual_start->format('Y-m-d');
+                    if($actual_end) $row['actual_end']=$actual_end->format('Y-m-d');
 
                     if($wbs){
                         if(count($wbs) == 1){
@@ -732,7 +748,7 @@ class ProjectController extends Controller
                         }
                     }
                 }
-
+                
                 if($errors['error']==true){
                     return $errors;
                 }
@@ -759,36 +775,37 @@ class ProjectController extends Controller
                 foreach ($data as $i => $list) {
                     $list['projects_id']=$project->id;
                     $tasks=[];
+                    
                     if(array_key_exists('tasks',$list)) $tasks= $list['tasks'];
-                    $list['start']=Carbon::createFromFormat('d/m/Y', $list['start'])->format('Y-m-d');
-                    $list['end']=Carbon::createFromFormat('d/m/Y', $list['end'])->format('Y-m-d');
-                    if($list['actual_start']) $list['actual_start']=Carbon::createFromFormat('d/m/Y', $list['actual_start'])->format('Y-m-d');
-                    if($list['actual_end']) $list['actual_end']=Carbon::createFromFormat('d/m/Y', $list['actual_end'])->format('Y-m-d');
+                    $list['start']=$list['start'];
+                    $list['end']=$list['end'];
+                    if($list['actual_start']) $list['actual_start']=$list['actual_start'];
+                    if($list['actual_end']) $list['actual_end']=$list['actual_end'];
                     $list=TaskList::create($list);
                     foreach ($tasks as $j => $task) {
                         $task['lists_id']=$list->id;
                         $task['is_subtask']=true;
                         $subtasks=[];
                         if(array_key_exists('subtasks',$task)) $subtasks=$task['subtasks'];
-                        $task['start']=Carbon::createFromFormat('d/m/Y', $task['start'])->format('Y-m-d');
-                        $task['end']=Carbon::createFromFormat('d/m/Y', $task['end'])->format('Y-m-d');
-                        if($task['actual_start']) $task['actual_start']=Carbon::createFromFormat('d/m/Y', $task['actual_start'])->format('Y-m-d');
-                        if($task['actual_end']) $task['actual_end']=Carbon::createFromFormat('d/m/Y', $task['actual_end'])->format('Y-m-d');
+                        $task['start']=$task['start'];
+                        $task['end']=$task['end'];
+                        if($task['actual_start']) $task['actual_start']=$task['actual_start'];
+                        if($task['actual_end']) $task['actual_end']=$task['actual_end'];
                         $task=$this->makeLabel($task);
                         $task=Task::create($task);
                         foreach ($subtasks as $k => $subtask) {
                             $subtask['parent_task_id']=$task->id;
                             $subtask['is_subtask']=true;
                             $subtask=$this->makeLabel($subtask);
-                            $subtask['start']=Carbon::createFromFormat('d/m/Y', $subtask['start'])->format('Y-m-d');
-                            $subtask['end']=Carbon::createFromFormat('d/m/Y', $subtask['end'])->format('Y-m-d');
-                            if($subtask['actual_start']) $subtask['actual_start']=Carbon::createFromFormat('d/m/Y', $subtask['actual_start'])->format('Y-m-d');
-                            if($subtask['actual_end']) $subtask['actual_end']=Carbon::createFromFormat('d/m/Y', $subtask['actual_end'])->format('Y-m-d');
+                            $subtask['start']=$subtask['start'];
+                            $subtask['end']=$subtask['end'];
+                            if($subtask['actual_start']) $subtask['actual_start']=$subtask['actual_start'];
+                            if($subtask['actual_end']) $subtask['actual_end']=$subtask['actual_end'];
                             Task::create($subtask);
                         }
                     }
                 }
-                
+    
                 if($id){
                     return redirect(route('projects.show',['project'=>$project->id]));
                 }else{
@@ -807,7 +824,6 @@ class ProjectController extends Controller
     
         $custom_columns=[
             [ 'id'=>'planned', 'title'=>'Plan', 'cards'=>[] ],
-            [ 'id'=>'started','title'=>'Started', 'cards'=>[] ],
             [ 'id'=>'in-progress', 'title'=>'In progress', 'cards'=>[] ],
             [ 'id'=>'finished', 'title'=>'Finished', 'cards'=>[] ],
         ];
@@ -824,12 +840,8 @@ class ProjectController extends Controller
                     $custom_columns[1]['cards'][]=$task;
                 }
     
-                if($task->actual_start && $task->actual_end && !$task->complete){   
+                if($task->actual_start && $task->actual_end){
                     $custom_columns[2]['cards'][]=$task;
-                }
-    
-                if($task->actual_start && $task->actual_end && $task->complete){
-                    $custom_columns[3]['cards'][]=$task;
                 }
             }
         }
