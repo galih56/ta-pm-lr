@@ -112,7 +112,7 @@ const DetailProject = (props) => {
 
     const getDetailProject = () => {
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
-        if(![1,2,3,4].includes(global.state.role?.id)){
+        if(![1,2,3,4,5].includes(global.state.role?.id)){
             url+='?users_id='+global.state.id;
         }
         const toast_loading = toast.loading('Loading...');
@@ -197,7 +197,7 @@ const DetailProject = (props) => {
                                         <BreadCrumbs projectName={detailProject.title} tabName="Timeline" style={{marginTop:'1em'}}/>
                                         <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
                                             <RefreshButton onClick={getDetailProject}  style={{float:'right'}}/>
-                                            {([1,2,4].includes(global.state.role?.id))?(
+                                            {([1,2,4,5].includes(global.state.role?.id))?(
                                                 <>
                                                     <Button variant="contained" color="primary"
                                                         onClick={()=>handleModalCreateList(true)}

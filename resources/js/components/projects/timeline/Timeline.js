@@ -186,7 +186,7 @@ function Timeline(props) {
                                             key={row.id} data={row} handleDetailTaskOpen={handleDetailTaskOpen} 
                                             projects_id={projects_id} detailProject={detailProject} 
                                             onClick={()=>{ 
-                                                if([1,2,4].includes(global.state.role?.id)){
+                                                if([1,2,4,5].includes(global.state.role?.id)){
                                                     setSelectedList(row); 
                                                     setOpenEditList(true); 
                                                 }

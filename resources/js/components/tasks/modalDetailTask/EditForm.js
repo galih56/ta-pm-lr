@@ -96,9 +96,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                                 {([1,2,4].includes(global.state.role?.id))?(
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                                         <MobileDateRangePicker required startText="Start at : " endText="Finish at : "
-                                            value={estimationDateRange}
-                                            minDate={detailProject.start?parseISO(detailProject.start):null}
-                                            maxDate={detailProject.end?parseISO(detailProject.end):null}
+                                            value={estimationDateRange} minDate={detailProject.start?parseISO(detailProject.start):null} maxDate={detailProject.end?parseISO(detailProject.end):null}
                                             onChange={(newValue) => {
                                                 if(newValue[0]){
                                                     setData({...data, start:moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss')})

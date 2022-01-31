@@ -65,6 +65,7 @@ class Project extends Model
             $this->save();
         }
     }
+    
     public function scopeExclude($query, $value = []) 
     {
         return $query->select(array_diff($this->fillable, (array) $value));

@@ -24,6 +24,7 @@ const TableSubtask=({tasks,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskD
     let searchParams = new URLSearchParams(location.search);
     
     const handlePopoverOpen = (event,member) =>  {
+        console.log(member);
         setMemberOnHover(member);
         setOpenPopOver(true);
         setAnchorEl(event.currentTarget);

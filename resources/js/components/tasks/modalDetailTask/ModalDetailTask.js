@@ -234,13 +234,13 @@ export default function ModalDetailTask(props) {
             is_subtask:data.is_subtask,  progress: data.progress, parent_task_id:data.parent_task_id, tags:data.tags,
             projects_id:props.detailProject.id, users_id:global.state.id
         }
-        if([1,2].includes(global.state.role?.id)){
+        if([1,2,4].includes(global.state.role?.id)){
             body.start=data.start;
             body.end=data.end;
             body.actual_start=data.actual_start;
             body.actual_end=data.actual_end;
         }
-        if(global.state.role?.id==9){
+        if(global.state.role?.id==3){
             body.cost=data.cost;
             body.actual_end=data.actual_end;
         }
