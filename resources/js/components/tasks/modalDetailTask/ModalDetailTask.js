@@ -64,8 +64,8 @@ const removeTaskIdQueryString=(history)=>{
 export default function ModalDetailTask(props) {
     const { id } = props.initialState;
     const {open,closeModalDetailTask,onTaskUpdate,onTaskDelete} = props;
-    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [startConfirmOpen, setStartConfirmOpen] = useState(false);
+    const initConfirmState={open:false,type:'',callback:()=>{}};
+    const [confirm,setConfirm]=useState(initConfirmState);
     const global = useContext(UserContext);
     const history = useHistory();
     const [data, setData] = useState({
@@ -81,7 +81,8 @@ export default function ModalDetailTask(props) {
     })
     const [isEditing, setIsEditing] = useState(false);
     const handleEditingMode = (bool = false) => setIsEditing(bool);
-
+    const handleCloseConfirm=()=>setConfirm(initConfirmState);
+    
     const getDetailTask = () => {
         var body={projects_id:detailProject.id,users_id:global.state.id}
         const url = `${process.env.MIX_BACK_END_BASE_URL}tasks/${id}`;
@@ -89,12 +90,14 @@ export default function ModalDetailTask(props) {
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url,body)
             .then((result) => {
-                setData({ ...data, ...result.data });
-                const payload = { projects_id: data.projects_id, lists_id: data.lists_id, ...result.data };
-                if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: payload })
+                result=result.data
+                setData({ ...data, ...result });
+                const payload = { projects_id: data.projects_id, lists_id: data.lists_id, ...result };
+                if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: payload })
                 else global.dispatch({ type: 'store-detail-task', payload: payload })
             }).catch((error) => {
                 switch(error.response?.status){
+                    case 404 : toast.error(<b>Task not found</b>); break;
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
                     default : {
@@ -102,15 +105,22 @@ export default function ModalDetailTask(props) {
                         console.error(error); break;
                     }
                 }
+                closeModalDetailTask()
             });
     }
 
     useEffect(() => {
         getDetailTask()
     }, [id,props.initialState.id]);
+
     useEffect(()=>{
         getProgress();
     },[data.cards])    
+    
+    useEffect(()=>{
+        console.log('modaldetailtask',detailProject)
+    },[detailProject]);
+
     useEffect(()=>{
         if(props.detailProject?.id)setDetailProject(props.detailProject)
         else {
@@ -121,10 +131,10 @@ export default function ModalDetailTask(props) {
             var url =`${process.env.MIX_BACK_END_BASE_URL}projects/`;
             if(data.list){
                  url+= data.list.project;
-            }else if(data.is_subtask){
+            }else if(data.parent_task){
                 url+=data.parent_task.list.project;
             }
-
+            console.log('modaldetailtask detialproject',url);
             const toast_loading = toast.loading('Loading...');
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -142,10 +152,11 @@ export default function ModalDetailTask(props) {
                     }
                 });
         }
+        console.log(detailProject.members);
     },[props.detailproject])
 
     const getProgress=()=>{
-        if(!data.is_subtask){
+        if(!data.parent_task){
             if(data.cards.length>0){
                 var valuePerSubtask=100/data.cards.length;
                 var completeSubtaskCounter=0;
@@ -162,35 +173,6 @@ export default function ModalDetailTask(props) {
         }
     }
     
-    const handleCompleteTask = (check) => {
-        const body = { complete: check };
-        
-        if(!data.actual_start){
-            toast.error("This task hasn't started yet");
-            return;
-        }
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/complete`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url, body),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    var result=result.data;
-                    setData(result);
-                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
-                    else global.dispatch({ type: 'store-detail-task', payload: result });
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
-    }
-    
     const handleStartTask = () => {
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/start`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
@@ -200,20 +182,52 @@ export default function ModalDetailTask(props) {
             {
                 loading: 'Updating...',
                 success: (result)=>{
-                    var result=result.data;
+                    result=result.data;
                     setData(result);
-                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                    if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
                     else global.dispatch({ type: 'store-detail-task', payload: result });
+                    handleCloseConfirm();
                     return <b>Successfully updated</b>
                 },
                 error: (error)=>{
                     if(error.response.status==401) return <b>Unauthenticated</b>;
                     if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    handleCloseConfirm()
                     return <b>{error.response.statusText}</b>;
                 },
             });
     }
     
+    const markAsComplete=()=>{
+        if(!data.actual_start){
+            toast.error("This task hasn't started yet");
+            return;
+        }
+        const body = { id: data.id, complete: !data.complete};
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/complete`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        toast.promise(
+            axios.patch(url, body),
+            {
+                loading: 'Updating...',
+                success: (result)=>{
+                    result=result.data;
+                    if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                    else global.dispatch({ type: 'store-detail-task', payload: result });
+                    handleCloseConfirm();
+                    return <b>Successfully updated</b>
+                },
+                error: (error)=>{
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    handleCloseConfirm();
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
+    
+    }
+
     const saveChanges = (body) => {
         if(!body) body= {
             id:data.id,complete:data.complete, title:data.title, 
@@ -241,9 +255,9 @@ export default function ModalDetailTask(props) {
             {
                 loading: 'Updating...',
                 success: (result)=>{
-                    var result=result.data;
+                    result=result.data;
                     setData(result);
-                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                    if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
                     else global.dispatch({ type: 'store-detail-task', payload: result });
                     return <b>Successfully updated</b>
                 },
@@ -264,14 +278,18 @@ export default function ModalDetailTask(props) {
             {
                 loading: 'Deleting...',
                 success: (result)=>{
-                    if(data.is_subtask) global.dispatch({ type: 'remove-subtask', payload: data });
+                    if(data.parent_task) global.dispatch({ type: 'remove-subtask', payload: data });
                     else  global.dispatch({ type: 'remove-task', payload: data });
                     removeTaskIdQueryString(history)
                     if(props.onDelete)props.onDelete(data.list,id)
                     if(onTaskDelete)onTaskDelete(data)
+                    handleCloseConfirm()
+                    closeModalDetailTask()
                     return <b>Successfully deleted</b>
                 },
                 error: (error)=>{
+                    handleCloseConfirm();
+                    closeModalDetailTask();
                     if(error.response.status==401) return <b>Unauthenticated</b>;
                     if(error.response.status==422) return <b>Some required inputs are empty</b>;
                     return <b>{error.response.statusText}</b>;
@@ -289,17 +307,10 @@ export default function ModalDetailTask(props) {
                 }}>
                     {data.title}
                     
-                    {data.parent_task?<Checkbox fontSize="small" onChange={(event) => {
-                            var progress=data.progress         
-                            if(data.cards.length<=0 && data.complete==true) progress=100 ;
-                            else if(data.cards.length<=0 && data.complete==false)progress=0 ;
-                            setData({...data,complete:event.target.checked,progress:progress});
-                            handleCompleteTask(event.target.checked);
-                        }}checked={data.complete}/>:null}
                     <br/>
                     {data.creator?<span style={{fontSize:'0.7em'}}>Created by : {data.creator.name}</span>:null}
                     <br /> 
-                    {(data.cards || !data.is_subtask)?<TaskProgress value={data.progress}></TaskProgress>:<></>}
+                    {(data.cards || !data.parent_task)?<TaskProgress value={data.progress}></TaskProgress>:<></>}
                     {data.extended?(
                             <Chip variant="outlined" size="small"
                                 label={`Deadline extended (${moment(data.old_deadline).format('DD MMMM YYYY')} >>> ${moment(data.end).format('DD MMMM YYYY')})`}
@@ -308,36 +319,26 @@ export default function ModalDetailTask(props) {
                     ):<></>}
                 </DialogTitle>
                 <DialogContent dividers>  
-                    <EditForm
-                        isEdit={isEditing}
-                        data={data}
-                        setData={setData}
-                        isAdmin={global.state.isAdmin}
-                        detailProject={detailProject}
-                        getProgress={getProgress}
-                        onTaskUpdate={onTaskUpdate}
-                        onTaskDelete={onTaskDelete}
-                        setStartConfirmOpen={setStartConfirmOpen}
+                    <EditForm isEdit={isEditing} data={data} setData={setData} 
+                        isAdmin={global.state.isAdmin} detailProject={detailProject}
+                        getProgress={getProgress} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete} 
+                        confirm={confirm} startConfirmOpen={()=>setConfirm({open:true,callback:handleStartTask})}
+                        completeConfirmOpen={()=>setConfirm({open:true,callback:markAsComplete})}
                         getDetailTask={getDetailTask}
                     /> 
                     <br/>
                 </DialogContent>                
                 <DialogActions>
-                    <DialogActionButtons
-                        isEdit={isEditing}
-                        saveChanges={saveChanges}
-                        setEditMode={handleEditingMode}
+                    <DialogActionButtons isEdit={isEditing} saveChanges={saveChanges} setEditMode={handleEditingMode}
                         deleteTask={deleteTask}
-                        deleteConfirmOpen={deleteConfirmOpen}
-                        setDeleteConfirmOpen={setDeleteConfirmOpen}
-                        closeModal={closeModalDetailTask}
+                        confirm={confirm}  setConfirm={setConfirm}  closeModal={closeModalDetailTask}
                     > </DialogActionButtons>
                 </DialogActions>
             </Dialog>
             <DialogConfirm
-                open={startConfirmOpen}
-                handleConfirm={() => { handleStartTask(); setStartConfirmOpen(false); }}
-                handleClose={() => { setStartConfirmOpen(false);}}  
+                open={confirm.open}
+                handleConfirm={confirm.callback}
+                handleClose={handleCloseConfirm}  
                 title={"Are you sure?"}>
                 <DialogContentText>Data will be changed permanently</DialogContentText>
             </DialogConfirm>

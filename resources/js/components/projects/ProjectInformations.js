@@ -205,7 +205,7 @@ const ProjectInfo = (props) => {
             ):(
                 <React.Fragment>
                     <Grid item xl={6} md={6} sm={6} xs={12} style={{ padding: '1em' }}>
-                        <Typography variant="h5">{detailProject.title}</Typography>
+                        <Typography variant="h5">{detailProject.title}  ({detailProject.progress?Math.round(detailProject.progress):'0'}%)</Typography>
                     </Grid>
                     <Grid item xl={6} md={6} sm={6} xs={12} style={{ padding: '1em' }}>
                         {detailProject.start ? (

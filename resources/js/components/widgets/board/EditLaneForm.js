@@ -176,8 +176,8 @@ const EditLaneForm = (props) => {
             return (
                 <DialogContent dividers>
                     <Tabs value={tabState} onChange={handleTabChanges} >
-                        <Tab label="Edit Lane" />
-                        <Tab label="Add new card" />
+                        <Tab label="Edit lane" />
+                        <Tab label="Add new task" />
                     </Tabs>
                     <TabPanel value={tabState} index={0}>
                         <Grid container spacing={2} 

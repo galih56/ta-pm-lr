@@ -34,6 +34,6 @@ class ClientsHasProjects extends Model
     }
 
     public function task_member(){
-        return $this->hasOne(TaskMember::class,'project_clients_id');
+        return $this->hasMany(TaskMember::class,'project_clients_id');
     }  
 }

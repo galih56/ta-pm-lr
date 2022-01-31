@@ -1,6 +1,5 @@
 import React, { useState, useContext } from 'react';
 import UserContext from '../../../context/UserContext';
-import toast from 'react-hot-toast';
 import TableTasks from './TableTasks';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
@@ -9,12 +8,10 @@ import TableRow from '@material-ui/core/TableRow';
 import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
 import moment from 'moment';
-import axios from 'axios';
 
 function Row(props) {
     const { data, handleDetailTaskOpen,onClick,headCells, onTaskUpdate, onTaskDelete,keywords } = props;
     const [openCollapsible, setOpenCollapsible] = useState(true);
-    let global = useContext(UserContext);
     
     return (
         <React.Fragment>
@@ -28,7 +25,7 @@ function Row(props) {
                         </IconButton>
                     ):null}
                 </TableCell>
-                <TableCell component="th" scope="row" style={{ cursor: 'pointer' }} onClick={onClick}>{data.title}</TableCell>
+                <TableCell component="th" scope="row" style={{ cursor: 'pointer' }} onClick={onClick}>{data.title} ({data.progress?Math.round(data.progress):'0'}%)</TableCell>
                 <TableCell align="left"> {data.start ? moment(data.start).format('DD MMMM YYYY') : null} </TableCell>
                 <TableCell align="left"> {data.end ? moment(data.end).format('DD MMMM YYYY') : null} </TableCell>
                 <TableCell> </TableCell>
@@ -42,11 +39,8 @@ function Row(props) {
                 <TableRow >
                     <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={headCells.length+2}>
                         <Collapse in={openCollapsible} timeout="auto">
-                            <TableTasks headCells={headCells}
-                                tasks={data.cards}  
-                                handleDetailTaskOpen={handleDetailTaskOpen}
-                                onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete}
-                                />
+                            <TableTasks headCells={headCells} tasks={data.cards} handleDetailTaskOpen={handleDetailTaskOpen}
+                                onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete} />
                         </Collapse>
                     </TableCell>
                 </TableRow>

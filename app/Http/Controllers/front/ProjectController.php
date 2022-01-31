@@ -297,9 +297,6 @@ class ProjectController extends Controller
         $clients_has_projects=ClientsHasProjects::where('projects_id','=',$id)->where('clients_id','=',$clients_id)->get();
         for ($i=0; $i < count($clients_has_projects); $i++) { 
             $cp=$clients_has_projects[$i];
-            foreach ($cp->task_member as $i => $member) {
-                $member->delete();
-            }
             $cp->delete();
         }
         return response()->json("",200);

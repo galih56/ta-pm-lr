@@ -130,36 +130,36 @@ export default function ModalCreateProject(props) {
         
         if (!window.navigator.onLine) {
             toast.error(`You are currently offline`);
-        } else {
-            var url = process.env.MIX_BACK_END_BASE_URL + 'projects';
-            const toast_loading = toast.loading('Loading...');
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-           
-            axios.post(url,body)
-                .then((result) => {
-                    if(!result.data?.error){
-                        global.dispatch({ type: 'create-new-project', payload: result.data })
-                        setTitle('');
-                        setDescription('');
-                        closeModal();
-                        toast.dismiss(toast_loading);
-                        setImportErrors([]);
-                        toast.success('A new project has been created')
-                    }else{
-                        if(result.data.error==true && result.data.messages.length>0){
-                            setImportErrors(result.data.messages);
-                            toast.dismiss(toast_loading);
-                            toast.error('Failed to import excel file')
-                        }
-                    }
-                }).catch((e)=>{
-                    console.error(e)
+        } 
+
+        var url = process.env.MIX_BACK_END_BASE_URL + 'projects';
+        const toast_loading = toast.loading('Loading...');
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        
+        axios.post(url,body)
+            .then((result) => {
+                if(!result.data?.error){
+                    global.dispatch({ type: 'create-new-project', payload: result.data })
+                    setTitle('');
+                    setDescription('');
+                    closeModal();
                     toast.dismiss(toast_loading);
-                    var error_message=error?.response?.statusText? error?.response?.statusText:'Something went wrong'
-                    toast.error(error_message)
-                });
-        }
+                    setImportErrors([]);
+                    toast.success('A new project has been created')
+                }else{
+                    if(result.data.error==true && result.data.messages.length>0){
+                        setImportErrors(result.data.messages);
+                        toast.dismiss(toast_loading);
+                        toast.error('Failed to import excel file')
+                    }
+                }
+            }).catch((e)=>{
+                console.log(e)
+                toast.dismiss(toast_loading);
+                var error_message=error?.response?.statusText? error?.response?.statusText:'Something went wrong'
+                toast.error(error_message)
+            });
     }
     
     return (

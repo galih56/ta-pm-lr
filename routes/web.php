@@ -26,6 +26,8 @@ Route::group(['prefix' => 'master'],function(){
         });
         Route::resource('/lists','App\Http\Controllers\admin\ListController');
         Route::resource('/tasks','App\Http\Controllers\admin\TaskController');
+        Route::patch('tasks/{task}/start', 'App\Http\Controllers\front\TaskController@startTask')->name('tasks.start');
+        Route::patch('tasks/{task}/complete', 'App\Http\Controllers\front\TaskController@updateComplete')->name('tasks.complete');
         Route::resource('/clients','App\Http\Controllers\admin\ClientController');
         Route::resource('/teams','App\Http\Controllers\admin\TeamController');
         Route::resource('/roles','App\Http\Controllers\admin\RoleController');        

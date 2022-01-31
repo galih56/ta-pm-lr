@@ -13,6 +13,7 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import ModalDetailTask from './../tasks/modalDetailTask/ModalDetailTask';
+import UpdateProgressButtons from './UpdateProgressButtons';
 import UserContext from '../../context/UserContext';
 import { visuallyHidden } from '@material-ui/utils';
 import Typography from '@material-ui/core/Typography';
@@ -111,9 +112,7 @@ export default function EnhancedTable({detailProject}) {
             return (
                 <ModalDetailTask
                     open={modalOpen}
-                    closeModalDetailTask={() => {
-                        handleModalOpen({ projects_id: null, lists_id: null, tasks_id: null, open: false })
-                    }}
+                    closeModalDetailTask={() =>handleModalOpen({ projects_id: null, lists_id: null, tasks_id: null, open: false })}
                     projects_id={clickedTask.projects_id}
                     initialState={clickedTask} />
             )
@@ -155,12 +154,13 @@ export default function EnhancedTable({detailProject}) {
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
                                     return (
-                                        <TableRow
-                                            hover
-                                            role="checkbox" key={row.title}
-                                        >
+                                        <TableRow hover role="checkbox" key={row.title}>
                                             <TableCell padding="checkbox">
-                                                {row.complete?<Checkbox disabled checked={row.complete}/>:<Checkbox disabled checked={row.complete}/>}
+                                                {!row.cards?.length || row.parent_task ?(
+                                                <div style={{display:'flex'}}>
+                                                    <UpdateProgressButtons data={row}/>
+                                                </div>):null}
+                                                {/* {row.complete?<Checkbox disabled checked={row.complete}/>:<Checkbox disabled checked={row.complete}/>} */}
                                             </TableCell>
                                             <TableCell component="th" scope="row" padding="none" style={{ cursor: 'pointer' }}
                                                 onClick={() => {

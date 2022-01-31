@@ -30,6 +30,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
     const classes = useStyles();
     
     useEffect(()=>{
+        console.log('MemberList : ',detailProject);
         setMembers(data.members?data.members:[]);
     },[data.members])
 
@@ -44,7 +45,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
                 success: (result)=>{
                     const newDetailTask={...data,members:result.data};
                     setData(newDetailTask);
-                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: newDetailTask })
+                    if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: newDetailTask })
                     else global.dispatch({ type: 'store-detail-task', payload: newDetailTask })
                     return <b>Successfuly updated</b>
                 },
@@ -72,7 +73,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
                     setMembers(newMemberList);
                     const newDetailTask={...data,members:newMemberList};
                     setData(newDetailTask);
-                    if(data.is_subtask) global.dispatch({ type: 'store-detail-subtask', payload: newDetailTask })
+                    if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: newDetailTask })
                     else global.dispatch({ type: 'store-detail-task', payload: newDetailTask })
                     return <b>Successfully deleted</b>
                 },

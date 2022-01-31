@@ -1,5 +1,7 @@
 import React,{useState,useEffect,useContext,lazy,Suspense} from 'react';
-import moment from 'moment';
+import PlayArrowIcon from '@material-ui/icons/PlayArrow';
+import PlayCircleFilledWhiteIcon from '@material-ui/icons/PlayCircleFilledWhite';
+import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
@@ -12,6 +14,7 @@ import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import { parseISO } from 'date-fns'; 
+import moment from 'moment';
 
 const Attachments = lazy(() => import('./Attachments'));
 const MemberList = lazy(() => import('./MemberList'));
@@ -20,7 +23,7 @@ const ExtendDeadlineForm = lazy(() => import('./../../widgets/ExtendDeadlineForm
 const SelectTag = lazy(() => import('./../../widgets/SelectTag'));
 const StatusChip = lazy(() => import('./../../widgets/StatusChip'));
 
-const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetailTask,onTaskUpdate,onTaskDelete,setStartConfirmOpen }) => {
+const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetailTask,onTaskUpdate,onTaskDelete,startConfirmOpen,completeConfirmOpen }) => {
     const global = useContext(UserContext);
     const [showExtendDeadlineForm,setShowExtendDeadlineForm]=useState(false);
     const [estimationDateRange,setEstimationDateRange]=useState([null,null]);
@@ -29,9 +32,15 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
     // const [minDate,setMinDate]=useState(null);
     // const [maxDate,setMaxDate]=useState(null);
 
+    function getDateRangeFromTask(start,end){
+        if(start) start=moment(start).format('YYYY-MM-DD HH:mm:ss');
+        if(end) end=moment(end).format('YYYY-MM-DD HH:mm:ss');
+        return [start,end];
+    }
+
     useEffect(()=>{
-        setEstimationDateRange([data.start,data.end]);
-        setRealizationDateRange([data.actual_start,data.actual_end]);
+        setEstimationDateRange(getDateRangeFromTask(data.start,data.end));
+        setRealizationDateRange(getDateRangeFromTask(data.actual_start,data.actual_end));
         // if(data.list){
         //     setMinDate(parseISO(data.list.start))
         //     setMaxDate(parseISO(data.list.end))
@@ -42,18 +51,18 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
         //     setMinDate(null)
         //     setMaxDate(null)
         // }
-    },[data.id])
+    },[data])
 
     const checkLoggedInUserProjectMember=()=>{
+        const project_members=detailProject.members||[];
         var logged_in_user={ 
             id:global.state.id, name:global.state.name, 
             username:global.state.username, email:global.state.email, 
         }
         var registered=false
         try {
-            console.log(detailProject);
-            for (let i = 0; i < detailProject.members.length; i++) {
-                const member = detailProject.members[i];
+            for (let i = 0; i < project_members.length; i++) {
+                const member = project_members[i];
                 if(member.id==logged_in_user.id){ registered=true; }
             }
             
@@ -62,10 +71,9 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
             }   
         } catch (error) {
             console.error(error)
-            console.log(detailProject)
         }
-
     }
+
     useEffect(()=>{    
         getProgress();
     },[data.cards]);
@@ -84,13 +92,10 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                         </Grid> 
                         <Grid item lg={12} md={12} sm={12} xs={12} container spacing={2}>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <Typography style={{ whiteSpace: 'noWrap'}}>Estimation start/end at : {data.start ? moment(data.start).format('DD MMMM YYYY') : ''} - {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}</Typography> 
+                                <Typography style={{ whiteSpace: 'noWrap'}}>Estimation : {data.start ? moment(data.start).format('DD MMMM YYYY') : ''} - {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}</Typography> 
                                 {([1,2,4].includes(global.state.role?.id))?(
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                        <MobileDateRangePicker
-                                            required
-                                            startText="Start at : "
-                                            endText="Finish at : "
+                                        <MobileDateRangePicker required startText="Start at : " endText="Finish at : "
                                             value={estimationDateRange}
                                             minDate={detailProject.start?parseISO(detailProject.start):null}
                                             maxDate={detailProject.end?parseISO(detailProject.end):null}
@@ -118,9 +123,12 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                             </Grid>
                             
                             <Grid item lg={12} md={12} sm={12} xs={12}>
-                                <Typography style={{ whiteSpace: 'noWrap'}}>Realization start/end at : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''} - {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</Typography> 
+                                <Typography style={{ whiteSpace: 'noWrap'}}>Realization at : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''} - {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</Typography> 
                                 <StatusChip status={data.start_label}/> - <StatusChip status={data.end_label}/>
-                                {([1,2,4].includes(global.state.role?.id))?(
+                              
+                            </Grid>
+                            <Grid item lg={12} md={12} sm={12} xs={12}>
+                            {([1,2,4].includes(global.state.role?.id))?(
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                                         <MobileDateRangePicker
                                             required
@@ -147,11 +155,22 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                                     </LocalizationProvider>
                                 ):(
                                     <>
-                                        <Typography style={{ whiteSpace: 'noWrap'}}>Realization start/end at : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''} - {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</Typography> 
-                                        <Button variant="contained" 
-                                                disabled={data.actual_start?true:false}
-                                                color="primary" style={{marginRight:'0.5em'}} 
-                                                onClick={()=>setStartConfirmOpen(true)}>Start progress</Button>
+                                        {/*Jika task sebuah parent dan tidak punya subtask atau 
+                                        Jika task sebuah children maka button update progress ditampilkan */}
+                                        {!data.cards?.length || data.parent_task ?(
+                                            <>
+                                                <Button variant="contained"  disabled={data.actual_start?true:false} color="primary" style={{marginRight:'0.5em'}} 
+                                                    onClick={startConfirmOpen} 
+                                                    endIcon={data.actual_start?<PlayArrowIcon style={{fill:'green'}}/>:<PlayCircleFilledWhiteIcon />}>
+                                                        {data.actual_start?<span style={{color:'black'}}>Started at {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''}</span>:`Start progress`} 
+                                                </Button>
+                                                <Button variant="contained"  disabled={data.actual_end?true:false} color="primary" style={{marginRight:'0.5em'}} 
+                                                    onClick={completeConfirmOpen}
+                                                    endIcon={data.actual_end?<CheckCircleOutlineIcon  style={{fill:'green'}}/>:<CheckCircleOutlineIcon />}>
+                                                        {data.actual_end?<span style={{color:'black'}}>Completed at ${data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</span>:"Mark as completed"} 
+                                                </Button>
+                                            </>
+                                        ):null}                                           
                                     </>
                                 )}
                             </Grid>
@@ -169,7 +188,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                                 </Grid>
                             </Grid>
                         ):null} 
-                        {([1,2,3].includes(global.state.role?.id) && !data.is_subtask)?(
+                        {([1,2,3].includes(global.state.role?.id) && !data.parent_task_id)?(
                             <Grid item lg={12} md={12} sm={12} xs={12} container spacing={2}>
                                 <Grid item lg={12} md={12} sm={12} xs={12}>
                                     <Typography>Cost estimation/realization : 
@@ -195,7 +214,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                         <Grid item lg={12} md={12} sm={12} xs={12} >
                             <StatusChip status={data.start_label}/> - <StatusChip status={data.end_label}/>
                         </Grid>
-                        {([1,2,3].includes(global.state.role?.id) && !data.is_subtask)?(
+                        {([1,2,3].includes(global.state.role?.id) && !data.parent_task_id)?(
                             <Grid item lg={12} md={12} sm={12} xs={12} >
                                 <Typography  style={{ whiteSpace: 'noWrap',margin:'0.4em' }} >Cost estimation/realization : 
                                     {data.cost? <NumberFormat customInput={Typography} style={{ whiteSpace: 'noWrap',margin:'0.4em' }}thousandSeparator={true} displayType={'text'} value={isNaN(data.cost)?0:Number.parseInt(data.cost)}/>:'...'}/
@@ -224,7 +243,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                         lists_id={data.lists_id}
                     />
                 </Grid>
-                {!data.is_subtask?(
+                {!data.parent_task?(
                     <Grid item lg={12} md={12} sm={12} xs={12}>
                         <Subtasks isEdit={isEdit} 
                             detailTask={data}  

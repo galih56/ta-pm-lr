@@ -40,11 +40,79 @@ class Task extends Model
                 $work_days= $actual_start->diffInDays($actual_end);
                 $task->work_days=$work_days;
             }
+            
+            if($task->parentTask){
+                if($task->actual_end){
+                    $task->progress=100;
+                }else{
+                    $task->progress=0;
+                }
+            }else{
+                if($task->actual_end){
+                    $task->progress=100;
+                }else{
+                    $task->progress=0;
+                }
+            }
+            if($task->progress==100){
+                $task->complete=true;
+            }
+
+            // if($task->cards){
+            //     $valuePerSubtask=100/count($task->cards);
+            //     $completeSubtaskCounter=0;
+            //     for ($i = 0; $i < count($task->cards); $i++) {
+            //         $subtask = $task->cards[$i];
+            //         if($subtask->progress==100){ $completeSubtaskCounter++; }
+            //     }
+            //     $progress=$completeSubtaskCounter*$valuePerSubtask;
+            //     $task->progress=round($progress);
+            // }
+
+            // if($task->parentTask){
+            //     $parent_task=$task->parentTask;
+            //     $valuePerSubtask=100/count($parent_task->cards);
+            //     $completeSubtaskCounter=0;
+            //     for ($i = 0; $i < count($parent_task->cards); $i++) {
+            //         $subtask = $parent_task->cards[$i];
+            //         if($subtask->progress==100){ $completeSubtaskCounter++; }
+            //     }
+            //     $progress=$completeSubtaskCounter*$valuePerSubtask;
+            //     $parent_task->progress=$progress;
+            //     $parent_task->save();
+            // }else{
+            // }
         });
-        
+        static::saved(function($task){
+            if(!$task->parentTask){
+                $task->list->updateProgress();
+            }else{
+                $task->parentTask->updateProgress();
+            }
+        }) ;      
         static::deleting(function($task) { 
-             $task->cards()->delete();
+            foreach ($task->members as $i => $member) {
+                $member->delete();
+            }
+            foreach ($task->cards as $k => $subtask) {
+                $subtask->delete();
+            }
         });
+    }
+
+    public function updateProgress(){      
+        if(count($this->cards)){
+            $valuePerSubtask=100/count($this->cards);
+            $completeSubtaskCounter=0;
+            for ($i = 0; $i < count($this->cards); $i++) {
+                $subtask = $this->cards[$i];
+                if($subtask->complete){ $completeSubtaskCounter++; }
+            }
+            $progress=$completeSubtaskCounter*$valuePerSubtask;
+            $this->progress=$progress;
+            $this->save();
+            // dd($this, $this->progress,$progress,$completeSubtaskCounter,$valuePerSubtask);
+        }
     }
 
     public function scopeExclude($query, $value = []) 

@@ -79,31 +79,30 @@ const Attachments = (props) => {
     }
     
     const onUploadFiles = async (files, payload) => {
+        let fd = new FormData();
+        fd.append('tasks_id',payload.tasks_id);
+        fd.append('users_id',global.state.id);
+        fd.append('source','upload');
+        files.map((file) => {
+            fd.append('file[]',file);
+        });
+        handleAddAttachment(fd,  payload)
         if (!window.navigator.onLine) {
             toast.error(`You are currently offline`);
-        } else {
-            let fd = new FormData();
-            fd.append('tasks_id',payload.tasks_id);
-            fd.append('users_id',global.state.id);
-            fd.append('source','upload');
-            files.map((file) => {
-                fd.append('file[]',file);
-            });
-            handleAddAttachment(fd,  payload)
-        }
+        } 
     }
     
     const handleFilePick = async (file,payload) => {
+        var body={
+            tasks_id:payload.tasks_id,
+            users_id:global.state.id,
+            source:'pick',
+            files_id:file.id
+        }
+        handleAddAttachment(body, payload);
+        
         if (!window.navigator.onLine) {
             toast.error(`You are currently offline`);
-        } else {
-            var body={
-                tasks_id:payload.tasks_id,
-                users_id:global.state.id,
-                source:'pick',
-                files_id:file.id
-            }
-            handleAddAttachment(body, payload);
         }
     }
     

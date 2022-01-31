@@ -4,7 +4,6 @@ import makeStyles from '@material-ui/styles/makeStyles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -16,13 +15,14 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Grid from '@material-ui/core/Grid';
 import ModalCreateSubtask from './ModalCreateSubtask';
 import FormCreateNewTask from '../../FormCreateNewTask';
-import CancelRoundedIcon from '@material-ui/icons/CancelRounded';
 import UserContext from '../../../../context/UserContext';
 import toast from 'react-hot-toast';
 import ModalDetailTask from './../ModalDetailTask';
 import moment from 'moment';
 import StatusChip from './../../../widgets/StatusChip';
 import axios from 'axios';
+import UpdateProgressButtons from '../../../widgets/UpdateProgressButtons';
+import DeleteButton from './DeleteButton';
 
 const useStyles = makeStyles((theme) => ({
     root: { width: '100%', backgroundColor: theme.palette.background.paper, },
@@ -86,40 +86,6 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                     global.dispatch({ type: 'create-new-subtask', payload: result.data })
                     if(onTaskUpdate)onTaskUpdate(newDetailTask);
                     return <b>A new subtask successfuly created</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
-    }
-
-    const handleCompleteTask = (task,event) => {    
-        if(!task.actual_start || task.actual_end){
-            toast.error("This task hasn't started yet");
-            return;
-        }
-        const body = { id: task.id, complete: event.target.checked };
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${task.id}/complete`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        toast.promise(
-            axios.patch(url, body),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    var newSubtasks=data.map(item=>{
-                        if(item.id==task.id) item.complete=event.target.checked;
-                        return item
-                    })
-                    console.log(body,newSubtasks,id,result.data)
-
-                    var newDetailTask={...detailTask,cards:newSubtasks}
-                    setData(newSubtasks);
-                    setDetailTask(newDetailTask);
-                    if(onTaskUpdate)onTaskUpdate(newDetailTask);            
-                    return <b>Successfully updated</b>
                 },
                 error: (error)=>{
                     if(error.response.status==401) return <b>Unauthenticated</b>;
@@ -199,15 +165,13 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
             return (
                 <ModalDetailTask
                     open={detailTaskOpen}
-                    closeModalDetailTask={() => {
-                        handleDetailTaskOpen({task :clickedTaskInitialState,open:false})
-                    }}
+                    closeModalDetailTask={() =>handleDetailTaskOpen({task :clickedTaskInitialState,open:false})}
                     projects_id={detailProject.id}
                     detailProject={detailProject}
                     initialState={clickedTask} 
                     onTaskUpdate={onTaskUpdate}
                     onTaskDelete={onTaskDelete}
-                    />
+                />
             )
         }
     }, [clickedTask]);
@@ -216,12 +180,25 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
         if (isEdit) {
             return (
                 <React.Fragment>
-                    <IconButton
-                        aria-label="Delete"
-                        onClick={() => setDeleteConfirmOpen(true)}
-                        size="large">
-                        <CancelRoundedIcon fontSize="small" />
-                    </IconButton>
+                    {!subtask.cards?.length || subtask.parent_task ?(
+                        <UpdateProgressButtons data={subtask} alwaysShow={true} 
+                            onUpdate={(result)=>{
+                                var newSubtasks=data.map(item=>{
+                                    if(item.id==result.id) item=result;
+                                    return item
+                                })
+                                var newDetailTask={...detailTask,cards:newSubtasks}
+                                if(result.parent_task) {
+                                    detailTask.progress=result.parent_task;
+                                    detailTask.actual_start=result.parent_task?.actual_start;
+                                    detailTask.actual_end=result.parent_task?.actual_end;
+                                }
+                                setData(newSubtasks);
+                                setDetailTask(newDetailTask);
+                                if(onTaskUpdate)onTaskUpdate(newDetailTask);             
+                            }}/>
+                    ):null}
+                    <DeleteButton onClick={() => setDeleteConfirmOpen(true)}/>
                     <DeleteConfirmDialog
                         open={deleteConfirmOpen}
                         handleClose={() => setDeleteConfirmOpen(false)}
@@ -247,13 +224,13 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                                 <Grid item xl={12} md={12} sm={12} xs={12} 
                                     style={{cursor:'pointer'}}
                                 >        
-                                    <Checkbox checked={item.complete} onChange={(event)=>handleCompleteTask(item,event)}/>
+                                    {/* <Checkbox checked={item.complete} onChange={(event)=>handleCompleteTask(item,event)}/> */}
                                     <span onClick={()=> handleDetailTaskOpen({task:item,open:true})} > 
                                         {item.title}
                                         <br/>
-                                        <span style={{paddingLeft:'2em'}}>{item.start ? moment(item.start).format('DD MMMM YYYY') : ''} - {item.end ? moment(item.end).format('DD MMMM YYYY') : ''}</span>
+                                        <span>{item.start ? moment(item.start).format('DD MMMM YYYY') : ''} - {item.end ? moment(item.end).format('DD MMMM YYYY') : ''}</span>
                                         <br/>
-                                        <span style={{paddingLeft:'2em'}}><StatusChip status={item.start_label}/> - <StatusChip status={item.end_label}/></span>
+                                        <span><StatusChip status={item.start_label}/> - <StatusChip status={item.end_label}/></span>
                                     </span>
                                 </Grid>
                                 <Grid item xl={6} md={6} sm={12} xs={12}>

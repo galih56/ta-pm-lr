@@ -99,6 +99,7 @@ const FormCreateClient=({open,handleClose,onCreate})=>{
                                 multiline
                                 fullWidth
                                 rows={4}
+                                required
                             />
                         </Grid>
                         <Grid xs={12} sm={12} md={12} lg={12} lg={12} item>

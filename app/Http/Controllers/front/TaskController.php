@@ -19,7 +19,7 @@ class TaskController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['index','update','show','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['index','update','store','destroy']]); 
     }
 
     public function index()
@@ -233,20 +233,32 @@ class TaskController extends Controller
         $task=$this->getDetailTask($id);
         return response()->json($task);
     }
+
+    function updateParentProgress($parent_task_id){
+        $parent_task=Task::with('cards')->findOrFail($parent_task_id);
+        $valuePerSubtask=100/count($parent_task->cards);
+        $completeSubtaskCounter=0;
+        for ($i = 0; $i < count($parent_task->cards); $i++) {
+            $subtask = $parent_task->cards[$i];
+            if($subtask->complete){ $completeSubtaskCounter++; }
+        }
+        $progress=round($completeSubtaskCounter*$valuePerSubtask);
+        $parent_task->progress=$progress;
+        if($progress>=100){
+            $parent_task->actual_end = Carbon::now()->toDateTimeString();
+            $parent_task->complete=true;
+        }else{
+            $parent_task->actual_end = null;
+            $parent_task->complete=false;
+        }
+        $parent_task->save();
+    }    
+
     public function updateComplete(Request $request,$id){
-        $task=Task::with('cards')->findOrFail($id);
+        $task=Task::with('cards')->with('parentTask')->findOrFail($id);
         if($request->has('complete')){ 
-            if($task->is_subtask){
-                $parent_task=Task::with('cards')->findOrFail($task->parent_task_id);
-                $valuePerSubtask=100/count($parent_task->cards);
-                $completeSubtaskCounter=0;
-                for ($i = 0; $i < count($parent_task->cards); $i++) {
-                    $subtask = $parent_task->cards[$i];
-                    if($subtask->complete){ $completeSubtaskCounter++; }
-                }
-                $progress=$completeSubtaskCounter*$valuePerSubtask;
-                $parent_task->progress=$progress;
-                $parent_task->save();
+            if($task->parentTask){
+                $this->updateParentProgress($task->parentTask->id);
             }
 
             if($request->complete){
@@ -256,13 +268,12 @@ class TaskController extends Controller
                 $task->complete=true;
                     
                 $end = Carbon::parse($task->end)->format('Y-m-d');
-                $actual_end = Carbon::now()->toDateTimeString();
-                if($actual_end<$end) $task->end_label='Selesai lebih cepat';
-                if($actual_end>$end) $task->end_label='Selesai terlambat';
-                if($actual_end==$end) $task->end_label='Selesai tepat waktu';
-
+                $task->actual_end = Carbon::now()->toDateTimeString();
+                if($task->actual_end<$end) $task->end_label='Selesai lebih cepat';
+                if($task->actual_end>$end) $task->end_label='Selesai terlambat';
+                if($task->actual_end==$end) $task->end_label='Selesai tepat waktu';
             }else{
-                if($task->is_subtask===false && count($task->cards)>0){
+                if($task->parentTask && count($task->cards)>0){
                     $valuePerSubtask=100/count($task->cards);
                     $completeSubtaskCounter=0;
                     for ($i = 0; $i < count($task->cards); $i++) {
@@ -273,6 +284,7 @@ class TaskController extends Controller
                     $task->progress=round($progress);
                     $task->save();
                 }                
+                $task->actual_end = null;
                 $task->end_label='Belum Selesai';
                 $task->complete=false;
                 if(!count($task->cards)){
@@ -294,9 +306,10 @@ class TaskController extends Controller
                     ->with('members.project_client.client')
                     ->with('tags')
                     ->with(['parentTask'=>function($q){
-                        return $q->select('id','start','end','old_deadline','actual_start','actual_end','created_at','updated_at');
-                    }])->findOrFail($id)->toArray();
+                        return $q->select('id','start','end','old_deadline','actual_start','actual_end','progress','created_at','updated_at');
+                    }])->findOrFail($id);
 
+        $task=$task->toArray();
         $task['attachments']=$this->getAttachments($id);
         $task['members']=$this->getTaskMembers($task);
         unset($task['task_members']);
@@ -403,7 +416,7 @@ class TaskController extends Controller
         
         $new_approval=new Approval();
         $new_approval->tasks_id=$task->id;
-        if($task->is_subtask){
+        if($task->parentTask){
             $new_approval->parent_task_id=$task->parentTask->id;
             $new_approval->lists_id=$task->parentTask->list->id;
             $new_approval->projects_id=$task->parentTask->list->project->id;

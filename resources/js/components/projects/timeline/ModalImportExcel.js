@@ -45,7 +45,7 @@ const DialogActions = withStyles((theme) => ({
 }))(MuiDialogActions);
 
 export default function ModalImportExcel(props) {
-    const {open,closeModal,projects_id}=props;
+    const {open,closeModal,projects_id,onUpdate}=props;
     const global = useContext(UserContext);
     const [selectedFile, setSelectedFile]=useState();
 
@@ -62,9 +62,8 @@ export default function ModalImportExcel(props) {
                 loading: 'Importing',
                 success: (result)=>{
                     closeModal();
-                    console.log(result.data);
-                    console.log(global.state);
                     global.dispatch({ type: 'store-detail-project', payload: result.data });
+                    onUpdate();
                     return <b>Imported</b>
                 },
                 error: (error)=>{

@@ -162,9 +162,11 @@ const CustomListItem=React.memo(({team,deleteTeam})=>{
         <ListItem style={{backgroundColor:'#e3e3e3'}}>
             <ListItemText primary={`${team.name}`} />
             <ListItemSecondaryAction>
+                {/* 
                 <IconButton edge="end" aria-label="members" onClick={()=>setOpen(!open)} size="large">
                     <PeopleIcon />
-                </IconButton>
+                </IconButton> 
+                */}
                 <IconButton
                     edge="end"
                     aria-label="delete"

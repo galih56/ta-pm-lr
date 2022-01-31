@@ -21,6 +21,9 @@ const OpenEditForm = ({ isEdit, data, setData ,detailProject,saveChanges}) => {
                         variant={'standard'}
                     />
                 </Grid>
+                <Grid item  lg={12} md={12} sm={12} xs={12} >
+                    <MemberList isEdit={isEdit} data={data} setData={setData} exceptedData={[]}/>
+                </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12} align="center">
                     <TextField variant="standard"
                         label="Description : "
@@ -30,9 +33,6 @@ const OpenEditForm = ({ isEdit, data, setData ,detailProject,saveChanges}) => {
                         onChange={(e) =>setData({ ...data, description: e.target.value })} 
                         style={{ width: '100%' }}
                     />
-                </Grid>
-                <Grid item  lg={12} md={12} sm={12} xs={12} >
-                    <MemberList isEdit={isEdit} data={data} setData={setData} exceptedData={[]}/>
                 </Grid>
                 {data.member?(
                     <>
