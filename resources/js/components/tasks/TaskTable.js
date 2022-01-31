@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { green, grey} from "@material-ui/core/colors";
 import makeStyles from '@material-ui/styles/makeStyles';
 import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
@@ -15,9 +14,10 @@ import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import ModalDetailTask from './modalDetailTask/ModalDetailTask';
+import UpdateProgressButtons from './../widgets/UpdateProgressButtons';
 import UserContext from '../../context/UserContext';
 import { visuallyHidden } from '@material-ui/utils';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import moment from 'moment';
 import axios from 'axios';
 
@@ -170,13 +170,7 @@ export default function EnhancedTable({data}) {
             <Paper className={classes.paper}>
                 <TableContainer>
                     <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} >
-                        <EnhancedTableHead
-                            classes={classes}
-                            order={order}
-                            orderBy={orderBy}
-                            onRequestSort={handleRequestSort}
-                            rowCount={rows.length}
-                        />
+                        <EnhancedTableHead classes={classes} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} rowCount={rows.length}/>
                         <TableBody>
                             {rows.length?stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
@@ -184,23 +178,24 @@ export default function EnhancedTable({data}) {
                                     return (
                                         <TableRow hover role="checkbox" key={row.id}>
                                             <TableCell padding="checkbox">
-                                                <Checkbox
-                                                    onChange={event =>handleCompleteTask(row, event)}
-                                                    checked={row.complete}
-                                                />
+                                                {/* <Checkbox onChange={event =>handleCompleteTask(row, event)} checked={row.complete} /> */}
+                                                {!row.cards?.length || row.parent_task ?(
+                                                    <div style={{display:'flex'}}>
+                                                        <UpdateProgressButtons data={row} alwaysShow={true}/>
+                                                    </div>):null}
                                             </TableCell>
                                             <TableCell component="th" scope="row" padding="none" style={{ cursor: 'pointer' }}
                                                 onClick={() => {
-                                                    var projects_id=(!row.is_subtask)?row.list.projects_id:row.parent_task.list.projects_id;
-                                                    var lists_id=(!row.is_subtask)?row.list.projects_id:row.parent_task.list.projects_id;
+                                                    var projects_id=(!row.parent_task)?row.list.projects_id:row.parent_task.list.projects_id;
+                                                    var lists_id=(!row.parent_task)?row.list.projects_id:row.parent_task.list.projects_id;
                                                     handleModalOpen({  projects_id: projects_id,  lists_id: lists_id,  tasks_id: row.id,  open: true });
                                                 }}>
                                                 {row.title} ({row.progress?Math.round(row.progress):'0'}%)
                                             </TableCell>
                                             <TableCell align="right">{row.start ? moment(row.start).format('DD MMM YYYY') : ''} - {row.end ? moment(row.end).format('DD MMM YYYY') : ''}</TableCell>
                                             <TableCell align="right">
-                                                <Link to={`/projects/${(!row.is_subtask)?row.list.projects_id:row.parent_task.list.projects_id}/`} style={{ textDecoration: 'none', color: 'black' }}>
-                                                    {(!row.is_subtask)?row.list.project.title:row.parent_task.list.project.title}
+                                                <Link to={`/projects/${(!row.parent_task)?row.list.projects_id:row.parent_task.list.projects_id}/`} style={{ textDecoration: 'none', color: 'black' }}>
+                                                    {(!row.parent_task)?row.list.project.title:row.parent_task.list.project.title}
                                                 </Link>
                                             </TableCell>
                                         </TableRow>

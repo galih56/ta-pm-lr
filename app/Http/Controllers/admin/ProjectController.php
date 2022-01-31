@@ -422,6 +422,7 @@ class ProjectController extends Controller
                         $task['is_subtask']=true;
                         $subtasks=[];
                         if(array_key_exists('subtasks',$task)) $subtasks=$task['subtasks'];
+                        $task['users_id']=Auth::user()->id;
                         $task['start']=$task['start'];
                         $task['end']=$task['end'];
                         if($task['actual_start']) $task['actual_start']=$task['actual_start'];
@@ -430,6 +431,7 @@ class ProjectController extends Controller
                         $task=Task::create($task);
                         foreach ($subtasks as $k => $subtask) {
                             $subtask['parent_task_id']=$task->id;
+                            $subtask['users_id']=Auth::user()->id;
                             $subtask['is_subtask']=true;
                             $subtask=$this->makeLabel($subtask);
                             $subtask['start']=$subtask['start'];

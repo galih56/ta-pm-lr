@@ -98,7 +98,7 @@ export default function TeamTable() {
                                         </TableRow>
                                         {row.description?(
                                             <TableRow>
-                                                <TableCell align="left"  colSpan="2">
+                                                <TableCell align="left"  colSpan="2" style={{paddingLeft:'1em'}}>
                                                 {row.description}
                                                 </TableCell>
                                             </TableRow>

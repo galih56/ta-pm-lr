@@ -22,14 +22,49 @@ class Project extends Model
         parent::boot();
 
         static::deleting(function($project) { 
-             $project->members()->delete();
-             $project->clients()->delete();
-             $project->columns()->delete();
-             $project->meetings()->delete();
-             $project->teams()->delete();
+             foreach ($project->members as $i => $member) {
+                $member->delete();
+             }
+
+             foreach ($project->clients as $i => $client) {
+                $client->delete();
+             }
+             
+             foreach ($project->meetings as $i => $meet) {
+                $meet->delete();
+             }
+
+             foreach ($project->teams as $i => $team) {
+                $team->delete();
+             }
+
+             foreach ($project->columns as $i => $list) {
+                foreach ($list->cards as $j => $task) {
+                    foreach ($task->cards as $k => $subtask) {
+                        $subtask->delete();
+                    }
+                    $task->delete();
+                }
+                $list->delete();
+             }
         });
     }
 
+    public function updateProgress(){      
+        $sum=0;
+        if(count($this->columns)){
+            for ($i = 0; $i < count($this->columns); $i++) {
+                $list = $this->columns[$i];
+                if($list->progress==null){
+                    $list->progress=0;
+                }
+                $sum+=$list->progress;
+            }
+            $progress=$sum/count($this->columns);
+            $this->progress=round($progress);
+            $this->save();
+        }
+    }
     public function scopeExclude($query, $value = []) 
     {
         return $query->select(array_diff($this->fillable, (array) $value));

@@ -21,6 +21,7 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,is_s
 
     useEffect(()=>{
         setNewTask({...newTask,is_subtask:is_subtask});
+        const project_members=detailProject?.members||[];
         const checkLoggedInUserProjectMember=()=>{
             var logged_in_user={
                 id:global.state.id,
@@ -29,8 +30,8 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,is_s
                 email:global.state.email,
             }
             var registered=false
-            for (let i = 0; i < detailProject.members.length; i++) {
-                const member = detailProject.members[i];
+            for (let i = 0; i < project_members.length; i++) {
+                const member = project_members[i];
                 if(member.id==logged_in_user.id){ registered=true; }
             }
             
@@ -43,6 +44,7 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,is_s
         checkLoggedInUserProjectMember();
     },[]);
     
+
     return (
         <Grid container spacing={2} style={{ paddingLeft: "1em", paddingRight: "1em",paddingTop:"1em" }} component="form" 
             onSubmit={(e) => { 

@@ -1,29 +1,27 @@
 import React, { useState, useEffect,useContext } from 'react';
-import UserContext from './../../../context/UserContext';
 import { Link, useHistory,useLocation } from 'react-router-dom';
 import Checkbox from '@material-ui/core/Checkbox';
 import moment from 'moment';
 import StatusChip from '../../widgets/StatusChip';
+import UpdateProgressButtons from '../../widgets/UpdateProgressButtons';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
-import Popover from '@material-ui/core/Popover';
 import Typography from '@material-ui/core/Typography';
 import EnhancedTableHead from './EnhancedTableHead';
-import { green, grey} from "@material-ui/core/colors";
+import PICPopover from './PICPopover';
 
 const TableSubtask=({tasks,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
     const [subtasks,setSubtasks]=useState([])
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const [openPopOver, setOpenPopOver] = React.useState(null);
-    const [memberOnHover, setMemberOnHover] = React.useState(null);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [openPopOver, setOpenPopOver] = useState(null);
+    const [memberOnHover, setMemberOnHover] = useState(null);
     
     let location = useLocation();
     let history = useHistory();
     let pathname = location.pathname;
     let searchParams = new URLSearchParams(location.search);
-    let global=useContext(UserContext);
     
     const handlePopoverOpen = (event,member) =>  {
         setMemberOnHover(member);
@@ -51,9 +49,13 @@ const TableSubtask=({tasks,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskD
                                 <TableCell padding="checkbox"></TableCell>
                                 <TableCell padding="checkbox"></TableCell>
                                 <TableCell padding="checkbox"> 
+                                    {!subtask.cards?.length || subtask.parent_task ?(
+                                        <div style={{display:'flex'}}>
+                                            <UpdateProgressButtons data={subtask} alwaysShow={true}/>
+                                        </div>):null}
                                 </TableCell>
                                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}> 
-                                    {subtask.complete?<Checkbox disabled checked={subtask.complete} />:<Checkbox disabled checked={subtask.complete} />}
+                                    {/* {subtask.complete?<Checkbox disabled checked={subtask.complete} />:<Checkbox disabled checked={subtask.complete} />} */}
                                     <Link 
                                     onClick={(e)=>{
                                         e.preventDefault()
@@ -62,41 +64,20 @@ const TableSubtask=({tasks,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskD
                                     }}
                                     to={{ pathname: pathname, search: searchParams.toString() }} 
                                         style={{ textDecoration: 'none', color: '#393939' }}>
-                                        {subtask.title}
+                                        {subtask.title}  ({Math.round(subtask.progress)}%)
                                     </Link>
                                 </TableCell>
                                 <TableCell>
                                     {subtask.members?subtask.members.map((member,i)=>{
-                                            return (
-                                                <span 
-                                                    key={i}
-                                                    onMouseEnter={(event)=>handlePopoverOpen(event,member)}
-                                                    onMouseLeave={handlePopoverClose} style={{margin:'1em'}}>
-                                                    {member?.project_client?.client?(<>{`Client ${`(${member.project_client?.client?.institution})`}`}</>):null}
-                                                    {member?.is_client?(<Typography>{`Client ${`(${memberOnHover?.institution})`}`}</Typography>):null}                                    
-                                                    {member?.role?<Typography>{member?.role?.name}</Typography>:null}
-                                            </span>
-                                            )
-                                        }):<></>}
-                                        
-                                        {(openPopOver)?(
-                                        <Popover
-                                            style={{ pointerEvents: 'none', zIndex:'1200',padding:'1em' }}
-                                            open={openPopOver}
-                                            anchorEl={anchorEl}
-                                            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                                            transformOrigin={{ vertical: 'top', horizontal: 'center', }}
-                                            onClose={handlePopoverClose}
-                                        >
-                                            <div style={{padding:'0.3em'}}>
-                                                {memberOnHover.project_client?.client?(<Typography>{`Client ${`(${memberOnHover.project_client?.client?.institution})`}`}</Typography>):null}
-                                                {memberOnHover?.is_client?(<Typography>{`Client ${`(${memberOnHover?.institution})`}`}</Typography>):null}
-                                                {memberOnHover.user?(<Typography>{memberOnHover?.user?.name}</Typography>):null}
-                                                {memberOnHover.name?(<Typography>{memberOnHover?.name}</Typography>):null}
-                                                {memberOnHover.member?.role?<Typography>{memberOnHover?.member?.role?.name}</Typography>:null}
-                                                {memberOnHover.role?<Typography>{memberOnHover?.role?.name}</Typography>:null}
-                                            </div>
-                                        </Popover>):<></>}
+                                        return (
+                                            <span key={i} onMouseEnter={(event)=>handlePopoverOpen(event,member)} onMouseLeave={handlePopoverClose} style={{margin:'1em'}}>
+                                                {member?.project_client?.client?(<>{`Client ${`(${member.project_client?.client?.institution})`}`}</>):null}
+                                                {member?.is_client?(<Typography>{`Client ${`(${memberOnHover?.institution})`}`}</Typography>):null}                                    
+                                                {member?.role?<Typography>{member?.role?.name}</Typography>:null}
+                                        </span>
+                                        )
+                                    }):<></>}                                        
+                                    <PICPopover open={openPopOver} data={memberOnHover} anchorEl={anchorEl} onClose={handlePopoverClose}/>
                                 </TableCell>
                                 <TableCell align="left">
                                     {subtask.start ? moment(subtask.start).format('DD MMMM YYYY') : ''}

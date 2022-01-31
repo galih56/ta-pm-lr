@@ -4,29 +4,19 @@ import { Button } from '@material-ui/core/';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import UserContext from '../../../context/UserContext';
 
-const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteTask, deleteConfirmOpen, setDeleteConfirmOpen, closeModal }) => {
+const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteTask, confirm, setConfirm, closeModal }) => {
     const global = useContext(UserContext);
+    const handleConfirm=()=> setConfirm({open:true,callback:deleteTask})
     if (isEdit) {
         return (
             <React.Fragment>
                 <Button onClick={() => setEditMode(false)} color="primary"> Cancel </Button>
-                <Button onClick={
-                    () => { saveChanges()}
-                } variant="contained" color="primary"> Save</Button>
+                <Button onClick={saveChanges} variant="contained" color="primary"> Save</Button>
                 {([2,4].includes(global.state.role?.id))?(
-                    <Button onClick={
-                        () => { setDeleteConfirmOpen(true); }
-                    } variant="contained" color="secondary">
+                    <Button onClick={handleConfirm} variant="contained" color="secondary">
                         Delete
                     </Button>
                 ):null}
-                <DialogConfirm
-                    open={deleteConfirmOpen}
-                    handleConfirm={() => { deleteTask(); setDeleteConfirmOpen(false); closeModal(); }}
-                    handleClose={() => { setDeleteConfirmOpen(false);}}  
-                    title={"Are you sure?"}>
-                    <DialogContentText>Data will be deleted permanently.</DialogContentText>
-                </DialogConfirm>
             </React.Fragment>
         )
     } else {

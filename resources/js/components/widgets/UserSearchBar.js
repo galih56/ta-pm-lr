@@ -29,7 +29,7 @@ export default function UserSearchbar(props) {
     useEffect(() => {
         if(detailProject?.members?.length) setUsers(detailProject.members);
         if(detailProject?.clients?.length) setClients(detailProject.clients);
-        if(!detailProject?.members?.length && !detailProject?.members?.length) {
+        if(!detailProject?.members?.length) {
             if(!clientOnly && !userOnly){
                 getClients()
                 getUsers();
@@ -43,6 +43,10 @@ export default function UserSearchbar(props) {
             }
         }
     }, [detailProject?.members,detailProject?.clients]);
+
+    useEffect(()=>{
+        console.log(detailProject?.members);
+    },[detailProject?.members]);
 
     function checkExistingMember(id, arr=[]) {
         var exists = false;
@@ -98,9 +102,7 @@ export default function UserSearchbar(props) {
     }, [users,clients]);
 
     return (
-        <Autocomplete
-            multiple
-            freeSolo
+        <Autocomplete multiple freeSolo
             options={options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter))}
             groupBy={(option) => option.firstLetter}
             getOptionLabel={(option) => {
@@ -117,8 +119,7 @@ export default function UserSearchbar(props) {
                 }
                 return label;
             }}
-            fullWidth
-            renderInput={(params) => <TextField {...params} label={inputLabel?inputLabel:"Search Users"} variant="standard"/>}
+            fullWidth renderInput={(params) => <TextField {...params} label={inputLabel?inputLabel:"Search Users"} variant="standard"/>}
             onChange={(event, options) => handleValueChanges(options)}
             renderTags={(values, getTagProps) => values.map((option, index) =>{
                 return(<Chip key={index} variant="outlined" label={option.name} {...getTagProps({ index })} /> )

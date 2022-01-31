@@ -1,21 +1,14 @@
-import React from 'react';
 import Popover from '@material-ui/core/Popover';
-
-const CustomPopOver=({classes,anchorEl,handleClose,children,open})=>{
+const CustomPopover=({open,anchorEl,handleClose,children})=>{
     return(
-        
-        <Popover
-            className={classes.popover}
-            classes={{ paper: classes.paper }}
-            open={open}
-            anchorEl={anchorEl}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'left', }}
-            transformOrigin={{ vertical: 'top', horizontal: 'left',  }}
+        <Popover style={{ pointerEvents: 'none', zIndex:'1200',padding:'1em' }}
+            open={open} anchorEl={anchorEl}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'center', }}
             onClose={handleClose}
-            disableRestoreFocus
         >
-            {children}
+            <div style={{padding:'0.5em'}}>{children}</div>
         </Popover>
     )
 }
-export default React.memo(CustomPopOver);
+export default CustomPopover;

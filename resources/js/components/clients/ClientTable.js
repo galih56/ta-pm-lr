@@ -142,30 +142,6 @@ export default function EnhancedTable() {
         setRowsPerPage(parseInt(event.target.value, 10));
         setPage(0);
     };
-    
-    const CustomRow=(data)=>{
-        return (
-            <>
-            <TableRow hover key={data.id}>
-                <TableCell align="left">
-                     <Link to={`/clients/${data.id}`} style={{textDecoration:'none'}}>
-                    {data.institution}
-                    </Link>
-                </TableCell>
-                <TableCell align="left">
-                    {data.city}
-                </TableCell>
-            </TableRow>
-            {data.description?(
-                <TableRow>
-                    <TableCell align="left"  colSpan="2">
-                    {data.description}
-                    </TableCell>
-                </TableRow>
-            ):null}
-            </>
-        );
-    }
 
     return (
         <Grid container>  
@@ -188,12 +164,8 @@ export default function EnhancedTable() {
                         {([1,2].includes(global.state.role?.id))?(
                             <>
                                 <Button variant="contained" color="primary" onClick={()=>setOpenFormCreate(true)}><b>+</b> Create a new client</Button>
-                                <FormCreateClient
-                                    open={openFormCreate}
-                                    handleClose={()=>setOpenFormCreate(false)}
-                                    onCreate={(newClient)=>{
-                                        setRows([...rows,newClient])
-                                    }}/>
+                                <FormCreateClient open={openFormCreate} handleClose={()=>setOpenFormCreate(false)}
+                                    onCreate={(newClient)=> setRows([...rows,newClient])}/>
                             </>
                             ):<></>}
                         <TableContainer>
@@ -205,7 +177,7 @@ export default function EnhancedTable() {
                                 <TableBody>
                                     {(rows.length>0)?stableSort(rows, getComparator(order, orderBy))
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                        .map((row) =><CustomRow data={row}/>):(    
+                                        .map((row) =><Row data={row}/>):(    
                                             <TableRow>
                                                 <TableCell  colSpan={headCells.length} align="center">
                                                     <Typography variant="body1">There is no data to show</Typography>
@@ -231,6 +203,30 @@ export default function EnhancedTable() {
     );
 }
 
+const Row=({data})=>{
+    console.log(data);
+    return (
+        <>
+        <TableRow hover key={data.id}>
+            <TableCell align="left">
+                 <Link to={`/clients/${data.id}`} style={{textDecoration:'none'}}>
+                {data.institution}
+                </Link>
+            </TableCell>
+            <TableCell align="left">
+                {data.city}
+            </TableCell>
+        </TableRow>
+        {data.description?(
+            <TableRow>
+                <TableCell align="left"  colSpan="2" style={{paddingLeft:'1em'}}>
+                {data.description}
+                </TableCell>
+            </TableRow>
+        ):null}
+        </>
+    );
+}
 EnhancedTableHead.propTypes = {
     classes: PropTypes.object.isRequired,
     onRequestSort: PropTypes.func.isRequired,

@@ -1,5 +1,4 @@
-import React, { useState, useContext, useEffect, Suspense, lazy } from 'react';
-import UserContext from '../../../context/UserContext';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Link, useLocation ,useHistory} from 'react-router-dom';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
@@ -7,23 +6,21 @@ import TableCell from '@material-ui/core/TableCell';
 import TableRow from '@material-ui/core/TableRow';
 import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
-import Popover from '@material-ui/core/Popover';
 import Typography from '@material-ui/core/Typography';
-import Checkbox from '@material-ui/core/Checkbox';
-import { green, grey} from "@material-ui/core/colors";
 import moment from 'moment';
 
+const UpdateProgressButtons = lazy(() => import('../../widgets/UpdateProgressButtons'));
 const StatusChip = lazy(() => import('../../widgets/StatusChip'));
+const PICPopover = lazy(() => import('./PICPopover'));
 const TableSubtask = lazy(() => import('./TableSubtasks'));
-
 
 const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
     const [openCollapsible, setOpenCollapsible] = useState(false);
     const [progress, setProgress] = useState(0);
 
-    const [anchorEl, setAnchorEl] = React.useState(null);
-    const [openPopOver, setOpenPopOver] = React.useState(null);
-    const [memberOnHover, setMemberOnHover] = React.useState(null);
+    const [anchorEl, setAnchorEl] = useState(null);
+    const [openPopOver, setOpenPopOver] = useState(null);
+    const [memberOnHover, setMemberOnHover] = useState(null);
     const handlePopoverOpen = (event,member) =>  {
         setMemberOnHover(member);
         setOpenPopOver(true);
@@ -42,7 +39,7 @@ const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete
 
     useEffect(()=>{
         const getProgress=()=>{
-            if(!data.is_subtask){
+            if(!data.parent_task){
                 try {
                     if(data.cards?.length>0){
                         var valuePerSubtask=100/data.cards.length;
@@ -72,6 +69,11 @@ const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete
                     {data.cards?.length?( <IconButton size="small" onClick={() =>setOpenCollapsible(!openCollapsible)} > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton> ):null}
                 </TableCell>
                 <TableCell padding="checkbox"> 
+                    {!data.cards?.length?(
+                        <div style={{display:'flex'}}>
+                            <UpdateProgressButtons data={data} alwaysShow={true}/>
+                        </div>
+                    ):null}
                     {/* {data.complete?<Checkbox disabled checked={data.complete} />:<Checkbox disabled checked={data.complete}/>} */}
                 </TableCell>
                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}> 
@@ -97,20 +99,7 @@ const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete
                                 </span>
                             )
                         }):<></>}
-                        
-                        {(openPopOver)?(
-                        <Popover style={{ pointerEvents: 'none', zIndex:'1200',padding:'1em' }} 
-                                open={openPopOver} anchorEl={anchorEl} 
-                                anchorOrigin={{ vertical: 'bottom', horizontal: 'center', }} transformOrigin={{ vertical: 'top', horizontal: 'center', }} onClose={handlePopoverClose}>
-                                <div style={{padding:'0.5em'}}>
-                                    {memberOnHover.project_client?.client?(<Typography>{`Client ${`(${memberOnHover.project_client?.client?.institution})`}`}</Typography>):null}
-                                    {memberOnHover?.is_client?(<Typography>{`Client ${`(${memberOnHover?.institution})`}`}</Typography>):null}
-                                    {memberOnHover.user?(<Typography>{memberOnHover?.user?.name}</Typography>):null}
-                                    {memberOnHover.name?(<Typography>{memberOnHover?.name}</Typography>):null}
-                                    {memberOnHover.member?.role?<Typography>{memberOnHover?.member?.role?.name}</Typography>:null}
-                                    {memberOnHover.role?<Typography>{memberOnHover?.role?.name}</Typography>:null}
-                                </div>
-                        </Popover>):<></>}
+                        <PICPopover open={openPopOver} data={memberOnHover} anchorEl={anchorEl} onClose={handlePopoverClose}/>
                 </TableCell>
                 <TableCell align="left"> {data.start ? moment(data.start).format('DD MMMM YYYY') : null} </TableCell>
                 <TableCell align="left"> {data.end ? moment(data.end).format('DD MMMM YYYY') : null} </TableCell>

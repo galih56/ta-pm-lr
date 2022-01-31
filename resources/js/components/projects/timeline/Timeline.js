@@ -86,7 +86,7 @@ function Timeline(props) {
         var newRows=rows.map(row=>{
             row.cards=row.cards.map(card=>{
                 if(card.id==task.id) return task;
-                if(card.id==task.parentTask){
+                if(card.id==task.parent_task){
                     card.cards=card.cards.map(subtask=>{
                         if(subtask.id==task.id)return task;
                         return subtask;
@@ -100,7 +100,7 @@ function Timeline(props) {
     }
     const onTaskDelete=(task)=>{
         var newRows=rows.map(row=>{
-            if(task.is_subtask){
+            if(task.parent_task){
                 row.cards=row.cards.map(card=>{
                     if(card.id==task.parentTask){
                         card.cards=card.cards.filter((subtask)=>{
@@ -126,36 +126,34 @@ function Timeline(props) {
         newTask.projects_id = detailProject.id;
         newTask.creator=global.state.id;
         const body=newTask;
-
-        if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL + 'tasks';
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            toast.promise(
-                axios.post(url, body),
-                {
-                    loading: 'Creating a new task',
-                    success: (result)=>{
-                        newTask.id = result.data.id;
-                        newTask.projects_id = detailProject.id;
-                        newTask.lists_id = laneId;
-                        global.dispatch({ type: 'create-new-task', payload: result.data })
-                        setRows(rows.map((row)=>{
-                            if(row.id==selectedList.id) row.cards.push(newTask)
-                            return row
-                        }))
-                        return <b>A new task successfuly created</b>
-                    },
-                    error: (error)=>{
-                        console.error(error);
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                        return <b>{error.response.statusText}</b>;
-                    },
-                });
-        } else {
+        const url = process.env.MIX_BACK_END_BASE_URL + 'tasks';
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        toast.promise(
+            axios.post(url, body),
+            {
+                loading: 'Creating a new task',
+                success: (result)=>{
+                    newTask.id = result.data.id;
+                    newTask.projects_id = detailProject.id;
+                    newTask.lists_id = laneId;
+                    global.dispatch({ type: 'create-new-task', payload: result.data })
+                    setRows(rows.map((row)=>{
+                        if(row.id==selectedList.id) row.cards.push(newTask)
+                        return row
+                    }))
+                    return <b>A new task successfuly created</b>
+                },
+                error: (error)=>{
+                    console.error(error);
+                    if(error.response.status==401) return <b>Unauthenticated</b>;
+                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
+                    return <b>{error.response.statusText}</b>;
+                },
+            });
+    
+        if (!window.navigator.onLine) {
             toast.error(`You're currently offline. Please check your internet connection`);
-            global.dispatch({ type: 'create-new-task', payload: newTask });
         }
     }
 

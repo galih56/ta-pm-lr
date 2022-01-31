@@ -45,7 +45,6 @@ const GoogleDriveButton = (props) => {
             }
             if (!window.navigator.onLine) toast.error(`You are currently offline`);
 
-            const config ={ headers: { 'X-Authorization':`Bearer ${global.state.token}`, 'Content-Type': 'application/json'  } }
             const url = process.env.MIX_BACK_END_BASE_URL + 'task-attachments/';
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -72,21 +71,10 @@ const GoogleDriveButton = (props) => {
             {/* <IconButton onClick={() => { loadPicker() }}>
                 <Icon icon={googleDrive} />
             </IconButton> */}
-            <GooglePicker 
-                clientId={clientId}
-                developerKey={developerKey}
-                scope={scope}
-                onChange={data => console.log('on change:', data)}
-                onAuthFailed={data =>{ 
-                    console.log('on auth failed:', data)
-                }}
-                multiselect={true}
-                navHidden={true}
-                authImmediate={false}
+            <GooglePicker  clientId={clientId} developerKey={developerKey} scope={scope} onChange={data => console.log('on change:', data)}
+                onAuthFailed={data => console.error('on auth failed:', data)}  multiselect={true}  navHidden={true}  authImmediate={false}
                 // mimeTypes={['image/png', 'image/jpeg', 'image/jpg']}
-                viewId={'DOCS'}
-                createPicker={createPicker}
-        >
+                viewId={'DOCS'} createPicker={createPicker}>
                 <IconButton size="large">
                     <Icon icon={googleDrive} />
                 </IconButton>

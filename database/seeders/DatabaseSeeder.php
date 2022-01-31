@@ -9,7 +9,7 @@ use DB;
 
 class DatabaseSeeder extends Seeder
 {
-    protected $toTruncate=['roles'];
+    protected $toTruncate=['projects','project_members','lists','tasks','task_members'];
 
     /**
      * Seed the application's database.
@@ -29,6 +29,6 @@ class DatabaseSeeder extends Seeder
         Schema::enableForeignKeyConstraints();
         Model::reguard();
         
-        $this->call(RoleSeeder::class);
+        // $this->call(RoleSeeder::class);
     }
 }

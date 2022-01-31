@@ -17,8 +17,35 @@ class TaskList extends Model
         parent::boot();
 
         static::deleting(function($list) { 
-             $list->tasks()->delete();
+            foreach ($list->cards as $j => $task) {
+                foreach ($task->cards as $k => $subtask) {
+                    $subtask->delete();
+                }
+                $task->delete();
+            }
         });
+
+        static::saving(function($list){
+            $list->project->updateProgress();
+        });
+    }
+
+    public function updateProgress(){      
+        if(count($this->cards)){
+            $sum=0;
+            for ($i = 0; $i < count($this->cards); $i++) {
+                $task = $this->cards[$i];
+                if($task->progress==null){
+                    $task->progress=0;
+                }
+                $sum+=$task->progress;
+            }
+            // dd('list : ',$sum,$this,$this->cards);
+            $progress=$sum/count($this->cards);
+            $this->progress=round($progress);
+            $this->save();
+
+        }
     }
 
     public function tasks(){

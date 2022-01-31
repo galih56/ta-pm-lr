@@ -56,7 +56,7 @@
                                 @if ($project_id) disabled @endif
                                 required
                             >
-                                <option value=""> Pilih daftar tugas </option>
+                                <option value=""> Pilih daftar proyek </option>
                                 @foreach ($projects as $item)
                                 <option value="{{$item->id}}"  
                                     @if (old('projects_id'))
