@@ -125,7 +125,7 @@ export default function EnhancedTable({data,page_name,showFormCreate}) {
             <Paper className={classes.paper}>
                 <Grid container spacing={2}>
                     <Grid item lg={12} md={12} sm={12} xs={12}>
-                        {([1,2,4].includes(global.state.role?.id) && showFormCreate )?(
+                        {([1,2,4,5].includes(global.state.role?.id) && showFormCreate )?(
                             <>
                                 <Button
                                     variant="contained"

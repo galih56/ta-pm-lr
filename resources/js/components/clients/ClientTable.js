@@ -204,7 +204,6 @@ export default function EnhancedTable() {
 }
 
 const Row=({data})=>{
-    console.log(data);
     return (
         <>
         <TableRow hover key={data.id}>
