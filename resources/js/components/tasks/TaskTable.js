@@ -115,43 +115,14 @@ export default function EnhancedTable({data}) {
     const showModalDetailTask = () => {
         if (clickedTask.tasks_id != null && clickedTask.tasks_id !== undefined && modalOpen == true) {
             return (
-                <ModalDetailTask
-                    open={modalOpen}
+                <ModalDetailTask open={modalOpen}
                     closeModalDetailTask={() =>handleModalOpen({ projects_id: null, lists_id: null, tasks_id: null, open: false })}
                     projects_id={clickedTask.projects_id}
                     initialState={clickedTask} />
             )
         }
     }
-    const handleCompleteTask = (task, event) => {
-        
-        if(!task.actual_start){
-            toast.error("This task hasn't started yet");
-            return;
-        }
-        const body = { id: task.id, complete: event.target.checked };
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${task.id}/complete`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url, body),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    var newRows = rows.map((row) => {
-                        if (row.id == task.id) row = result.data;
-                        return row;
-                    });
-                    setRows(newRows);
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
-    }
+
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -178,7 +149,6 @@ export default function EnhancedTable({data}) {
                                     return (
                                         <TableRow hover role="checkbox" key={row.id}>
                                             <TableCell padding="checkbox">
-                                                {/* <Checkbox onChange={event =>handleCompleteTask(row, event)} checked={row.complete} /> */}
                                                 {!row.cards?.length || row.parent_task ?(
                                                     <div style={{display:'flex'}}>
                                                         <UpdateProgressButtons data={row} alwaysShow={true}/>

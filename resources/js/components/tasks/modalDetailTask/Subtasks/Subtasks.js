@@ -126,29 +126,17 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
         if (isEdit) {
             return (
                 <Grid xl={12} md={12} sm={12} xs={12} item>
-                    <Button onClick={()=>{
-                        setShowCreateSubtaskForm(true);
-                    }} color="primary">Create</Button>
-                    {(()=>{
-                        if(showCreateSubtaskForm){
-                            return (
-                                <ModalCreateSubtask 
-                                open={showCreateSubtaskForm} 
-                                handleClose={()=> setShowCreateSubtaskForm(false)}>
-                                    <FormCreateNewTask
-                                        classes={classes} 
-                                        newTask={newTask} 
-                                        setNewTask={setNewTask}
-                                        handleAddNewTask={handleAddNewTask}
-                                        detailProject={detailProject}
-                                        is_subtask={true}
-                                        minDate={detailTask.start}
-                                        maxDate={detailTask.end}
-                                    />
-                                </ModalCreateSubtask>
-                            )
-                        }
-                    })()}
+                    {[1,2,4,5].includes(global.state.id)?(
+                        <>
+                        <Button onClick={()=> setShowCreateSubtaskForm(true)} color="primary">Create</Button>
+                        {showCreateSubtaskForm?(
+                            <ModalCreateSubtask  open={showCreateSubtaskForm}  handleClose={()=> setShowCreateSubtaskForm(false)}>
+                                <FormCreateNewTask classes={classes}  newTask={newTask}  setNewTask={setNewTask} handleAddNewTask={handleAddNewTask}
+                                    detailProject={detailProject} is_subtask={true} minDate={detailTask.start} maxDate={detailTask.end}/>
+                            </ModalCreateSubtask>
+                        ):null}
+                        </>
+                    ):null}
                 </Grid>
             );
         }

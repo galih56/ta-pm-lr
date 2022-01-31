@@ -121,8 +121,8 @@ const Kanban = (props) => {
    
     const [eventBus, setEventBus] = useState(undefined);
 
-    const onCardDelete=(lists_id,tasks_id)=>{
-        eventBus.publish({type: 'REMOVE_CARD', laneId: listId, cardId: tasks_id});
+    const onCardDelete=(laneId,cardId)=>{
+        eventBus.publish({type: 'REMOVE_CARD', laneId: laneId, cardId: cardId});
     }
 
     const onSorting=(card1,card2)=>{
@@ -131,18 +131,9 @@ const Kanban = (props) => {
 
     return (
         <React.Fragment>
-            <Board
-                t={createTranslate(TEXTS)}
-                data={board}
-                collapsibleLanes={true}
-                onLaneUpdate={onLaneRename}
-                onCardAdd={onCardNew}
-                onCardClick={onCardClick}
-                components={{ Card: CustomCard, NewCardForm: EditLaneFormWithDetailProject }}
-                detailProject={detailProject}
-                eventBusHandle={setEventBus}
-                laneSortFunction={onSorting}
-            >
+            <Board t={createTranslate(TEXTS)} data={board} collapsibleLanes={true} onLaneUpdate={onLaneRename} onCardAdd={onCardNew} 
+                onCardClick={onCardClick} components={{ Card: CustomCard, NewCardForm: EditLaneFormWithDetailProject }}
+                detailProject={detailProject} eventBusHandle={setEventBus} laneSortFunction={onSorting}>
             </Board>
              
         </React.Fragment>
