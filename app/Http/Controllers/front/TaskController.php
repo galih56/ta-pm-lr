@@ -306,7 +306,8 @@ class TaskController extends Controller
                     ->with('members.project_client.client')
                     ->with('tags')
                     ->with(['parentTask'=>function($q){
-                        return $q->select('id','start','end','old_deadline','actual_start','actual_end','progress','created_at','updated_at');
+                        return $q->select('id','start','end','old_deadline','actual_start','actual_end','progress','lists_id')
+                                ->with(['list.project']);
                     }])->findOrFail($id);
 
         $task=$task->toArray();

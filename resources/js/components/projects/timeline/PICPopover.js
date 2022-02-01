@@ -13,8 +13,6 @@ const PICPopover=({open,anchorEl,onClose,data})=>{
                         {data?.is_client?(<Typography>{`Client ${`(${data?.institution})`}`}</Typography>):null}
                         {data.user?(<Typography>{data?.user?.name}</Typography>):null}
                         {data.name?(<Typography>{data?.name}</Typography>):null}
-                        {data.member?.role?<Typography>{data?.member?.role?.name}</Typography>:null}
-                        {data.role?<Typography>{data?.role?.name}</Typography>:null}
                     </div>
             </Popover>
         )

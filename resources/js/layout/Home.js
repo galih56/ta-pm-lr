@@ -43,7 +43,6 @@ const Home = (props) => {
     useEffect(()=>{
         getProjects();
         getTasks();
-        console.log(history.location);
     },[]);
 
     useEffect(()=>{

@@ -94,20 +94,13 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
                     <Typography>Assigned to : </Typography>
                  </Grid>
                  <Grid item lg={12} md={12} sm={12} xs={12}>
-                    <UserSearchBar 
-                        detailProject={detailProject}
-                        exceptedData={[...exceptedData,data.creator]} 
-                        onChange={(users)=>{
-                            setNewMembers(users);
-                        }}
-                        userOnly={true}
-                    />
+                    <UserSearchBar  detailProject={detailProject} exceptedData={[...exceptedData,data.creator]}  onChange={(users)=> setNewMembers(users)} userOnly={true}/>
                  </Grid>
-                 <Grid item lg={12} md={12} sm={12} xs={12}>
-                    <Button style={{float:'right'}} onClick={()=>{
-                        addMembers( { tasks_id: data.id, users:newMembers });
-                        }} color="primary" >Invite</Button>
-                 </Grid>
+                 {[1,2,4,5].includes(global.state.role.id)?(
+                    <Grid item lg={12} md={12} sm={12} xs={12}>
+                        <Button style={{float:'right'}} onClick={()=>addMembers( { tasks_id: data.id, users:newMembers })}  variant="contained" color="secondary">Invite</Button>
+                    </Grid>
+                 ):null}
             </>):(
                  <Grid item lg={12} md={12} sm={12} xs={12}>
                     <Typography>Assigned to : </Typography>

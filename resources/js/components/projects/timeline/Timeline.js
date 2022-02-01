@@ -16,13 +16,13 @@ const EditLaneForm = lazy(() => import('../../widgets/board/EditLaneForm'));
 
 const headCells = [
     { id: 'Title', align: 'left', label: 'Title' },
-    { id: 'PIC', align: 'left', label: 'PIC' },
     { id: 'Start', align: 'left',  label: 'Start' },
     { id: 'End', align: 'left',  label: 'End' },
     { id: 'Days', align: 'right', label: 'Days' },
     { id: 'Realisasi Start', align: 'left',  label: 'Realisasi Start' },
     { id: 'Realisasi End', align: 'left',  label: 'Realisasi End' },
     { id: 'Work days', align: 'right', label: 'Work days' },
+    { id: 'PIC', align: 'left', label: 'PIC' },
 ];
 
 function Timeline(props) {
@@ -180,19 +180,18 @@ function Timeline(props) {
                     <Table size={'small'} >
                         <Suspense fallback={<LinearProgress />}>
                             <TableBody>
-                                {rows.map((row) => {
-                                    return (
-                                        <Row headCells={headCells} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete}
-                                            key={row.id} data={row} handleDetailTaskOpen={handleDetailTaskOpen} 
-                                            projects_id={projects_id} detailProject={detailProject} 
-                                            onClick={()=>{ 
-                                                if([1,2,4,5].includes(global.state.role?.id)){
-                                                    setSelectedList(row); 
-                                                    setOpenEditList(true); 
-                                                }
-                                            }} />
-                                    );
-                                })}
+                                {rows.map((row) => (
+                                    <Row headCells={headCells} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete}
+                                        key={row.id} data={row} handleDetailTaskOpen={handleDetailTaskOpen} 
+                                        projects_id={projects_id} detailProject={detailProject} 
+                                        onClick={()=>{ 
+                                            if([1,2,4,5].includes(global.state.role?.id)){
+                                                setSelectedList(row); 
+                                                setOpenEditList(true); 
+                                            }
+                                        }} />
+                                    )
+                                )}
                             </TableBody>
                         </Suspense>
                     </Table>

@@ -173,19 +173,6 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                                 )}
                             </Grid>
                         </Grid>
-                        
-                        {([1,2].includes(global.state.role?.id))?(
-                            <Grid item lg={12} md={12} sm={12} xs={12} container spacing={2}>
-                                <Grid item lg={12} md={12} sm={12} xs={12}>
-                                    <Typography>Progress : </Typography>
-                                    <TextField variant="standard" required value={data.progress} 
-                                        type="number"
-                                        onChange={(e)=>{
-                                            e =>setData({ ...data, progress: e.target.value })
-                                        }}/>     
-                                </Grid>
-                            </Grid>
-                        ):null} 
                         {([1,2,3].includes(global.state.role?.id) && !data.parent_task_id)?(
                             <Grid item lg={12} md={12} sm={12} xs={12} container spacing={2}>
                                 <Grid item lg={12} md={12} sm={12} xs={12}>
@@ -267,15 +254,9 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                         </>
                     )}
                 </Grid>
-                {([1,2,4,5].includes(global.state.role?.id))?(
-                    <Grid item lg={12} md={12} sm={12} xs={12}>
-                        <MemberList 
-                            detailProject={detailProject} 
-                            exceptedData={exceptedMembers} 
-                            data={data} setData={setData} isEdit={isEdit}
-                            getDetailTask={getDetailTask}/>
-                    </Grid>
-                ):null}
+                <Grid item lg={12} md={12} sm={12} xs={12}>
+                    <MemberList detailProject={detailProject} exceptedData={exceptedMembers} data={data} setData={setData} isEdit={isEdit}getDetailTask={getDetailTask}/>
+                </Grid>
                 <ExtendDeadlineForm 
                     open={showExtendDeadlineForm} 
                     handleClose={()=>setShowExtendDeadlineForm(false)}

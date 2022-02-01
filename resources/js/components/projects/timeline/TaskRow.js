@@ -87,13 +87,19 @@ const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete
                         {data.title} ({Math.round(progress)}%)
                     </Link>
                 </TableCell>
+                <TableCell align="left"> {data.start ? moment(data.start).format('DD MMMM YYYY') : null} </TableCell>
+                <TableCell align="left"> {data.end ? moment(data.end).format('DD MMMM YYYY') : null} </TableCell>
+                <TableCell align="right"> {(data.start && data.end)?Math.round(moment.duration(moment(data.start).diff(moment(data.end))).asDays())*(-1):null} </TableCell>
+                <TableCell align="left"> {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY'):null}<br/> {data.start_label?<StatusChip status={data.start_label}/>:null} </TableCell>
+                <TableCell align="left">  {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY'):null}<br/> {data.end_label?<StatusChip status={data.end_label}/>:null} </TableCell>
+                <TableCell align="right"> {(data.actual_start && data.actual_end)?Math.round(moment.duration(moment(data.actual_start).diff(moment(data.actual_end))).asDays())*(-1):null} </TableCell>
                 <TableCell style={{maxWidth:'100px'}}>
                     {data.members?data.members.map((member,i)=>{
                             return (
                                 <span key={i} onMouseEnter={(event)=>handlePopoverOpen(event,member)} 
                                     onMouseLeave={handlePopoverClose}  style={{margin:'0.5em',float:'left'}}>
                                     {member?.project_client?.client?(<>{`Client ${`(${member.project_client?.client?.institution})`}`}</>):null}
-                                    {member?.is_client?(<Typography>{`Client ${`(${memberOnHover?.institution})`}`}</Typography>):null}
+                                    {member?.is_client?(<Typography>{`Client ${`(${member?.institution})`}`}</Typography>):null}
                                     {member?.role?<>{member?.role?.name}</>:null}
                                     {member?.user?.role?<>{member?.user?.role?.name}</>:null}
                                 </span>
@@ -101,12 +107,6 @@ const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete
                         }):<></>}
                         <PICPopover open={openPopOver} data={memberOnHover} anchorEl={anchorEl} onClose={handlePopoverClose}/>
                 </TableCell>
-                <TableCell align="left"> {data.start ? moment(data.start).format('DD MMMM YYYY') : null} </TableCell>
-                <TableCell align="left"> {data.end ? moment(data.end).format('DD MMMM YYYY') : null} </TableCell>
-                <TableCell align="right"> {(data.start && data.end)?Math.round(moment.duration(moment(data.start).diff(moment(data.end))).asDays())*(-1):null} </TableCell>
-                <TableCell align="left"> {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY'):null}<br/> {data.start_label?<StatusChip status={data.start_label}/>:null} </TableCell>
-                <TableCell align="left">  {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY'):null}<br/> {data.end_label?<StatusChip status={data.end_label}/>:null} </TableCell>
-                <TableCell align="right"> {(data.actual_start && data.actual_end)?Math.round(moment.duration(moment(data.actual_start).diff(moment(data.actual_end))).asDays())*(-1):null} </TableCell>
             </TableRow>
             {data.cards?.length?(
                 <TableRow >

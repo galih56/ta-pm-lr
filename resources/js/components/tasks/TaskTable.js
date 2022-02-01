@@ -136,6 +136,15 @@ export default function EnhancedTable({data}) {
         setPage(0);
     };
 
+    const handleProgressOnUpdate=(newData)=>{
+        var newRows=rows.map(row=>{
+            if(row.id==newData.id){
+                return newData
+            }
+            return row;
+        });
+        setRows(newRows);
+    }
     return (
         <div className={classes.root}>
             <Paper className={classes.paper}>
@@ -146,12 +155,13 @@ export default function EnhancedTable({data}) {
                             {rows.length?stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
+                                    console.log(row,row.cards.length)
                                     return (
                                         <TableRow hover role="checkbox" key={row.id}>
                                             <TableCell padding="checkbox">
-                                                {!row.cards?.length || row.parent_task ?(
+                                                {!row.cards?.length?(
                                                     <div style={{display:'flex'}}>
-                                                        <UpdateProgressButtons data={row} alwaysShow={true}/>
+                                                        <UpdateProgressButtons data={row} alwaysShow={true} onUpdate={handleProgressOnUpdate}/>
                                                     </div>):null}
                                             </TableCell>
                                             <TableCell component="th" scope="row" padding="none" style={{ cursor: 'pointer' }}
@@ -160,7 +170,7 @@ export default function EnhancedTable({data}) {
                                                     var lists_id=(!row.parent_task)?row.list.projects_id:row.parent_task.list.projects_id;
                                                     handleModalOpen({  projects_id: projects_id,  lists_id: lists_id,  tasks_id: row.id,  open: true });
                                                 }}>
-                                                {row.title} ({row.progress?Math.round(row.progress):'0'}%)
+                                                {row.title} {data.cards?`(${row.progress?Math.round(row.progress):'0'}%)`:''}
                                             </TableCell>
                                             <TableCell align="right">{row.start ? moment(row.start).format('DD MMM YYYY') : ''} - {row.end ? moment(row.end).format('DD MMM YYYY') : ''}</TableCell>
                                             <TableCell align="right">

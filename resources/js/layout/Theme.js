@@ -19,7 +19,9 @@ const themeConfig = (theme) => {
                 easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.enteringScreen,
             }),
         },
-        menuButton: { marginRight: 36, }, menuButtonHidden: { display: 'none', }, title: { flexGrow: 1, },
+        menuButton: { marginRight: 36, }, menuButtonHidden: { display: 'none', }, 
+        title : { flexGrow: 1, },
+        username : { fontSize: '1rem' },
         drawerPaper: {
             position:'inherit !important',
             whiteSpace: 'nowrap', width: drawerWidth, transition: theme.transitions.create('width', {
@@ -29,7 +31,8 @@ const themeConfig = (theme) => {
         drawerPaperClose: {
             overflowX: 'hidden',
             transition: theme.transitions.create('width', {
-                easing: theme.transitions.easing.sharp, duration: theme.transitions.duration.leavingScreen,
+                easing: theme.transitions.easing.sharp, 
+                duration: theme.transitions.duration.leavingScreen,
             }),
             width: theme.spacing(7),
             [theme.breakpoints.up('sm')]: { width: theme.spacing(9), },

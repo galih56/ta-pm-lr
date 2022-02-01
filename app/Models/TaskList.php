@@ -40,11 +40,9 @@ class TaskList extends Model
                 }
                 $sum+=$task->progress;
             }
-            // dd('list : ',$sum,$this,$this->cards);
             $progress=$sum/count($this->cards);
             $this->progress=round($progress);
             $this->save();
-
         }
     }
 

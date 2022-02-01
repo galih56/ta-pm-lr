@@ -17,12 +17,7 @@ const DialogTitle = withStyles(styles)((props) => {
     return (
         <MuiDialogTitle className={classes.root} {...other}>
             <Typography variant="h6">{children}</Typography>
-            <IconButton
-                aria-label="close"
-                className={classes.closeButton}
-                onClick={onClose}
-                size="large">
-                <CloseIcon />
+                <IconButton aria-label="close" className={classes.closeButton} onClick={onClose} size="large"> <CloseIcon />
             </IconButton>
         </MuiDialogTitle>
     );
@@ -35,10 +30,7 @@ const DialogContent = withStyles((theme) => ({
 export default function ModalCreateSubtask({open,handleClose,children}) {
     return (
         <Dialog aria-labelledby="Create a subtask" open={open}>
-            <DialogTitle onClose={
-                () => {
-                    handleClose();
-                }} > Create a new subtask </DialogTitle>
+            <DialogTitle onClose={handleClose} > Create a new subtask </DialogTitle>
             <DialogContent dividers>
                 {children}
             </DialogContent>
