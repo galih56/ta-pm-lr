@@ -20,23 +20,30 @@ export default function UserSearchbar(props) {
         axios.get(url).then(result => setUsers(result.data)).catch(console.log);
     }
     
-    // const getDetailProject = () => {
-    //     const url = `${process.env.MIX_BACK_END_BASE_URL}users`;
-    //     axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-    //     axios.defaults.headers.post['Content-Type'] = 'application/json';
-    //     axios.get(url).then(result => setUsers(result.data)).catch(console.log);
-    // }
-
     const getClients = () => {
         const url = `${process.env.MIX_BACK_END_BASE_URL}clients`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url).then(result => setClients(result.data)).catch(console.log);
     }
+
+    
+    const getDetailProject = () => {
+        var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
+        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
+        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        axios.get(url)
+            .then((result) => {
+                const data = result.data;
+                setDetailProject(data);
+                global.dispatch({ type: 'store-detail-project', payload: data });
+                global.dispatch({type:'store-current-selected-project',payload:params.id});
+            }).catch(console.log);
+    }
     useEffect(() => {
-        if(detailProject?.members?.length) setUsers(detailProject.members);
-        if(detailProject?.clients?.length) setClients(detailProject.clients);
-        if(!detailProject?.members?.length) {
+        if('members' in detailProject) setUsers(detailProject.members);
+        if('clients' in detailProject) setClients(detailProject.clients);
+        if('members' in detailProject) {
             if(!clientOnly && !userOnly){
                 getClients()
                 getUsers();
@@ -50,10 +57,6 @@ export default function UserSearchbar(props) {
             }
         }
     }, [detailProject?.members,detailProject?.clients]);
-
-    useEffect(()=>{
-        console.log(detailProject?.members);
-    },[detailProject?.members]);
 
     function checkExistingMember(id, arr=[]) {
         var exists = false;
@@ -87,7 +90,7 @@ export default function UserSearchbar(props) {
         var filteredClients = clients.filter((option) => { 
             if (!checkExistingMember(option.id, (exceptedData?exceptedData:exceptedClients))){ 
                     return option;
-                }
+            }
         });
 
         filteredUsers = filteredUsers.map((option) => {
@@ -109,15 +112,12 @@ export default function UserSearchbar(props) {
     }, [users,clients]);
 
     return (
-        <Autocomplete multiple freeSolo
-            options={options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter))}
-            groupBy={(option) => option.firstLetter}
+        <Autocomplete multiple freeSolo options={options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter))} groupBy={(option) => option.firstLetter}
             getOptionLabel={(option) => {
                 var label='';
                 if(option.is_user){
-                    if(option?.role) label= `${option.name} (${option.role.name})`;
-                    if(option?.role) label= `${option.name} (${option.role.name})`; 
-                    if(!option.role && !option.role){ 
+                    if('role' in option) label= `${option.name} (${option.role.name})`; 
+                    if(!option.role){ 
                         label= `${option.name} (${option.email})`;
                     }
                 }

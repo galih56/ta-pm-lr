@@ -80,12 +80,13 @@ const UpdateProgressButtons=({data,onUpdate,alwaysShow})=>{
                 loading: 'Updating...',
                 success: (result)=>{
                     result=result.data
-                    if(result.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                    if(result.parent_task){ global.dispatch({ type: 'store-detail-subtask', payload: result });}
                     else global.dispatch({ type: 'store-detail-task', payload: result });
                     if(onUpdate)onUpdate(result);
                     return <b>Successfully updated</b>
                 },
                 error: (error)=>{
+                    if(error.response.status==404) return <b>Task not found</b>;
                     if(error.response.status==401) return <b>Unauthenticated</b>;
                     if(error.response.status==422) return <b>Some required inputs are empty</b>;
                     return <b>{error.response.statusText}</b>;

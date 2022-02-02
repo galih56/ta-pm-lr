@@ -352,14 +352,14 @@ class ProjectController extends Controller
                         $date_1 = Carbon::parse($start);
                         $date_2 = Carbon::parse($end);
                         $days= $date_1->diffInDays($date_2);
-                        $row['days']=$days;
+                        $row['days']=$days+1;
                     }            
 
                     if($actual_start  && $actual_end){
                         $date_1 = Carbon::parse($actual_start);
                         $date_2 = Carbon::parse($actual_end);
                         $days= $date_1->diffInDays($date_2);
-                        $row['work_days']=$days;
+                        $row['work_days']=$days+1;
                     }            
 
                     if($start) $row['start']=$start->format('Y-m-d');

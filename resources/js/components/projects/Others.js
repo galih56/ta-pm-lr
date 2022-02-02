@@ -4,7 +4,6 @@ import Grid from '@material-ui/core/Grid';
 import MemberList from './members/MemberList';
 const ProjectInformations = lazy(() => import('./ProjectInformations'));
 const ClientTable = lazy(() => import('./clients/ClientTable'));
-const TeamList = lazy(() => import('./TeamList'));
 
 const Others = ({detailProject,handleDetailTaskOpen, refreshProject}) => {
     const [memberChange,setMemberChange]=useState(false);
