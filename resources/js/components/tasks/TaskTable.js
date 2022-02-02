@@ -155,7 +155,6 @@ export default function EnhancedTable({data}) {
                             {rows.length?stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
-                                    console.log(row,row.cards.length)
                                     return (
                                         <TableRow hover role="checkbox" key={row.id}>
                                             <TableCell padding="checkbox">

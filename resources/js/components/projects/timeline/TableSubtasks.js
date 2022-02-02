@@ -1,4 +1,5 @@
 import React, { useState, useEffect,useContext } from 'react';
+import UserContext from '../../../context/UserContext';
 import { Link, useHistory,useLocation } from 'react-router-dom';
 import Checkbox from '@material-ui/core/Checkbox';
 import moment from 'moment';
@@ -17,14 +18,13 @@ const TableSubtask=({tasks,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskD
     const [anchorEl, setAnchorEl] = useState(null);
     const [openPopOver, setOpenPopOver] = useState(null);
     const [memberOnHover, setMemberOnHover] = useState(null);
-    
+    let global = useContext(UserContext);
     let location = useLocation();
     let history = useHistory();
     let pathname = location.pathname;
     let searchParams = new URLSearchParams(location.search);
-    
+
     const handlePopoverOpen = (event,member) =>  {
-        console.log(member);
         setMemberOnHover(member);
         setOpenPopOver(true);
         setAnchorEl(event.currentTarget);
@@ -38,6 +38,16 @@ const TableSubtask=({tasks,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskD
         setSubtasks(tasks);
     },[tasks])
 
+    const isMemberLoggedInOrAdmin=(task_members=[])=>{
+        try {
+            var user=task_members?.find((o, i) => (o.user?.email===global.state.email || o?.email===global.state.email));
+            return user||[1,2,3,4,5].includes(global.state.role.id);                
+        } catch (error) {
+            console.log(task_members,error)
+            return false;
+        }
+    }
+
     return(
         <>
             <Table size={'small'}>
@@ -50,7 +60,7 @@ const TableSubtask=({tasks,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskD
                                 <TableCell padding="checkbox"></TableCell>
                                 <TableCell padding="checkbox"></TableCell>
                                 <TableCell padding="checkbox"> 
-                                    {!subtask.cards?.length || subtask.parent_task ?(
+                                    {(isMemberLoggedInOrAdmin(subtask.members)) && !subtask.cards?.length?(
                                         <div style={{display:'flex'}}>
                                             <UpdateProgressButtons data={subtask} alwaysShow={true}/>
                                         </div>):null}
@@ -65,6 +75,20 @@ const TableSubtask=({tasks,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskD
                                         to={{ pathname: pathname, search: searchParams.toString() }} style={{ textDecoration: 'none', color: '#393939' }}>
                                         {subtask.title}
                                     </Link>
+                                </TableCell>
+                                <TableCell>
+                                    {subtask.members?subtask.members.map((member,i)=>{
+                                        return (
+                                            <span key={i} onMouseEnter={(event)=>handlePopoverOpen(event,member)} 
+                                                onMouseLeave={handlePopoverClose}  style={{margin:'0.5em',float:'left'}}>
+                                                {member?.project_client?.client?(<>{`Client ${`(${member.project_client?.client?.institution})`}`}</>):null}
+                                                {member?.is_client?(<Typography>{`Client ${`(${member?.institution})`}`}</Typography>):null}                                    
+                                                {member?.role?<>{member?.role?.name}</>:null}
+                                                {member?.user?.role?<>{member?.user?.role?.name}</>:null}
+                                        </span>
+                                        )
+                                    }):<></>}                                        
+                                    <PICPopover open={openPopOver} data={memberOnHover} anchorEl={anchorEl} onClose={handlePopoverClose}/>
                                 </TableCell>
                                 <TableCell align="left">
                                     {subtask.start ? moment(subtask.start).format('DD MMMM YYYY') : ''}
@@ -85,19 +109,6 @@ const TableSubtask=({tasks,handleDetailTaskOpen,headCells, onTaskUpdate, onTaskD
                                 </TableCell>
                                 <TableCell align="right">
                                     {(subtask.actual_start && subtask.actual_end)?Math.round(moment.duration(moment(subtask.actual_start).diff(moment(subtask.actual_end))).asDays())*(-1):''}
-                                </TableCell>
-                                <TableCell>
-                                    {subtask.members?subtask.members.map((member,i)=>{
-                                        return (
-                                            <span key={i} onMouseEnter={(event)=>handlePopoverOpen(event,member)} onMouseLeave={handlePopoverClose} style={{margin:'1em'}}>
-                                                {member?.project_client?.client?(<>{`Client ${`(${member.project_client?.client?.institution})`}`}</>):null}
-                                                {member?.is_client?(<Typography>{`Client ${`(${member?.institution})`}`}</Typography>):null}                                    
-                                                {member?.role?<>{member?.role?.name}</>:null}
-                                                {member?.user?.role?<>{member?.user?.role?.name}</>:null}
-                                        </span>
-                                        )
-                                    }):<></>}                                        
-                                    <PICPopover open={openPopOver} data={memberOnHover} anchorEl={anchorEl} onClose={handlePopoverClose}/>
                                 </TableCell>
                             </TableRow>
                         )

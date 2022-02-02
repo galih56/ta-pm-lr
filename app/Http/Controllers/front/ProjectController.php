@@ -52,10 +52,12 @@ class ProjectController extends Controller
                 $project->teams()->sync($request->teams);
             }
 
-            if($request->has('members')){
-                $project->users()->sync($request->members);
+            $members=[];
+            if($request->has('members')){  
+                $members=$request->members;
+                if($request->users_id)$members[]=$request->users_id;  
+                $project->users()->sync($members);
             }
-
             
             if($request->has('clients')){
                 $project->clients()->sync($request->clients);
@@ -768,6 +770,7 @@ class ProjectController extends Controller
                     foreach ($tasks as $j => $task) {
                         $task['lists_id']=$list->id;
                         $task['is_subtask']=true;
+                        $task['users_id']=$request->users_id;
                         $subtasks=[];
                         if(array_key_exists('subtasks',$task)) $subtasks=$task['subtasks'];
                         $task['start']=$task['start'];
@@ -777,6 +780,7 @@ class ProjectController extends Controller
                         $task=$this->makeLabel($task);
                         $task=Task::create($task);
                         foreach ($subtasks as $k => $subtask) {
+                            $subtask['users_id']=$request->users_id;
                             $subtask['parent_task_id']=$task->id;
                             $subtask['is_subtask']=true;
                             $subtask=$this->makeLabel($subtask);

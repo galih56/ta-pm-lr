@@ -23,9 +23,6 @@ const Others = ({detailProject,handleDetailTaskOpen, refreshProject}) => {
                 <Grid item xl={12} md={12} sm={12} xs={12}>
                     <ClientTable detailProject={{id:detailProject.id,clients:detailProject.clients}} refreshProject={refreshProject}/>
                 </Grid>
-                <Grid item xl={12} md={12} sm={12} xs={12}>
-                    <TeamList projects_id={detailProject.id} callback={()=>setMemberChange(true)} refreshProject={refreshProject}/>
-                </Grid>
             </Suspense>
         </Grid >
     );

@@ -128,10 +128,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                             <Grid item lg={12} md={12} sm={12} xs={12}>
                             {([1,2,4].includes(global.state.role?.id))?(
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                        <MobileDateRangePicker
-                                            required
-                                            startText="Start at : "
-                                            endText="Finish at : "
+                                        <MobileDateRangePicker required startText="Start at : " endText="Finish at : "
                                             value={realizationDateRange}
                                             onChange={(newValue) => {
                                                 if(newValue[0]){

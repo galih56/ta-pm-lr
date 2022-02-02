@@ -16,13 +16,13 @@ const EditLaneForm = lazy(() => import('../../widgets/board/EditLaneForm'));
 
 const headCells = [
     { id: 'Title', align: 'left', label: 'Title' },
+    { id: 'PIC', align: 'left', label: 'PIC' },
     { id: 'Start', align: 'left',  label: 'Start' },
     { id: 'End', align: 'left',  label: 'End' },
     { id: 'Days', align: 'right', label: 'Days' },
     { id: 'Realisasi Start', align: 'left',  label: 'Realisasi Start' },
     { id: 'Realisasi End', align: 'left',  label: 'Realisasi End' },
     { id: 'Work days', align: 'right', label: 'Work days' },
-    { id: 'PIC', align: 'left', label: 'PIC' },
 ];
 
 function Timeline(props) {

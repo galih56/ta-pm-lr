@@ -23,12 +23,6 @@ export const MainListItems = () => (
                 Home
             </ListItemText>
         </ListItem>
-        <ListItem button component={Link} to="/teams"  key={uuid()}>
-            <ListItemIcon>
-                <PeopleIcon />
-            </ListItemIcon>
-            <ListItemText> Teams </ListItemText>
-        </ListItem>
         <ListItem button component={Link} to="/reports"  key={uuid()}>
             <ListItemIcon>
                 <BarChartIcon />
