@@ -52,10 +52,12 @@ class ProjectController extends Controller
                 $project->teams()->sync($request->teams);
             }
 
-            if($request->has('members')){
-                $project->users()->sync($request->members);
+            $members=[];
+            if($request->has('members')){  
+                $members=$request->members;
+                if($request->users_id)$members[]=$request->users_id;  
+                $project->users()->sync($members);
             }
-
             
             if($request->has('clients')){
                 $project->clients()->sync($request->clients);
@@ -91,28 +93,14 @@ class ProjectController extends Controller
             $project=$this->getDetailProject($project->id,$request); 
             return response()->json($project);
         }
-        
     }
     function getDetailProject($id,$request){
         $project=Project::with(['columns'=>function($q) use($request){
             return $q->orderBy('start','ASC')
                 ->with(['cards'=>function($q1) use($request){
-                    $q1=$q1->orderBy('start','ASC');
-                    if($request->has('users_id')){
-                        $users_id=$request->users_id;
-                        $q1=$q1->orWhereHas('members',function($members_q) use($users_id){
-                            return $members_q->where('users_id',$users_id);
-                        });
-                    }
-                    $q1=$q1->with(['cards'=>function($q2) use($request){
-                            $q2=$q2->orderBy('start','ASC');
-                                if($request->has('users_id')){
-                                    $users_id=$request->users_id;
-                                    $q2=$q2->whereHas('members',function($members_q) use($users_id){
-                                        return $members_q->where('users_id',$users_id);
-                                    });
-                                }
-                            $q2=$q2->with('members.user.role')
+                    $q1=$q1->orderBy('start','ASC')
+                        ->with(['cards'=>function($q2) use($request){
+                            $q2=$q2->orderBy('start','ASC')->with('members.user.role')
                                 ->with('members.project_client.client')
                                 ->with('tags');
                             return $q2;
@@ -782,6 +770,7 @@ class ProjectController extends Controller
                     foreach ($tasks as $j => $task) {
                         $task['lists_id']=$list->id;
                         $task['is_subtask']=true;
+                        $task['users_id']=$request->users_id;
                         $subtasks=[];
                         if(array_key_exists('subtasks',$task)) $subtasks=$task['subtasks'];
                         $task['start']=$task['start'];
@@ -791,6 +780,7 @@ class ProjectController extends Controller
                         $task=$this->makeLabel($task);
                         $task=Task::create($task);
                         foreach ($subtasks as $k => $subtask) {
+                            $subtask['users_id']=$request->users_id;
                             $subtask['parent_task_id']=$task->id;
                             $subtask['is_subtask']=true;
                             $subtask=$this->makeLabel($subtask);

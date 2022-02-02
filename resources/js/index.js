@@ -27,8 +27,6 @@ const Home = lazy(() => import("./layout/Home"));
 const DetailProject = lazy(() => import("./components/projects/DetailProject"));
 const ProjectReports = lazy(() => import("./components/reports/ProjectList"));
 const DetailProjectReports = lazy(() => import("./components/reports/DetailProject"));
-const TeamList = lazy(() => import("./components/teams/TeamList"));
-const DetailTeam = lazy(() => import("./components/teams/DetailTeam"));
 const ApprovalTable = lazy(() => import("./components/approvals/ApprovalTable"));
 const DetailApproval = lazy(() => import("./components/approvals/DetailApproval"));
 // const NotificationList = lazy(() => import("./layout/notifications/NotificationList"));
@@ -153,15 +151,6 @@ const App = () => {
                                         <>
                                             <Route path={`${path}/:id`} component={DetailProjectReports} />
                                             <Route path={`${path}`} exact component={ProjectReports} />
-                                        </>
-                                    )
-                                }} />
-                                <Route path='/teams' render={(props) => {
-                                    const { match: { path } } = props;
-                                    return (
-                                        <>
-                                            <Route path={`${path}/:id`} component={DetailTeam} />
-                                            <Route path={`${path}`} exact component={TeamList} />
                                         </>
                                     )
                                 }} />

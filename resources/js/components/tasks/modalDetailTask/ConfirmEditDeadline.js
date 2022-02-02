@@ -55,10 +55,7 @@ export default function ModalConfirmEditDeadline({open,handleClose,data,setData}
     }
     return (
         <Dialog aria-labelledby="Edit deadline" open={open}>
-            <DialogTitle onClose={
-                () => {
-                    handleClose();
-                }} >Edit deadline </DialogTitle>
+            <DialogTitle onClose={handleClose} >Edit deadline </DialogTitle>
             <DialogContent dividers>
                 <form onSubmit={(e)=> submitApproval()}>
                    

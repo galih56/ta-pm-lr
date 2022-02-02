@@ -14,7 +14,6 @@ const Kanban = (props) => {
 
     useEffect(() => {
         if (detailProject){                
-            const toast_loading = toast.loading('Loading...');
             var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/kanban`;
             if(![1,2,3,4].includes(global.state.role?.id)){
                 url+=`?users_id=${global.state.id}`;
@@ -24,10 +23,9 @@ const Kanban = (props) => {
             axios.get(url)
                 .then((result) => {
                     setBoard({lanes:result.data});
-                    toast.dismiss(toast_loading);
                 }).catch((error) => {
-                    toast.dismiss(toast_loading);
                     switch(error.response.status){
+                        case 404 : toast.error(<b>Project not found</b>); break;
                         case 401 : toast.error(<b>Unauthenticated</b>); break;
                         case 422 : toast.error(<b>Some required inputs are empty</b>); break;
                         default : toast.error(<b>{error.response.statusText}</b>); break

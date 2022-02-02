@@ -45,27 +45,16 @@ const Layout = (props) => {
                 className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
                 style={{ zIndex: 701 }}>
                 <Toolbar className={classes.toolbar}>
-                    <IconButton
-                        edge="start"
-                        color="inherit"
-                        aria-label="open drawer"
-                        onClick={handleDrawerOpen}
-                        className={clsx(classes.menuButton, drawerOpen && classes.menuButtonHidden)}
-                    >
+                    <IconButton edge="start" color="inherit" aria-label="open drawer" 
+                        onClick={handleDrawerOpen} className={clsx(classes.menuButton, drawerOpen && classes.menuButtonHidden)}>
                         <MenuIcon />
                     </IconButton>
                     <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>ManPro</Typography>
                         {/* <Notification/> */}
-                    <UserMenu/>
+                    <UserMenu classes={classes}/>
                 </Toolbar>
             </AppBar>
-            <Drawer
-                variant="permanent"
-                style={{ zIndex: 700 }}
-                classes={{
-                    paper: clsx(classes.drawerPaper, !drawerOpen && classes.drawerPaperClose),
-                }}
-                open={drawerOpen} >
+            <Drawer variant="permanent" style={{ zIndex: 700 }} classes={{ paper: clsx(classes.drawerPaper, !drawerOpen && classes.drawerPaperClose) }} open={drawerOpen} >
                 <div className={classes.toolbarIcon}>
                     <div className={classes.toolbarLogo}style={{padding:'2px'}}>
                         <img src={mainLogo} style={{maxHeight:'3em'}}/>

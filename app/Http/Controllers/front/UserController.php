@@ -123,12 +123,13 @@ class UserController extends Controller
     }
     
     public function getTasks(Request $request,$id){
-        $tasks=Task::selectRaw("t.id, t.title, t.lists_id, t.start, t.end, t.actual_start, t.actual_end, t.created_at, t.updated_at, l.projects_id, t.progress, t.complete")
+        $tasks=Task::selectRaw("t.id, t.title, t.lists_id, t.start, t.end, t.actual_start, 
+            t.actual_end, t.created_at, t.updated_at, l.projects_id, t.progress, t.complete, t.parent_task_id")
                     ->from('tasks AS t')
-                    ->join('lists AS l','t.lists_id','=','l.id')
-                    ->join('projects AS p','p.id','l.projects_id')
-                    ->join('users AS u','t.users_id','=','u.id')
-                    ->join(DB::raw("(
+                    ->leftJoin('lists AS l','t.lists_id','=','l.id')
+                    ->leftJoin('projects AS p','p.id','l.projects_id')
+                    ->leftJoin('users AS u','t.users_id','=','u.id')
+                    ->leftJoin(DB::raw("(
                         SELECT tm.tasks_id,count(tm.tasks_id) AS counts
                         FROM task_members AS tm 
                         WHERE tm.users_id=$id
@@ -151,7 +152,10 @@ class UserController extends Controller
                         }])
                         ->with(['creator'=>function($query){
                             return $query->select('id','name','email');
-                        }])->get();
+                        }])->with(['cards'=>function($query){
+                            return $query->select('id','title','start','end','actual_start','actual_end','progress','parent_task_id','complete');
+                        }]);
+        $tasks=$tasks->get();
         return response()->json($tasks);
     }
     

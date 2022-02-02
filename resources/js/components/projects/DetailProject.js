@@ -112,10 +112,9 @@ const DetailProject = (props) => {
 
     const getDetailProject = () => {
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
-        if(![1,2,3,4,5].includes(global.state.role?.id)){
-            url+='?users_id='+global.state.id;
-        }
-        const toast_loading = toast.loading('Loading...');
+        // if(![1,2,3,4,5].includes(global.state.role?.id)){
+        //     url+='?users_id='+global.state.id;
+        // }
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
@@ -124,9 +123,7 @@ const DetailProject = (props) => {
                 setDetailProject(data);
                 global.dispatch({ type: 'store-detail-project', payload: data });
                 global.dispatch({type:'store-current-selected-project',payload:params.id});
-                toast.dismiss(toast_loading);
             }).catch((error) => {
-                toast.dismiss(toast_loading);
                 switch(error?.response?.status){
                     case 404 : toast.error(<b>Project not found</b>); break;
                     case 401 : toast.error(<b>Unauthenticated</b>); break;

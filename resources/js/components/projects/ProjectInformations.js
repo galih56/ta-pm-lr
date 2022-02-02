@@ -30,14 +30,24 @@ const ProjectInfo = (props) => {
     });
     const [estimationDateRange,setEstimationDateRange]=useState([null,null]);
     const [realizationDateRange,setRealizationDateRange]=useState([null,null]);
-    const [showExtendDeadlineForm,setShowExtendDeadlineForm]=useState(false);
-    
+    const [showExtendDeadlineForm,setShowExtendDeadlineForm]=useState(false);    
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+    let history = useHistory();
+
+    function getDateRangeFromTask(start,end){
+        if(start) start=moment(start).format('YYYY-MM-DD HH:mm:ss');
+        if(end) end=moment(end).format('YYYY-MM-DD HH:mm:ss');
+        return [start,end];
+    }
+
     useEffect(() => {
         setDetailProject(props.detailProject);
     }, [props.detailProject])
 
-    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    let history = useHistory();
+    useEffect(()=>{
+        setEstimationDateRange(getDateRangeFromTask(detailProject.start,detailProject.end));
+        setRealizationDateRange(getDateRangeFromTask(detailProject.actual_start,detailProject.actual_end));
+    },[detailProject])
 
     const saveChanges = () => {        
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}`;
@@ -91,12 +101,9 @@ const ProjectInfo = (props) => {
                 {(isEditing)?(
                 <React.Fragment>
                     <Grid item xl={6} md={6} sm={12} xs={12} style={{ padding: '1em' }}>
-                        <TextField
-                            label="Title : "
-                            value={detailProject.title}
+                        <TextField label="Title : " value={detailProject.title}
+                            style={{ width: '90%' }} variant="standard" 
                             onChange={(e) => setDetailProject({ ...detailProject, title: e.target.value })}
-                            style={{ width: '90%' }}
-                            variant="standard" 
                         />
                     </Grid>
                     <Grid item lg={6} md={6} sm={12} xs={12}  style={{ padding: '1em' }}>

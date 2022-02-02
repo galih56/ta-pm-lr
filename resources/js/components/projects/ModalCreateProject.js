@@ -22,7 +22,6 @@ import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import CloseIcon from '@material-ui/icons/Close';
 import UserSearchBar from './../widgets/UserSearchBar';
-import TeamSearchbar from './../widgets/TeamSearchbar';
 import moment from 'moment';
 import UserContext from '../../context/UserContext';
 
@@ -38,11 +37,7 @@ const DialogTitle = withStyles(styles)((props) => {
         <MuiDialogTitle className={classes.root} {...other}>
             <Typography variant="h6">{children}</Typography>
             {onClose ? (
-                <IconButton
-                    aria-label="close"
-                    className={classes.closeButton}
-                    onClick={onClose}
-                    size="large">
+                <IconButton aria-label="close" className={classes.closeButton} onClick={onClose} size="large">
                     <CloseIcon />
                 </IconButton>
             ) : null}
@@ -67,10 +62,7 @@ const useStyles = makeStyles((theme) => {
 
 
 function a11yProps(index) {
-    return {
-        id: `tab-${index}`,
-        'aria-controls': `tabpanel-${index}`,
-};
+    return {  id: `tab-${index}`, 'aria-controls': `tabpanel-${index}` };
 }
 
 export default function ModalCreateProject(props) {
@@ -120,7 +112,7 @@ export default function ModalCreateProject(props) {
             body.append("teams[]", team.id);
         });
         members.forEach((user)=>{
-            body.append("members[]", user.id);
+            body.append("members[]", global.state.id);
         });
 
         if(selectedFile){
@@ -219,9 +211,6 @@ export default function ModalCreateProject(props) {
                                             </LocalizationProvider> 
                                         </Grid>
                                         <Grid item lg={12} md={12} sm={12} xs={12}>
-                                            <TeamSearchbar onChange={(event, options)=> setChoosenTeams(options)}/>
-                                        </Grid>
-                                        <Grid item lg={12} md={12} sm={12} xs={12}>
                                             <UserSearchBar required={true} userOnly={true}
                                                 inputLabel={"Members"}
                                                 onChange={(values)=> setMembers(values)}/>
@@ -268,9 +257,6 @@ export default function ModalCreateProject(props) {
                                             <UserSearchBar required={true} clientOnly={true}
                                                 inputLabel={"Clients"}
                                                 onChange={(values)=>setProjectClients(values)}/>
-                                        </Grid>
-                                        <Grid item lg={12} md={12} sm={12} xs={12}>
-                                            <TeamSearchbar onChange={(event, options)=>setChoosenTeams(options)}/>
                                         </Grid>
                                         <Grid item lg={12} md={12} sm={12} xs={12}>
                                             <TextField variant="standard"

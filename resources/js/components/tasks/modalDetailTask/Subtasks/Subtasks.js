@@ -126,7 +126,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
         if (isEdit) {
             return (
                 <Grid xl={12} md={12} sm={12} xs={12} item>
-                    {[1,2,4,5].includes(global.state.id)?(
+                    {[1,2,4,5].includes(global.state.role.id)?(
                         <>
                         <Button onClick={()=> setShowCreateSubtaskForm(true)} color="primary">Create</Button>
                         {showCreateSubtaskForm?(
@@ -210,10 +210,10 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                         >
                             <Grid container>
                                 <Grid item xl={12} md={12} sm={12} xs={12} 
-                                    style={{cursor:'pointer'}}
+                                    style={{cursor:'pointer'}} onClick={()=> handleDetailTaskOpen({task:item,open:true})} 
                                 >        
                                     {/* <Checkbox checked={item.complete} onChange={(event)=>handleCompleteTask(item,event)}/> */}
-                                    <span onClick={()=> handleDetailTaskOpen({task:item,open:true})} > 
+                                    <span> 
                                         {item.title}
                                         <br/>
                                         <span>{item.start ? moment(item.start).format('DD MMMM YYYY') : ''} - {item.end ? moment(item.end).format('DD MMMM YYYY') : ''}</span>

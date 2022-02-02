@@ -180,19 +180,18 @@ function Timeline(props) {
                     <Table size={'small'} >
                         <Suspense fallback={<LinearProgress />}>
                             <TableBody>
-                                {rows.map((row) => {
-                                    return (
-                                        <Row headCells={headCells} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete}
-                                            key={row.id} data={row} handleDetailTaskOpen={handleDetailTaskOpen} 
-                                            projects_id={projects_id} detailProject={detailProject} 
-                                            onClick={()=>{ 
-                                                if([1,2,4,5].includes(global.state.role?.id)){
-                                                    setSelectedList(row); 
-                                                    setOpenEditList(true); 
-                                                }
-                                            }} />
-                                    );
-                                })}
+                                {rows.map((row) => (
+                                    <Row headCells={headCells} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete}
+                                        key={row.id} data={row} handleDetailTaskOpen={handleDetailTaskOpen} 
+                                        projects_id={projects_id} detailProject={detailProject} 
+                                        onClick={()=>{ 
+                                            if([1,2,4,5].includes(global.state.role?.id)){
+                                                setSelectedList(row); 
+                                                setOpenEditList(true); 
+                                            }
+                                        }} />
+                                    )
+                                )}
                             </TableBody>
                         </Suspense>
                     </Table>

@@ -31,14 +31,14 @@ class Task extends Model
                 $start = Carbon::parse($task->start);
                 $end = Carbon::parse($task->end);
                 $days= $start->diffInDays($end);
-                $task->days=$days;
+                $task->days=$days+1;
             }       
 
             if(!empty($task->actual_start) && !empty($task->actual_end)){
                 $actual_start = Carbon::parse($task->actual_start);
                 $actual_end = Carbon::parse($task->actual_end);
                 $work_days= $actual_start->diffInDays($actual_end);
-                $task->work_days=$work_days;
+                $task->work_days=$work_days+1;
             }
             
             if($task->parentTask){

@@ -1,6 +1,11 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Link, useHistory } from "react-router-dom";
-import { Menu, MenuItem, IconButton, Badge, ListItemText } from '@material-ui/core/';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import IconButton from '@material-ui/core/IconButton';
+import Badge from '@material-ui/core/Badge';
+import ListItemText from '@material-ui/core/ListItemText';
+import Typography from '@material-ui/core/Typography';
 import { withStyles } from '@material-ui/styles';
 import UserContext from '../../context/UserContext';
 import PersonIcon from '@material-ui/icons/Person';
@@ -10,17 +15,9 @@ import ModalDetailUser from './../../components/users/ModalDetailUser/ModalDetai
 
 const StyledMenu = withStyles({
     paper: { border: '1px solid #d3d4d5' },
-})((props) => (
-    <Menu
-        elevation={0}
-        getcontentanchorel={null}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-        {...props}
-    />
-));
+})(props => <Menu elevation={0} getcontentanchorel={null} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} transformOrigin={{ vertical: 'top', horizontal: 'center' }} {...props}/>);
 
-const UserMenu = (props) => {
+const UserMenu = ({classes}) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
     const handleMenuOpen = (event) => { setAnchorEl(event.currentTarget); };
@@ -40,15 +37,11 @@ const UserMenu = (props) => {
     const {id,email,name,role,username,verified}=global.state;
     return (
         <>
+                    <Typography component="h2" variant="h6" color="inherit" noWrap style={{fontSize:'1rem'}}>{global.state.name}</Typography>
             <IconButton color="inherit" onClick={handleMenuOpen}>
                 <Badge color="secondary"> <PersonIcon /> </Badge>
             </IconButton>
-            <StyledMenu
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-            >
+            <StyledMenu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleMenuClose}>
                 {(global.state.authenticated)?(
                     <MenuItem onClick={()=>{
                             handleMenuClose();

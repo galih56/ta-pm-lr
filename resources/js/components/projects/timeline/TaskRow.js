@@ -1,4 +1,5 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy, useContext } from 'react';
+import UserContext from '../../../context/UserContext';
 import { Link, useLocation ,useHistory} from 'react-router-dom';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
@@ -21,21 +22,34 @@ const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete
     const [anchorEl, setAnchorEl] = useState(null);
     const [openPopOver, setOpenPopOver] = useState(null);
     const [memberOnHover, setMemberOnHover] = useState(null);
-    const handlePopoverOpen = (event,member) =>  {
-        setMemberOnHover(member);
-        setOpenPopOver(true);
-        setAnchorEl(event.currentTarget);
-    }
-    const handlePopoverClose = () => {
-        setOpenPopOver(false);
-        setAnchorEl(null);
-    }
-
+    
+    let global = useContext(UserContext);
     let location = useLocation();
     let history = useHistory();
     let pathname = location.pathname;
     let searchParams = new URLSearchParams(location.search);
     searchParams.set('tasks_id', data.id);
+
+    const handlePopoverOpen = (event,member) =>  {
+        setMemberOnHover(member);
+        setOpenPopOver(true);
+        setAnchorEl(event.currentTarget);
+    }
+
+    const handlePopoverClose = () => {
+        setOpenPopOver(false);
+        setAnchorEl(null);
+    }
+
+    const isMemberLoggedInOrAdmin=(task_members=[])=>{
+        try {
+            var user=task_members?.find((o, i) => (o.user?.email===global.state.email || o?.email===global.state.email));
+            return user||[1,2,3,4,5].includes(global.state.role.id);                
+        } catch (error) {
+            console.log(task_members,error)
+            return false;
+        }
+    }
 
     useEffect(()=>{
         const getProgress=()=>{
@@ -69,12 +83,11 @@ const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete
                     {data.cards?.length?( <IconButton size="small" onClick={() =>setOpenCollapsible(!openCollapsible)} > {openCollapsible ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />} </IconButton> ):null}
                 </TableCell>
                 <TableCell padding="checkbox"> 
-                    {!data.cards?.length?(
+                    {(isMemberLoggedInOrAdmin(data.members)) && !data.cards?.length?(
                         <div style={{display:'flex'}}>
                             <UpdateProgressButtons data={data} alwaysShow={true}/>
                         </div>
                     ):null}
-                    {/* {data.complete?<Checkbox disabled checked={data.complete} />:<Checkbox disabled checked={data.complete}/>} */}
                 </TableCell>
                 <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}> 
                     <Link  onClick={(e)=>{
@@ -93,7 +106,7 @@ const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete
                                 <span key={i} onMouseEnter={(event)=>handlePopoverOpen(event,member)} 
                                     onMouseLeave={handlePopoverClose}  style={{margin:'0.5em',float:'left'}}>
                                     {member?.project_client?.client?(<>{`Client ${`(${member.project_client?.client?.institution})`}`}</>):null}
-                                    {member?.is_client?(<Typography>{`Client ${`(${memberOnHover?.institution})`}`}</Typography>):null}
+                                    {member?.is_client?(<Typography>{`Client ${`(${member?.institution})`}`}</Typography>):null}
                                     {member?.role?<>{member?.role?.name}</>:null}
                                     {member?.user?.role?<>{member?.user?.role?.name}</>:null}
                                 </span>
@@ -107,6 +120,7 @@ const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete
                 <TableCell align="left"> {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY'):null}<br/> {data.start_label?<StatusChip status={data.start_label}/>:null} </TableCell>
                 <TableCell align="left">  {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY'):null}<br/> {data.end_label?<StatusChip status={data.end_label}/>:null} </TableCell>
                 <TableCell align="right"> {(data.actual_start && data.actual_end)?Math.round(moment.duration(moment(data.actual_start).diff(moment(data.actual_end))).asDays())*(-1):null} </TableCell>
+               
             </TableRow>
             {data.cards?.length?(
                 <TableRow >
