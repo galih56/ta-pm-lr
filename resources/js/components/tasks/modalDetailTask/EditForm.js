@@ -93,6 +93,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                         <Grid item lg={12} md={12} sm={12} xs={12} container spacing={2}>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
                                 <Typography style={{ whiteSpace: 'noWrap'}}>Estimation : {data.start ? moment(data.start).format('DD MMMM YYYY') : ''} - {data.end ? moment(data.end).format('DD MMMM YYYY') : ''}</Typography> 
+                                <Typography style={{ whiteSpace: 'noWrap'}}>Days : {data.days}</Typography> 
                                 {([1,2,4].includes(global.state.role?.id))?(
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                                         <MobileDateRangePicker required startText="Start at : " endText="Finish at : "
@@ -123,7 +124,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                             <Grid item lg={12} md={12} sm={12} xs={12}>
                                 <Typography style={{ whiteSpace: 'noWrap'}}>Realization at : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''} - {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</Typography> 
                                 <StatusChip status={data.start_label}/> - <StatusChip status={data.end_label}/>
-                              
+                                <Typography style={{ whiteSpace: 'noWrap'}}>Work Days : {data.work_days}</Typography> 
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
                             {([1,2,4].includes(global.state.role?.id))?(
@@ -154,16 +155,16 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                                         Jika task sebuah children maka button update progress ditampilkan */}
                                         {!data.cards?.length || data.parent_task ?(
                                             <>
-                                                <Button variant="contained"  disabled={data.actual_start?true:false} color="primary" style={{marginRight:'0.5em'}} 
-                                                    onClick={startConfirmOpen} 
+                                                <Button variant="contained"  disabled={data.actual_start?true:false} color="primary" style={{marginRight:'0.5em'}} onClick={startConfirmOpen} 
                                                     endIcon={data.actual_start?<PlayArrowIcon style={{fill:'green'}}/>:<PlayCircleFilledWhiteIcon />}>
                                                         {data.actual_start?<span style={{color:'black'}}>Started at {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''}</span>:`Start progress`} 
                                                 </Button>
-                                                <Button variant="contained"  disabled={data.actual_end?true:false} color="primary" style={{marginRight:'0.5em'}} 
-                                                    onClick={completeConfirmOpen}
-                                                    endIcon={data.actual_end?<CheckCircleOutlineIcon  style={{fill:'green'}}/>:<CheckCircleOutlineIcon />}>
-                                                        {data.actual_end?<span style={{color:'black'}}>Completed at ${data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</span>:"Mark as completed"} 
-                                                </Button>
+                                                {data.actual_start?(
+                                                    <Button variant="contained"  disabled={data.actual_end?true:false} color="primary" style={{marginRight:'0.5em'}} onClick={completeConfirmOpen}
+                                                        endIcon={data.actual_end?<CheckCircleOutlineIcon  style={{fill:'green'}}/>:<CheckCircleOutlineIcon />}>
+                                                            {data.actual_end?<span style={{color:'black'}}>Completed at {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</span>:"Mark as completed"} 
+                                                    </Button>
+                                                ):null}
                                             </>
                                         ):null}                                           
                                     </>

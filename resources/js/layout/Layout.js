@@ -74,7 +74,7 @@ const Layout = (props) => {
             </Drawer>
             <main className={classes.content}>
                 <div className={classes.appBarSpacer} ></div>
-                <Container maxWidth="lg" className={classes.container}>
+                <Container maxWidth="xl" className={classes.container}>
                     <Grid container spacing={3} style={{ marginLeft:'0.5em',display:'block'}}>
                         {props.children}
                         <Footer />

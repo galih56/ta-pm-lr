@@ -16,10 +16,10 @@ import TablePagination from '@material-ui/core/TablePagination';
 import TableHead from '@material-ui/core/TableHead';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import TableRow from '@material-ui/core/TableRow';
-import Paper from '@material-ui/core/Paper';
+import DialogConfirm from './DialogConfirm';
 import { visuallyHidden } from '@material-ui/utils';
 import FormAddClient from './FormAddClient';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) return -1;
@@ -98,6 +98,10 @@ export default function EnhancedTable(props) {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [openFormAddClient,setOpenFormAddClient]=useState(false);
+    const [deleteConfirmDialog,setDeleteConfirmDialog]=useState({
+        open:false,
+        data:null
+    })
 
     let global = useContext(UserContext);
 
@@ -158,6 +162,7 @@ export default function EnhancedTable(props) {
         setPage(0);
     };
 
+    const handleDeleteDialogOpen=()=>setDeleteConfirmDialog(true);
     return (
         <Grid container>  
             <Grid item xl={12} lg={12} md={12} sm={12} xs={12} >
@@ -193,7 +198,7 @@ export default function EnhancedTable(props) {
                                                     {row.city}
                                                 </TableCell>
                                                 <TableCell align="right">
-                                                    <IconButton onClick={()=>handleRemoveClient(row.id)}>
+                                                    <IconButton onClick={()=>setDeleteConfirmDialog({open:true,data:row})}>
                                                         <DeleteIcon/>
                                                     </IconButton>
                                                 </TableCell>
@@ -209,17 +214,10 @@ export default function EnhancedTable(props) {
                             </TableBody>
                         </Table>
                     </TableContainer>
-                    <TablePagination
-                        page={page}
-                        component="div"
-                        count={rows.length}
-                        rowsPerPage={rowsPerPage}
-                        onPageChange={handleChangePage}
-                        rowsPerPageOptions={[10, 20, 30]}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                    />
+                    <TablePagination page={page} component="div" count={rows.length} rowsPerPage={rowsPerPage} onPageChange={handleChangePage} rowsPerPageOptions={[10, 20, 30]} onRowsPerPageChange={handleChangeRowsPerPage}/>
                 </div>
             </Grid>
+            <DialogConfirm open={deleteConfirmDialog.open}handleClose={()=>{setDeleteConfirmDialog({open:false,data:null})}} handleConfirm={()=>handleRemoveClient(deleteConfirmDialog.data?.id)} title={`Are you sure?`} children={`Data will be deleted permanently`}/>
         </Grid>
     );
 }

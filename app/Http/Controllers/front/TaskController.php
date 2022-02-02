@@ -378,33 +378,39 @@ class TaskController extends Controller
     }
     
     function getTaskMembers($task){
-        $members=[];
-        $task_members=$task['members'];
-        for ($i=0; $i < count($task_members); $i++) { 
-            $task_member=$task_members[$i];
-            if($task_member['user']){
-                $user=$task_member['user'];
-                $user['project_members_id']=$task_member['project_members_id'];
-                $user['tasks_id']=$task_member['tasks_id'];
-                $user['task_members_id']=$task_member['id'];
-                $user['is_user']=true;
-                $user['is_client']=false;
-                $members[]=$user;
+        $numb=null;
+        try {
+            $members=[];
+            $task_members=$task['members'];
+            for ($i=0; $i < count($task_members); $i++) { 
+                $task_member=$task_members[$i];
+                $numb=$task_member;
+                if($task_member['user']){
+                    $user=$task_member['user'];
+                    $user['project_members_id']=$task_member['project_members_id'];
+                    $user['tasks_id']=$task_member['tasks_id'];
+                    $user['task_members_id']=$task_member['id'];
+                    $user['is_user']=true;
+                    $user['is_client']=false;
+                    $members[]=$user;
+                }
+                if($task_member['project_client'] && !empty($task_member['project_client']['client'])){
+                    $client=[];
+                    $client=$task_member['project_client']['client'];
+                    $client['project_clients_id']=$task_member['project_client']['id'];
+                    $client['clients_id']=$task_member['project_client']['client']['id'];
+                    $client['tasks_id']=$task_member['tasks_id'];
+                    $client['task_members_id']=$task_member['id'];
+                    $client['is_client']=true;
+                    $client['is_user']=false;
+                    $members[]=$client;
+                }
+    
             }
-            if($task_member['project_client']){
-                $client=[];
-                $client=$task_member['project_client']['client'];
-                $client['project_clients_id']=$task_member['project_client']['id'];
-                $client['clients_id']=$task_member['project_client']['client']['id'];
-                $client['tasks_id']=$task_member['tasks_id'];
-                $client['task_members_id']=$task_member['id'];
-                $client['is_client']=true;
-                $client['is_user']=false;
-                $members[]=$client;
-            }
-
+            return $members;
+        } catch (\Throwable $th) {
+            dd($th,$task,$numb);
         }
-        return $members;
     }
     
     public function extendDeadline(Request $request,$id){

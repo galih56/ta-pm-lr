@@ -58,30 +58,9 @@ class Task extends Model
                 $task->complete=true;
             }
 
-            // if($task->cards){
-            //     $valuePerSubtask=100/count($task->cards);
-            //     $completeSubtaskCounter=0;
-            //     for ($i = 0; $i < count($task->cards); $i++) {
-            //         $subtask = $task->cards[$i];
-            //         if($subtask->progress==100){ $completeSubtaskCounter++; }
-            //     }
-            //     $progress=$completeSubtaskCounter*$valuePerSubtask;
-            //     $task->progress=round($progress);
-            // }
-
-            // if($task->parentTask){
-            //     $parent_task=$task->parentTask;
-            //     $valuePerSubtask=100/count($parent_task->cards);
-            //     $completeSubtaskCounter=0;
-            //     for ($i = 0; $i < count($parent_task->cards); $i++) {
-            //         $subtask = $parent_task->cards[$i];
-            //         if($subtask->progress==100){ $completeSubtaskCounter++; }
-            //     }
-            //     $progress=$completeSubtaskCounter*$valuePerSubtask;
-            //     $parent_task->progress=$progress;
-            //     $parent_task->save();
-            // }else{
-            // }
+            if($task->parentTask){
+                $task->parentTask->updateProgress();
+            }
         });
         static::saved(function($task){
             if(!$task->parentTask){

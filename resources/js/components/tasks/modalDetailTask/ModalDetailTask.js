@@ -130,11 +130,11 @@ export default function ModalDetailTask(props) {
             }
             var url =`${process.env.MIX_BACK_END_BASE_URL}projects/`;
             if(data.list){
-                 url+= data.list.project;
+                 url+= data.list?.project;
             }else if(data.parent_task){
                 url+=data.parent_task.list.project;
             }
-            console.log('modaldetailtask detialproject',url);
+
             const toast_loading = toast.loading('Loading...');
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -152,7 +152,6 @@ export default function ModalDetailTask(props) {
                     }
                 });
         }
-        console.log(detailProject.members);
     },[props.detailproject])
 
     const getProgress=()=>{
@@ -213,6 +212,7 @@ export default function ModalDetailTask(props) {
                 loading: 'Updating...',
                 success: (result)=>{
                     result=result.data;
+                    setData(result);
                     if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
                     else global.dispatch({ type: 'store-detail-task', payload: result });
                     handleCloseConfirm();
@@ -234,7 +234,7 @@ export default function ModalDetailTask(props) {
             is_subtask:data.is_subtask,  progress: data.progress, parent_task_id:data.parent_task_id, tags:data.tags,
             projects_id:props.detailProject.id, users_id:global.state.id
         }
-        if([1,2,4].includes(global.state.role?.id)){
+        if([1,2,4,5].includes(global.state.role?.id)){
             body.start=data.start;
             body.end=data.end;
             body.actual_start=data.actual_start;
@@ -250,18 +250,24 @@ export default function ModalDetailTask(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
+        console.log(body);
         toast.promise(
             axios.patch(url, body),
             {
                 loading: 'Updating...',
                 success: (result)=>{
                     result=result.data;
-                    setData(result);
-                    if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
-                    else global.dispatch({ type: 'store-detail-task', payload: result });
+                    setData({...data,...result});
+                    // if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                    // else global.dispatch({ type: 'store-detail-task', payload: result });
                     return <b>Successfully updated</b>
                 },
                 error: (error)=>{
+                    console.log(error)
+                    if(error.response?.status==404){ 
+                        removeTaskIdQueryString(history)
+                        return <b>Unauthenticated</b>;
+                    }
                     if(error.response?.status==401) return <b>Unauthenticated</b>;
                     if(error.response?.status==422) return <b>Some required inputs are empty</b>;
                     return <b>{error.response.statusText}</b>;
@@ -329,7 +335,7 @@ export default function ModalDetailTask(props) {
                     <br/>
                 </DialogContent>                
                 <DialogActions>
-                    <DialogActionButtons isEdit={isEditing} saveChanges={saveChanges} setEditMode={handleEditingMode}
+                    <DialogActionButtons isEdit={isEditing} saveChanges={()=>saveChanges(data)} setEditMode={handleEditingMode}
                         deleteTask={deleteTask}
                         confirm={confirm}  setConfirm={setConfirm}  closeModal={closeModalDetailTask}
                     > </DialogActionButtons>

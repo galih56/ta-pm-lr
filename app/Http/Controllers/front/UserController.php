@@ -22,7 +22,7 @@ class UserController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['update','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['update','destroy','refreshLastLogin']]); 
     }
 
     public function index()
@@ -237,5 +237,15 @@ class UserController extends Controller
             'message'=>'Logged Out',
         ]);
     }
+
+    public function refreshLastLogin(Request $request, $id){
+        $user=User::findOrFail($id);
+        $user->last_login= Carbon::now()->toDateTimeString();
+        $user->save();
+        return response()->json([
+            'message'=>'logged in'
+        ]);
+    }
+
 }
 

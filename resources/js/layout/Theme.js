@@ -41,8 +41,10 @@ const themeConfig = (theme) => {
         content: { flexGrow: 1, height: '100vh', overflow: 'auto'},
         container: { 
             marginLeft:'inherit !important',
-            paddingTop: theme.spacing(4), 
+            paddingTop: theme.spacing(5), 
             paddingBottom: theme.spacing(4), 
+            paddingRight: theme.spacing(3), 
+            paddingLeft: theme.spacing(1), 
         },
         paper: { padding: theme.spacing(2), display: 'flex', overflow: 'auto', flexDirection: 'column'}, 
         fixedHeight: { height: 240, },

@@ -104,6 +104,7 @@ export default function ModalCreateProject(props) {
         body.append("start", start);
         body.append("end", end);
         body.append("users_id", global.state.id);
+        body.append("members[]", global.state.id);
 
         projectClients.forEach((client)=>{
             body.append("clients[]", client.id);
@@ -112,7 +113,7 @@ export default function ModalCreateProject(props) {
             body.append("teams[]", team.id);
         });
         members.forEach((user)=>{
-            body.append("members[]", global.state.id);
+            body.append("members[]", user.id);
         });
 
         if(selectedFile){

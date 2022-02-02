@@ -29,6 +29,7 @@ Route::resource('tags', 'App\Http\Controllers\front\TagController');
 Route::resource('comments', 'App\Http\Controllers\front\CommentController');
 
 Route::group(['prefix'=>'users'],function(){
+    Route::post('/{id}/refresh-last-login','App\Http\Controllers\front\UserController@refreshLastLogin');
     Route::get('/{id}/projects','App\Http\Controllers\front\UserController@getProjects');
     Route::get('/{id}/meetings','App\Http\Controllers\front\UserController@getMeetings');
     Route::get('/{id}/tasks','App\Http\Controllers\front\UserController@gettasks');
@@ -64,6 +65,9 @@ Route::group(['prefix'=>'project-members'],function(){
     Route::get('/{id}/tasks','App\Http\Controllers\front\ProjectMemberController@getTasks');
 });
 Route::resource('approvals', 'App\Http\Controllers\front\ApprovalController');
+Route::get('check-url', function (Request $request) {
+    return dd(url(''));
+});
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

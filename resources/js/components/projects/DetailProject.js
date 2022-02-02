@@ -28,9 +28,12 @@ const ModalDetailTask = lazy(() => import('../tasks/modalDetailTask/ModalDetailT
 
 function TabPanel({ children, value, index, ...other }) {
     return (
-        <Box role="tabpanel" hidden={value !== index} {...other} >{children}</Box>
+        <div role="tabpanel" hidden={value !== index} id={`scrollable-auto-tabpanel-${index}`} aria-labelledby={`scrollable-auto-tab-${index}`} {...other}>
+            <Box>{children}</Box>
+        </div>
     );
 }
+
 
 const getProjectFromState = (projects, projects_id) => {
     var data = null;
@@ -94,6 +97,7 @@ const DetailProject = (props) => {
     let global = useContext(UserContext);
     let history = useHistory();
     let location = useLocation();
+
     const { match: { params } } = props;
     const [detailProject, setDetailProject] = useState({ 
         id: null, title: null, description: null, 
@@ -112,9 +116,6 @@ const DetailProject = (props) => {
 
     const getDetailProject = () => {
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
-        // if(![1,2,3,4,5].includes(global.state.role?.id)){
-        //     url+='?users_id='+global.state.id;
-        // }
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
@@ -176,7 +177,7 @@ const DetailProject = (props) => {
     return (
         <Router>
             <Paper>
-                <Tabs value={tabState} onChange={handleChange} >
+                <Tabs value={tabState} onChange={handleChange}  variant="scrollable" scrollButtons="auto">
                     <Tab component={Link} label="Timeline" to={`timeline`} />
                     <Tab component={Link} label="Gantt" to={`gantt`} />
                     <Tab component={Link} label="Board" to={`board`} />

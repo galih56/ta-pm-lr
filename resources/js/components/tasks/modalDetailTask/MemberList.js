@@ -30,7 +30,6 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
     const classes = useStyles();
     
     useEffect(()=>{
-        console.log('MemberList : ',detailProject);
         setMembers(data.members?data.members:[]);
     },[data.members])
 
@@ -98,7 +97,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
                  </Grid>
                  {[1,2,4,5].includes(global.state.role.id)?(
                     <Grid item lg={12} md={12} sm={12} xs={12}>
-                        <Button style={{float:'right'}} onClick={()=>addMembers( { tasks_id: data.id, users:newMembers })}  variant="contained" color="secondary">Invite</Button>
+                        <Button style={{float:'right',marginTop:'0.5em'}} onClick={()=>addMembers( { tasks_id: data.id, users:newMembers })}  variant="contained" color="secondary">Invite</Button>
                     </Grid>
                  ):null}
             </>):(

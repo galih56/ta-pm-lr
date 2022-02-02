@@ -7,15 +7,6 @@ const storeDetailTask = (payload) => {
                 if (card.id == payload.id) {
                     card = payload;
                 } 
-                if (card.id == payload.parent_task_id) {
-                    card.cards=card.cards.map((subtask)=>{
-                        if(subtask.parent_task){
-                            card.progress=subtask.parent_task.progress;
-                        }
-                        if(subtask.id==payload.id){ return payload}
-                        return subtask;
-                    })
-                }
                 return card
             });
             return column;
