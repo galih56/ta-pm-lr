@@ -3,11 +3,8 @@ import CanvasJSReact from '../../assets/js/canvasjs.react';
 import moment from 'moment';
 
 var initialStateOptions = {
-    animationEnabled: true,
-    zoomEnabled: true,
-    axisX:  {
-        title: "",
-    },
+    animationEnabled: true, zoomEnabled: true,
+    axisX:  { title: "" },
     axisY: {
         title: ` - `,
         titleFontColor: "#6D78AD",
@@ -24,9 +21,7 @@ var initialStateOptions = {
         labelFontColor: "#51CDA0",
         tickColor: "#51CDA0",   
         includeZero: true,
-        crosshair: {
-            enabled: true
-        },
+        crosshair: { enabled: true },
     },
     toolTip: {
         shared: true,

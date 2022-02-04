@@ -70,9 +70,7 @@ export default function ModalDetailUser(props) {
             .then((result) => {
                 setData(result.data);
                 props.onUpdate(result.data, 'update');
-            }).catch((error) => {
-                console.error(error.response);
-            });
+            }).catch(console.log);
         }
     }
 

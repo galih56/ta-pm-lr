@@ -44,21 +44,24 @@ const DialogContent = withStyles((theme) => ({
     root: { padding: theme.spacing(2) },
 }))(MuiDialogContent);
 
-export default function ModalExtendDeadline({open,handleClose,task,detailProject,minDate,maxDate}) {
+export default function ModalExtendDeadline({open,handleClose,task,detailProject}) {
     const global=useContext(UserContext);
     const [newDeadline,setNewDeadline]=useState(null);
     const [description,setDescription]=useState("");
-    if(task){
-        if(task.parent_task){
-            minDate=task.parent_task?task.parent_task?.start:task.start;
-            minDate=parseISO(moment(minDate).format('YYYY-MM-DD HH:mm:ss'));
-        }
-    }else{
-        minDate=parseISO(moment(detailProject.start).format('YYYY-MM-DD HH:mm:ss'));
-    }
+    const [minDate,setMinDate]=useState(null);
+    const [maxDate,setMaxDate]=useState(null);
+
     useEffect(()=>{
-        console.log(minDate,maxDate)
-    },[])
+        if(task){
+            if(task.parent_task){
+                var minimal_date=(task.parent_task?task.parent_task?.start:task.start);
+                setMinDate(parseISO(moment(minimal_date).format('YYYY-MM-DD HH:mm:ss')));
+            }
+        }else{
+            setMinDate(parseISO(moment(detailProject.start).format('YYYY-MM-DD HH:mm:ss')));
+        }
+    },[detailProject,task]);
+
     const handleSubmit=(e)=>{
         e.preventDefault();     
         var body=null;
@@ -95,10 +98,7 @@ export default function ModalExtendDeadline({open,handleClose,task,detailProject
 
     return (
         <Dialog aria-labelledby="Extend deadline" open={open}>
-            <DialogTitle onClose={
-                () => {
-                    handleClose();
-                }} > Extend deadline </DialogTitle>
+            <DialogTitle onClose={handleClose} > Extend deadline </DialogTitle>
             <DialogContent dividers>
                  
                 <form onSubmit={handleSubmit}>
@@ -106,21 +106,15 @@ export default function ModalExtendDeadline({open,handleClose,task,detailProject
                         <Grid item lg={12} md={12} sm={12} xs={12}>
                             <Typography>Current deadline {task?moment(task.end).format('DD MMMM YYYY'):moment(detailProject.end).format('DD MMMM YYYY')}</Typography>
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                <MobileDatePicker 
-                                    label="New deadline"
-                                    value={null}
-                                    minDate={minDate}
-                                    maxDate={parseISO(maxDate)}
+                                <MobileDatePicker  label="New deadline" value={null} minDate={minDate}
+                                    maxDate={maxDate}
                                     onChange={(value)=> setNewDeadline(parseISO(moment(value).format('YYYY-MM-DD HH:mm:ss')))}
                                     renderInput={(params)=><TextField {...params} variant="standard" style={{width:'100%'}}/>}
                                 />
                             </LocalizationProvider>
                         </Grid>
                         <Grid item lg={12} md={12} sm={12} xs={12}>
-                            <TextField
-                                label="Description : "
-                                multiline
-                                rows={4}
+                            <TextField label="Description : " multiline rows={4}
                                 variant="standard"
                                 value={description}
                                 onChange={(event)=>setDescription(event.target.value)}

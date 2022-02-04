@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, lazy, Suspense } from 'react';
-import { Link, useHistory,Switch, Route, BrowserRouter as Router, useLocation } from "react-router-dom";
+import { Link, useHistory,Switch, Route, BrowserRouter as Router, useLocation,Redirect } from "react-router-dom";
 import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -70,7 +70,6 @@ const getCurrentTabIndex = (location, history, projects_id) => {
             tabIndex = 5;
             break;
         default:
-            history.push(`/projects/${projects_id}/timeline`);
             tabIndex = 0;
             break;
     }
@@ -125,7 +124,7 @@ const DetailProject = (props) => {
                 global.dispatch({ type: 'store-detail-project', payload: data });
                 global.dispatch({type:'store-current-selected-project',payload:params.id});
             }).catch((error) => {
-                switch(error?.response?.status){
+                switch(error?.response?.status){ 
                     case 404 : toast.error(<b>Project not found</b>); break;
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are empty</b>); break;
@@ -142,16 +141,13 @@ const DetailProject = (props) => {
     }
 
     useEffect(() => {
+        getDetailProject();
         const query = new URLSearchParams(props.location.search);
         const paramTaskId = query.get('tasks_id');
         const paramMeetingId = query.get('meetings_id');
         if (paramTaskId) handleDetailTaskOpen({ task:{...clickedTask, id: paramTaskId}, open: true });
         if (paramMeetingId) handleDetailMeetingOpen({ meeting : { id:paramMeetingId,...clickedMeeting }, open: true });
     }, []);
-
-    useEffect(()=>{
-        getDetailProject();
-    },[]);
 
     useEffect(()=>{
         const currentProject=getProjectFromState(global.state.projects, params.id);
@@ -188,6 +184,7 @@ const DetailProject = (props) => {
             </Paper>
             <Suspense fallback={<LinearProgress />}>
                 <Switch>
+                    <Route path='/projects/:id' exact ><Redirect to={`/projects/${params.id}/timeline`} /></Route>
                     <Route path={"/projects/:id/timeline"} render={() => {
                             return (
                                 <TabPanel value={tabState} index={0} style={{  padding: '0.5em', minHeight:'500px !important' } }>

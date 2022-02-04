@@ -1,4 +1,5 @@
 const createNewList = (payload) => {
+    console.log(payload)
     var user = JSON.parse(localStorage.getItem('user'));
     const newProjects = user.projects.map((project) => {
         if (project.id == payload.projects_id) {

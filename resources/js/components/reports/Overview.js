@@ -1,5 +1,5 @@
 import React,{useState,useEffect,useContext,useCallback} from 'react';
-import UserContext from './../../context/UserContext';
+import UserContext from '../../context/UserContext';
 import Grid from '@material-ui/core/Typography';
 import Typography from '@material-ui/core/Typography';
 import CanvasJSReact from '../../assets/js/canvasjs.react';
@@ -120,13 +120,13 @@ const Overview=({detailProject,refreshDetailProject,handleDetailTaskOpen})=>{
     return(
         <Grid container component="div" style={{padding:'1em'}}>
             <Grid item xl={12} md={12} sm={12} xs={12} component="div">
-                <Typography variant="h5">Tasks overview : </Typography>
+                <Typography variant="h5" component="div">Tasks overview : </Typography>
             </Grid>
             <Grid item xl={12} md={12} sm={12} xs={12} component="div">
                 <GroupedTasksChart groupedTasks={groupedTasks}/>
             </Grid>
             <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                <Typography variant="h5">Starts : </Typography>
+                <Typography variant="h5" component="div">Starts : </Typography>
                 <CustomedChart 
                         titleX="Tasks"  titleY="Date"titleX="Date" titleY="Tasks"
                         prop1={"estimations"} prop2={"realizations"}
@@ -148,7 +148,7 @@ const Overview=({detailProject,refreshDetailProject,handleDetailTaskOpen})=>{
                      />
             </Grid> 
             <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
-                <Typography variant="h5">Ends : </Typography>
+                <Typography variant="h5" component="div">Ends : </Typography>
                 <CustomedChart titleX="Date" titleY="Tasks"
                     prop1={"estimations"} prop2={"realizations"}
                     maximumX={moment(detailProject.end).add(1, 'weeks').toDate()}

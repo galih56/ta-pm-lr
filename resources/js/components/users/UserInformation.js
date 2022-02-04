@@ -27,7 +27,7 @@ const UserInformation = (props) => {
                         <Grid container>
                             <Grid lg={12} md={12} sm={12} xs={12} item>
                                 <Router>
-                                    <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="teams">
+                                    <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="projects">
                                         <Button component={Link}  color="primary"
                                             to="/projects">
                                             Projects

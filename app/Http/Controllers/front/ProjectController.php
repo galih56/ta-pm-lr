@@ -444,12 +444,6 @@ class ProjectController extends Controller
     public function getoverallProjectReports(Request $request){
         $projects=Project::select('id','title','start','end',
             'actual_start','actual_end','progress','complete','created_at','updated_at');
-        if($request->has('users_id')){
-            $users_id=$request->users_id;
-            $projects=$projects->whereHas('members',function($members_q) use($users_id){
-                return $members_q->where('users_id','=',$users_id);
-            });
-        }
         $projects=$projects->get()->toArray();
         $new_projects=[];
         for ($i=0; $i < count($projects); $i++) { 
@@ -475,7 +469,7 @@ class ProjectController extends Controller
             $incomplete_task_counter=0;
             for ($j=0; $j < count($tasks); $j++) { 
                 $task=$tasks[$j];
-                if($task->complete) $complete_task_counter++;
+                if($task->actual_end) $complete_task_counter++;
                 else $incomplete_task_counter++;
             }
             $project['total_complete_tasks']=$complete_task_counter;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useHistory, BrowserRouter as Router } from "react-router-dom";
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import UserContext from '../../context/UserContext';
@@ -24,9 +24,6 @@ const ProjectList = (props) => {
     const getProjects = () => {
         const toast_loading=toast.loading('Loading...');
         let url = `${process.env.MIX_BACK_END_BASE_URL}projects-overview`;
-        if(![1,2,3,4,5,6].includes(global.state.role?.id)){
-            url+=`?users_id=${global.state.id}`;
-        }
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
@@ -53,8 +50,7 @@ const ProjectList = (props) => {
     },[]);
 
     return (
-        <Grid container spacing={2}>
-             
+        <Grid item  lg={12} md={12} sm={12} xs={12}  container spacing={1}>
              <Grid lg={12} md={12} sm={12} xs={12} item>
                 <Router>
                     <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />}>
@@ -72,9 +68,7 @@ const ProjectList = (props) => {
                 <ProjectTable data={projects} page_name="reports"/>
             </Grid>
             <Grid lg={12} md={12} sm={12} xs={12} item>
-                <CostumedChart 
-                    titleX="Projects" 
-                    prop1={"complete"} prop2={"incomplete"}
+                <CostumedChart titleX="Projects"  prop1={"complete"} prop2={"incomplete"}
                     contentFormatter={ ( e )=> {
                         var dp1=e.entries[0].dataPoint
                         var dp2=e.entries[1].dataPoint

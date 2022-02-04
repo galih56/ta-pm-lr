@@ -54,7 +54,7 @@ const SignIn = (props) => {
     }
 
     return (
-        <React.Fragment>
+        <>
              
             { wrongCredentialAlert ? <Alert severity="error" style={{marginTop:'1em'}}> Email/Password is incorrect</Alert> : null}
             { inputRequireAlert ? <Alert severity="error"  style={{marginTop:'1em'}}>Please complete the form</Alert> : null}
@@ -72,7 +72,7 @@ const SignIn = (props) => {
                     className={classes.submit} onClick={handleSubmit} fullWidth
                 > Sign In  </Button>
             </form >
-        </React.Fragment>
+        </>
     );
 }
 

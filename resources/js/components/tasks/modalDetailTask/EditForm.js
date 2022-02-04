@@ -124,7 +124,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                             <Grid item lg={12} md={12} sm={12} xs={12}>
                                 <Typography style={{ whiteSpace: 'noWrap'}}>Realization at : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''} - {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</Typography> 
                                 <StatusChip status={data.start_label}/> - <StatusChip status={data.end_label}/>
-                                <Typography style={{ whiteSpace: 'noWrap'}}>Work Days : {data.work_days}</Typography> 
+                                <Typography style={{ whiteSpace: 'noWrap'}}>Work Days : {data.work_days}</Typography>   
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
                             {([1,2,4].includes(global.state.role?.id))?(
@@ -255,13 +255,9 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <MemberList detailProject={detailProject} exceptedData={exceptedMembers} data={data} setData={setData} isEdit={isEdit}getDetailTask={getDetailTask}/>
                 </Grid>
-                <ExtendDeadlineForm 
-                    open={showExtendDeadlineForm} 
-                    handleClose={()=>setShowExtendDeadlineForm(false)}
+                <ExtendDeadlineForm  open={showExtendDeadlineForm}  handleClose={()=>setShowExtendDeadlineForm(false)}
                     task={data} 
                     detailProject={detailProject}
-                    minDate={data.end}
-                    maxDate={detailProject.end}
                     />
             </Suspense>
         </Grid>

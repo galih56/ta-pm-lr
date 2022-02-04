@@ -123,16 +123,10 @@ const TaskList = (props) => {
     };
     
     return (
-        <React.Fragment>
+        <>
             <TableContainer>
                 <Table size="small">
-                    <EnhancedTableHead
-                            classes={classes}
-                            order={order}
-                            orderBy={orderBy}
-                            onRequestSort={handleRequestSort}
-                            rowCount={rows.length}
-                        />
+                    <EnhancedTableHead classes={classes} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} rowCount={rows.length}/>
                     <TableBody>
                         {stableSort(rows, getComparator(order, orderBy))
                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((task) => (
@@ -143,7 +137,7 @@ const TaskList = (props) => {
                                     {task.title}
                                 </TableCell>
                                 <TableCell>
-                                    {task.start ? moment(task.start).format('DD MMM YYYY') : ''} - {task.end ? moment(task.end).format('DD MMM YYYY') : ''}
+                                    {task.start ? moment(task.start).format('DD MMM YYYY') : ''}
                                     {(task.actual_start)?(
                                         <>
                                             <br/>
@@ -153,12 +147,11 @@ const TaskList = (props) => {
                                     
                                 </TableCell>
                                 <TableCell>
-                                    {task.start ? moment(task.start).format('DD MMM YYYY') : ''} - {task.end ? moment(task.end).format('DD MMM YYYY') : ''}
-                                    {(task.actual_end && task.actual_end)?(
+                                    {task.end ? moment(task.end).format('DD MMM YYYY') : ''}
+                                    {(task.actual_end)?(
                                         <>
                                             <br/>
-                                            Actual end : 
-                                            {task.actual_end ? moment(task.actual_end).format('DD MMM YYYY') : ''} - {task.actual_end ? moment(task.actual_end).format('DD MMM YYYY') : ''}
+                                            Actual end : {task.actual_end ? moment(task.actual_end).format('DD MMM YYYY') : ''}
                                         </>
                                     ):''}
                                     
@@ -180,7 +173,7 @@ const TaskList = (props) => {
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                 />
-        </React.Fragment>
+        </>
     );
 }
 export default TaskList;

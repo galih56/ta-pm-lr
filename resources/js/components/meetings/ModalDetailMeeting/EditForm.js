@@ -10,6 +10,7 @@ import MemberList from './MemberList';
 import Alert from '@material-ui/core/Alert';
 
 const OpenEditForm = ({ isEdit, data, setData ,detailProject,saveChanges}) => {
+    console.log('ModalDetailMeeting EditForm : ',detailProject);
     if (isEdit) {
         return (   
             <Grid container spacing={2} style={{ paddingLeft: 4, paddingRight: 4 }} >
@@ -25,13 +26,8 @@ const OpenEditForm = ({ isEdit, data, setData ,detailProject,saveChanges}) => {
                     <MemberList isEdit={isEdit} data={data} setData={setData} exceptedData={[]}/>
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12} align="center">
-                    <TextField variant="standard"
-                        label="Description : "
-                        multiline 
-                        rows={4}
-                        defaultValue={data.description}
-                        onChange={(e) =>setData({ ...data, description: e.target.value })} 
-                        style={{ width: '100%' }}
+                    <TextField variant="standard" label="Description : " multiline  rows={4}
+                        defaultValue={data.description} onChange={(e) =>setData({ ...data, description: e.target.value })}  style={{ width: '100%' }}
                     />
                 </Grid>
                 {data.member?(
@@ -65,7 +61,7 @@ const OpenEditForm = ({ isEdit, data, setData ,detailProject,saveChanges}) => {
                 </Grid>
                 <Grid item  lg={12} md={12} sm={12} xs={12} >
                     <MemberList isEdit={isEdit} data={data} setData={setData} 
-                        exceptedData={data.members}/>
+                        exceptedData={data.members} detailProject={detailProject}/>
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <Typography>Description : </Typography>
