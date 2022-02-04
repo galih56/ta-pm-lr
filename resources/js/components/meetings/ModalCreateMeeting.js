@@ -16,7 +16,7 @@ import DatePicker from '@material-ui/lab/DatePicker';
 import Alert from '@material-ui/core/Alert';
 import { parseISO } from 'date-fns'; 
 import moment from 'moment';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },
@@ -185,8 +185,8 @@ export default function ModalCreateMeeting(props) {
                                     email:global.state.email,
                                     name:global.state.name
                                 }]} 
-                                withAdmin={true}
-                                userOnly={true}/>
+                                userOnly={true}    
+                            />
                         </Grid>
                     </Grid>
                 </DialogContent>

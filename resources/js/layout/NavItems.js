@@ -14,7 +14,7 @@ import StorageIcon from '@material-ui/icons/Storage';
 import uuid from 'uuid';
 // https://stackoverflow.com/questions/60416677/how-to-re-render-a-component-with-react-router-link-pointing-to-the-same-url
 export const MainListItems = () => (
-    <React.Fragment>
+    <>
         <ListItem button component={Link} to={'/projects'} key={uuid()}>
             <ListItemIcon>
                 <DashboardIcon />
@@ -30,7 +30,7 @@ export const MainListItems = () => (
             <ListItemText>Reports
             </ListItemText>
         </ListItem>
-    </React.Fragment >
+    </ >
 );
 export const RestrictedAccessMenu = () => {
     const global=useContext(UserContext);
@@ -75,46 +75,42 @@ export const RestrictedAccessMenu = () => {
 
 
     return (
-        <React.Fragment>
+        <>
             {(showAdminMenu || showApprovalMenu)?(
                 <ListSubheader inset>Restricted Access</ListSubheader>
             ):<></>}
             
             {(showApprovalMenu)?(
-                <React.Fragment>
-                    <ListItem button component={Link} to="/approvals"  key={uuid()}>
+                    [<ListItem button component={Link} to="/approvals"  key={uuid()}>
                         <ListItemIcon>
                             <EmailIcon />
                         </ListItemIcon>
                         <ListItemText> Approvals </ListItemText>
-                    </ListItem>
-                </React.Fragment>
+                    </ListItem>]
             ):<></>}
             
             {(showAdminMenu)?(
-                <React.Fragment>
-                    <ListItem button component={Link} to="/clients"  key={uuid()}>
+                    [<ListItem button component={Link} to="/clients"  key={uuid()}>
                         <ListItemIcon>
                             <BusinessCenterIcon />
                         </ListItemIcon>
                         <ListItemText> Clients </ListItemText>
-                    </ListItem>
+                    </ListItem>,
                     <ListItem button component={Link} to="/users"  key={uuid()}>
                         <ListItemIcon>
                             <PeopleIcon />
                         </ListItemIcon>
                         <ListItemText> Employee </ListItemText>
-                    </ListItem>
-                    {/* 
-                        <ListItem component="a" href={`${process.env.MIX_FRONT_END_BASE_URL}master`} target="_blank" >
-                            <ListItemIcon>
-                                <StorageIcon />
-                            </ListItemIcon>
-                            <ListItemText> Master Data </ListItemText>
-                        </ListItem> 
-                    */}
-                </React.Fragment>
+                    </ListItem>]
             ):<></>}
-        </React.Fragment>
+        </>
     )
 };
+/* 
+    <ListItem component="a" href={`${process.env.MIX_FRONT_END_BASE_URL}master`} target="_blank" >
+        <ListItemIcon>
+            <StorageIcon />
+        </ListItemIcon>
+        <ListItemText> Master Data </ListItemText>
+    </ListItem> 
+*/

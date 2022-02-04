@@ -250,7 +250,7 @@ export default function ModalDetailTask(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-        console.log(body);
+
         toast.promise(
             axios.patch(url, body),
             {

@@ -205,8 +205,6 @@ const ProjectInfo = (props) => {
                         open={showExtendDeadlineForm} 
                         handleClose={()=>setShowExtendDeadlineForm(false)}
                         detailProject={detailProject}
-                        minDate={detailProject.end}
-                        maxDate={null}
                         />
                 </React.Fragment>
             ):(

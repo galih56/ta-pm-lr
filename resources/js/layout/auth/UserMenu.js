@@ -11,7 +11,7 @@ import UserContext from '../../context/UserContext';
 import PersonIcon from '@material-ui/icons/Person';
 import LogoutConfirmDialog from './LogoutConfirmDialog';
 import ModalDetailUser from './../../components/users/ModalDetailUser/ModalDetailUser';
-
+import uuid from 'uuid';
 
 const StyledMenu = withStyles({
     paper: { border: '1px solid #d3d4d5' },
@@ -37,16 +37,16 @@ const UserMenu = ({classes}) => {
     const {id,email,name,role,username,verified}=global.state;
     return (
         <>
-                    <Typography component="h2" variant="h6" color="inherit" noWrap style={{fontSize:'1rem'}}>{global.state.name}</Typography>
+            <Typography component="h2" variant="h6" color="inherit" noWrap style={{fontSize:'1rem'}}>{global.state.name}</Typography>
             <IconButton color="inherit" onClick={handleMenuOpen}>
                 <Badge color="secondary"> <PersonIcon /> </Badge>
             </IconButton>
             <StyledMenu anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleMenuClose}>
                 {(global.state.authenticated)?(
-                    <MenuItem onClick={()=>{
+                   [ <MenuItem onClick={()=>{
                             handleMenuClose();
                             handleModalProfileOpen();
-                        }}>
+                        }} key={uuid()}>
                         <ListItemText>
                             {global.state.name}
                             <br />
@@ -58,30 +58,31 @@ const UserMenu = ({classes}) => {
                                 </>
                             ):<></>}
                         </ListItemText>
-                    </MenuItem>
+                    </MenuItem>]
                 ):<></>}
              {(global.state.authenticated)?(
-                    <MenuItem onClick={() => { setOpenLogoutDialog(true); }}>
+                    [<MenuItem onClick={() => { setOpenLogoutDialog(true); }} key={uuid()}>
                         <ListItemText primary="Logout" />
-                    </MenuItem>
+                    </MenuItem>]
              ):(
-                <MenuItem>
+                [<MenuItem key={uuid()}>
                     <Link to='/auth' >
                         <ListItemText primary="Login/Register" />
                     </Link>
-                </MenuItem>
+                </MenuItem>]
              )}  
+             
+                <ModalDetailUser
+                    open={modalProfileOpen} id={id} 
+                    initialState={{id:id,email:email,name:name,username:username,verified:verified,role:role}}
+                    closeModal={handleModalProfileOpen}
+                    onUpdate={(data)=>global.dispatch({type:'store-user-information',payload:data})}
+                    asProfile={true}
+                />
+                <LogoutConfirmDialog open={openLogoutDialog} handleDialogClose={handleLogoutDialogClose} handleHistory={handleHistory} />
+
             </StyledMenu>
             
-            <ModalDetailUser
-                open={modalProfileOpen} id={id} 
-                initialState={{id:id,email:email,name:name,username:username,verified:verified,role:role}}
-                closeModal={handleModalProfileOpen}
-                onUpdate={(data)=>global.dispatch({type:'store-user-information',payload:data})}
-                asProfile={true}
-            />
-            <LogoutConfirmDialog open={openLogoutDialog} handleDialogClose={handleLogoutDialogClose} handleHistory={handleHistory} />
-
         </>
     );
 }

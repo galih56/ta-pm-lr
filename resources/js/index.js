@@ -61,7 +61,7 @@ const reducer = (state, action) => {
         case 'store-projects':
             return storeProjects(state, payload);
         case 'store-detail-project':
-            return storeDetailProject(payload);
+            return storeDetailProject(state,payload);
         case 'create-new-project':
             return createNewProject(payload);
         case 'remove-project':

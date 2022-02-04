@@ -123,6 +123,7 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
                 id={id} open={open} anchorEl={anchorPopover} onClose={handleClose}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'center'}}
                 transformOrigin={{ vertical: 'top', horizontal: 'center'}}
+                style={{ pointerEvents: 'none'}}
             >
                 <List dense={true}>
                     <ListItem button onClick={()=>onPick(file)}>

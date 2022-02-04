@@ -18,6 +18,7 @@ export default function UserSearchbar(props) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url).then(result => setUsers(result.data)).catch(console.log);
+        console.log('getUsers run');
     }
     
     const getClients = () => {
@@ -25,6 +26,8 @@ export default function UserSearchbar(props) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url).then(result => setClients(result.data)).catch(console.log);
+        console.log('getClients run');
+
     }
 
     
@@ -41,9 +44,11 @@ export default function UserSearchbar(props) {
             }).catch(console.log);
     }
     useEffect(() => {
-        if('members' in detailProject) setUsers(detailProject.members);
-        if('clients' in detailProject) setClients(detailProject.clients);
-        if('members' in detailProject) {
+        if(detailProject){
+            if('members' in detailProject) setUsers(detailProject.members);
+            if('clients' in detailProject) setClients(detailProject.clients);    
+        }
+        if(!detailProject?.members?.length) {
             if(!clientOnly && !userOnly){
                 getClients()
                 getUsers();
@@ -57,6 +62,10 @@ export default function UserSearchbar(props) {
             }
         }
     }, [detailProject?.members,detailProject?.clients]);
+
+    useEffect(()=>{
+        console.log('UserSearchBar : ',detailProject,options.length,detailProject?.members?.length,detailProject?.clients?.lengt,users.length,clients.length)
+    },[options])
 
     function checkExistingMember(id, arr=[]) {
         var exists = false;

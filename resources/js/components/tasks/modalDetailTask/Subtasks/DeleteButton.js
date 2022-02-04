@@ -27,7 +27,7 @@ const DeleteButton=({onClick})=>{
                 >
                 <DeleteIcon fontSize="small" />
             </IconButton>
-            <Popover {...showPopover} handleClose={handlePopoverClose}/>
+            <Popover {...showPopover} handleClose={handlePopoverClose} style={{ pointerEvents: 'none'}}/>
         </>
     )
 }

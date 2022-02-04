@@ -58,7 +58,7 @@ class ApprovalController extends Controller
         if($request->has('projects_id')) $approval->projects_id=$request->projects_id;
         $approval->status=$request->status;
         $approval->save();
-
+        /*
         $user=User::findOrFail($users_id);
         $notif=new Notification();
         $notif->notifiable_id=$approval->id;
@@ -67,7 +67,8 @@ class ApprovalController extends Controller
         $notif->message=$user->name.' meminta perpanjangan waktu proyek';
         $notif->route='\Approvals';
         $notif->users_id=$user->id;
-        $notif->save();
+        $notif->save(); 
+        */
         return response()->json($approval,200);
     }
 
@@ -120,7 +121,7 @@ class ApprovalController extends Controller
             $message='Status permohonan telah diubah';
         }
         $approval->save();
-        
+/*
         $user=User::findOrFail($approval->users_id);
         $notif=new Notification();
         $notif->notifiable_id=$approval->id;
@@ -130,6 +131,7 @@ class ApprovalController extends Controller
         $notif->route='\Approvals';
         $notif->users_id=$user->id;
         $notif->save();
+        */
         $approval=$this->getDetailApproval($id);
         return response()->json($approval);
     }

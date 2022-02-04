@@ -70,7 +70,7 @@ const SignUp = (props) => {
             });
     }
     return (
-        <React.Fragment>
+        <>
             { passwordConfirmAlert ? <Alert severity="error" > Password and confirm password does not match</Alert> : null}
             { inputRequireAlert ? <Alert severity="error" >Please complete the form</Alert> : null}
             { userExists ? <Alert severity="warning" >Email : <strong>{email} </strong>already in use</Alert> : null}
@@ -142,7 +142,7 @@ const SignUp = (props) => {
                     onClick={handleSubmit}
                 > Sign Up  </Button>
             </form>
-        </React.Fragment>
+        </>
     );
 }
 export default SignUp;

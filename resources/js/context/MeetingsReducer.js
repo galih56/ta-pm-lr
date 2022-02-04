@@ -30,12 +30,18 @@ const createNewMeeting = (payload) => {
 
 const storeDetailMeeting = (payload) => {
     var user = JSON.parse(localStorage.getItem('user'));
-    const newProjects = user.projects.map((project) => {
+    const newProjects = state.projects.map((project) => {
         if (project.id == payload.projects_id) {
-            project.meetings.map(function(meeting){
-                if(meeting.id==payload.id) return payload;
-                return meeting;
-            });
+            try {
+                project.meetings.map(function(meeting){
+                    if(meeting.id==payload.id) return payload;
+                    return meeting;
+                });
+            } catch (error) {
+                console.log(error)
+                console.log('context storeDetailMeeting : ',project,payload,user.projects);
+
+            }
         }
         return project
     });

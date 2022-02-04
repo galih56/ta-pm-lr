@@ -17,7 +17,7 @@ const UpdateProgressButtons=({onClick,style})=>{
                 onMouseEnter={(event)=>handlePopoverOpen(event,'Refresh')} onMouseLeave={handlePopoverClose} >
                 <RefreshIcon />
             </IconButton>
-            <Popover {...showPopover} handleClose={handlePopoverClose}/>
+            <Popover {...showPopover} handleClose={handlePopoverClose}style={{ pointerEvents: 'none'}}/>
         </>
         )
 }

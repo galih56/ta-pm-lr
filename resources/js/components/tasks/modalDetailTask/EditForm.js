@@ -255,13 +255,9 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                 <Grid item lg={12} md={12} sm={12} xs={12}>
                     <MemberList detailProject={detailProject} exceptedData={exceptedMembers} data={data} setData={setData} isEdit={isEdit}getDetailTask={getDetailTask}/>
                 </Grid>
-                <ExtendDeadlineForm 
-                    open={showExtendDeadlineForm} 
-                    handleClose={()=>setShowExtendDeadlineForm(false)}
+                <ExtendDeadlineForm  open={showExtendDeadlineForm}  handleClose={()=>setShowExtendDeadlineForm(false)}
                     task={data} 
                     detailProject={detailProject}
-                    minDate={data.end}
-                    maxDate={detailProject.end}
                     />
             </Suspense>
         </Grid>

@@ -105,6 +105,7 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,is_s
                     onChange={(users)=>{
                         setNewTask({...newTask,members:[...users]});
                     }}
+                    userOnly={true}
                 />
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12}>

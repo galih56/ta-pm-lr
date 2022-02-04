@@ -100,9 +100,9 @@ const UpdateProgressButtons=({data,onUpdate,alwaysShow})=>{
            {showButtons?(
                <>
                     {alwaysShow?null:<IconButton fontSize="small" aria-label={"Cancel"} onClick={handleHideButtons} onMouseEnter={(event)=>handlePopoverOpen(event,'Cancel')} onMouseLeave={handlePopoverClose} ><ArrowBackIosIcon /></IconButton>}
-                    <IconButton fontSize="small" aria-label={data.actual_start?"Started":"Start progress"} onClick={(e)=>startProgress(data.id)}  onMouseEnter={(event)=>handlePopoverOpen(event,data.actual_start?"Started":"Start progress")} onMouseLeave={handlePopoverClose} disabled={data.actual_start?true:false}  >
+                    {!data.actual_end?(<IconButton fontSize="small" aria-label={data.actual_start?"Started":"Start progress"} onClick={(e)=>startProgress(data.id)}  onMouseEnter={(event)=>handlePopoverOpen(event,data.actual_start?"Started":"Start progress")} onMouseLeave={handlePopoverClose} disabled={data.actual_start?true:false}  >
                         {data.actual_start?<PlayCircleFilledWhiteIcon  style={{fill:'green'}}/>:<PlayArrowIcon  style={{fill:'#1976d2'}}/>}
-                    </IconButton>
+                    </IconButton>):null}
                     {data.actual_start?(
                         <IconButton fontSize="small" aria-label={data.actual_end?"Completed":"Mark as completed"} onClick={(e)=>markAsComplete(data)} onMouseEnter={(event)=>handlePopoverOpen(event,data.actual_end?"Complete":"Mark as complete")} onMouseLeave={handlePopoverClose} disabled={data.actual_end?true:false}  >
                             {data.actual_end?<CheckCircleIcon  style={{fill:'green'}}/>:<CheckCircleOutlineIcon  style={{fill:'#1976d2'}}/>}
@@ -114,7 +114,7 @@ const UpdateProgressButtons=({data,onUpdate,alwaysShow})=>{
                     {alwaysShow?null:<IconButton fontSize="small" aria-label="Update Progress" onClick={handleShowButtons}><SettingsIcon /></IconButton>}
                 </>
             )}
-            <Popover {...showPopover} handleClose={handlePopoverClose}/>
+            <Popover {...showPopover} handleClose={handlePopoverClose} style={{ pointerEvents: 'none'}}/>
         </>
     )
 }

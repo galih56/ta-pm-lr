@@ -79,7 +79,6 @@ export default function ModalCreateProject(props) {
     const [members, setMembers] = useState([]);
     const [projectClients, setProjectClients] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
-    const [choosenTeams, setChoosenTeams] = useState([]);
     const [showImportErrors,setShowImportErrors]=useState(false);
    
     const [importErrors, setImportErrors] = useState([]);
@@ -109,9 +108,7 @@ export default function ModalCreateProject(props) {
         projectClients.forEach((client)=>{
             body.append("clients[]", client.id);
         });
-        choosenTeams.forEach((team)=>{
-            body.append("teams[]", team.id);
-        });
+        
         members.forEach((user)=>{
             body.append("members[]", user.id);
         });
