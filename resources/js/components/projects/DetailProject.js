@@ -323,7 +323,7 @@ const DetailProject = (props) => {
                         initialState={clickedTask} 
                         onTaskUpdate={clickedTask.onTaskUpdate}
                         onTaskDelete={clickedTask.onTaskDelete}
-                        />
+                    />
                 ):<></>}
                 {(clickedMeeting.id && detailMeetingOpen)?
                 <ModalDetailMeeting open={detailMeetingOpen} closeModal={()=>handleDetailMeetingOpen({open:false,meeting:clickedMeetingInitialState})}

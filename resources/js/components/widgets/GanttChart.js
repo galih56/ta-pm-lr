@@ -78,7 +78,8 @@ class GanttChart extends React.Component {
                     if(subtask.actual_end) subtask_realization.end=subtask.actual_end;
                     if(subtask.complete) completeSubtaskCounter++;
                     new_subtasks.push(subtask);
-                    new_subtasks.push(subtask_realization);
+                    console.log('subtask.actual_start && subtask.actual_end',subtask.actual_start && subtask.actual_end,subtask)
+                    if(subtask.actual_start && subtask.actual_end)new_subtasks.push(subtask_realization);
                 }
                 task.progress=completeSubtaskCounter*valuePerSubtask;
                 task.cards=new_subtasks;
