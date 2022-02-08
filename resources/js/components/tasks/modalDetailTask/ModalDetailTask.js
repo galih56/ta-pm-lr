@@ -116,43 +116,38 @@ export default function ModalDetailTask(props) {
     useEffect(()=>{
         getProgress();
     },[data.cards])    
-    
-    useEffect(()=>{
-        console.log('modaldetailtask',detailProject)
-    },[detailProject]);
+
 
     useEffect(()=>{
-        if(props.detailProject?.id)setDetailProject(props.detailProject)
+        if(props.detailProject?.id && typeof props.detailProject?.members=='array' && typeof props.detailProject?.clients=='array')setDetailProject(props.detailProject)
         else {
-            var body={
-                projects_id : detailProject.id,
+            var projects_id='';
+            if(data.list){
+                projects_id=data.list?.project.id;
+            }
+            if(data.parent_task){
+                projects_id=data.parent_task?.list?.project?.id;
+            }
+            const body={
+                projects_id : projects_id,
                 users_id:global.state.id
             }
-            var url =`${process.env.MIX_BACK_END_BASE_URL}projects/`;
-            if(data.list){
-                 url+= data.list?.project;
-            }else if(data.parent_task){
-                url+=data.parent_task.list.project;
-            }
-
-            const toast_loading = toast.loading('Loading...');
+            const url =`${process.env.MIX_BACK_END_BASE_URL}projects/${projects_id}`;
             axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
             axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.get(url,body)
                 .then((result) => {
-                    var newDP=result.data
-                    setDetailProject({id:newDP.id,members:newDP.members,clients:newDP.clients})
-                    toast.dismiss(toast_loading);
+                    setDetailProject(result.data)
                 }).catch((error) => {
-                    toast.dismiss(toast_loading);
                     switch(error.response.status){
+                        case 404: toast.error(<b>Project not found</b>); break;
                         case 401 : toast.error(<b>Unauthenticated</b>); break;
                         case 422 : toast.error(<b>Some required inputs are empty</b>); break;
                         default : toast.error(<b>{error.response.statusText}</b>); break
                     }
                 });
         }
-    },[props.detailproject])
+    },[props.detailproject,data.list,data.parent_task])
 
     const getProgress=()=>{
         if(!data.parent_task){
