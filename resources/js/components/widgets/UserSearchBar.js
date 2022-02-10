@@ -44,8 +44,6 @@ export default function UserSearchbar(props) {
     }
 
     useEffect(() => {
-        console.log(detailProject,task);
-        
         if(detailProject || task){
             if(detailProject){
                 if('members' in detailProject) setUsers(detailProject.members);
