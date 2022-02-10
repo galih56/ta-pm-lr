@@ -146,6 +146,9 @@ class TaskController extends Controller
             if($actual_start<$start) $task->start_label='Mulai lebih cepat';
             if($actual_start>$start) $task->start_label='Mulai terlambat';
             if($actual_start==$start) $task->start_label='Mulai tepat waktu';
+        }else{
+            $task->actual_start=$request->actual_start;
+            $task->start_label='Belum dimulai';
         }
         
         if(($request->has('actual_end')) && !empty($request->actual_end)){
@@ -154,7 +157,11 @@ class TaskController extends Controller
             if($actual_end<$end) $task->end_label='Selesai lebih cepat';
             if($actual_end>$end) $task->end_label='Selesai terlambat';
             if($actual_end==$end) $task->end_label='Selesai tepat waktu';
+        }else{
+            $task->actual_end=$request->actual_end;
+            $task->end_label='Belum selesai';
         }
+
         $task->save();
         
         if($task->parent_task){

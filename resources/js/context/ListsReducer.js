@@ -21,7 +21,8 @@ const removeList = (payload) => {
                 }
             });
         }
-        return project;
+        project.progress=average(project.columns)
+        return project
     });
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
@@ -40,6 +41,7 @@ const updateList = (payload) => {
                 return column;
             })
         }
+        project.progress=average(project.columns)
         return project
     });
     user.projects = newProjects;

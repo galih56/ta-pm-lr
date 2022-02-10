@@ -1,3 +1,12 @@
+const average = arr => {
+    if(typeof arr=='array'){
+        var avg=arr.reduce((sum,data) => {
+            return sum + data.progress
+        }, 0) / arr.length
+        return avg;
+    }
+    return 0;
+};
 
 const storeDetailTask = (payload) => {
     var user = JSON.parse(localStorage.getItem('user'));
@@ -7,10 +16,16 @@ const storeDetailTask = (payload) => {
                 if (card.id == payload.id) {
                     card = payload;
                 } 
+                card.progress=average(card.cards)
+                // console.log(card,average(card.cards));
                 return card
             });
+            column.progress=average(column.cards)
+            // console.log(column,average(column.cards));
             return column;
         });
+        project.progress=average(project.columns)
+        // console.log(project,average(project.columns));
         return project
     });
     user.projects = newProjects;
@@ -32,10 +47,13 @@ const storeDetailSubtask = (payload) => {
                         return subtask;
                     })
                 }
+                card.progress=average(card.cards)
                 return card
             });
+            column.progress=average(column.cards)
             return column;
         });
+        project.progress=average(project.columns)
         return project
     });
     user.projects = newProjects;
@@ -52,14 +70,18 @@ const storeSubtasks = (payload) => {
                     column.cards = column.cards.map((card) => {
                         if (card.id == payload.parent_task_id)
                             card.cards = payload;
-                        return card;
+                            card.progress=average(card.cards)
+                            return card
                     })
                 }
+                column.progress=average(column.cards)
                 return column;
             })
         }
+        project.progress=average(project.columns)
         return project
     });
+    
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
     return user;
@@ -85,15 +107,18 @@ const removeTask = (payload) => {
     var user = JSON.parse(localStorage.getItem('user'));
     const newProjects = user.projects.map((project) => {
         project.columns = project.columns.map(column => {
-                column.cards = column.cards.filter(card => {
-                    if (card.id != payload.id) {
-                        return card
-                    }
-                });
+            column.cards = column.cards.filter(card => {
+                if (card.id != payload.id) {
+                    return card
+                }
+            });
+            column.progress=average(column.cards)
             return column;
         });
-        return project;
+        project.progress=average(project.columns)
+        return project
     });
+    
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
     return user;
@@ -108,12 +133,16 @@ const createNewSubtask = (payload) => {
                 if (card.id == payload.parent_task_id) {
                     card.cards.push(payload);
                 }
-                return card;
+                card.progress=average(card.cards)
+                return card
             });
+            column.progress=average(column.cards)
             return column;
         })
+        project.progress=average(project.columns)
         return project
     });
+    
     user.projects = newProjects;
     localStorage.setItem("user", JSON.stringify(user));
     return user;
@@ -130,10 +159,13 @@ const removeSubtask = (payload) => {
                         if (item.id != payload.id)  return  item;
                     });
                 }
-                return card;
+                card.progress=average(card.cards)
+                return card
             });
+            column.progress=average(column.cards)
             return column;
         })
+        project.progress=average(project.columns)
         return project
     });
     user.projects = newProjects;

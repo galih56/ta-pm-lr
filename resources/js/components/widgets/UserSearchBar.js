@@ -6,7 +6,7 @@ import axios from 'axios';
 import UserContext from '../../context/UserContext';
 
 export default function UserSearchbar(props) {
-    const { detailProject, exceptedData,exceptedUsers,exceptedClients,onChange,inputLabel,clientOnly,userOnly, withAdmin } = props;
+    const { detailProject, task, exceptedData,exceptedUsers,exceptedClients,onChange,inputLabel,clientOnly,userOnly, withAdmin } = props;
     const handleValueChanges = onChange;
     const [users, setUsers] = useState([]);
     const [clients, setClients] = useState([]);
@@ -30,7 +30,6 @@ export default function UserSearchbar(props) {
 
     }
 
-    
     const getDetailProject = () => {
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
@@ -43,29 +42,31 @@ export default function UserSearchbar(props) {
                 global.dispatch({type:'store-current-selected-project',payload:params.id});
             }).catch(console.log);
     }
+
     useEffect(() => {
-        if(detailProject){
-            if('members' in detailProject) setUsers(detailProject.members);
-            if('clients' in detailProject) setClients(detailProject.clients);    
-        }
-        if(!detailProject?.members?.length) {
+        console.log(detailProject,task);
+        
+        if(detailProject || task){
+            if(detailProject){
+                if('members' in detailProject) setUsers(detailProject.members);
+                if('clients' in detailProject) setClients(detailProject.clients);    
+            }
+            if(task){
+                if('members' in task) setUsers(task.members);
+            }
+        }else{
             if(!clientOnly && !userOnly){
-                getClients()
+                getClients();
                 getUsers();
             }
             if(clientOnly && !userOnly){
-                getClients()
+                getClients();
             }
-            
             if(!clientOnly && userOnly){
-                getUsers()
+                getUsers();
             }
         }
-    }, [detailProject?.members,detailProject?.clients]);
-
-    useEffect(()=>{
-        console.log('UserSearchBar : ',detailProject,options.length,detailProject?.members?.length,detailProject?.clients?.lengt,users.length,clients.length)
-    },[options])
+    }, [detailProject?.members,detailProject?.clients,task?.members]);
 
     function checkExistingMember(id, arr=[]) {
         var exists = false;

@@ -84,6 +84,8 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
             });
     }
 
+    const handleUserbarOnChange=(users)=> setNewMembers(users);
+    const handleButtonAddOnClick=()=>addMembers( { tasks_id: data.id, users:newMembers });
     return(
         <>
         <Grid container>
@@ -93,12 +95,15 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
                     <Typography>Assigned to : </Typography>
                  </Grid>
                  <Grid item lg={12} md={12} sm={12} xs={12}>
-                    <UserSearchBar  detailProject={detailProject} 
-                        exceptedData={[...exceptedData,data.creator]}  onChange={(users)=> setNewMembers(users)} userOnly={true}/>
-                 </Grid>
+                    {data.cards?.length?(
+                        <UserSearchBar detailProject={detailProject} exceptedData={[...exceptedData,data.creator]}  onChange={handleUserbarOnChange} userOnly={true}/>
+                    ):(
+                        <UserSearchBar task={data} exceptedData={[...exceptedData,data.creator]}  onChange={handleUserbarOnChange} userOnly={true}/>
+                    )}
+                    </Grid>
                  {[1,2,4,5].includes(global.state.role.id)?(
                     <Grid item lg={12} md={12} sm={12} xs={12}>
-                        <Button style={{float:'right',marginTop:'0.5em'}} onClick={()=>addMembers( { tasks_id: data.id, users:newMembers })}  variant="contained" color="secondary">Invite</Button>
+                        <Button style={{float:'right',marginTop:'0.5em'}} onClick={handleButtonAddOnClick}  variant="contained" color="secondary">Invite</Button>
                     </Grid>
                  ):null}
             </>):(
@@ -108,11 +113,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
                  )}
              </Grid>
             <List>
-                {members.map((member)=>{
-                    return(
-                        <CustomListItem key={member.id} classes={classes} isEdit={isEdit} member={member} onClick={()=>removeMember(member)} logged_in_user_role={global.state.role}/>
-                    )
-                })}
+                {members.map(member=> <CustomListItem key={member.id} classes={classes} isEdit={isEdit} member={member} onClick={()=>removeMember(member)} logged_in_user_role={global.state.role}/>)}
             </List>
 
         </>
@@ -127,28 +128,10 @@ const CustomListItem=({classes,isEdit,member,onClick,logged_in_user_role})=>{
                 <Avatar alt={"Photo profile " + (member.is_user?member.name:member.institution)} src={`${process.env.MIX_BACK_END_BASE_URL}/${member.profilePicturePath}`}/>:
                 <Avatar alt={"Photo profile " + (member.is_user?member.name:member.institution)} className={classes.photoProfileBg}>{(member.is_user?member.name:member.institution)?.charAt(0).toUpperCase()}</Avatar>}
             </ListItemAvatar>
-            <ListItemText
-                primary={member.is_client?`${member.institution} (Client)`:(member.name)}
-                secondary={
-                    <>
-                        <Typography
-                            component="span"
-                            variant="body2"
-                            className={classes.inline}
-                            color="textPrimary"
-                        >
-                            {member.is_user?member.role?.name:member.institution}
-                        </Typography>
-                    </>
-                }
-
-            />
-            {isEdit && [1,2,4].includes(logged_in_user_role?.id)?(<ListItemSecondaryAction>
-                <IconButton
-                    edge="end"
-                    aria-label="Remove"
-                    onClick={onClick}
-                    size="large">
+            <ListItemText primary={member.is_client?`${member.institution} (Client)`:(member.name)} secondary={<Typography component="span" variant="body2" className={classes.inline} color="textPrimary">{member.is_user?member.role?.name:member.institution}</Typography>}/>
+            {isEdit && [1,2,4].includes(logged_in_user_role?.id)?(
+            <ListItemSecondaryAction>
+                <IconButton edge="end" aria-label="Remove" onClick={onClick} size="large">
                     <CancelIcon />
                 </IconButton>
             </ListItemSecondaryAction>):<></>}

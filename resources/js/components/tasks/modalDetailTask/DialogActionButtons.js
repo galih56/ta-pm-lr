@@ -11,7 +11,7 @@ const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteTask, con
         return (
             <React.Fragment>
                 <Button onClick={() => setEditMode(false)} color="primary"> Cancel </Button>
-                <Button onClick={saveChanges} variant="contained" color="primary"> Save</Button>
+                <Button type="submit" variant="contained" color="primary"> Save</Button>
                 {([2,4].includes(global.state.role?.id))?(
                     <Button onClick={handleConfirm} variant="contained" color="secondary">
                         Delete
