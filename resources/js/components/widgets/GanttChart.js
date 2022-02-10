@@ -41,7 +41,7 @@ class GanttChart extends React.Component {
                 };
 
                 var task_realization={
-                    id: `realisasi-${task.id}`, title:``, subtitle:`Realisasi ${task.title}` ,
+                    id: `realisasi-${task.id}`, title:`Realisasi ${task.title}`, subtitle:`Realisasi ${task.title}` ,
                     start : task.start, end : task.end, 
                     realization:true, 
                     metadata:{
@@ -63,7 +63,7 @@ class GanttChart extends React.Component {
                     task.cards[k].isManual=true;
                     var subtask=task.cards[k];
                     var subtask_realization={ 
-                        id: `realisasi-${subtask.id}`, title:``,
+                        id: `realisasi-${subtask.id}`, title:`Realisasi ${subtask.title}`,
                         subtitle:`Realisasi ${subtask.title}` ,
                         start : subtask.start, end : subtask.end,
                         predecessor:`${task.id}SS`, realization:true,
@@ -78,7 +78,6 @@ class GanttChart extends React.Component {
                     if(subtask.actual_end) subtask_realization.end=subtask.actual_end;
                     if(subtask.complete) completeSubtaskCounter++;
                     new_subtasks.push(subtask);
-                    console.log('subtask.actual_start && subtask.actual_end',subtask.actual_start && subtask.actual_end,subtask)
                     if(subtask.actual_start && subtask.actual_end)new_subtasks.push(subtask_realization);
                 }
                 task.progress=completeSubtaskCounter*valuePerSubtask;

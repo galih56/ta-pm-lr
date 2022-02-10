@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useContext,useCallback } from 'react';
-import {useLocation} from 'react-router-dom';
 import makeStyles from '@material-ui/styles/makeStyles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import Checkbox from '@material-ui/core/Checkbox';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -28,13 +26,14 @@ const useStyles = makeStyles((theme) => ({
     root: { width: '100%', backgroundColor: theme.palette.background.paper, },
 }));
 const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDelete,isEdit}) => {
+    // console.log()
     const global = useContext(UserContext);
     var isEditing = isEdit;
     const classes = useStyles();
     const parent_task_id = detailTask.id;
     
     var clickedTaskInitialState={
-        id: '', projects_id: '', lists_id: null, list:null,
+        id: '', projects_id: detailProject.id, lists_id: null, list:null,
         title: '', description: '', label: '', complete: false, progress: 0,
         start:null,end:null,actual_start:null,actual_end:null, start_label:'',end_label:'',
         list: null, tags: [], members: [], parent_task_id:parent_task_id,
@@ -44,7 +43,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
     var initialStateNewTask= {
         id: '', title: '', description: '', projects_id:detailProject.id,
         label: '', progress: 0, start: null, end: null, 
-        actualStart: null, actualEnd: null, creator:null,
+        actual_start: null, actual_end: null, creator:null,
         tags: [], users_id: global.state.id,
         is_subtask:true, parent_task_id:parent_task_id
     }
@@ -59,16 +58,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
     useEffect(() => {
         setData(detailTask.cards);
     }, [detailTask]);
-
-    /*
-    useEffect(() => {
-        const query = new URLSearchParams(location.search);
-        const paramTaskId = query.get('subtasks_id');
-        console.log(paramTaskId);
-        if (paramTaskId) handleDetailTaskOpen({ task:{...clickedTask, id: paramTaskId}, open: true });
-    }, []);
-    */
-   
+    
     const handleAddNewTask=()=>{
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -132,7 +122,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                         {showCreateSubtaskForm?(
                             <ModalCreateSubtask  open={showCreateSubtaskForm}  handleClose={()=> setShowCreateSubtaskForm(false)}>
                                 <FormCreateNewTask classes={classes}  newTask={newTask}  setNewTask={setNewTask} handleAddNewTask={handleAddNewTask}
-                                    detailProject={detailProject} is_subtask={true} minDate={detailTask.start} maxDate={detailTask.end}/>
+                                    parent_task={detailTask} is_subtask={true} minDate={detailTask.start} maxDate={detailTask.end}/>
                             </ModalCreateSubtask>
                         ):null}
                         </>
@@ -212,7 +202,6 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                                 <Grid item xl={12} md={12} sm={12} xs={12} 
                                     style={{cursor:'pointer'}} onClick={()=> handleDetailTaskOpen({task:item,open:true})} 
                                 >        
-                                    {/* <Checkbox checked={item.complete} onChange={(event)=>handleCompleteTask(item,event)}/> */}
                                     <span> 
                                         {item.title}
                                         <br/>

@@ -74,10 +74,7 @@ const FormAddClient=({open,handleClose,onCreate,detailProject})=>{
         <Dialog aria-labelledby="Create a client" maxWidth={'lg'} fullwidth={"true"} open={open} >
             <DialogTitle 
                 style={{ minWidth: "400px" }} 
-                onClose={
-                    () => {
-                        handleClose();
-                    }} > Add a new client </DialogTitle>
+                onClose={handleClose} > Add a new client </DialogTitle>
             <DialogContent dividers>
                  
                 <form onSubmit={(e)=>{

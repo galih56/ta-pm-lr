@@ -54,6 +54,7 @@ class TaskMemberController extends Controller
 
         $members=[];
         $task_members=$task['members'];
+
         for ($i=0; $i < count($task_members); $i++) { 
             $task_member=$task_members[$i];
             if($task_member['user']){
@@ -66,15 +67,17 @@ class TaskMemberController extends Controller
                 $members[]=$user;
             }
             if($task_member['project_client']){
-                $client=[];
-                $client=$task_member['project_client']['client'];
-                $client['project_clients_id']=$task_member['project_client']['id'];
-                $client['clients_id']=$task_member['project_client']['client']['id'];
-                $client['tasks_id']=$task_member['tasks_id'];
-                $client['task_members_id']=$task_member['id'];
-                $client['is_client']=true;
-                $client['is_user']=false;
-                $members[]=$client;
+                if($task_member['project_client']['client']){
+                    $client=[];
+                    $client=$task_member['project_client']['client'];
+                    $client['project_clients_id']=$task_member['project_client']['id'];
+                    $client['clients_id']=$task_member['project_client']['client']['id'];
+                    $client['tasks_id']=$task_member['tasks_id'];
+                    $client['task_members_id']=$task_member['id'];
+                    $client['is_client']=true;
+                    $client['is_user']=false;
+                    $members[]=$client;
+                }
             }
 
         }

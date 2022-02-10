@@ -4,7 +4,6 @@ import { useHistory } from "react-router-dom";
 import UserContext from '../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
 import Dialog from '@material-ui/core/Dialog';
-import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
@@ -17,6 +16,7 @@ import Chip from '@material-ui/core/Chip';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import moment from 'moment';
 import DialogConfirm from './DialogConfirm';
+import Alert from '@material-ui/core/Alert';
 import toast from 'react-hot-toast';
 
 // https://stackoverflow.com/questions/35352638/react-how-to-get-parameter-value-from-query-string
@@ -66,6 +66,7 @@ export default function ModalDetailTask(props) {
     const {open,closeModalDetailTask,onTaskUpdate,onTaskDelete} = props;
     const initConfirmState={open:false,type:'',callback:()=>{}};
     const [confirm,setConfirm]=useState(initConfirmState);
+    const [emptyInputErrors,setEmptyInputErrors]=useState(false);
     const global = useContext(UserContext);
     const history = useHistory();
     const [data, setData] = useState({
@@ -116,7 +117,6 @@ export default function ModalDetailTask(props) {
     useEffect(()=>{
         getProgress();
     },[data.cards])    
-
 
     useEffect(()=>{
         if(props.detailProject?.id && typeof props.detailProject?.members=='array' && typeof props.detailProject?.clients=='array')setDetailProject(props.detailProject)
@@ -223,7 +223,10 @@ export default function ModalDetailTask(props) {
     
     }
 
-    const saveChanges = (body) => {
+    const saveChanges = (e) => {
+        console.log(e);
+        e.preventDefault();
+        var body=data;
         if(!body) body= {
             id:data.id,complete:data.complete, title:data.title, 
             is_subtask:data.is_subtask,  progress: data.progress, parent_task_id:data.parent_task_id, tags:data.tags,
@@ -245,7 +248,6 @@ export default function ModalDetailTask(props) {
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
-
         toast.promise(
             axios.patch(url, body),
             {
@@ -298,43 +300,50 @@ export default function ModalDetailTask(props) {
             });
     }
     
+    const submitForm=()=>{
+        const form=document.getElementById('form-detail-task')
+        if(form){
+            form.submit();
+        }
+    }
     return (
         <>
             <Dialog  aria-labelledby="Modal Task Detail" open={open} style={{ zIndex: '750' }}
                 maxWidth={'lg'} fullwidth={"true"}>
-                <DialogTitle onClose={() => {
-                    removeTaskIdQueryString(history)
-                    closeModalDetailTask();
-                }}>
-                    {data.title}
-                    
-                    <br/>
-                    {data.creator?<span style={{fontSize:'0.7em'}}>Created by : {data.creator.name}</span>:null}
-                    <br /> 
-                    {(data.cards || !data.parent_task)?<TaskProgress value={data.progress}></TaskProgress>:<></>}
-                    {data.extended?(
-                            <Chip variant="outlined" size="small"
-                                label={`Deadline extended (${moment(data.old_deadline).format('DD MMMM YYYY')} >>> ${moment(data.end).format('DD MMMM YYYY')})`}
-                                color="secondary"
+                <form onSubmit={saveChanges}>
+                    <DialogTitle onClose={() => {
+                        removeTaskIdQueryString(history)
+                        closeModalDetailTask();
+                    }}>
+                        {data.title}
+                        <br/>
+                        {data.creator?<span style={{fontSize:'0.7em'}}>Created by : {data.creator.name}</span>:null}
+                        <br /> 
+                        {(data.cards || !data.parent_task)?<TaskProgress value={data.progress}></TaskProgress>:<></>}
+                        {data.extended?(
+                                <Chip variant="outlined" size="small"
+                                    label={`Deadline extended (${moment(data.old_deadline).format('DD MMMM YYYY')} >>> ${moment(data.end).format('DD MMMM YYYY')})`}
+                                    color="secondary"
+                                /> 
+                        ):<></>}
+                    </DialogTitle>
+                    <DialogContent dividers> 
+                        {emptyInputErrors?<Alert severity="warning">Required inputs are empty</Alert>:null}
+                            <EditForm isEdit={isEditing} data={data} setData={setData} 
+                                isAdmin={global.state.isAdmin} detailProject={detailProject}
+                                getProgress={getProgress} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete} 
+                                confirm={confirm} startConfirmOpen={()=>setConfirm({open:true,callback:handleStartTask})}
+                                completeConfirmOpen={()=>setConfirm({open:true,callback:markAsComplete})}
+                                getDetailTask={getDetailTask}
                             /> 
-                    ):<></>}
-                </DialogTitle>
-                <DialogContent dividers>  
-                    <EditForm isEdit={isEditing} data={data} setData={setData} 
-                        isAdmin={global.state.isAdmin} detailProject={detailProject}
-                        getProgress={getProgress} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete} 
-                        confirm={confirm} startConfirmOpen={()=>setConfirm({open:true,callback:handleStartTask})}
-                        completeConfirmOpen={()=>setConfirm({open:true,callback:markAsComplete})}
-                        getDetailTask={getDetailTask}
-                    /> 
-                    <br/>
-                </DialogContent>                
-                <DialogActions>
-                    <DialogActionButtons isEdit={isEditing} saveChanges={()=>saveChanges(data)} setEditMode={handleEditingMode}
-                        deleteTask={deleteTask}
-                        confirm={confirm}  setConfirm={setConfirm}  closeModal={closeModalDetailTask}
-                    > </DialogActionButtons>
-                </DialogActions>
+                    </DialogContent>                
+                    <DialogActions>
+                        <DialogActionButtons isEdit={isEditing} saveChanges={submitForm} setEditMode={handleEditingMode}
+                            deleteTask={deleteTask}
+                            confirm={confirm}  setConfirm={setConfirm}  closeModal={closeModalDetailTask}
+                        > </DialogActionButtons>
+                    </DialogActions>
+                </form>
             </Dialog>
             <DialogConfirm
                 open={confirm.open}

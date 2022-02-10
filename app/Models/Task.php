@@ -24,6 +24,9 @@ class Task extends Model
         'progress' => 'double',
     ];
     
+
+    protected $appends = ['dynamic_progress'];
+
     public static function boot() {
         parent::boot();
         static::saving(function($task){
@@ -77,6 +80,20 @@ class Task extends Model
                 $subtask->delete();
             }
         });
+    }
+
+    // SELECT avg(progress),parent_task_id
+    // FROM tasks
+    // GROUP BY parent_task_id
+    public function getDynamicProgressAttribute(){
+        if(count($this->cards)){
+            $subtasks=$this->cards()->selectRaw('avg(progress)')->first();
+            return $subtasks->avg;
+        }else if($this->progress!=null){
+            return $this->progress;
+        }else{
+            return 0;
+        }
     }
 
     public function updateProgress(){      

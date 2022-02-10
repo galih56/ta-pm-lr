@@ -14,7 +14,7 @@ import UserContext from './../../context/UserContext';
 import { parseISO } from 'date-fns'; 
 import NumberFormat from 'react-number-format';
 
-const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,is_subtask,minDate,maxDate})=>{
+const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,is_subtask,minDate,maxDate,parent_task})=>{
     const global=useContext(UserContext);
     const [dateRange, setDateRange] = useState([null, null]);
     const [exceptedUsers,setExceptedUsers]=useState([]);
@@ -44,84 +44,61 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,is_s
         checkLoggedInUserProjectMember();
     },[]);
     
+    const handleUserSearchbarChange=(users)=> setNewTask({...newTask,members:[...users]});
+    const handleSelectTagChange=(tags) => setNewTask({ ...newTask, tags: tags });
+    const handleDescriptionChange=(e) => setNewTask({ ...newTask, description: e.target.value });
+    const handleTitleChange=(e) => setNewTask({ ...newTask, title: e.target.value });
+    const handleCostEstimationChange=(formattedValue) => setNewTask({ ...newTask, cost: formattedValue.value });
+    const handleEstimationDateRangeChange=(newValue) => {
+        if(newValue[0]) setNewTask({...newTask, start:moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss')});
+        if(newValue[1]) setNewTask({...newTask, end:moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss')});
+        setDateRange([newValue[0],newValue[1]]);
+    }
 
+    const dateRangeRenderInput=(startProps, endProps) => (
+        <>
+            <TextField {...startProps} variant="standard" required />
+            <Box sx={{ mx: 2 }}> to </Box>
+            <TextField {...endProps}  variant="standard"  required/>
+        </>
+    )
     return (
-        <Grid container spacing={2} style={{ paddingLeft: "1em", paddingRight: "1em",paddingTop:"1em" }} component="form" 
-            onSubmit={(e) => { 
-                e.preventDefault(); 
-                handleAddNewTask();
-            }} >
+        <Grid container spacing={2} style={{ paddingLeft: "1em", paddingRight: "1em",paddingTop:"1em" }} 
+            // component="form" 
+            // onSubmit={handleOnSubmit} 
+            >
             <Grid item lg={6} md={6} sm={6} xs={12}>
-                <TextField
-                    label="Title : "
-                    onChange={ (e) => setNewTask({ ...newTask, title: e.target.value })}
-                    placeholder={"Example : Redesigning UI"}
-                    style={{ width: '100%' }}
-                    variant="standard" 
-                    required
-                />
+                <TextField label="Title : " onChange={handleTitleChange} placeholder={"Example : Redesigning UI"} style={{ width: '100%' }} variant="standard"  required/>
             </Grid>
             <Grid item lg={6} md={6} sm={6} xs={12}>
                 {(!is_subtask)?
-                    <NumberFormat 
-                        customInput={TextField} 
-                        variant="standard"
-                        label="Cost estimation: "
-                        onValueChange={ (formattedValue) => setNewTask({ ...newTask, cost: formattedValue.value })}
-                        fullWidth
-                        thousandSeparator={true} 
-                        isNumericString={true} 
+                    <NumberFormat  customInput={TextField}  variant="standard" label="Cost estimation: "
+                        fullWidth thousandSeparator={true}  isNumericString={true}  onValueChange={ handleCostEstimationChange}
                         displayType={'input'} />:<></>}
                 
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12} container>
                 <LocalizationProvider dateAdapter={AdapterDateFns}>
-                    <MobileDateRangePicker
-                        required
-                        startText="Start : "
-                        endText="End : "
-                        value={dateRange}
-                        minDate={minDate?parseISO(minDate):null}
-                        maxDate={maxDate?parseISO(maxDate):null}
-                        onChange={(newValue) => {
-                            if(newValue[0]) setNewTask({...newTask, start:moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss')});
-                            if(newValue[1]) setNewTask({...newTask, end:moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss')});
-                            setDateRange([newValue[0],newValue[1]]);
-                        }}
-                        renderInput={(startProps, endProps) => (
-                        <>
-                            <TextField {...startProps} variant="standard" required />
-                            <Box sx={{ mx: 2 }}> to </Box>
-                            <TextField {...endProps}  variant="standard"  required/>
-                        </>
-                        )}
+                    <MobileDateRangePicker required startText="Start : " endText="End : "
+                        value={dateRange} minDate={minDate?parseISO(minDate):null} maxDate={maxDate?parseISO(maxDate):null}
+                        onChange={handleEstimationDateRangeChange}
+                        renderInput={dateRangeRenderInput}
                     />
                 </LocalizationProvider>  
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12}>
-                <UserSearchBar 
-                    detailProject={detailProject}
-                    exceptedUsers={exceptedUsers} 
-                    onChange={(users)=>{
-                        setNewTask({...newTask,members:[...users]});
-                    }}
-                    userOnly={true}
-                />
+                {data.cards?.length?( <UserSearchBar detailProject={detailProject}  exceptedData={[...exceptedData,data.creator]}  onChange={handleUserbarOnChange} userOnly={true}/>):
+                (<UserSearchBar  task={data} exceptedData={[...exceptedData,data.creator]} onChange={handleUserSearchbarChange} userOnly={true}/>)}
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12}>
-                <SelectTag onChange={(tags) => setNewTask({ ...newTask, tags: tags })} isEdit={true} defaultValue={[]}/>
+                <SelectTag onChange={handleSelectTagChange} isEdit={true} defaultValue={[]}/>
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12}>
                 <Typography>Description : </Typography>
-                <TextField 
-                    variant="standard" 
-                    multiline 
-                    rows={4}
-                    style={{ width: '100%' }}
-                    onChange={(e) => setNewTask({ ...newTask, description: e.target.value }) } />
+                <TextField   variant="standard"   multiline   rows={4}  style={{ width: '100%' }} onChange={handleDescriptionChange} />
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12}>
-                <Button type="submit" variant="contained" color="primary">Add</Button>
+                <Button onClick={handleAddNewTask} variant="contained" color="primary">Add</Button>
             </Grid>
         </Grid>
     )

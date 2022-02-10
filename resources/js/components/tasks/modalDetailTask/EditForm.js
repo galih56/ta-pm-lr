@@ -127,7 +127,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                                 <Typography style={{ whiteSpace: 'noWrap'}}>Work Days : {data.work_days}</Typography>   
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
-                            {([1,2,4].includes(global.state.role?.id))?(
+                                {([1,2,4].includes(global.state.role?.id))?(
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
                                         <MobileDateRangePicker required startText="Start at : " endText="Finish at : "
                                             value={realizationDateRange}
