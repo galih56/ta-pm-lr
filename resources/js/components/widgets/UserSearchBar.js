@@ -43,26 +43,38 @@ export default function UserSearchbar(props) {
             }).catch(console.log);
     }
 
+
+    const getDefaultData=()=>{
+        if(!clientOnly && !userOnly){
+            getClients();
+            getUsers();
+        }
+        if(clientOnly && !userOnly){
+            getClients();
+        }
+        if(!clientOnly && userOnly){
+            getUsers();
+        }
+    }
     useEffect(() => {
         if(detailProject || task){
             if(detailProject){
                 if('members' in detailProject) setUsers(detailProject.members);
-                if('clients' in detailProject) setClients(detailProject.clients);    
+                if('clients' in detailProject) setClients(detailProject.clients); 
+                if(!('members' in detailProject) && !('clients' in detailProject)){
+                    getDefaultData();
+                }   
             }
             if(task){
-                if('members' in task) setUsers(task.members);
+                if('members' in task) {
+                    setUsers(task.members.filter(item=>item.is_user));
+                    setClients(task.members.filter(item=>item.is_client));
+                }else{
+                    getDefaultData();
+                }
             }
         }else{
-            if(!clientOnly && !userOnly){
-                getClients();
-                getUsers();
-            }
-            if(clientOnly && !userOnly){
-                getClients();
-            }
-            if(!clientOnly && userOnly){
-                getUsers();
-            }
+            getDefaultData();
         }
     }, [detailProject?.members,detailProject?.clients,task?.members]);
 
