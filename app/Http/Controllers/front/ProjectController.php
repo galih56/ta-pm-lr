@@ -641,9 +641,10 @@ class ProjectController extends Controller
             $errors=['error'=>false,'messages'=>[],'data'=>null];
             if($imported_data->count()){
                 $rows=$imported_data[0];
-
                 for ($i=0; $i < $rows->count(); $i++) { 
-                    $row=$rows[$i]->toArray();          
+                    $row=$rows[$i]->toArray();  
+                    $sheet_row_number=$i+2;
+                    $is_row_valid=false;
                     $start=$this->validateDateTime($row['start']);
                     $end=$this->validateDateTime($row['end']);
                     $actual_start=$this->validateDateTime($row['actual_start']);
@@ -651,23 +652,27 @@ class ProjectController extends Controller
                     
                     if(empty($row['title'])) {
                         $errors['error']=true;
-                        $errors['messages'][]=['row'=>$i,'title'=> 'Title column is required','data'=>$row];
+                        $errors['messages'][]=['row'=>$sheet_row_number,'title'=> 'Title column is required','data'=>$row];
+                        $is_row_valid=true;
                     }
                     if(empty($row['wbs'])) {
                         $errors['error']=true;
-                        $errors['messages'][]=['row'=>$i,'title'=> 'WBS column is required','data'=>$row];
+                        $errors['messages'][]=['row'=>$sheet_row_number,'title'=> 'WBS column is required','data'=>$row];
+                        $is_row_valid=true;
                     }
 
                     if(!$start || !$end) {
                         $errors['error']=true;
-                        $errors['messages'][]=['row'=>$i,'title'=> 'start/end column must be a valid date (d/m/Y)','data'=>$row];
+                        $errors['messages'][]=['row'=>$sheet_row_number,'title'=> 'start/end column must be a valid date (d/m/Y)','data'=>$row];
+                        $is_row_valid=true;
                     }
                     
                     if(array_key_exists('actual_start',$row)){ 
                         if(!empty($row['actual_start']) ){
                             if(!$actual_start) {
                                 $errors['error']=true;
-                                $errors['messages'][]=['row'=>$i,'title'=> 'actual_start column must be a valid date (d/m/Y)','data'=>$row];
+                                $errors['messages'][]=['row'=>$sheet_row_number,'title'=> 'actual_start column must be a valid date (d/m/Y)','data'=>$row];
+                                $is_row_valid=true;
                             }
                         }   
                     }
@@ -676,7 +681,8 @@ class ProjectController extends Controller
                         if(!empty($row['actual_end'])){
                             if(!$actual_end) {
                                 $errors['error']=true;
-                                $errors['messages'][]=['row'=>$i,'title'=> 'actual_end column must be a valid date (d/m/Y)','data'=>$row];
+                                $errors['messages'][]=['row'=>$sheet_row_number,'title'=> 'actual_end column must be a valid date (d/m/Y)','data'=>$row];
+                                $is_row_valid=true;
                             }
                         }   
                     }
@@ -684,7 +690,8 @@ class ProjectController extends Controller
                     $wbs=$this->checkWBSFormat($row);
                     if(!$wbs){
                         $errors['error']=true;
-                        $errors['messages'][]=['row'=>$i,'title'=> 'WBS format is invalid','data'=>$row];
+                        $errors['messages'][]=['row'=>$sheet_row_number,'title'=> 'WBS format is invalid','data'=>$row];
+                        $is_row_valid=true;
                     }
                     
                     if($start) {  
@@ -827,6 +834,17 @@ class ProjectController extends Controller
             }
         }
         return response()->json($custom_columns);
+    }
+
+    
+    public function check_file_format(Request $request){
+        if($request->hasFile('file')){
+            $import = new ProjectImport();
+            $imported_data = $import->toCollection($request->file('file')->store('temp'));
+            return view('exports.check_file_import',['data'=>$imported_data[0]]);
+        }else{
+            return 'File not found';
+        }
     }
 }
 

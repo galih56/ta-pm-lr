@@ -23,7 +23,7 @@ const Calendar = lazy(() => import('../widgets/Calendar'));
 const Files = lazy(() => import('../widgets/Files'));
 const Others = lazy(() => import('./Others'));
 const Timeline = lazy(() => import('./timeline/Timeline'));
-const ModalImportExcel = lazy(() => import('./timeline/ModalImportExcel'));
+const ModalImportExcel = lazy(() => import('./ModalImportExcel'));
 const ModalDetailTask = lazy(() => import('../tasks/modalDetailTask/ModalDetailTask'));
 
 function TabPanel({ children, value, index, ...other }) {

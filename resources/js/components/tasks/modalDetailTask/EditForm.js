@@ -124,12 +124,12 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                             <Grid item lg={12} md={12} sm={12} xs={12}>
                                 <Typography style={{ whiteSpace: 'noWrap'}}>Realization at : {data.actual_start ? moment(data.actual_start).format('DD MMMM YYYY') : ''} - {data.actual_end ? moment(data.actual_end).format('DD MMMM YYYY') : ''}</Typography> 
                                 <StatusChip status={data.start_label}/> - <StatusChip status={data.end_label}/>
-                                <Typography style={{ whiteSpace: 'noWrap'}}>Work Days : {data.work_days}</Typography>   
                             </Grid>
                             <Grid item lg={12} md={12} sm={12} xs={12}>
+                                <Typography style={{ whiteSpace: 'noWrap'}}>Work Days : {data.work_days}</Typography>   
                                 {([1,2,4].includes(global.state.role?.id))?(
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                        <MobileDateRangePicker required startText="Start at : " endText="Finish at : "
+                                        <MobileDateRangePicker startText="Start at : " endText="Finish at : "
                                             value={realizationDateRange}
                                             onChange={(newValue) => {
                                                 if(newValue[0]){
@@ -142,9 +142,9 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                                             }}
                                             renderInput={(startProps, endProps) => (
                                             <>
-                                                <TextField {...startProps} variant="standard" required />
+                                                <TextField {...startProps} variant="standard" />
                                                 <Box sx={{ mx: 2 }}> to </Box>
-                                                <TextField {...endProps}  variant="standard"  required/>
+                                                <TextField {...endProps}  variant="standard" />
                                             </>
                                             )}
                                         />
