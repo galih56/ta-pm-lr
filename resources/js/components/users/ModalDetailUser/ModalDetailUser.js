@@ -121,7 +121,7 @@ export default function ModalDetailUser(props) {
 
     return (
         <Dialog onClose={closeModal} aria-labelledby="Modal User Detail" open={open} style={{ zIndex: '750' }}
-            maxWidth={'lg'} fullwidth={"true"}>
+            maxWidth={'md'} fullWidth>
             <DialogTitle onClose={closeModal}>User information</DialogTitle>
             <DialogContent dividers>
                 <EditForm open={open} isEdit={isEditing} data={data} setData={setData} asProfile={asProfile}/>

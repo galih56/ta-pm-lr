@@ -105,25 +105,26 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
         getRoles();
     }, [open])
     
+    const handleNameOnChange=(e) => setData({ ...data, name: e.target.value });
+    const handleEmailOnChange=(e) => setData({ ...data, email: e.target.value });
+    const handleRolesOnChange=e => {
+        var choosenId= e.target.value;
+        var choosenData= roles.filter(item=>item.id==choosenId)
+        if(choosenData.length>0){
+            setData({ ...data, role:choosenData[0],roles_id:choosenData[0].id });
+        }
+    }
+    const handleNewPasswordOnChange=(e) => setNewPassword(e.target.value);
+    const handleConfirmPasswordOnChange=(e) => setConfirmPassword(e.target.value);
+    
     if (isEdit) {
         return (
             <Grid container spacing={2} style={{ paddingLeft: 4, paddingRight: 4 }} >
-                 
                 <Grid item lg={12} md={12} sm={12} xs={12} align="center">
-                    <TextField
-                        defaultValue={data.name}
-                        onChange={(e) => setData({ ...data, name: e.target.value })}
-                        fullWidth
-                        variant="standard"
-                    />
+                    <TextField defaultValue={data.name} onChange={handleNameOnChange} fullWidth variant="standard"/>
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12} align="center">
-                    <TextField
-                        defaultValue={data.email}
-                        onChange={(e) => setData({ ...data, email: e.target.value })}
-                        className={classes.textfield}
-                        variant="standard"
-                    />
+                    <TextField defaultValue={data.email} onChange={handleEmailOnChange} className={classes.textfield} variant="standard"/>
                 </Grid>
                 {(asProfile)?(
                     <Grid item lg={12} md={12} sm={12} xs={12} align="center">
@@ -134,17 +135,7 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
                         {([1,2,4].includes(global.state.role?.id))?(
                                 <FormControl className={classes.textfield} >
                                     <InputLabel>Roles</InputLabel>
-                                    <Select 
-                                    variant="standard"
-                                    onChange={e => {
-                                        var choosenId= e.target.value;
-                                        var choosenData= roles.filter(item=>item.id==choosenId)
-                                        if(choosenData.length>0){
-                                            setData({ ...data, role:choosenData[0],roles_id:choosenData[0].id });
-                                        }
-                                    }}
-                                    
-                                        defaultValue={data.role?.id}>
+                                    <Select variant="standard" onChange={handleRolesOnChange} value={data.role?.id}>
                                         {
                                             roles.map((role, index) => (<MenuItem value={role.id} key={role.id}>{role.name}</MenuItem>))
                                         } 
@@ -170,22 +161,8 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
                                     <Grid item lg={12} md={12} sm={12} xs={12}>
                                         { passwordConfirmAlert ? <Alert severity="warning" > Password confirmation does not match</Alert> : null}
                                         { changePasswordInputsEmpty ? <Alert severity="warning" > Some fields are empty</Alert> : null}
-                                        <TextField
-                                            label="New Password"
-                                            onChange={(e) => setNewPassword(e.target.value)}
-                                            className={classes.textfield}
-                                            fullWidth
-                                            type="password"
-                                            variant="standard"
-                                        />
-                                        <TextField
-                                                label="Confirm Password"
-                                                className={classes.textfield}
-                                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                                fullWidth
-                                                type="password"
-                                                variant="standard"
-                                            />
+                                        <TextField label="New Password" onChange={handleNewPasswordOnChange} className={classes.textfield} fullWidth type="password" variant="standard"/>
+                                        <TextField label="Confirm Password" className={classes.textfield} onChange={handleConfirmPasswordOnChange} fullWidth type="password" variant="standard"/>
                                     </Grid>
                                     <Grid item lg={12} md={12} sm={12} xs={12} style={{marginTop:'0.5em'}}>
                                         <Button type="submit" variant="contained" color="primary" >Change Password</Button>

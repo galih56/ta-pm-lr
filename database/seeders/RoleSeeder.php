@@ -20,12 +20,12 @@ class RoleSeeder extends Seeder
             ['id'=>4,'name' => 'Manager'],
             ['id'=>5,'name' => 'Project Manager'],
             ['id'=>6,'name' => 'Analyst'],
-            ['id'=>7,'name' => 'Senior Developer'],
-            ['id'=>8,'name' => 'Junior Developer'],
+            ['id'=>7,'name' => 'Senior Programmer'],
+            ['id'=>8,'name' => 'Junior Programmer'],
             ['id'=>9,'name' => 'Project Support'],
             ['id'=>10,'name' => 'Surveyor'],
-            ['id'=>11,'name' => 'Researcher'],  
-            ['id'=>12,'name' => 'Designer']  
+            ['id'=>11,'name' => 'Designer'],  
+            ['id'=>12,'name' => 'Researcher']  
         ];
         foreach ($roles as $i => $role) {
             $occ=new Role();

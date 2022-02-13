@@ -135,8 +135,7 @@ export default function ModalDetailMeeting(props) {
             });
     }
     return (
-        <Dialog open={open} maxWidth={'lg'} fullwidth={"true"}>
-             
+        <Dialog open={open} maxWidth={'lg'} fullWidth>
             <DialogTitle onClose={closeModal}>Meeting information</DialogTitle>
             <DialogContent dividers>
                 <EditForm 

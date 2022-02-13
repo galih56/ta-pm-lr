@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { Link, useHistory,useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Typography from '@material-ui/core/Typography';
@@ -99,7 +99,8 @@ export default function EnhancedTable({data}) {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [clickedTask, setClickedTask] = useState({ projects_id: null, lists_id: null, tasks_id: null,id:null });
     const [modalOpen, setModalOpen] = useState(false);
-
+    let location = useLocation();
+    let pathname = location.pathname;
     let global = useContext(UserContext);
 
     const handleModalOpen = (taskInfo) => {
@@ -117,8 +118,7 @@ export default function EnhancedTable({data}) {
             return (
                 <ModalDetailTask open={modalOpen}
                     closeModalDetailTask={() =>handleModalOpen({ projects_id: null, lists_id: null, tasks_id: null, open: false })}
-                    projects_id={clickedTask.projects_id}
-                    initialState={clickedTask} />
+                    projects_id={clickedTask.projects_id} initialState={clickedTask} />
             )
         }
     }

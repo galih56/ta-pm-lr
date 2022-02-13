@@ -106,15 +106,13 @@ export default function ModalDetailRole(props) {
     }
 
     return (
-        <Dialog onClose={closeModal} open={open} maxWidth={'lg'} fullwidth={"true"}>
+        <Dialog onClose={closeModal} open={open} maxWidth={'lg'} fullWidth>
             <DialogTitle onClose={closeModal}>Role</DialogTitle>
             <DialogContent dividers>
                 <EditForm isEdit={isEditing} data={data} setData={setData}> </EditForm>
             </DialogContent>
             <DialogActions>
-                <DialogActionButtons
-                    isEdit={isEditing}
-                    deletable={!([1, 2,3,4,5,6].includes(data.id))}
+                <DialogActionButtons isEdit={isEditing} deletable={!([1, 2,3,4,5,6].includes(data.id))}
                     saveChanges={saveChanges}
                     setEditMode={handleEditingMode}
                     deleteRole={deleteRole}

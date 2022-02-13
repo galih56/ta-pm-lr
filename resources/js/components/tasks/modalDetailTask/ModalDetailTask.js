@@ -309,7 +309,7 @@ export default function ModalDetailTask(props) {
     return (
         <>
             <Dialog  aria-labelledby="Modal Task Detail" open={open} style={{ zIndex: '750' }}
-                maxWidth={'lg'} fullwidth={"true"}>
+                maxWidth={'lg'} fullWidth>
                 <form onSubmit={saveChanges}>
                     <DialogTitle onClose={() => {
                         removeTaskIdQueryString(history)

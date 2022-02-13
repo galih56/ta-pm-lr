@@ -148,8 +148,8 @@ const ModalCreateUser = (props) => {
     }
     return (
         <Dialog onClose={closeModal} aria-labelledby="Modal Create user" open={open} style={{ zIndex: '750' }}
-            maxWidth={'lg'} fullwidth={"true"}>
-            <DialogTitle onClose={closeModal}>User information</DialogTitle>
+            maxWidth={'lg'} fullWidth>
+            <DialogTitle onClose={closeModal}>Create new user</DialogTitle>
             <DialogContent dividers>
                 <Container component="main" >
                     <CssBaseline />
