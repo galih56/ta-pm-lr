@@ -68,6 +68,7 @@ Route::resource('approvals', 'App\Http\Controllers\front\ApprovalController');
 Route::get('check-url', function (Request $request) {
     return dd(url(''));
 });
+Route::post('check_file_import','App\Http\Controllers\front\ProjectController@check_file_format');
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });

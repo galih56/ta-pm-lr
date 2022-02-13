@@ -87,8 +87,7 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,is_s
                 </LocalizationProvider>  
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12}>
-                {!parent_task?( <UserSearchBar detailProject={detailProject}  onChange={handleUserbarOnChange} userOnly={true}/>):
-                (<UserSearchBar  task={parent_task} onChange={handleUserSearchbarChange} userOnly={true}/>)}
+                <UserSearchBar detailProject={detailProject}  onChange={handleUserbarOnChange} userOnly={true}/>
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12}>
                 <SelectTag onChange={handleSelectTagChange} isEdit={true} defaultValue={[]}/>

@@ -64,6 +64,7 @@ export default function UserSearchbar(props) {
                 if(!('members' in detailProject) && !('clients' in detailProject)){
                     getDefaultData();
                 }   
+                console.log('detailProject_exists',detailProject,task)
             }
             if(task){
                 if('members' in task) {
@@ -72,6 +73,7 @@ export default function UserSearchbar(props) {
                 }else{
                     getDefaultData();
                 }
+                console.log('task_exists',detailProject,task)
             }
         }else{
             getDefaultData();

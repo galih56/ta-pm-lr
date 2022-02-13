@@ -24,6 +24,9 @@ import CloseIcon from '@material-ui/icons/Close';
 import UserSearchBar from './../widgets/UserSearchBar';
 import moment from 'moment';
 import UserContext from '../../context/UserContext';
+import FormControl from '@material-ui/core/FormControl';
+import NativeSelect from '@material-ui/core/NativeSelect';
+import SearchIcon from '@material-ui/icons/Search';
 
 const styles = (theme) => {
     return({
@@ -80,10 +83,12 @@ export default function ModalCreateProject(props) {
     const [projectClients, setProjectClients] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
     const [showImportErrors,setShowImportErrors]=useState(false);
-   
     const [importErrors, setImportErrors] = useState([]);
-    const [tabIndex, setTabIndex] = React.useState(0);
+    const [isCheckingFile, setIsCheckingFile]=useState(0);
 
+    const [tabIndex, setTabIndex] = React.useState(0);
+    
+    const handleFormTypeOnChange=(e)=>{setIsCheckingFile(e.target.value)};
     const handleChange = (event, newValue) =>  setTabIndex(newValue)
     const handleShowMoreErrors=(e)=>{
         e.preventDefault();
@@ -278,9 +283,24 @@ export default function ModalCreateProject(props) {
                                                     <a onClick={handleShowMoreErrors}>Hide...</a>:
                                                     <a onClick={handleShowMoreErrors}>Show more...</a>}
                                             </Alert>:null}
-                                            <input accept=".csv, .xls, .xlsx, text/csv, application/csv, text/comma-separated-values, application/csv, application/excel, application/vnd.msexcel, text/anytext, application/vnd. ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                                                type="file" onChange={(e)=>setSelectedFile(e.target.files)}
-                                            />
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            <FormControl fullWidth>
+                                                <NativeSelect defaultValue={0} inputProps={{ name: 'Check file', id: 'uncontrolled-native' }} onChange={handleFormTypeOnChange}>
+                                                    <option value={0}>Import file</option>
+                                                    <option value={1}>Periksa data file</option>
+                                                </NativeSelect>
+                                            </FormControl>
+                                        </Grid>
+                                        <Grid item lg={12} md={12} sm={12} xs={12}>
+                                            {isCheckingFile==0?(
+                                                <input type="file" accept=".csv, .xls, .xlsx, text/csv, application/csv, text/comma-separated-values, application/csv, application/excel, application/vnd.msexcel, text/anytext, application/vnd. ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={e=> setSelectedFile(e.target.files)}/>
+                                            ):(
+                                                <form method="POST"  enctype="multipart/form-data" target="_blank" action={`${process.env.MIX_BACK_END_BASE_URL}check_file_import`}>
+                                                    <input type="file" name="file"  accept=".csv, .xls, .xlsx, text/csv, application/csv, text/comma-separated-values, application/csv, application/excel, application/vnd.msexcel, text/anytext, application/vnd. ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/>
+                                                    <Button type="submit" variantcolor="secondary" startIcon={<SearchIcon />}>Check</Button>
+                                                </form>
+                                            )}    
                                         </Grid>
                                     </Grid>
                                 </TabPanel>
@@ -288,7 +308,7 @@ export default function ModalCreateProject(props) {
                         </Grid>
                     </DialogContent>
                     <DialogActions>
-                        <Button type="submit" color="primary">Create</Button>
+                        {isCheckingFile==0? <Button type="submit" color="primary">Create</Button>:null}
                     </DialogActions>
                 </form>
             ):(

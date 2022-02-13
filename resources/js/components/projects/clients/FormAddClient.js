@@ -83,9 +83,7 @@ const FormAddClient=({open,handleClose,onCreate,detailProject})=>{
                     }}>
                     <Grid container spacing={2}>
                         <Grid lg={12} md={12} sm={12} xs={12} item>
-                            <UserSearchBar 
-                                exceptedClients={detailProject.clients} 
-                                onChange={(clients)=> setNewClients(clients)}
+                            <UserSearchBar  exceptedClients={detailProject.clients}  onChange={(clients)=> setNewClients(clients)}
                                 clientOnly={true}
                                 inputLabel="Search clients"
                             />
