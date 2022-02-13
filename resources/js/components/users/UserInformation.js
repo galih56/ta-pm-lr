@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import NavigateNextIcon from '@material-ui/icons/NavigateNext';
+import RoleInformation from './../roles/RoleInformation';
 
 const useStyles = makeStyles((theme) => (styleConfig(theme)));
 
@@ -43,6 +44,14 @@ const UserInformation = (props) => {
                                 </Collapse>
                             </Grid>
                         </Grid>
+                    </Paper>
+                </Grid>
+                <Grid lg={12} md={12} sm={12} xs={12} item>
+                    <Paper className={classes.paper}>
+                        <ListItem button dense font="small" onClick={handleRoleTableOpen} style={{ paddingBottom: '1.2em' }}> {roleTableOpen ? <ExpandLess /> : <ExpandMore />}Roles</ListItem>
+                        <Collapse in={roleTableOpen} timeout="auto">
+                            <RoleInformation />
+                        </Collapse>
                     </Paper>
                 </Grid>
         </React.Fragment>

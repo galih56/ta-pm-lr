@@ -25,7 +25,6 @@ const CustomCard = (props) => {
                 className={className}
             >
                 <Link to={{ pathname: pathname, search: searchParams.toString() }} style={{ textDecoration: 'none', color: '#393939' }}>
-
                         <header
                             style={{
                                 borderBottom: '1px solid #eee', paddingBottom: 6, marginBottom: 10,
