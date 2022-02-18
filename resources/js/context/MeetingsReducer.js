@@ -30,7 +30,7 @@ const createNewMeeting = (payload) => {
 
 const storeDetailMeeting = (payload) => {
     var user = JSON.parse(localStorage.getItem('user'));
-    const newProjects = state.projects.map((project) => {
+    const newProjects = user.projects.map((project) => {
         if (project.id == payload.projects_id) {
             try {
                 project.meetings.map(function(meeting){

@@ -207,7 +207,7 @@ const DetailProject = (props) => {
                             tabState={tabState} index={3} 
                             handleModalCreateMeeting={handleModalCreateMeeting}
                             getDetailProject={getDetailProject}
-                            handleDetailTaskOpen={handleDetailTaskOpen}/>
+                            handleDetailMeetingOpen ={handleDetailMeetingOpen }/>
                         } />
                     <Route path={"/projects/:id/files"} render={() => <TabFile tabState={tabState} index={4} 
                             detailProject={{
