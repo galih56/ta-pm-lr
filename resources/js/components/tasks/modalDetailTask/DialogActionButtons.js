@@ -4,7 +4,7 @@ import { Button } from '@material-ui/core/';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import UserContext from '../../../context/UserContext';
 
-const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteTask, confirm, setConfirm, closeModal }) => {
+const dialogActionButtons = ({ isEdit,  setEditMode, deleteTask, setConfirm, closeModal,deletable }) => {
     const global = useContext(UserContext);
     const handleConfirm=()=> setConfirm({open:true,callback:deleteTask})
     if (isEdit) {
@@ -12,7 +12,7 @@ const dialogActionButtons = ({ isEdit, saveChanges, setEditMode, deleteTask, con
             <React.Fragment>
                 <Button onClick={() => setEditMode(false)} color="primary"> Cancel </Button>
                 <Button type="submit" variant="contained" color="primary"> Save</Button>
-                {([2,4].includes(global.state.role?.id))?(
+                {(deletable)?(
                     <Button onClick={handleConfirm} variant="contained" color="secondary">
                         Delete
                     </Button>

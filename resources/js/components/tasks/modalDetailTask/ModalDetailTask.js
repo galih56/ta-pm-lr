@@ -339,7 +339,7 @@ export default function ModalDetailTask(props) {
                     </DialogContent>                
                     <DialogActions>
                         <DialogActionButtons isEdit={isEditing} saveChanges={submitForm} setEditMode={handleEditingMode}
-                            deleteTask={deleteTask}
+                            deleteTask={deleteTask} deletable={!data.actual_start || [1,2].includes(global.state.role?.id)}
                             confirm={confirm}  setConfirm={setConfirm}  closeModal={closeModalDetailTask}
                         > </DialogActionButtons>
                     </DialogActions>
