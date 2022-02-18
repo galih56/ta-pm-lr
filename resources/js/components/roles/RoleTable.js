@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useLocation} from 'react-router-dom';
 import SearchIcon from '@material-ui/icons/Search';
 import PropTypes from 'prop-types';
 import Typography from '@material-ui/core/Typography';
@@ -76,23 +76,21 @@ export default function RoleTable(props) {
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const handleModalOpen = props.modalOpen;
     const [keywords,setKeywords]=useState('');
+    let location = useLocation();
+    let pathname = location.pathname;
 
-    const removeRoleIdQueryString=()=>{
-        const queryParams = new URLSearchParams(history.location.search)
-        if (queryParams.has('roles_id')) {
-            queryParams.delete('roles_id');
-            history.replace({
-                search: queryParams.toString(),
-            })
-        }
-    }
-    
     useEffect(() => {
         setRows(props.data);
-        // const query = new URLSearchParams(props.location.search);
-        // const paramRoleId = query.get('tasks_id');
-        // if (paramRoleId) handleModalOpen({ role:{ id: paramRoleId, }, open: true });
     }, [props.data]);
+
+    useEffect(()=>{
+        const query = new URLSearchParams(location.search);
+        const paramRoleId = query.get('roles_id');
+        if (paramRoleId && rows.length) {
+            var current_role=rows.find(row=>row.id==paramRoleId);
+            handleModalOpen({ role: current_role, open: true });
+        }
+    },[rows])
 
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -115,10 +113,11 @@ export default function RoleTable(props) {
                     <TableBody>
                         {(rows.length)?
                             stableSort(rows, getComparator(order, orderBy))
+                            .filter(row=>row.name?.toLowerCase().includes(keywords.toLowerCase()))
                             .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                             .map((row) => {             
-                                // let searchParams = new URLSearchParams(location.search);
-                                // searchParams.set('roles_id', id);
+                                let searchParams = new URLSearchParams(location.search);
+                                searchParams.set('roles_id', row.id);
                                 return (
                                     <TableRow hover key={row.id}>
                                         <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}
@@ -126,29 +125,27 @@ export default function RoleTable(props) {
                                                 role: row,
                                                 open: true
                                             })}>
-                                            {/* <Link to={{ pathname: pathname, search: searchParams.toString() }} style={{ textDecoration: 'none', color: '#393939' }}> */}
+                                            <Link to={{ pathname: pathname, search: searchParams.toString() }} style={{ textDecoration: 'none', color: '#393939' }}>
                                                 {row.id}
-                                            {/* </Link> */}
+                                            </Link>
                                         </TableCell>
                                         <TableCell component="th" scope="row" style={{ cursor: 'pointer' }}
                                             onClick={() => handleModalOpen({
                                                 role: row,
                                                 open: true
                                             })}>                                                
-                                            {/* <Link to={{ pathname: pathname, search: searchParams.toString() }} style={{ textDecoration: 'none', color: '#393939' }}> */}
+                                            <Link to={{ pathname: pathname, search: searchParams.toString() }} style={{ textDecoration: 'none', color: '#393939' }}>
                                                 {row.name}
-                                            {/* </Link> */}
+                                            </Link>
                                         </TableCell>
                                     </TableRow>
                                 );
                             }):(
-                                (
-                                    <TableRow>
-                                        <TableCell align="center" colSpan={headCells.length}>
-                                            <Typography variant="body1"><b>There is no data to show</b></Typography>
-                                        </TableCell>
-                                    </TableRow>
-                                )
+                                <TableRow>
+                                    <TableCell align="center" colSpan={headCells.length}>
+                                        <Typography variant="body1"><b>There is no data to show</b></Typography>
+                                    </TableCell>
+                                </TableRow>
                             )}
                     </TableBody>
                 </Table>

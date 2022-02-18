@@ -21,6 +21,10 @@ class Client extends Authenticatable
     
     protected static function boot(){
         parent::boot();
+        
+        static::deleting(function($client) { 
+            $client->projects()->detach();
+        });
     }
 
     public function projects(){

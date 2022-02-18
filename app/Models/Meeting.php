@@ -18,6 +18,14 @@ class Meeting extends Model
     protected $casts = [
         'google_calendar_info' => 'json',
     ];
+  
+    protected static function boot(){
+        parent::boot();
+        
+        static::deleting(function($client) { 
+            $client->members()->detach();
+        });
+    }
 
     public function creator(){
         return $this->belongsTo(User::class,'users_id');

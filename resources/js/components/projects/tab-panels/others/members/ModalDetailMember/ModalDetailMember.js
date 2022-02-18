@@ -1,10 +1,10 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { useHistory } from "react-router-dom";
-import UserContext from '../../../../context/UserContext';
+import UserContext from '../../../../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
 import makeStyles from '@material-ui/styles/makeStyles';
 import { Dialog, IconButton, Typography } from '@material-ui/core/';
-import TaskList from '../../../tasks/TaskList';
+import TaskList from '../../../../../tasks/TaskList';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogActions from '@material-ui/core/DialogActions';

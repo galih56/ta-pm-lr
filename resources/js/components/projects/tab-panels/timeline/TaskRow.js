@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy, useContext } from 'react';
-import UserContext from '../../../context/UserContext';
+import UserContext from '../../../../context/UserContext';
 import { Link, useLocation ,useHistory} from 'react-router-dom';
 import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
@@ -10,8 +10,8 @@ import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import moment from 'moment';
 
-const UpdateProgressButtons = lazy(() => import('../../widgets/UpdateProgressButtons'));
-const StatusChip = lazy(() => import('../../widgets/StatusChip'));
+const UpdateProgressButtons = lazy(() => import('../../../widgets/UpdateProgressButtons'));
+const StatusChip = lazy(() => import('../../../widgets/StatusChip'));
 const PICPopover = lazy(() => import('./PICPopover'));
 const TableSubtask = lazy(() => import('./TableSubtasks'));
 

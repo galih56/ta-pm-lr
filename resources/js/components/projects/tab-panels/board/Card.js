@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { MovableCardWrapper } from 'react-trello/dist/styles/Base';
 import Tag from 'react-trello/dist/components/Card/Tag';
 import moment from 'moment';
-import StatusChip from './../StatusChip';
+import StatusChip from './../../../widgets/StatusChip';
 
 //https://github.com/rcdexta/react-trello/issues/18
 const CustomCard = (props) => {

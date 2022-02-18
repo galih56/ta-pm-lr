@@ -40,9 +40,7 @@ class TaskController extends Controller
     {
         $fields = $request->validate([
             'users_id' => 'required',
-            'projects_id' => 'required',
             'title' => 'required',
-            'is_subtask'=>'required',
             'start'=>'required',
             'end'=>'required',
         ]);
@@ -226,15 +224,19 @@ class TaskController extends Controller
         return response()->json($task->delete());
     }
     public function startTask(Request $request,$id){
-        $task=Task::findOrFail($id);
+        $task=Task::with('parentTask')->findOrFail($id);
         $task->actual_start= Carbon::now()->toDateTimeString();
-
         if($task->actual_start){
             $start = Carbon::parse($task->start)->format('Y-m-d');
             $actual_start = Carbon::parse($task->actual_start)->format('Y-m-d');
             if($actual_start<$start) $task->start_label='Mulai lebih cepat';
             if($actual_start>$start) $task->start_label='Mulai terlambat';
             if($actual_start==$start) $task->start_label='Mulai tepat waktu';
+        }
+        if($task->parentTask){
+            if(empty($task->parentTask->actual_start)){
+                $task->parentTask->actual_start=Carbon::now()->toDateTimeString();
+            }
         }
         $task->save();
         $task=$this->getDetailTask($id);
@@ -283,12 +285,13 @@ class TaskController extends Controller
                 if($task->parentTask && count($task->cards)>0){
                     $valuePerSubtask=100/count($task->cards);
                     $completeSubtaskCounter=0;
-                    for ($i = 0; $i < count($task->cards); $i++) {
+                    for ($i = 0; $i < count($task->parentTask->cards); $i++) {
                         $subtask = $task->cards[$i];
                         if($subtask->complete){ $completeSubtaskCounter++; }
                     }
                     $progress=$completeSubtaskCounter*$valuePerSubtask;
                     $task->progress=round($progress);
+                    if($task->progress>=100)$task->actual_end = Carbon::now()->toDateTimeString();
                     $task->save();
                 }                
                 $task->actual_end = null;

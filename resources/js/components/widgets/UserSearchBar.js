@@ -18,7 +18,6 @@ export default function UserSearchbar(props) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url).then(result => setUsers(result.data)).catch(console.log);
-        console.log('getUsers run');
     }
     
     const getClients = () => {
@@ -26,8 +25,6 @@ export default function UserSearchbar(props) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url).then(result => setClients(result.data)).catch(console.log);
-        console.log('getClients run');
-
     }
 
     const getDetailProject = () => {
@@ -56,6 +53,7 @@ export default function UserSearchbar(props) {
             getUsers();
         }
     }
+
     useEffect(() => {
         if(detailProject || task){
             if(detailProject){
@@ -64,7 +62,6 @@ export default function UserSearchbar(props) {
                 if(!('members' in detailProject) && !('clients' in detailProject)){
                     getDefaultData();
                 }   
-                console.log('detailProject_exists',detailProject,task)
             }
             if(task){
                 if('members' in task) {
@@ -73,12 +70,17 @@ export default function UserSearchbar(props) {
                 }else{
                     getDefaultData();
                 }
-                console.log('task_exists',detailProject,task)
             }
         }else{
             getDefaultData();
         }
     }, [detailProject?.members,detailProject?.clients,task?.members]);
+
+    useEffect(()=>{
+        if(!(detailProject||task)){
+            getDefaultData();
+        }
+    },[])
 
     function checkExistingMember(id, arr=[]) {
         var exists = false;
@@ -134,12 +136,15 @@ export default function UserSearchbar(props) {
     }, [users,clients]);
 
     return (
+        <>
         <Autocomplete multiple freeSolo options={options.sort((a, b) => -b.firstLetter.localeCompare(a.firstLetter))} groupBy={(option) => option.firstLetter}
             getOptionLabel={(option) => {
                 var label='';
                 if(option.is_user){
-                    if('role' in option) label= `${option.name} (${option.role.name})`; 
-                    if(!option.role){ 
+                    if(option.role){
+                        label= `${option.name} (${option.role?.name})`; 
+                    }
+                    else{ 
                         label= `${option.name} (${option.email})`;
                     }
                 }
@@ -154,5 +159,14 @@ export default function UserSearchbar(props) {
                 return(<Chip key={index} variant="outlined" label={option.name} {...getTagProps({ index })} /> )
             })}
         />
+{/*         
+        {(modalCreateOpen)?(
+            <ModalCreateUser
+                open={modalCreateOpen}
+                closeModal={() => setModalCreateOpen(false)}
+                onCreate={handleUserUpdate}
+            />
+        ):<></>} */}
+        </>
     );
 }

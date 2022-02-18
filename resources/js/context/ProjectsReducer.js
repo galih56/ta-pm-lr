@@ -1,3 +1,12 @@
+const average = arr => {
+    if(typeof arr=='array'){
+        var avg=arr.reduce((sum,data) => {
+            return sum + data.progress
+        }, 0) / arr.length
+        return avg;
+    }
+    return 0;
+};
 
 const storeProjects = (state, payload) => {
     var user = JSON.parse(localStorage.getItem('user'));

@@ -22,20 +22,17 @@ class Project extends Model
         parent::boot();
 
         static::deleting(function($project) { 
+            
+            $project->clients()->detach();
+            $project->teams()->detach();
+            $project->users()->detach();
+            
              foreach ($project->members as $i => $member) {
                 $member->delete();
              }
 
-             foreach ($project->clients as $i => $client) {
-                $client->delete();
-             }
-             
              foreach ($project->meetings as $i => $meet) {
                 $meet->delete();
-             }
-
-             foreach ($project->teams as $i => $team) {
-                $team->delete();
              }
 
              foreach ($project->columns as $i => $list) {

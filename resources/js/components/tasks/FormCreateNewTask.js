@@ -14,7 +14,7 @@ import UserContext from './../../context/UserContext';
 import { parseISO } from 'date-fns'; 
 import NumberFormat from 'react-number-format';
 
-const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,is_subtask,minDate,maxDate,parent_task})=>{
+const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,is_subtask,minDate,maxDate})=>{
     const global=useContext(UserContext);
     const [dateRange, setDateRange] = useState([null, null]);
     const [exceptedUsers,setExceptedUsers]=useState([]);
@@ -87,7 +87,7 @@ const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,is_s
                 </LocalizationProvider>  
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12}>
-                <UserSearchBar detailProject={detailProject}  onChange={handleUserbarOnChange} userOnly={true}/>
+                <UserSearchBar detailProject={detailProject}  onChange={handleUserSearchbarChange} userOnly={true}/>
             </Grid>
             <Grid item lg={12} md={12} sm={12} xs={12}>
                 <SelectTag onChange={handleSelectTagChange} isEdit={true} defaultValue={[]}/>

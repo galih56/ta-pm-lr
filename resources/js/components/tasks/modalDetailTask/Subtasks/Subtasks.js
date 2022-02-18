@@ -122,7 +122,7 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
                         {showCreateSubtaskForm?(
                             <ModalCreateSubtask  open={showCreateSubtaskForm}  handleClose={()=> setShowCreateSubtaskForm(false)}>
                                 <FormCreateNewTask classes={classes}  newTask={newTask}  setNewTask={setNewTask} handleAddNewTask={handleAddNewTask}
-                                    parent_task={detailTask} is_subtask={true} minDate={detailTask.start} maxDate={detailTask.end}/>
+                                    detailProject={detailProject} is_subtask={true} minDate={detailTask.start} maxDate={detailTask.end}/>
                             </ModalCreateSubtask>
                         ):null}
                         </>

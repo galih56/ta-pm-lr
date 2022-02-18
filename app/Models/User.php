@@ -40,6 +40,16 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    protected static function boot(){
+        parent::boot();
+        
+        static::deleting(function($user) { 
+            $user->projects()->detach();
+            $user->meetings()->detach();
+            
+        });
+    }
+
     public function scopeExclude($query, $value = []) 
     {
         return $query->select(array_diff($this->fillable, (array) $value));

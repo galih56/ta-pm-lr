@@ -1,10 +1,10 @@
 import React, { useState, useEffect,useContext } from 'react';
-import UserContext from '../../../context/UserContext';
+import UserContext from '../../../../context/UserContext';
 import { Link, useHistory,useLocation } from 'react-router-dom';
 import Checkbox from '@material-ui/core/Checkbox';
 import moment from 'moment';
-import StatusChip from '../../widgets/StatusChip';
-import UpdateProgressButtons from '../../widgets/UpdateProgressButtons';
+import StatusChip from '../../../widgets/StatusChip';
+import UpdateProgressButtons from '../../../widgets/UpdateProgressButtons';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';

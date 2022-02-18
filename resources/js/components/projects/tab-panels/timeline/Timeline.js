@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, lazy, Suspense } from 'react';
-import UserContext from '../../../context/UserContext';
+import UserContext from '../../../../context/UserContext';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 import axios from 'axios';
 
 const Row = lazy(() => import('./Row'));
-const EditLaneForm = lazy(() => import('../../widgets/board/EditLaneForm'));
+const EditLaneForm = lazy(() => import('../board/EditLaneForm'));
 
 const headCells = [
     { id: 'Title', align: 'left', label: 'Title' },
@@ -77,16 +77,16 @@ function Timeline(props) {
             const results= searchByKeywords()
             setRows(results);
         }else{
-            setRows(props.data);
+            setRows(props.detailProject?.columns?.length?props.detailProject?.columns:[]);
             setDetailProject(props.detailProject)    
         }
-    }, [props.detailProject.id,props.data,keywords]);
+    }, [props.detailProject,props.data,keywords]);
 
     const onTaskUpdate=(task)=>{
         var newRows=rows.map(row=>{
             row.cards=row.cards.map(card=>{
                 if(card.id==task.id) return task;
-                if(card.id==task.parent_task){
+                if(card.id==task.parent_task_id){
                     card.cards=card.cards.map(subtask=>{
                         if(subtask.id==task.id)return task;
                         return subtask;
@@ -100,7 +100,7 @@ function Timeline(props) {
     }
     const onTaskDelete=(task)=>{
         var newRows=rows.map(row=>{
-            if(task.parent_task){
+            if(task.parent_task_id){
                 row.cards=row.cards.map(card=>{
                     if(card.id==task.parentTask){
                         card.cards=card.cards.filter((subtask)=>{

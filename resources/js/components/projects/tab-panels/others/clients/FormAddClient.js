@@ -2,15 +2,15 @@ import React,{useState,useContext} from 'react';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import axios from 'axios';
-import toast, { Toaster } from 'react-hot-toast';
-import UserContext from './../../../context/UserContext';
+import toast  from 'react-hot-toast';
+import UserContext from '../../../../../context/UserContext';
 import withStyles from '@material-ui/styles/withStyles';
 import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import UserSearchBar from '../../widgets/UserSearchBar';
+import UserSearchBar from '../../../../widgets/UserSearchBar';
 import CloseIcon from '@material-ui/icons/Close';
 
 const styles = (theme) => ({

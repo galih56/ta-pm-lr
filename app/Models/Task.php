@@ -79,6 +79,8 @@ class Task extends Model
             foreach ($task->cards as $k => $subtask) {
                 $subtask->delete();
             }
+            $task->tags()->detach();
+            $task->task_members()->detach();
         });
     }
 
