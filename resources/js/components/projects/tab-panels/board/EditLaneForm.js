@@ -13,12 +13,12 @@ import withStyles from '@material-ui/styles/withStyles';
 import makeStyles from '@material-ui/styles/makeStyles';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import UserContext from '../../../context/UserContext';
+import UserContext from '../../../../context/UserContext';
 import CloseIcon from '@material-ui/icons/Close';
 import Alert from '@material-ui/core/Alert';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
-import FormCreateNewTask from './../../tasks/FormCreateNewTask';
+import FormCreateNewTask from '../../../tasks/FormCreateNewTask';
 
 const styles = (theme) => ({
     root: { margin: 0, padding: theme.spacing(2) },

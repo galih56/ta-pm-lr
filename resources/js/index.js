@@ -129,7 +129,7 @@ const App = () => {
                 <Router>
                     <Layout>
                         <Toaster 
-                            position="bottom-right"
+                            position="bottom-left"
                             reverseOrder={false}/>
                         <React.Suspense fallback={<LinearProgress />}>
                             <Switch>

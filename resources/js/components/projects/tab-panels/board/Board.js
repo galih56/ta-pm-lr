@@ -1,16 +1,20 @@
 import React, { useContext, useEffect, memo, useState } from 'react';
 import Board from 'react-trello';
 import { createTranslate } from 'react-trello';
-import UserContext from '../../../context/UserContext';
+import UserContext from '../../../../context/UserContext';
 import axios from 'axios';
 import CustomCard from './Card';
 import EditLaneForm from './EditLaneForm';
 import toast from 'react-hot-toast';
+import TabPanel from '../../../widgets/TabPanel';
+import BreadCrumbs from '../../../widgets/BreadCrumbs';
+import Grid from '@material-ui/core/Grid';
+
 
 const Kanban = (props) => {
     const global = useContext(UserContext);
     const [board, setBoard] = useState({ lanes: [] });
-    const {detailProject,handleDetailTaskOpen} = props;
+    const {tabState, index, detailProject,handleDetailTaskOpen} = props;
 
     useEffect(() => {
         if (detailProject){                
@@ -128,13 +132,18 @@ const Kanban = (props) => {
     }
 
     return (
-        <React.Fragment>
-            <Board t={createTranslate(TEXTS)} data={board} collapsibleLanes={true} onLaneUpdate={onLaneRename} onCardAdd={onCardNew} 
-                onCardClick={onCardClick} components={{ Card: CustomCard, NewCardForm: EditLaneFormWithDetailProject }}
-                detailProject={detailProject} eventBusHandle={setEventBus} laneSortFunction={onSorting}>
-            </Board>
-             
-        </React.Fragment>
+        <TabPanel value={tabState} index={index} className={{  padding: '0.5em', minHeight:'500px !important' } }>
+         <Grid container>
+             <BreadCrumbs projectName={detailProject.title} tabName="Board"/>
+             <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
+                <Board t={createTranslate(TEXTS)} data={board} collapsibleLanes={true} onLaneUpdate={onLaneRename} onCardAdd={onCardNew} 
+                    onCardClick={onCardClick} components={{ Card: CustomCard, NewCardForm: EditLaneFormWithDetailProject }}
+                    detailProject={detailProject} eventBusHandle={setEventBus} laneSortFunction={onSorting}>
+                </Board>
+             </Grid>
+         </Grid>
+     </TabPanel>
+        
     )
 
 }

@@ -1,8 +1,8 @@
 import React, { useEffect, useContext, useState } from 'react';
 import makeStyles from '@material-ui/styles/makeStyles';
-import UserContext from '../../../../context/UserContext';
+import UserContext from '../../../../../../context/UserContext';
 import { Grid, Typography, Avatar } from '@material-ui/core/';
-import SelectRole from '../../../widgets/SelectRole';
+import SelectRole from '../../../../../widgets/SelectRole';
 import toast, { Toaster } from 'react-hot-toast';
 import moment from 'moment';
 import axios from 'axios';

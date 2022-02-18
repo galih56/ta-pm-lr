@@ -44,9 +44,7 @@ const DialogContent = withStyles((theme) => ({
     root: { padding: theme.spacing(2), },
 }))(MuiDialogContent);
 
-const ModalCreateUser = (props) => {
-    const open = props.open;
-    const closeModal = props.closeModal;
+const ModalCreateUser = ({open, closeModal, onCreate}) => {
     const [roles, setRoles] = useState([]);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -57,9 +55,9 @@ const ModalCreateUser = (props) => {
     const [emailTaken, setEmailTaken] = useState(false);
     const [passwordConfirmAlert, setPasswordConfirmAlert] = useState(false);
     const [offlineAlert, setOfflineAlert] = useState(false);
-    let [userExists, setUserExists] = useState(false);
-    let [signUpSuccess, setSignUpSuccess] = useState(false);
-    let global = useContext(UserContext);
+    const [userExists, setUserExists] = useState(false);
+    const [signUpSuccess, setSignUpSuccess] = useState(false);
+    const global = useContext(UserContext);
 
     const getRoles = () => {
         const url = `${process.env.MIX_BACK_END_BASE_URL}roles`;
@@ -129,7 +127,7 @@ const ModalCreateUser = (props) => {
                     setEmail('');
                     setPassword('');
                     setConfirmPassword('');
-                    props.onCreate(result.data,'create');
+                    onCreate(result.data,'create');
                     return <b>A new user successfuly created</b>
                 },
                 error: (error)=>{
@@ -146,6 +144,12 @@ const ModalCreateUser = (props) => {
                 },
             });
     }
+
+    const handleUsernameOnChange=(e) => setUsername(e.target.value);
+    const handleEmailOnChange=(e) => setEmail(e.target.value);
+    const handleRolesIdOnChange= (e) => setRolesId(e.target.value);
+    const handlePasswordOnChange=(e) => setPassword(e.target.value); 
+    const handleConfirmPasswordOnChange=(e) => setConfirmPassword(e.target.value)
     return (
         <Dialog onClose={closeModal} aria-labelledby="Modal Create user" open={open} style={{ zIndex: '750' }}
             maxWidth={'lg'} fullWidth>
@@ -160,71 +164,14 @@ const ModalCreateUser = (props) => {
                     { signUpSuccess ? <Alert severity="success" ><strong>Success</strong><br />New user is now registered</Alert> : null}
                     { offlineAlert ? <Alert severity="warning" >You're currently offline. Please check your internet connection</Alert> : null}
                     <form style={{ textAlign: 'center' }} onSubmit={handleSubmit}>
-                        <TextField
-                            variant="standard"
-                            margin="normal"
-                            required
-                            fullWidth
-                            label="Name"
-                            name="name"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value) }
-                        />
-                        <TextField
-                            variant="standard"
-                            margin="normal"
-                            required
-                            fullWidth
-                            label="Email"
-                            name="email"
-                            value={email}
-                            type="email"
-                            onChange={(e) => setEmail(e.target.value) }
-                        />
-                        <Select 
-                            variant="standard"
-                            onChange={e => {
-                                setRolesId(e.target.value);
-                            }}
-                            value={rolesId}
-                            fullWidth
-                            placeholder="Role"
-                        >
-                            {
-                                roles.map((role, index) =>(<MenuItem value={role?.id} key={role?.id}>{role?.name}</MenuItem>))
-                            } 
+                        <TextField variant="standard" margin="normal" required fullWidth label="Name" name="name" value={username} onChange={handleUsernameOnChange}/>
+                        <TextField variant="standard" margin="normal" required fullWidth label="Email" name="email" value={email} type="email" onChange={handleEmailOnChange}/>
+                        <Select  variant="standard" onChange={handleRolesIdOnChange} value={rolesId} fullWidth placeholder="Role">
+                            {roles.map((role, index) =>(<MenuItem value={role?.id} key={role?.id}>{role?.name}</MenuItem>))} 
                         </Select>
-                        <TextField
-                            variant="standard"
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="password"
-                            label="Password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value) }
-                            autoComplete="current-password"
-                        />
-                        <TextField
-                            variant="standard"
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="confirm-password"
-                            label="Confirm Password"
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value) }
-                            autoComplete="current-password"
-                        />
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            color="primary"
-                            onClick={handleSubmit}
-                        > Create </Button>
+                        <TextField variant="standard" margin="normal" required fullWidth name="password" label="Password" type="password" value={password} onChange={handlePasswordOnChange} autoComplete="current-password"/>
+                        <TextField variant="standard" margin="normal" required fullWidth name="confirm-password" label="Confirm Password" type="password" value={confirmPassword} onChange={handleConfirmPasswordOnChange} autoComplete="current-password"/>
+                        <Button type="submit" fullWidth variant="contained" color="primary" onClick={handleSubmit}> Create </Button>
                     </form>
                     
                 </Container>

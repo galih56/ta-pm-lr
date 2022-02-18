@@ -210,10 +210,7 @@ const Files = (props) => {
 
     return (
         <Grid container spacing={2}>
-            {(files.length>0)?(
-                <React.Fragment>
-                {
-                    files.map(file => (
+            {(files.length>0)?(files.map(file => (
                         <Grid item xl={2} lg={3} md={4} sm={6} xs={6} key={file.id}>
                             <CustomCard 
                                 file={file} 
@@ -223,11 +220,8 @@ const Files = (props) => {
                                 projects_id={projects_id}
                                 />
                         </Grid>
-                    ))
-                }
-                </React.Fragment>
-            ):(
-                <Grid xl={12} lg={12} sm={12} xs={12}>
+                    ))):(
+                <Grid item xl={12} lg={12} sm={12} xs={12}>
                     <Alert severity="info" style={{margin:'1em',padding:'auto'}}>No files have been uploaded to this project yet</Alert>
                 </Grid>
             )}

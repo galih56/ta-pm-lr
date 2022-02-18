@@ -1,5 +1,4 @@
-import React, { useState,Suspense,lazy ,useEffect} from 'react';
-import {withRouter} from 'react-router-dom';
+import React, { useState,Suspense,lazy } from 'react';
 import Grid from '@material-ui/core/Grid';
 import MemberList from './members/MemberList';
 const ProjectInformations = lazy(() => import('./ProjectInformations'));
@@ -27,4 +26,4 @@ const Others = ({detailProject,handleDetailTaskOpen, refreshProject}) => {
     );
 }
 
-export default withRouter(Others);
+export default Others;

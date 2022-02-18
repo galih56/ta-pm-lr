@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import {useHistory} from 'react-router-dom';
 import UserContext from '../../context/UserContext';
 import ModalCreateRole from './ModalCreateRole';
 import axios from 'axios';
@@ -18,11 +19,24 @@ export default function RoleInformation() {
         children: [], root: false, isHighlight: false });
     const [modalDetailOpen, setModalDetailOpen] = useState(false);
     const [modalCreateOpen, setModalCreateOpen] = useState(false);
+    let history=useHistory();
+    
+    const removeRoleIdQueryString=()=>{
+        const queryParams = new URLSearchParams(history.location.search)
+        if (queryParams.has('roles_id')) {
+            queryParams.delete('roles_id');
+            history.replace({
+                search: queryParams.toString(),
+            })
+        }
+    }
+    
 
     const handleModalOpen = (data) => {
         const { role, open } = data;
         setModalDetailOpen(open);
         setClickedRole(role);
+        if(!open)removeRoleIdQueryString()
     }
 
     const getRoles = () => {

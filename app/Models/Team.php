@@ -18,6 +18,16 @@ class Team extends Model
         'description',
     ];
 
+
+    protected static function boot(){
+        parent::boot();
+        
+        static::deleting(function($team) { 
+            $team->projects()->detach();
+            $team->users()->detach();
+        });
+    }
+
     public function members(){
         return $this->hasMany(TeamMember::class,'teams_id');
     }

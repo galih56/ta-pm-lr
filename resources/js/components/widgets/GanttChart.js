@@ -269,7 +269,7 @@ class GanttChart extends React.Component {
                     actionComplete={this.HandleActionComplete.bind(this)}
                     enableVirtualization={true}
                     milestoneTemplate={this.MilestoneTemplate.bind(this)}
-                    ref={gantt => this.ganttInstance = gantt}
+                    // ref={gantt => this.ganttInstance = gantt}
                     actionBegin={this.actionBegin.bind(this)}
                 >
                     <Inject services={[Toolbar,VirtualScroll ]}/>

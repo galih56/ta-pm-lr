@@ -12,13 +12,12 @@ import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
-import UserContext from '../../context/UserContext';
-import toast, { Toaster } from 'react-hot-toast';
+import UserContext from '../../../../context/UserContext';
+import toast from 'react-hot-toast';
 import MobileDateRangePicker from '@material-ui/lab/MobileDateRangePicker';
 import AdapterDateFns from '@material-ui/lab/AdapterDateFns';
 import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
-import ExtendDeadlineForm from './../widgets/ExtendDeadlineForm';
-import { parseISO } from 'date-fns'; 
+import ExtendDeadlineForm from '../../../widgets/ExtendDeadlineForm';
 
 const ProjectInfo = (props) => {
     const global = useContext(UserContext);

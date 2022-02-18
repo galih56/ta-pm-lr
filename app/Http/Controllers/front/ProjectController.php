@@ -48,21 +48,6 @@ class ProjectController extends Controller
     {
         if($request->hasFile('file')){
             $project=$this->import($request);
-            if($request->has('teams')){
-                $project->teams()->sync($request->teams);
-            }
-
-            $members=[];
-            if($request->has('members')){  
-                $members=$request->members;
-                if($request->users_id)$members[]=$request->users_id;  
-                $project->users()->sync($members);
-            }
-            
-            if($request->has('clients')){
-                $project->clients()->sync($request->clients);
-            }
-              
             if($project['error']==true){   
                 return response()->json($project);
             }else{
@@ -170,22 +155,17 @@ class ProjectController extends Controller
                                 ->from('task_attachments AS ta')
                                 ->join('files AS f','f.id','=','ta.files_id')
                                 ->join('tasks AS t','ta.tasks_id','=','t.id')
-                                ->where(function($qw)use($id){
-                                    $qw->whereIn('ta.tasks_id',function($query) use($id){
-                                        return $query->select('t1.id')
-                                                    ->from('tasks AS t1')
-                                                    ->join('lists AS l1', 't1.lists_id','=','l1.id')
-                                                    ->where('l1.projects_id','=',$id);
-                                    })->orWhereIn('ta.tasks_id',function($query)use($id){
-                                        return $query->select('t2.id')
-                                                    ->from('tasks AS t1')
-                                                    ->join('tasks AS t2','t2.parent_task_id','=','t1.id')
-                                                    ->join('lists AS l2', 't1.lists_id','=','l2.id')
-                                                    ->where('l2.projects_id','=',$id);
-                                    });
-                                })->with('user')->get();
-                                
-        return response()->json($files);
+                                ->leftJoin(DB::raw("(	
+                                    SELECT tasks.id, tasks.title AS tasks_title, tasks.parent_task_id, tasks.lists_id, lists.title AS lists_title, lists.projects_id, projects.title AS projects_title
+                                       FROM public.tasks
+                                    LEFT JOIN lists ON tasks.lists_id=lists.id
+                                    LEFT JOIN projects ON lists.projects_id=projects.id 
+                                    WHERE projects.id=$id
+                                ) AS parent_task "),'t.parent_task_id','=','parent_task.id')
+                                ->leftJoin('lists AS l','t.lists_id','=','l.id')
+                                ->leftJoin('projects AS p','l.projects_id','=','p.id')
+                                ->where('p.id','=',$id)->with('user');
+        return response()->json($files->get());
     }
 
     public function getClients($id){
@@ -231,9 +211,13 @@ class ProjectController extends Controller
     public function getMembers($id){
         $project=Project::with('members.user.role')->findOrFail($id);
         $members=$project['members'];
+        // dd($members);
         $project_members=[];
         for ($i=0; $i < count($members); $i++) { 
             $member=$members[$i];
+            // if($member['id']!=8){
+            //     dd($member);
+            // }
             $project_members_id=$member['id'];
             $user=$member['user'];
             $projects_id=$member['projects_id'];
@@ -756,6 +740,18 @@ class ProjectController extends Controller
                     if($request->has('clients')){
                         $project->clients()->sync($request->clients);
                     }
+                    
+                    $members=[];
+                    if($request->has('members')){  
+                        $members=$request->members;
+                        if($request->users_id)$members[]=$request->users_id;  
+                        $project->users()->sync($members);
+                    }
+                    
+                    if($request->has('clients')){
+                        $project->clients()->sync($request->clients);
+                    }
+                    
                 }  
     
                 foreach ($data as $i => $list) {

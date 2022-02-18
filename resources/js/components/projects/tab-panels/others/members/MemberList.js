@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import UserContext from '../../../context/UserContext';
+import UserContext from '../../../../../context/UserContext';
 import PropTypes from 'prop-types';
 import makeStyles from '@material-ui/styles/makeStyles';
 import Table from '@material-ui/core/Table';
@@ -19,7 +19,7 @@ import KeyboardArrowDownIcon from '@material-ui/icons/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@material-ui/icons/KeyboardArrowUp';
 import { visuallyHidden } from '@material-ui/utils';
 import ModalDetailMember from './ModalDetailMember/ModalDetailMember';
-import TaskList from '../../tasks/TaskList';
+import TaskList from '../../../../tasks/TaskList';
 import moment from 'moment';
 import axios from 'axios';
 import ModalCreateMember from './ModalCreateMember';
@@ -96,12 +96,7 @@ function EnhancedTableHead(props) {
 
 export default function EnhancedTable(props) {
     const classes = useStyles();
-    const handleDetailTaskOpen = props.handleDetailTaskOpen;
-    const projects_id = props.projects_id;
-    const memberChange = props.memberChange;
-    const refreshProject= props.refreshProject;
-    const setMemberChange = props.setMemberChange;
-    const data = props.data;
+    const {projects_id,memberChange,refreshProject,setMemberChange,handleDetailTaskOpen}=props
     let global = useContext(UserContext);
 
     let initStateUser = { id: null, name: '', email: '', role: { id: null, name: '' } }

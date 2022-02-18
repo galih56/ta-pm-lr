@@ -170,7 +170,7 @@ export default function EnhancedTable() {
         const { user, open } = data;
         setModalOpen(open);
         setClickedUser(user);
-        removeUserIdQueryString()
+        if(!open) removeUserIdQueryString()
     }
 
     useEffect(()=>{
