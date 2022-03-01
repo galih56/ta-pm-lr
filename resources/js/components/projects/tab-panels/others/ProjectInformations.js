@@ -83,7 +83,7 @@ const ProjectInfo = (props) => {
                 loading: 'Deleting...',
                 success: (result)=>{
                     global.dispatch({ type: 'remove-project', payload: detailProject.id });
-                    history.push('/projects');
+                    window.location.replace(window.location.origin)
                     return <b>Successfully deleted</b>
                 },
                 error: (error)=>{
@@ -200,30 +200,18 @@ const ProjectInfo = (props) => {
                                 handleConfirm={handleRemoveProject}></DeleteConfirmDialog>
                         </>
                     ):null}
-                    <ExtendDeadlineForm 
-                        open={showExtendDeadlineForm} 
-                        handleClose={()=>setShowExtendDeadlineForm(false)}
-                        detailProject={detailProject}
-                        />
+                    <ExtendDeadlineForm  open={showExtendDeadlineForm}  handleClose={()=>setShowExtendDeadlineForm(false)} detailProject={detailProject} />
                 </React.Fragment>
             ):(
                 <React.Fragment>
                     <Grid item xl={6} md={6} sm={6} xs={12} style={{ padding: '1em' }}>
-                        <Typography variant="h5">{detailProject.title}  ({detailProject.progress?Math.round(detailProject.progress):'0'}%)</Typography>
+                        <Typography variant="h5">{detailProject.title}  ({Math.round(detailProject.progress)}%)</Typography>
                     </Grid>
                     <Grid item xl={6} md={6} sm={6} xs={12} style={{ padding: '1em' }}>
-                        {detailProject.start ? (
-                                <Typography variant="body1" >Start : {moment(detailProject.start).format('DD MMMM YYYY') }</Typography>
-                            ): null} 
-                        {detailProject.end ? (
-                                <Typography variant="body1" >End : {moment(detailProject.end).format('DD MMMM YYYY') }</Typography>
-                            ): null} 
-                        {detailProject.actual_start ? (
-                                <Typography variant="body1" >Actual Start : {moment(detailProject.actual_start).format('DD MMMM YYYY') }</Typography>
-                            ): null}
-                        {detailProject.actual_end ? (
-                                <Typography variant="body1" >Actual End : {moment(detailProject.actual_end).format('DD MMMM YYYY') }</Typography>
-                            ): null}
+                        {detailProject.start ? <Typography variant="body1" >Start : {moment(detailProject.start).format('DD MMMM YYYY') }</Typography>: null} 
+                        {detailProject.end ? <Typography variant="body1" >End : {moment(detailProject.end).format('DD MMMM YYYY') }</Typography>: null} 
+                        {detailProject.actual_start ?<Typography variant="body1" >Actual Start : {moment(detailProject.actual_start).format('DD MMMM YYYY') }</Typography>: null}
+                        {detailProject.actual_end ?<Typography variant="body1" >Actual End : {moment(detailProject.actual_end).format('DD MMMM YYYY') }</Typography>:null}
                     </Grid>
                     <Grid item xl={12} md={12} sm={12} xs={12} style={{ padding: '1em' }}>
                         <Typography variant="body1" >{detailProject.description}</Typography>

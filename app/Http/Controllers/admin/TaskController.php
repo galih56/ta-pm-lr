@@ -14,6 +14,7 @@ use App\Models\File;
 use App\Models\Attachment;
 use Session;
 use Auth;
+use Carbon\Carbon;
 
 class TaskController extends Controller
 {
@@ -158,20 +159,27 @@ class TaskController extends Controller
      */
     public function edit($id,$project=null,$list=null)
     {
+        $task=Task::with('list')->with('parentTask')->with('members.user')->findOrFail($id);
         $tasks=Task::orderBy('created_at','DESC')->with('list.project')->with('parentTask.list.project')->get();
         if($project){
-            $project=Project::findOrFail($project);
+            if($task->parentTask){
+                return $task->parentTask->list->project;
+            }else{
+                return $task->list->project;
+            }
+            if(empty($project)) $project=Project::findOrFail($project);
         }
         if($list){
-            $list=TaskList::findOrFail($list);
-            // $tasks=$list->tasks()->orderBy('created_at','DESC')->with('list.project')->with('parentTask.list.project');
+            $list=$task->list;
+            if(empty($list)) $list=TaskList::findOrFail($list);
         }
-        $task=Task::with('members.user')->findOrFail($id);
         $users=User::orderBy('name','asc')->get();
         $projects=Project::orderBy('title','asc')->get();
         $tags=Tag::orderBy('title','asc')->get();
         $clients=Client::orderBy('institution','asc')->get();
-        return view('admin.tasks.edit')->with(compact('project','list','task','projects','users','clients','tags'));
+        $lists=TaskList::orderBy('title','asc')->get();
+        $tasks=Task::orderBy('title','asc')->get();
+        return view('admin.tasks.edit')->with(compact('project','list','task','projects','users','clients','tags','lists','tasks'));
     }
     // bayu@pttati.co.id
     /**
@@ -205,6 +213,7 @@ class TaskController extends Controller
         $task->cost=$request->cost;
         $task->actual_cost=$request->actual_cost;
         $task->complete=$request->complete;
+        $task->progress=$request->progress;
         $task->save();
 
         if($request->has('users')){
@@ -253,7 +262,6 @@ class TaskController extends Controller
             if($actual_start==$start) $task->start_label='Mulai tepat waktu';
         }
         $task->save();
-        $task=$this->getDetailTask($id);
         return redirect()->back();
     }
 
@@ -279,44 +287,30 @@ class TaskController extends Controller
 
     public function updateComplete(Request $request,$id){
         $task=Task::with('cards')->with('parentTask')->findOrFail($id);
-        if($request->has('complete')){ 
-            if($task->parentTask){
-                $this->updateParentProgress($task->parentTask->id);
-            }
-
-            if($request->complete){
-                if(!count($task->cards)){
-                    $task->progress=100;
-                }
-                $task->complete=true;
-                    
-                $end = Carbon::parse($task->end)->format('Y-m-d');
-                $task->actual_end = Carbon::now()->toDateTimeString();
-                if($task->actual_end<$end) $task->end_label='Selesai lebih cepat';
-                if($task->actual_end>$end) $task->end_label='Selesai terlambat';
-                if($task->actual_end==$end) $task->end_label='Selesai tepat waktu';
-            }else{
-                if($task->parentTask && count($task->cards)>0){
-                    $valuePerSubtask=100/count($task->cards);
-                    $completeSubtaskCounter=0;
-                    for ($i = 0; $i < count($task->cards); $i++) {
-                        $subtask = $task->cards[$i];
-                        if($subtask->complete){ $completeSubtaskCounter++; }
-                    }
-                    $progress=$completeSubtaskCounter*$valuePerSubtask;
-                    $task->progress=round($progress);
-                    $task->save();
-                }                
-                $task->actual_end = null;
-                $task->end_label='Belum Selesai';
-                $task->complete=false;
-                if(!count($task->cards)){
-                    $task->progress=0;
-                }
-            }
+        if($request->complete){
+            $task->progress=100;
+            $task->complete=true;
+                
+            $end = Carbon::parse($task->end)->format('Y-m-d');
+            $task->actual_end = Carbon::now()->toDateTimeString();
+            if($task->actual_end<$end) $task->end_label='Selesai lebih cepat';
+            if($task->actual_end>$end) $task->end_label='Selesai terlambat';
+            if($task->actual_end==$end) $task->end_label='Selesai tepat waktu';
+        }else{
+            $task->progress=0;
+            $task->complete=false;
+            $task->actual_end=null;
+            $task->end_label='Belum selesai';
         }
         $task->save();
-        $task=$this->getDetailTask($task->id);
+          //is a subtask
+        // if($task->parentTask){
+        //     // dd('subtask',$task->id,$task->complete,$task->progress,$task->parentTask,$task->list);
+        //     $task->parentTask->updateProgress();
+        // }else{
+        //     // dd('parent task',$task->id,$task->complete,$task->progress,$task->parentTask,$task->list);
+        //     $task->list->updateProgress();
+        // }
         return redirect()->back();
     }
 

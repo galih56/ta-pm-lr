@@ -17,31 +17,9 @@ import NumberFormat from 'react-number-format';
 const FormCreateNewTask=({newTask,setNewTask,handleAddNewTask,detailProject,is_subtask,minDate,maxDate})=>{
     const global=useContext(UserContext);
     const [dateRange, setDateRange] = useState([null, null]);
-    const [exceptedUsers,setExceptedUsers]=useState([]);
 
     useEffect(()=>{
         setNewTask({...newTask,is_subtask:is_subtask});
-        const project_members=detailProject?.members||[];
-        const checkLoggedInUserProjectMember=()=>{
-            var logged_in_user={
-                id:global.state.id,
-                name:global.state.name,
-                username:global.state.username,
-                email:global.state.email,
-            }
-            var registered=false
-            for (let i = 0; i < project_members.length; i++) {
-                const member = project_members[i];
-                if(member.id==logged_in_user.id){ registered=true; }
-            }
-            
-            var users=[];
-            if(!registered){
-                users=[ logged_in_user ];
-                setExceptedUsers(users);
-            }
-        }
-        checkLoggedInUserProjectMember();
     },[]);
     
     const handleUserSearchbarChange=(users)=> setNewTask({...newTask,members:[...users]});

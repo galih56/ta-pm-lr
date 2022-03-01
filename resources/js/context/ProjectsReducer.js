@@ -1,11 +1,12 @@
 const average = arr => {
-    if(typeof arr=='array'){
+    var result=0
+    if(typeof arr !== 'undefined'){
         var avg=arr.reduce((sum,data) => {
             return sum + data.progress
         }, 0) / arr.length
-        return avg;
+        result=avg
     }
-    return 0;
+    return result;
 };
 
 const storeProjects = (state, payload) => {
@@ -21,6 +22,9 @@ const storeDetailProject = (state,payload) => {
     const newProjects = state.projects.map((project) => {
         if (project.id == payload.id) {
             project =payload;
+            if(project.columns){
+                project.progress=average(project.columns)
+            }
         }
         return project
     });

@@ -37,7 +37,7 @@
                         Export
                     </a>
                 </div>
-                <div class="col-12">
+                <div class="col-4">
                     <div class="mb-2">
                         <label class="my-1 me-2" for="title">Nama</label>
                         <input type="text" name="title" id="title" 
@@ -50,6 +50,20 @@
                         @enderror    
                     </div>
                 </div>
+                <div class="col-4">
+                    <div class="mb-2">
+                        <label class="my-1 me-2" for="progress">Progress</label>
+                        <input type="text" name="progress" id="progress" 
+                            class="form-control @error('progress') is-invalid @enderror"
+                            value="{{$project->progress}}" required>
+                        @error('progress')
+                        <span class="invalid-feedback" role="alert">
+                            <strong>{{ $message }}</strong>
+                        </span>
+                        @enderror    
+                    </div>
+                </div>
+                
                 <div class="col-6">
                     <div class="mb-2">
                         <label class="my-1 me-2" for="start">Tanggal mulai</label>
@@ -110,7 +124,7 @@
                                 <option value="{{$user->id}}"  
                                     @if(count($project->users))
                                         {{$project->users->contains($user->id)? 'selected' : ''}}
-                                    @endif>{{$user->name}} - {{$user->role->name}}</option>
+                                    @endif>{{$user->name}} {{$user->role?" - ".$user->role->name:''}}</option>
                                 @endforeach
                         </select>
                         @error('users')

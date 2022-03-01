@@ -12,19 +12,44 @@ import { makeStyles } from '@material-ui/styles';
 import UserContext from './../context/UserContext';
 import axios from 'axios';
 import styleConfig from './Theme';
-import toast, { Toaster } from 'react-hot-toast';
+import Typography from '@material-ui/core/Typography';
+import toast from 'react-hot-toast';
 
 const useStyles = makeStyles((theme) => (styleConfig(theme)));
 
+var groupTasks = function (arr) {
+  return arr.reduce(function(results, task) {
+      const projects_id = task.projects_id;
+      const projects_title = task.projects_title;
+
+      if(projects_id && projects_title){
+        var project_check = results.find((item) => item.id == projects_id);
+        if(project_check){
+          for (let i = 0; i <= results.length; i++) {
+            if (results[i].id === project_check.id) {
+              results[i].tasks.push(task);
+              break;
+            }
+          }
+        }else{
+          var project={
+            id:projects_id,
+            title:projects_title,
+            tasks:[]
+          }
+          project.tasks.push(task);
+          results.push(project);
+        }
+      }
+      return results;
+  }, [])
+};
+
 const Home = (props) => {
     const classes = useStyles();
-    const [taskListOpen, setTaskListOpen] = useState(true);
     const [projectListOpen, setProjectListOpen] = useState(true);
-    const [tasks, setTasks] = useState([]);
-
-    const handleTaskListOpen = () => setTaskListOpen(!taskListOpen);
-
     const handleProjectListOpen = () => setProjectListOpen(!projectListOpen);
+    const [tasksDueSoon, setTasksDueSoon] = useState([]);
 
     const global=useContext(UserContext);
     const history =useHistory();
@@ -51,7 +76,7 @@ const Home = (props) => {
                 getTasks();
         });
     },[history]);
-
+    
     const getProjects = () => {
         let url =''
         const toast_loading=toast.loading('Loading...');
@@ -75,20 +100,33 @@ const Home = (props) => {
                 }
             });
     }
-
+    
     const getTasks = () => {
         const url = `${process.env.MIX_BACK_END_BASE_URL}users/${global.state.id}/tasks`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
-                setTasks(result.data);
-            }).catch((error) => {
-                console.log(error);
-            });
+              const tasks=groupTasks(result.data);
+              // console.log(tasks)
+                setTasksDueSoon(tasks);
+            }).catch(console.log);
     }
 
 
+    const TasksList=({project})=>{
+        const [taskListOpen, setTaskListOpen] = useState(true);
+        const handleTaskListOpen = () => setTaskListOpen(!taskListOpen);
+        return( 
+            <>
+                <ListItem button dense font="small" onClick={handleTaskListOpen} style={{ paddingBottom: '1.2em' }}> {taskListOpen ? <ExpandLess /> : <ExpandMore />}{project.title} </ListItem>
+                <Collapse in={taskListOpen} timeout="auto">
+                    <TaskTable data={project.tasks}/>
+                </Collapse>
+            </>
+        )
+    }
+  
     return (
         <React.Fragment>
             <Grid item xs={12}>
@@ -102,11 +140,8 @@ const Home = (props) => {
             </Grid>
             <Grid item xs={12}>
                 <Paper className={classes.paper}>
-                    <ListItem button dense font="small" onClick={handleTaskListOpen} 
-                        style={{ paddingBottom: '1.2em' }}> {taskListOpen ? <ExpandLess /> : <ExpandMore />}Task Due Soon </ListItem>
-                    <Collapse in={taskListOpen} timeout="auto">
-                        <TaskTable data={tasks}/>
-                    </Collapse>
+                  <Typography variant="body1">Tasks due soon</Typography>
+                  {tasksDueSoon.map(project=><TasksList project={project}/>)}
                 </Paper>
             </Grid>
         </React.Fragment >

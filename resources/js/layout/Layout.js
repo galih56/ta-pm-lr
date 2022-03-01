@@ -41,12 +41,9 @@ const Layout = (props) => {
         <div className={classes.root}>
             <CssBaseline />
             <Router>
-            <AppBar position="absolute" 
-                className={clsx(classes.appBar, drawerOpen && classes.appBarShift)}
-                style={{ zIndex: 701 }}>
+            <AppBar position="absolute"  className={clsx(classes.appBar, drawerOpen && classes.appBarShift)} style={{ zIndex: 701 }}>
                 <Toolbar className={classes.toolbar}>
-                    <IconButton edge="start" color="inherit" aria-label="open drawer" 
-                        onClick={handleDrawerOpen} className={clsx(classes.menuButton, drawerOpen && classes.menuButtonHidden)}>
+                    <IconButton edge="start" color="inherit" aria-label="open drawer"  onClick={handleDrawerOpen} className={clsx(classes.menuButton, drawerOpen && classes.menuButtonHidden)}>
                         <MenuIcon />
                     </IconButton>
                     <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>ManPro</Typography>

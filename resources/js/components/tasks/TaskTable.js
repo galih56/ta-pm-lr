@@ -189,15 +189,8 @@ export default function EnhancedTable({data}) {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <TablePagination
-                    rowsPerPageOptions={[10, 20, 30]}
-                    component="div"
-                    count={rows.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onPageChange={handleChangePage}
-                    onRowsPerPageChange={handleChangeRowsPerPage}
-                />
+                <TablePagination rowsPerPageOptions={[10, 20, 30]} component="div" count={rows.length} rowsPerPage={rowsPerPage} 
+                    page={page} onPageChange={handleChangePage} onRowsPerPageChange={handleChangeRowsPerPage}/>
             </Paper>
             {showModalDetailTask()}
         </div>
@@ -211,3 +204,5 @@ EnhancedTableHead.propTypes = {
     orderBy: PropTypes.string.isRequired,
     rowCount: PropTypes.number.isRequired,
 };
+
+

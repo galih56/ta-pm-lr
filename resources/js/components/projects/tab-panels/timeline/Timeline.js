@@ -37,8 +37,9 @@ function Timeline(props) {
     let global = useContext(UserContext);
 
     const searchByKeywords=()=>{
+        var columns=props.detailProject?.columns||[];
         const toast_loading = toast.loading('Loading...');
-        var newRows=props.data.filter(row => {
+        var newRows=columns.filter(row => {
             var matched=false;
             var filteredTasks=[];
             if(row.title.toLowerCase().includes(keywords.toLowerCase())){

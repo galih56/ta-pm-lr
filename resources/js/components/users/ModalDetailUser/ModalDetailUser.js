@@ -54,11 +54,28 @@ export default function ModalDetailUser(props) {
         id: null, name: '', email: '', last_login: '', role: null, roles_id:'',profilePicture: ''
     });
     const [isEditing, setIsEditing] = useState(false);
-    const handleEditingMode = (bool = false) => setIsEditing(bool);
+    let history=useHistory();
+
+    const handleEditingMode = (bool = false) => {
+        const params = new URLSearchParams(history.location.search)
+        if(bool==true) {
+            params.append('edit', 1)
+            history.replace({ search: params.toString() })
+        }else{
+            params.delete('edit')
+            history.replace({ search: params.toString() })
+        }
+        setIsEditing(bool);
+    }
 
     useEffect(() => {
         setData(props.initialState);
         getDetailUser()
+        const params = new URLSearchParams(history.location.search)
+        if(params.has('edit')){
+            const paramsEdit = params.get('edit');
+            if(paramsEdit==1) setIsEditing(true);
+        }
     }, [props.initialState.id]);
 
     const getDetailUser = () => {

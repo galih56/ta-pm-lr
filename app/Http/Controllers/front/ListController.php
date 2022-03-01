@@ -29,6 +29,7 @@ class ListController extends Controller
     {
         $list=new TaskList();
         $list->title=$request->title;
+        $list->progress=0;
         $list->start=$request->start;
         $list->end=$request->end;
         $list->projects_id=$request->projects_id;

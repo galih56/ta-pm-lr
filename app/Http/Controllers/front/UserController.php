@@ -124,11 +124,19 @@ class UserController extends Controller
     
     public function getTasks(Request $request,$id){
         $tasks=Task::selectRaw("t.id, t.title, t.lists_id, t.start, t.end, t.actual_start, 
-            t.actual_end, t.created_at, t.updated_at, l.projects_id, t.progress, t.complete, t.parent_task_id")
+            t.actual_end, t.created_at, t.updated_at, l.projects_id, t.progress, t.complete, t.parent_task_id, 
+            coalesce(l.projects_id,pt.projects_id)  AS projects_id, 
+            coalesce(p.title,pt.projects_title)  AS projects_title")
                     ->from('tasks AS t')
                     ->leftJoin('lists AS l','t.lists_id','=','l.id')
                     ->leftJoin('projects AS p','p.id','l.projects_id')
                     ->leftJoin('users AS u','t.users_id','=','u.id')
+                    ->leftJoin(DB::raw('(
+                        SELECT tasks.id, projects.id as projects_id, projects.title as projects_title  
+                        FROM tasks	
+                        left join "lists" on "tasks"."lists_id" = "lists"."id" 
+                        left join "projects" on "projects"."id" = "lists"."projects_id"
+                    ) AS pt'), 't.parent_task_id','=','pt.id')
                     ->leftJoin(DB::raw("(
                         SELECT tm.tasks_id,count(tm.tasks_id) AS counts
                         FROM task_members AS tm 
@@ -138,23 +146,23 @@ class UserController extends Controller
                     ->where('counter.counts','>=','1')
                     ->orWhere('t.users_id','=',$id)
                     ->orderBy('t.start','ASC')
-                        ->with(['list'=>function($query){
-                            return $query->select('id','title','start','end','projects_id')
-                                    ->with(['project'=>function($query){
-                                        return $query->select('id','title','start','end','complete');
-                                    }]);
-                        }])
-                        ->with(['parentTask.list'=>function($query){
-                            return $query->select('id','title','start','end','projects_id')
-                                    ->with(['project'=>function($query){
-                                        return $query->select('id','title','start','end','complete');
-                                    }]);
-                        }])
-                        ->with(['creator'=>function($query){
-                            return $query->select('id','name','email');
-                        }])->with(['cards'=>function($query){
-                            return $query->select('id','title','start','end','actual_start','actual_end','progress','parent_task_id','complete');
-                        }]);
+                    ->with(['list'=>function($query){
+                        return $query->select('id','title','start','end','projects_id')
+                                ->with(['project'=>function($query){
+                                    return $query->select('id','title','start','end','complete');
+                                }]);
+                    }])
+                    ->with(['parentTask.list'=>function($query){
+                        return $query->select('id','title','start','end','projects_id')
+                                ->with(['project'=>function($query){
+                                    return $query->select('id','title','start','end','complete');
+                                }]);
+                    }])
+                    ->with(['creator'=>function($query){
+                        return $query->select('id','name','email');
+                    }]);
+        // dd($tasks->toSql());
+        // dd($tasks->count());
         $tasks=$tasks->get();
         return response()->json($tasks);
     }
@@ -239,12 +247,10 @@ class UserController extends Controller
     }
 
     public function refreshLastLogin(Request $request, $id){
-        $user=User::findOrFail($id);
+        $user=User::with('role')->findOrFail($id);
         $user->last_login= Carbon::now()->toDateTimeString();
         $user->save();
-        return response()->json([
-            'message'=>'logged in'
-        ]);
+        return response()->json($user);
     }
 
 }

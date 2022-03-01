@@ -26,13 +26,26 @@
                 @csrf
                 <div class="row">
                     <h1 class="h4">Form Ubah Daftar Tugas (List)</h1>
-                    <div class="col-12">
+                    <div class="col-8">
                         <div class="mb-2">
                             <label class="my-1 me-2" for="title">Judul</label>
                             <input type="text" name="title" id="title" 
                                 class="form-control @error('title') is-invalid @enderror"
                                 value="{{$list->title}}" required>
                             @error('title')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                            @enderror    
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="mb-2">
+                            <label class="my-1 me-2" for="title">Progress</label>
+                            <input type="number" name="progress" id="progress" 
+                                class="form-control @error('progress') is-invalid @enderror"
+                                value="{{$list->progress}}" required>
+                            @error('progress')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
                             </span>

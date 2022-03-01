@@ -40,7 +40,6 @@ class ProjectController extends Controller
      */
     public function index(Request $request)
     {
-
         $projects=Project::orderBy('created_at','DESC')->get();
         return view('admin.projects.index',['projects'=>$projects]);
     }

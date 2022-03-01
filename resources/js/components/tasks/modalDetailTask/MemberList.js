@@ -95,7 +95,7 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
                     <Typography>Assigned to : </Typography>
                  </Grid>
                  <Grid item lg={12} md={12} sm={12} xs={12}>
-                     <UserSearchBar detailProject={detailProject} exceptedData={[...exceptedData,data.creator]}  onChange={handleUserbarOnChange} userOnly={true}/>
+                     <UserSearchBar detailProject={detailProject} exceptedData={exceptedData}  onChange={handleUserbarOnChange} userOnly={true}/>
                     </Grid>
                  {[1,2,4,5].includes(global.state.role.id)?(
                     <Grid item lg={12} md={12} sm={12} xs={12}>

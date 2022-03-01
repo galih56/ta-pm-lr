@@ -7,7 +7,7 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\withHeadings;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -20,7 +20,7 @@ use Maatwebsite\Excel\Concerns\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Carbon\Carbon;
 
-class ProjectExport implements FromCollection,withHeadings,WithHeadingRow, WithTitle,WithMapping
+class ProjectExport implements FromCollection,WithHeadings,WithHeadingRow, WithTitle,WithMapping
 {
     use Exportable;
     protected $project;

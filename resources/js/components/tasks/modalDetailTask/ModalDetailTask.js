@@ -7,7 +7,7 @@ import Dialog from '@material-ui/core/Dialog';
 import IconButton from '@material-ui/core/IconButton';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
 import MuiDialogContent from '@material-ui/core/DialogContent';
-import MuiDialogActions from '@material-ui/core/DialogActions';
+import MuiDialogActions from '@material-ui/core/DialogActions'; 
 import CloseIcon from '@material-ui/icons/Close';
 import DialogActionButtons from './DialogActionButtons';
 import TaskProgress from './TaskProgress';
@@ -31,11 +31,7 @@ const DialogTitle = withStyles(styles)((props) => {
         <MuiDialogTitle className={classes.root} {...other} component="div">
             <span>{children}</span>
             {onClose ? (
-                <IconButton
-                    aria-label="close"
-                    className={classes.closeButton}
-                    onClick={onClose}
-                    size="large">
+                <IconButton aria-label="close" className={classes.closeButton} onClick={onClose} size="large">
                     <CloseIcon />
                 </IconButton>
             ) : null}
@@ -59,6 +55,12 @@ const removeTaskIdQueryString=(history)=>{
             search: queryParams.toString(),
         })
     }
+    if (queryParams.has('edit')) {
+        queryParams.delete('edit');
+        history.replace({
+            search: queryParams.toString(),
+        })
+    }
 }
 
 export default function ModalDetailTask(props) {
@@ -67,6 +69,7 @@ export default function ModalDetailTask(props) {
     const initConfirmState={open:false,type:'',callback:()=>{}};
     const [confirm,setConfirm]=useState(initConfirmState);
     const [emptyInputErrors,setEmptyInputErrors]=useState(false);
+  
     const global = useContext(UserContext);
     const history = useHistory();
     const [data, setData] = useState({
@@ -81,7 +84,17 @@ export default function ModalDetailTask(props) {
         id:'',title:'',members:[],clients:[],columns:[]
     })
     const [isEditing, setIsEditing] = useState(false);
-    const handleEditingMode = (bool = false) => setIsEditing(bool);
+    const handleEditingMode = (bool = false) => {
+        const params = new URLSearchParams(history.location.search)
+        if(bool==true) {
+            params.append('edit', 1)
+            history.replace({ search: params.toString() })
+        }else{
+            params.delete('edit')
+            history.replace({ search: params.toString() })
+        }
+        setIsEditing(bool);
+    }
     const handleCloseConfirm=()=>setConfirm(initConfirmState);
     
     const getDetailTask = () => {
@@ -112,6 +125,11 @@ export default function ModalDetailTask(props) {
 
     useEffect(() => {
         getDetailTask()
+        const params = new URLSearchParams(history.location.search)
+        if(params.has('edit')){
+            const paramsEdit = params.get('edit');
+            if(paramsEdit==1) setIsEditing(true);
+        }
     }, [id,props.initialState.id]);
 
     useEffect(()=>{

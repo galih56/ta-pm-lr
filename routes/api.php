@@ -22,6 +22,7 @@ Route::get('files/{id}/download', 'App\Http\Controllers\front\FileController@dow
 Route::patch('meetings/add-meeting-members', 'App\Http\Controllers\front\MeetingController@addMembers');
 Route::patch('meetings/remove-meeting-members', 'App\Http\Controllers\front\MeetingController@removeMembers');
 Route::resource('meetings', 'App\Http\Controllers\front\MeetingController');
+Route::patch('meetings/{meetings_id}/users/{users_id}','App\Http\Controllers\front\MeetingMemberController@update');
 Route::resource('meeting-members', 'App\Http\Controllers\front\MeetingMemberController');
 Route::resource('teams', 'App\Http\Controllers\front\TeamController');
 Route::resource('team-members', 'App\Http\Controllers\front\TeamMemberController');

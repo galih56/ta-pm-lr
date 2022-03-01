@@ -57,6 +57,7 @@ class ProjectController extends Controller
         }else{
             $project=new Project();
             $project->title=$request->title;
+            $project->progress=0;
             $project->description=$request->description;
             $project->start=$request->start;
             $project->end=$request->end;

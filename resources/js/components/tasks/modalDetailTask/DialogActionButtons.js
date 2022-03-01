@@ -1,11 +1,7 @@
-import React, { memo,useContext } from 'react';
-import DialogConfirm from './DialogConfirm';
+import React, { memo } from 'react';
 import { Button } from '@material-ui/core/';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import UserContext from '../../../context/UserContext';
 
 const dialogActionButtons = ({ isEdit,  setEditMode, deleteTask, setConfirm, closeModal,deletable }) => {
-    const global = useContext(UserContext);
     const handleConfirm=()=> setConfirm({open:true,callback:deleteTask})
     if (isEdit) {
         return (

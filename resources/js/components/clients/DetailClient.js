@@ -92,65 +92,40 @@ export default function DetailClient(props) {
                 },
             });
     }
+
+    const handleCancle=(e)=>{
+        e.preventDefault();
+        setEditing(false);
+    }
+    const handleInstitutionOnChange=(e) => setData({...data, institution:e.target.value})
+    const handleCityOnChange=(e) => setData({...data,city:e.target.value})
+    const handleDescriptionOnChange=(e) => setData({ ...data, description: e.target.value })
+    const handleEditOpen=()=>setEditing(true);
+    const handleConfirmClose=()=>setOpenModalConfirm(false);
+    const handleConfirmOpen=()=>setOpenModalConfirm(true);
+
     return (
         <Paper style={{ padding: '1em',width:'100%' }}>
-             
             <Grid container component="form" spacing={1}>
                 <Grid item xl={12} lg={12} md={12} sm={12} xs={12}>
                     <Router>
                         <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="projects">
-                            <Button component={Link}  color="primary"
-                                to="/projects">
-                                Projects
-                            </Button>
-                            <Button component={Link}  color="primary"
-                                to="/clients">
-                                Clients
-                            </Button>
+                            <Button component={Link}  color="primary"  to="/projects">  Projects </Button>
+                            <Button component={Link}  color="primary" to="/clients"> Clients </Button>
                             <Typography color="textPrimary">{data.institution}</Typography>
                         </Breadcrumbs>
                     </Router>
                 </Grid>
                 <Grid item xl={6} lg={6} md={12} sm={12}>
-                    {(editing)?(
-                        <TextField variant="standard"
-                            label="Institution"
-                            value={data.institution}
-                            onChange={(e) => setData({...data, institution:e.target.value})}
-                            placeholder={"Institution"}
-                            fullWidth
-                            required
-                        />
-                    ):(    
-                        <Typography variant="body1" component="div"><b>Institution</b> : {data.institution}</Typography>
-                    )}
+                    {(editing)?( <TextField variant="standard" label="Institution" value={data.institution} onChange={handleInstitutionOnChange} placeholder={"Institution"} fullWidth required/>):
+                    (<Typography variant="body1" component="div"><b>Institution</b> : {data.institution}</Typography>)}
                 </Grid>
                 <Grid item xl={6} lg={6} md={12} sm={12}>
-                    {(editing)?(
-                        <TextField variant="standard"
-                            label="City : "
-                            onChange={(e) => setData({...data,city:e.target.value})}
-                            placeholder={"City"}
-                            value={data.city}
-                            fullWidth
-                            required
-                            />
-                    ):(
-                        <Typography variant="body1" component="div"><b>City</b> : {data.city}</Typography>
-                    )}
+                    {(editing)?( <TextField variant="standard" label="City : " onChange={handleCityOnChange} placeholder={"City"} value={data.city} fullWidth required />):
+                    (<Typography variant="body1" component="div"><b>City</b> : {data.city}</Typography>)}
                 </Grid>
                 <Grid item xl={12} lg={12} md={12} sm={12} >
-                    {(editing)?(
-                        <TextField variant="standard"
-                            label="Description : "
-                            defaultValue={data.description} fullWidth
-                            onChange={(e) => setData({ ...data, description: e.target.value })}
-                            multiline
-                            fullWidth
-                            rows={4}
-                        />
-                        
-                    ):(
+                    {(editing)?( <TextField variant="standard" label="Description : " defaultValue={data.description} fullWidth onChange={handleDescriptionOnChange} multiline fullWidth rows={4}/>      ):(
                         <>
                             <Typography variant="body1" component="div"><b>Description : </b></Typography>
                             <Typography variant="body1" component="div">
@@ -162,22 +137,17 @@ export default function DetailClient(props) {
                 <Grid item xl={12} lg={12} md={12} sm={12} >
                     {(editing)?(
                         <>
-                            <Button type="button" style={{marginRight:'1em'}} onClick={(e)=>{
-                                e.preventDefault();
-                                setEditing(false);
-                            }}>Cancel</Button>
+                            <Button type="button" style={{marginRight:'1em'}} onClick={handleCancle}>Cancel</Button>
                             <Button variant="contained" color="primary"  onClick={handleSubmit}style={{marginRight:'1em'}}>Save</Button>
                             <Button variant="contained" color="secondary" 
-                                onClick={()=>setOpenModalConfirm(true)}>Delete</Button>
+                                onClick={handleConfirmOpen}>Delete</Button>
                             <ModalConfirm 
                                 open={openModalConfirm} 
                                 handleConfirm={handleDelete}
-                                handleClose={()=>setOpenModalConfirm(false)}
+                                handleClose={handleConfirmClose}
                             />
                         </>
-                    ):(
-                        <Button variant="contained" color="primary" type="submit" onClick={()=>setEditing(true)}>Edit</Button>
-                    )}
+                    ):( <Button variant="contained" color="primary" type="submit" onClick={handleEditOpen}>Edit</Button> )}
                 </Grid>
             </Grid>
         </Paper>

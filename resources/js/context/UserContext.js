@@ -23,7 +23,6 @@ const getAuthDataFromStorage = () => {
 }
 
 const storeAuthData = (payload) => {
-    console.log('payload storeAuthData',payload)
     var token=payload.token.split(' ')[1];
     const user = {
         ...payload.user,
