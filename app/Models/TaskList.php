@@ -11,8 +11,12 @@ class TaskList extends Model
 
     protected $table = 'lists';
 
-    protected $fillable = [ 'title', 'position', 'projects_id', 'start', 'end', 'actual_start', 'actual_end' ];
+    protected $fillable = [ 'title', 'position', 'projects_id', 'start', 'end', 'actual_start', 'actual_end', 'progress' ];
 
+    protected $casts = [
+        'progress' => 'double',
+    ];
+    
     public static function boot() {
         parent::boot();
 
@@ -25,12 +29,17 @@ class TaskList extends Model
             }
         });
 
-        static::saving(function($list){
+        static::saved(function($list){
+            $list->project->updateProgress();
+        });
+        
+        static::deleted(function($list){
             $list->project->updateProgress();
         });
     }
 
     public function updateProgress(){      
+        $tes=[];
         if(count($this->cards)){
             $sum=0;
             for ($i = 0; $i < count($this->cards); $i++) {
@@ -39,11 +48,13 @@ class TaskList extends Model
                     $task->progress=0;
                 }
                 $sum+=$task->progress;
+                $tes[]=['id'=>$task->id,'progress'=>$task->progress,$task->cards];
             }
             $progress=$sum/count($this->cards);
             $this->progress=round($progress);
             $this->save();
         }
+        return ['id'=>$this->id,'progress'=>$this->progress,'cards'=>$this->cards,$tes];
     }
 
     public function tasks(){

@@ -15,9 +15,13 @@ class Project extends Model
 
     protected $fillable = [
         'id','title', 'description', 'actual_start', 'actual_end',
-        'start', 'end'
+        'start', 'end','progress'
     ];
 
+    protected $casts = [
+        'progress' => 'double',
+    ];
+    
     public static function boot() {
         parent::boot();
 
@@ -61,6 +65,7 @@ class Project extends Model
             $this->progress=round($progress);
             $this->save();
         }
+        return $this->progress;
     }
     
     public function scopeExclude($query, $value = []) 
@@ -104,19 +109,3 @@ class Project extends Model
         return $this->belongsToMany(Client::class,'clients_has_projects','projects_id','clients_id');
     }
 }
-
-
-/*
-select l.id,l.title,p.id as projects_id,p.title from lists as l
-left join projects as p
-on l.projects_id=p.id where l.projects_id=201
-
-
- select * from teams_has_projects where projects_id=201
-select * from clients_has_projects where projects_id=201
-select * from meetings where projects_id=201
-select * from project_members where projects_id=201
-select project_members.id, project_members.users_id,project_members.projects_id , projects.id, projects.title from "project_members"  
-left join projects on project_members.projects_id=projects.id where "users_id" = 17
-
-*/

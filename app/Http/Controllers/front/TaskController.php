@@ -47,6 +47,7 @@ class TaskController extends Controller
 
         $task=new Task();
         $task->title=$request->title;
+        $task->progress=0;
         $task->description=$request->description;
         $task->cost=$request->cost;
         $task->start=$request->start;

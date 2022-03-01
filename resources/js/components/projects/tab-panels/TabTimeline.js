@@ -6,6 +6,7 @@ import BreadCrumbs from '../../widgets/BreadCrumbs';
 import RefreshButton from '../../widgets/RefreshButton';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
+import Typography from '@material-ui/core/Typography';
 import AddIcon from '@material-ui/icons/Add';
 
 const TabTimeline=({tabState, index, detailProject,handleDetailTaskOpen,openModalImportExcel,handleModalCreateList,getDetailProject} )=>{
@@ -15,6 +16,9 @@ const TabTimeline=({tabState, index, detailProject,handleDetailTaskOpen,openModa
         <TabPanel value={tabState} index={index} style={{  padding: '0.5em', minHeight:'500px !important' } }>
             <Grid container >   
                 <BreadCrumbs projectName={detailProject.title} tabName="Timeline" style={{marginTop:'1em'}}/>
+                <Grid item xl={12} md={12} sm={12} xs={12}>
+                    <Typography variant="h5">{detailProject.title}  ({Math.round(detailProject.progress)}%)</Typography>
+                </Grid>
                 <Grid item xl={12} md={12} sm={12} xs={12} style={{marginTop:'1em'}}>
                     <RefreshButton onClick={getDetailProject}  style={{float:'right'}}/>
                     {([1,2,4,5].includes(global.state.role?.id))?(
@@ -35,9 +39,7 @@ const TabTimeline=({tabState, index, detailProject,handleDetailTaskOpen,openModa
                     ):<></>}
                     
                 </Grid>
-                <Timeline detailProject={detailProject}
-                    handleDetailTaskOpen={handleDetailTaskOpen}
-                />
+                <Timeline detailProject={detailProject}  handleDetailTaskOpen={handleDetailTaskOpen}/>
             </Grid>
         </TabPanel>
     )

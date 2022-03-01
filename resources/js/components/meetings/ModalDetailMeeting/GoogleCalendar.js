@@ -99,7 +99,7 @@ const GoogleCalendar  = ({isEdit,meeting,setMeeting,detailProject,saveChanges}) 
 
     const updateMeetingMember=(body)=>{
         if(!meeting.member?.id) return;
-        const url = `${process.env.MIX_BACK_END_BASE_URL}meeting-members/${meeting.member?.id}`;
+        const url = `${process.env.MIX_BACK_END_BASE_URL}meetings/${meeting.id}/users/${global.state.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.patch(url,body)

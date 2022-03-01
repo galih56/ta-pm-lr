@@ -16,7 +16,7 @@ import LocalizationProvider from '@material-ui/lab/LocalizationProvider';
 import { parseISO } from 'date-fns'; 
 import moment from 'moment';
 
-const Attachments = lazy(() => import('./Attachments'));
+const Attachments = lazy(() => import('./attachments/Attachments'));
 const MemberList = lazy(() => import('./MemberList'));
 const Subtasks = lazy(() => import('./Subtasks/Subtasks'));
 const ExtendDeadlineForm = lazy(() => import('./../../widgets/ExtendDeadlineForm'));
@@ -28,7 +28,6 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
     const [showExtendDeadlineForm,setShowExtendDeadlineForm]=useState(false);
     const [estimationDateRange,setEstimationDateRange]=useState([null,null]);
     const [realizationDateRange,setRealizationDateRange]=useState([null,null]);
-    const [exceptedMembers,setExceptedMembers]=useState([]);
     // const [minDate,setMinDate]=useState(null);
     // const [maxDate,setMaxDate]=useState(null);
 
@@ -53,34 +52,11 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
         // }
     },[data])
 
-    const checkLoggedInUserProjectMember=()=>{
-        const project_members=detailProject.members||[];
-        var logged_in_user={ 
-            id:global.state.id, name:global.state.name, 
-            username:global.state.username, email:global.state.email, 
-        }
-        var registered=false
-        try {
-            for (let i = 0; i < project_members.length; i++) {
-                const member = project_members[i];
-                if(member.id==logged_in_user.id){ registered=true; }
-            }
-            
-            if(!registered){
-                setExceptedMembers([...data.members,logged_in_user]);
-            }   
-        } catch (error) {
-            console.error(error)
-        }
-    }
 
     useEffect(()=>{    
         getProgress();
     },[data.cards]);
 
-    useEffect(()=>{
-        checkLoggedInUserProjectMember();
-    },[data.members,data.cards]);
     
     return (
         <Grid container spacing={2} style={{ paddingLeft: 4, paddingRight: 4 }} justifyContent="center" alignItems="center">
@@ -253,7 +229,7 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                     )}
                 </Grid>
                 <Grid item lg={12} md={12} sm={12} xs={12}>
-                    <MemberList detailProject={detailProject} exceptedData={exceptedMembers} data={data} setData={setData} isEdit={isEdit}getDetailTask={getDetailTask}/>
+                    <MemberList detailProject={detailProject} data={data} setData={setData} isEdit={isEdit}getDetailTask={getDetailTask}/>
                 </Grid>
                 <ExtendDeadlineForm  open={showExtendDeadlineForm}  handleClose={()=>setShowExtendDeadlineForm(false)}
                     task={data} 

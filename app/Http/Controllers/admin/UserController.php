@@ -176,18 +176,18 @@ class UserController extends Controller
     }
 
     public function login(Request $request){
-        $validator=$this->validator($request, 
-        [ 'email' => ['required'], 'password' => ['required'] ],
-        [ 'email.required' => 'Email dibutuhkan', 'password.required' => 'Password dibutuhkan' ]);
+        $validator=$this->validator($request,  [ 'email' => ['required'], 'password' => ['required'] ], [ 'email.required' => 'Email dibutuhkan', 'password.required' => 'Password dibutuhkan' ]);
         if($validator->fails()){
             return redirect()->back()->withErrors($validator);
         }else{
             $credentials=['email'=>$request->email,'password'=>$request->password];
-            if (Auth::attempt($credentials)) { 
+            $attempt=Auth::attempt($credentials);
+            if ( $attempt) { 
                 $userExist=User::where('email','like',$request->get('email'))->with('Role')->first();
-                if(in_array($userExist->Role->id,[1,2,4],true) ){
-                    return redirect(route('home'));
+                if(in_array($userExist->role->id,[1,2,4],true) ){
+                    return redirect(route('projects.index'));
                 }
+
                 Session::flash('message', 'Hanya administrator yang boleh masuk'); 
                 Session::flash('alert-class', 'alert-danger'); 
                 return redirect()->back()->withInput($request->input());
@@ -246,13 +246,16 @@ class UserController extends Controller
     }
 
     public function loginForm(){
+        if(Auth::user()){
+            return redirect(route('projects.index'));
+        }
         return view('admin.layouts.login');
     }
 
     public function logout()
     {
         Session::flush();
-        Auth::guard('admins')->logout();
-        return redirect(route('home'));
+        Auth::logout();
+        return redirect(route('login.form.admin'));
     }
 }

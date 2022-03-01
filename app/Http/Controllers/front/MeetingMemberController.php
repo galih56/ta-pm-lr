@@ -48,7 +48,14 @@ class MeetingMemberController extends Controller
 
     public function update(Request $request, $id)
     {
-        $meeting_member=MeetingMember::findOrFail($id);
+        if($request->has('meetings_id') && $request->has('users_id')){
+            $meeting_member=MeetingMember::where('meetings_id',$request->meetings_id)->where('users_id',$request->users_id)->first();
+        }else{
+            $meeting_member=MeetingMember::find($id);
+        }
+        if(empty($meeting_member)){
+            abort(404);
+        }
         if($request->has('meetings_id')) $meeting_member->meetings_id=$request->meetings_id;
         if($request->has('google_calendar_info')) $meeting_member->google_calendar_info=$request->google_calendar_info;
         if($request->has('users_id')) $meeting_member->users_id=$request->users_id;

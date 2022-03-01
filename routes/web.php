@@ -8,7 +8,7 @@ Route::group(['prefix' => 'master'],function(){
     Route::get('/login' , 'App\Http\Controllers\admin\UserController@loginForm')->name('login.form.admin');
     Route::post('/login' , 'App\Http\Controllers\admin\UserController@login')->name('login.admin');
     Route::post('/logout' , 'App\Http\Controllers\admin\UserController@logout')->name('logout.admin');
-    Route::group(['middleware'=>['auth']],function(){ 
+    Route::group(['middleware'=>['admin-only']],function(){ 
         Route::resource('/users','App\Http\Controllers\admin\UserController');        
         Route::group(['prefix'=>'users'],function(){
             Route::post('/{id}/change-password','App\Http\Controllers\admin\UserController@changePassword')->name('admins.change-password');
@@ -24,8 +24,8 @@ Route::group(['prefix' => 'master'],function(){
         });
         Route::resource('/lists','App\Http\Controllers\admin\ListController');
         Route::resource('/tasks','App\Http\Controllers\admin\TaskController');
-        Route::patch('tasks/{task}/start', 'App\Http\Controllers\front\TaskController@startTask')->name('tasks.start');
-        Route::patch('tasks/{task}/complete', 'App\Http\Controllers\front\TaskController@updateComplete')->name('tasks.complete');
+        Route::patch('tasks/{task}/start', 'App\Http\Controllers\admin\TaskController@startTask')->name('tasks.start');
+        Route::patch('tasks/{task}/complete', 'App\Http\Controllers\admin\TaskController@updateComplete')->name('tasks.complete');
         Route::resource('/clients','App\Http\Controllers\admin\ClientController');
         Route::resource('/teams','App\Http\Controllers\admin\TeamController');
         Route::resource('/roles','App\Http\Controllers\admin\RoleController');        

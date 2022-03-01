@@ -97,7 +97,7 @@ const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete
                         handleDetailTaskOpen(taskInfo);
                     }}  
                     to={{ pathname: pathname, search: searchParams.toString() }} style={{ textDecoration: 'none', color: '#393939' }}>
-                        {data.title} ({Math.round(progress)}%)
+                        {data.title} {data.cards?'('+Math.round(progress)+'%)':''}
                     </Link>
                 </TableCell>
                 <TableCell style={{maxWidth:'100px'}}>

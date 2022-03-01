@@ -49,6 +49,7 @@
             </div>
             <form action="{{route('tasks.update',['task'=>$task->id])}}" method="POST">
                 @csrf
+                @method('PATCH')
                 <div class="row">
                     <div class="col-12">
                         <div class="mb-2">
@@ -94,21 +95,58 @@
                             @enderror    
                         </div>
                     </div> --}}
-                    
+                    @if($task->is_subtask)
+                        <div class="col-6">
+                            <div class="mb-2">
+                                @php
+                                    $task_id=$task?$task->id:null;
+                                @endphp
+                                <label class="my-1 me-2" for="lists_id">Daftar Tugas (List)</label>
+                                <select name="lists_id" class="form-control w-100" 
+                                    id="dynamic-select2-list"
+                                    @if ($task_id) disabled @endif
+                                >
+                                    <option value=""> Pilih daftar tugas </option>
+                                    @foreach ($lists as $item)
+                                        <option value="{{$item->id}}">{{$item->title}}</option>                                    
+                                    @endforeach
+                                </select>
+                                @error('lists_id')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                                @enderror    
+                            </div>
+                        </div>
+                    @else
+                        <div class="col-6">
+                            <div class="mb-2">
+                                @php
+                                    $list_id=$list?$list->id:null;
+                                @endphp
+                                <label class="my-1 me-2" for="lists_id">Daftar Tugas (List)</label>
+                                <select name="lists_id" class="form-control w-100" 
+                                    id="dynamic-select2-list"
+                                    @if ($list_id) disabled @endif
+                                >
+                                    <option value=""> Pilih daftar tugas </option>
+                                    @foreach ($lists as $item)
+                                        <option value="{{$item->id}}">{{$item->title}}</option>                                    
+                                    @endforeach
+                                </select>
+                                @error('lists_id')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                                @enderror    
+                            </div>
+                        </div>
+                    @endif
                     <div class="col-6">
                         <div class="mb-2">
-                            @php
-                                $project_id=$project?$project->id:null;
-                            @endphp
-                            <label class="my-1 me-2" for="lists_id">Daftar Tugas (List)</label>
-                            <select name="lists_id" class="form-control w-100" 
-                                id="dynamic-select2-list"
-                                @if ($project_id) disabled @endif
-                                required
-                            >
-                                <option value=""> Pilih proyek </option>
-                            </select>
-                            @error('lists_id')
+                            <label class="my-1 me-2" for="progress">Progress</label>
+                            <input class="form-control" type="number" value="{{$task->progress}}"max="100" name="progress">
+                            @error('progress')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
                             </span>
@@ -120,7 +158,7 @@
                             <label class="my-1 me-2" for="start">Tanggal mulai</label>
                             <input type="date" name="start" id="start" 
                                 class="form-control @error('start') is-invalid @enderror"
-                                value="{{old('start')}}" required>
+                                value="{{ $task->start?(\Carbon\Carbon::parse($task->start)->isoformat('YYYY-MM-DD')):''}}" required>
                             @error('start')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -133,7 +171,7 @@
                             <label class="my-1 me-2" for="end">Tanggal selesai</label>
                             <input type="date" name="end" id="end" 
                                 class="form-control @error('end') is-invalid @enderror"
-                                value="{{old('end')}}" required>
+                                value="{{ $task->end?(\Carbon\Carbon::parse($task->end)->isoformat('YYYY-MM-DD')):''}}" required>
                             @error('end')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -146,7 +184,7 @@
                             <label class="my-1 me-2" for="actual_start">Tanggal realisasi mulai</label>
                             <input type="date" name="actual_start" id="actual_start" 
                                 class="form-control @error('actual_start') is-invalid @enderror"
-                                value="{{old('actual_start')}}" required>
+                                value="{{ $task->actual_start?(\Carbon\Carbon::parse($task->actual_start)->isoformat('YYYY-MM-DD')):''}}">
                             @error('actual_start')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -159,7 +197,7 @@
                             <label class="my-1 me-2" for="actual_end">Tanggal realisasi selesai</label>
                             <input type="date" name="actual_end" id="actual_end" 
                                 class="form-control @error('actual_end') is-invalid @enderror"
-                                value="{{old('actual_end')}}" required>
+                                value="{{ $task->actual_end?(\Carbon\Carbon::parse($task->actual_end)->isoformat('YYYY-MM-DD')):''}}" >
                             @error('actual_end')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>

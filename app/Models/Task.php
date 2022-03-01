@@ -23,9 +23,7 @@ class Task extends Model
     protected $casts = [
         'progress' => 'double',
     ];
-    
 
-    protected $appends = ['dynamic_progress'];
 
     public static function boot() {
         parent::boot();
@@ -44,34 +42,33 @@ class Task extends Model
                 $task->work_days=$work_days+1;
             }
             
-            if($task->parentTask){
-                if($task->actual_end){
-                    $task->progress=100;
-                }else{
-                    $task->progress=0;
-                }
-            }else{
-                if($task->actual_end){
-                    $task->progress=100;
-                }else{
-                    $task->progress=0;
-                }
-            }
             if($task->progress==100){
                 $task->complete=true;
+            }else{
+                $task->complete=false;
             }
-
+            
+            
+        });
+        
+        static::saved(function($task){
+            //is a subtask
             if($task->parentTask){
                 $task->parentTask->updateProgress();
+            }else{
+                $task->list->updateProgress();
             }
         });
-        static::saved(function($task){
-            if(!$task->parentTask){
-                $task->list->updateProgress();
-            }else{
+
+        static::deleted(function($task){
+            //is a subtask
+            if($task->parentTask){
                 $task->parentTask->updateProgress();
+            }else{
+                $task->list->updateProgress();
             }
-        }) ;      
+        });
+
         static::deleting(function($task) { 
             foreach ($task->members as $i => $member) {
                 $member->delete();
@@ -104,12 +101,21 @@ class Task extends Model
             $completeSubtaskCounter=0;
             for ($i = 0; $i < count($this->cards); $i++) {
                 $subtask = $this->cards[$i];
-                if($subtask->complete){ $completeSubtaskCounter++; }
+                if($subtask->complete){ 
+                    $completeSubtaskCounter++; 
+                }
             }
             $progress=$completeSubtaskCounter*$valuePerSubtask;
+            if($progress>=100){
+                $this->actual_end= Carbon::now()->toDateTimeString();
+                $this->complete=true;
+            }else{
+                $this->actual_end= null;
+                $this->complete=false;
+            }
             $this->progress=$progress;
             $this->save();
-            // dd($this, $this->progress,$progress,$completeSubtaskCounter,$valuePerSubtask);
+            return [$this->id,$this->title,$this->progress,$progress];
         }
     }
 
@@ -169,7 +175,7 @@ class Task extends Model
     public function approvals(){
         return $this->hasMany(Approval::class,'lists_id');
     }
-    
+
 }
 
 

@@ -170,100 +170,24 @@ const DetailProject = (props) => {
             <Suspense fallback={<LinearProgress />}>
                 <Switch>
                     <Route path='/projects/:id' exact ><Redirect to={`/projects/${params.id}/timeline`} /></Route>
-                    <Route path={"/projects/:id/timeline"} render={() =>  
-                            <TabTimeline tabState={tabState}  index={0} 
-                                    detailProject={{
-                                        id:detailProject.id,
-                                        title:detailProject.title,
-                                        start:detailProject.start,end:detailProject.end,
-                                        actual_start:detailProject.actual_start,
-                                        actual_end:detailProject.actual_end,
-                                        members:detailProject.members,
-                                        clients:detailProject.clients,
-                                        columns:detailProject.columns
-                                    }}
-                                    handleDetailTaskOpen={handleDetailTaskOpen}
-                                    handleModalCreateList={handleModalCreateList}
-                                    openModalImportExcel={()=>setShowModalImportExcel(true)}
-                                    getDetailProject={getDetailProject}
-                                    />} />
+                    <Route path={"/projects/:id/timeline"} render={() => <TabTimeline tabState={tabState}  index={0}  detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen} handleModalCreateList={handleModalCreateList} openModalImportExcel={()=>setShowModalImportExcel(true)} getDetailProject={getDetailProject} />} />
                     <Route path={`/projects/:id/gantt`} render={() =>  <TabGantt tabState={tabState} index={1} detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen}/> } />
-                    <Route path={`/projects/:id/board`}
-                        render={() =><TabBoard tabState={tabState} index={2}
-                                        detailProject={{
-                                            id:detailProject.id,
-                                            title:detailProject.title,
-                                            members:detailProject.members,
-                                        }} handleDetailTaskOpen={handleDetailTaskOpen}
-                                        getDetailProject={getDetailProject}/>} />
-                    <Route path={"/projects/:id/meeting"}
-                        render={() => <TabMeeting  
-                            detailProject={{
-                                id:detailProject.id,
-                                title:detailProject.title,
-                                members:detailProject.members,
-                                meetings:detailProject.meetings,
-                            }}
-                            tabState={tabState} index={3} 
-                            handleModalCreateMeeting={handleModalCreateMeeting}
-                            getDetailProject={getDetailProject}
-                            handleDetailMeetingOpen ={handleDetailMeetingOpen }/>
-                        } />
-                    <Route path={"/projects/:id/files"} render={() => <TabFile tabState={tabState} index={4} 
-                            detailProject={{
-                                id:detailProject.id,
-                                title:detailProject.title,
-                                members:detailProject.members,
-                            }} getDetailProject={getDetailProject} handleDetailTaskOpen={handleDetailTaskOpen}/>}/>
-                    <Route path={"/projects/:id/others"} render={() => <TabOthers  tabState={tabState} index={5} 
-                            detailProject={{
-                                id:detailProject.id,
-                                title:detailProject.title,
-                                members:detailProject.members,
-                            }} getDetailProject={getDetailProject}handleDetailTaskOpen={handleDetailTaskOpen}/>} />
+                    <Route path={`/projects/:id/board`} render={() =><TabBoard tabState={tabState} index={2} detailProject={detailProject} handleDetailTaskOpen={handleDetailTaskOpen} getDetailProject={getDetailProject}/>} />
+                    <Route path={"/projects/:id/meeting"} render={() => <TabMeeting  tabState={tabState} detailProject={detailProject}index={3}  handleModalCreateMeeting={handleModalCreateMeeting} getDetailProject={getDetailProject} handleDetailMeetingOpen ={handleDetailMeetingOpen }/>} />
+                    <Route path={"/projects/:id/files"} render={() => <TabFile tabState={tabState} index={4} detailProject={detailProject} getDetailProject={getDetailProject} handleDetailTaskOpen={handleDetailTaskOpen}/>}/>
+                    <Route path={"/projects/:id/others"} render={() => <TabOthers  tabState={tabState} index={5} detailProject={detailProject} getDetailProject={getDetailProject}handleDetailTaskOpen={handleDetailTaskOpen}/>} />
                 </Switch>
                 <ModalImportExcel projects_id={params.id} open={showModalImportExcel} closeModal={()=>handleModalImportExcel(false)} onUpdate={getDetailProject}/>
                 <ModalCreateList projects_id={params.id} open={showModalCreateList} closeModal={()=>handleModalCreateList(false)} 
-                    detailProject={{id:detailProject.id,members:detailProject.members,clients:detailProject.clients,start:detailProject.start,end:detailProject.end}}
+                    detailProject={detailProject}
                 />
-                <ModalCreateMeeting
-                    detailProject={{
-                        id:detailProject.id,
-                        members:detailProject.members,
-                        start:detailProject.start,
-                        end:detailProject.end,
-                        actual_start:detailProject.actual_start,
-                        actual_end:detailProject.actual_end
-                    }}
-                    projects_id={params.id} open={showModalCreateMeeting} 
-                    handleClose={()=>handleModalCreateMeeting(false)} />
+                <ModalCreateMeeting detailProject={detailProject} projects_id={params.id} open={showModalCreateMeeting}  handleClose={()=>handleModalCreateMeeting(false)} />
                         
                 {(clickedTask.id && detailTaskOpen == true)?(
-                    <ModalDetailTask open={detailTaskOpen}
-                        closeModalDetailTask={() => handleDetailTaskOpen({task :clickedTaskInitialState,open:false})}
-                        projects_id={detailProject.id}
-                        detailProject={{
-                            id:detailProject.id,
-                            start:detailProject.start,end:detailProject.end,
-                            members:detailProject.members,
-                            clients:detailProject.clients,
-                        }}
-                        setDetailProject={setDetailProject}
-                        initialState={clickedTask} 
-                        onTaskUpdate={clickedTask.onTaskUpdate}
-                        onTaskDelete={clickedTask.onTaskDelete}
-                    />
+                    <ModalDetailTask open={detailTaskOpen} closeModalDetailTask={() => handleDetailTaskOpen({task :clickedTaskInitialState,open:false})} projects_id={detailProject.id} detailProject={detailProject} setDetailProject={setDetailProject} initialState={clickedTask}  onTaskUpdate={clickedTask.onTaskUpdate} onTaskDelete={clickedTask.onTaskDelete}/>
                 ):<></>}
                 {(clickedMeeting.id && detailMeetingOpen)?
-                <ModalDetailMeeting open={detailMeetingOpen} closeModal={()=>handleDetailMeetingOpen({open:false,meeting:clickedMeetingInitialState})}
-                    detailProject={{ 
-                        id:detailProject.id,
-                        title:detailProject.title,
-                        start:detailProject.start,end:detailProject.end,
-                        members:detailProject.members,
-                    }}
-                    initialState={clickedMeeting}
-                />:<></>}
+                <ModalDetailMeeting open={detailMeetingOpen} closeModal={()=>handleDetailMeetingOpen({open:false,meeting:clickedMeetingInitialState})} detailProject={detailProject} initialState={clickedMeeting} />:<></>}
             </Suspense>
         </Router>
     );

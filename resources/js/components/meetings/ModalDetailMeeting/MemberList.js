@@ -98,7 +98,7 @@ const MemberList=({isEdit,data,setData,exceptedData,detailProject})=>{
                     <Grid item lg={12} md={12} sm={12} xs={12}>
                         <UserSearchBar 
                             detailProject={detailProject}
-                            exceptedData={[...exceptedData,data.creator]} 
+                            exceptedData={[...exceptedData]} 
                             onChange={(users)=>{
                                 setNewMembers(users);
                             }}
