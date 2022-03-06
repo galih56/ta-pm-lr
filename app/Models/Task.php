@@ -49,6 +49,28 @@ class Task extends Model
             }
             
             
+            if($task->actual_start){
+                $start = Carbon::parse($task->start)->format('Y-m-d');
+                $actual_start = Carbon::parse($task->actual_start)->format('Y-m-d');
+                if($actual_start<$start) $task->start_label='Mulai lebih cepat';
+                if($actual_start>$start) $task->start_label='Mulai terlambat';
+                if($actual_start==$start) $task->start_label='Mulai tepat waktu';
+                $task->startParent();
+            }else{
+                $task->actual_start=$task->actual_start;
+                $task->start_label='Belum dimulai';
+            }
+
+            if($task->actual_end){
+                $end = Carbon::parse($task->end)->format('Y-m-d');
+                $actual_end = Carbon::parse($task->actual_end)->format('Y-m-d');
+                if($actual_end<$end) $task->end_label='Selesai lebih cepat';
+                if($actual_end>$end) $task->end_label='Selesai terlambat';
+                if($actual_end==$end) $task->end_label='Selesai tepat waktu';
+            }else{
+                $task->actual_end=$task->actual_end;
+                $task->end_label='Belum selesai';
+            }    
         });
         
         static::saved(function($task){
@@ -81,20 +103,6 @@ class Task extends Model
         });
     }
 
-    // SELECT avg(progress),parent_task_id
-    // FROM tasks
-    // GROUP BY parent_task_id
-    public function getDynamicProgressAttribute(){
-        if(count($this->cards)){
-            $subtasks=$this->cards()->selectRaw('avg(progress)')->first();
-            return $subtasks->avg;
-        }else if($this->progress!=null){
-            return $this->progress;
-        }else{
-            return 0;
-        }
-    }
-
     public function updateProgress(){      
         if(count($this->cards)){
             $valuePerSubtask=100/count($this->cards);
@@ -113,10 +121,26 @@ class Task extends Model
                 $this->actual_end= null;
                 $this->complete=false;
             }
+            // dd($this->progress,$this->actual_end);
+
             $this->progress=$progress;
             $this->save();
-            return [$this->id,$this->title,$this->progress,$progress];
+            return $this->progress;
         }
+    }
+
+    
+    function startParent(){   
+        $parent=$this->parentTask;
+        if($parent){
+            //if has parent
+            //mark parent as started
+            if(empty($this->parentTask->actual_start)){
+                $parent->actual_start=Carbon::now()->toDateTimeString();
+                $parent->save();
+            }
+        }
+        return $this->parentTask;
     }
 
     public function scopeExclude($query, $value = []) 
@@ -176,6 +200,41 @@ class Task extends Model
         return $this->hasMany(Approval::class,'lists_id');
     }
 
+    function validateDateTime($data)
+    {       
+        try {
+            $date=null;
+            switch (gettype($data)) {
+                case 'integer':
+                    $date=Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($data))->format('d/m/Y');
+                    break;
+                case 'string':
+                    $date=Carbon::createFromFormat('d/m/Y', $data)->format('d/m/Y');
+                    break;
+                default:
+                    $date=Carbon::createFromFormat('d/m/Y', $data)->format('d/m/Y');
+                    break;
+            }
+            return $date;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
 }
 
 
+
+    // SELECT avg(progress),parent_task_id
+    // FROM tasks
+    // GROUP BY parent_task_id
+    // public function getDynamicProgressAttribute(){
+    //     if(count($this->cards)){
+    //         $subtasks=$this->cards()->selectRaw('avg(progress)')->first();
+    //         return $subtasks->avg;
+    //     }else if($this->progress!=null){
+    //         return $this->progress;
+    //     }else{
+    //         return 0;
+    //     }
+    // }

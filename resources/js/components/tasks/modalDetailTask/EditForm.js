@@ -108,6 +108,8 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                                         <MobileDateRangePicker startText="Start at : " endText="Finish at : "
                                             value={realizationDateRange}
                                             onChange={(newValue) => {
+                                                console.log(moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss'),moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss'))
+
                                                 if(newValue[0]){
                                                     setData({...data, actual_start:moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss')})
                                                 }

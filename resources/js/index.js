@@ -80,7 +80,7 @@ const reducer = (state, action) => {
             return removeTask(payload);
         case 'create-new-subtask':
             return createNewSubtask(payload);
-        case 'store-detail-subtask':    
+        case 'store-detail-subtask':   
             return storeDetailSubtask(payload);
         case 'create-task-subtask':
             return createNewSubtask(payload);

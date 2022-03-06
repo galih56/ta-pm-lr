@@ -118,12 +118,12 @@ const Home = (props) => {
         const [taskListOpen, setTaskListOpen] = useState(true);
         const handleTaskListOpen = () => setTaskListOpen(!taskListOpen);
         return( 
-            <>
+            <React.Fragment key={project.id}>
                 <ListItem button dense font="small" onClick={handleTaskListOpen} style={{ paddingBottom: '1.2em' }}> {taskListOpen ? <ExpandLess /> : <ExpandMore />}{project.title} </ListItem>
                 <Collapse in={taskListOpen} timeout="auto">
-                    <TaskTable data={project.tasks}/>
+                    <TaskTable data={project.tasks} withSearchbar={true} hiddenCells={['project']}/>
                 </Collapse>
-            </>
+            </React.Fragment>
         )
     }
   
@@ -141,7 +141,7 @@ const Home = (props) => {
             <Grid item xs={12}>
                 <Paper className={classes.paper}>
                   <Typography variant="body1">Tasks due soon</Typography>
-                  {tasksDueSoon.map(project=><TasksList project={project}/>)}
+                  {tasksDueSoon.map(project=><TasksList key={project.id} project={project}/>)}
                 </Paper>
             </Grid>
         </React.Fragment >

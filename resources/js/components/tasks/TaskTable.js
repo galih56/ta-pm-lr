@@ -12,14 +12,11 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Paper from '@material-ui/core/Paper';
-import Checkbox from '@material-ui/core/Checkbox';
-import ModalDetailTask from './modalDetailTask/ModalDetailTask';
 import UpdateProgressButtons from './../widgets/UpdateProgressButtons';
-import UserContext from '../../context/UserContext';
 import { visuallyHidden } from '@material-ui/utils';
-import toast from 'react-hot-toast';
 import moment from 'moment';
-import axios from 'axios';
+import TextField from '@material-ui/core/TextField';
+import SearchIcon from '@material-ui/icons/Search';
 
 function descendingComparator(a, b, orderBy) {
    if (b[orderBy] < a[orderBy]) return -1;
@@ -43,7 +40,7 @@ function stableSort(array, comparator) {
     return stabilizedThis.map((el) => el[0]);
 }
 
-const headCells = [
+let headCells = [
     { id: 'title', align: 'left', disablePadding: true, label: 'Title' },
     { id: 'deadline', align: 'right', disablePadding: false, label: 'Start - End' },
     { id: 'project', align: 'right', disablePadding: false, label: 'Project' },
@@ -56,73 +53,49 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function EnhancedTableHead(props) {
-    const { classes, order, orderBy, onRequestSort } = props;
+    const { classes, order, orderBy, onRequestSort, hiddenCells=[] } = props;
 
     const createSortHandler = (property) => (event) => onRequestSort(event, property);
-
     return (
         <TableHead>
             <TableRow>
                 <TableCell padding="checkbox"></TableCell>
-                {headCells.map((headCell) => (
-                    <TableCell
-                        key={headCell.id}
-                        align={headCell.align}
-                        padding={headCell.disablePadding ? 'none' : 'normal'}
-                        sortDirection={orderBy === headCell.id ? order : false}
-                    >
-                        <TableSortLabel
-                            active={orderBy === headCell.id}
-                            direction={orderBy === headCell.id ? order : 'asc'}
-                            onClick={createSortHandler(headCell.id)}
-                        >
-                            {headCell.label}
-                            {orderBy === headCell.id ? (
-                                <span className={classes.sortSpan}>
-                                    {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                                </span>
-                            ) : null}
-                        </TableSortLabel>
-                    </TableCell>
-                ))}
+                {headCells
+                    .filter(cell=>!hiddenCells.includes(cell.id))
+                    .map((headCell) => (
+                        <TableCell key={headCell.id} align={headCell.align} padding={headCell.disablePadding ? 'none' : 'normal'} sortDirection={orderBy === headCell.id ? order : false}>
+                            <TableSortLabel active={orderBy === headCell.id} direction={orderBy === headCell.id ? order : 'asc'} onClick={createSortHandler(headCell.id)}>
+                                {headCell.label}
+                                {orderBy === headCell.id ? (
+                                    <span className={classes.sortSpan}>
+                                        {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
+                                    </span>
+                                ) : null}
+                            </TableSortLabel>
+                        </TableCell>
+                    ))}
             </TableRow>
         </TableHead>
     );
 }
 
-export default function EnhancedTable({data}) {
+export default function EnhancedTable({data,withSearchbar, search, hiddenCells=[]}) {
     const classes = useStyles();
     const [rows, setRows] = useState([]);
     const [order, setOrder] = useState('asc');
     const [orderBy, setOrderBy] = useState('end');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [clickedTask, setClickedTask] = useState({ projects_id: null, lists_id: null, tasks_id: null,id:null });
-    const [modalOpen, setModalOpen] = useState(false);
-    let location = useLocation();
-    let pathname = location.pathname;
-    let global = useContext(UserContext);
-
-    const handleModalOpen = (taskInfo) => {
-        const { projects_id, lists_id, tasks_id, open } = taskInfo;
-        setModalOpen(open);
-        setClickedTask({ projects_id: projects_id, lists_id: lists_id, tasks_id: tasks_id, id:tasks_id });
-    }
+    const [keywords,setKeywords]=useState('');
 
     useEffect(()=>{
         setRows(data)
     },[data])
 
-    const showModalDetailTask = () => {
-        if (clickedTask.tasks_id != null && clickedTask.tasks_id !== undefined && modalOpen == true) {
-            return (
-                <ModalDetailTask open={modalOpen}
-                    closeModalDetailTask={() =>handleModalOpen({ projects_id: null, lists_id: null, tasks_id: null, open: false })}
-                    projects_id={clickedTask.projects_id} initialState={clickedTask} />
-            )
-        }
-    }
-
+    useEffect(()=>{
+        if(typeof search==='string') setKeywords(search);
+    },[search])
+    
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -145,38 +118,63 @@ export default function EnhancedTable({data}) {
         });
         setRows(newRows);
     }
+
     return (
         <div className={classes.root}>
             <Paper className={classes.paper}>
+                {withSearchbar?(<TextField  variant="standard" InputProps={{endAdornment:<SearchIcon/>}}  style={{ margin:'1em', float:'right', minWidth:'300px' }} placeholder="Search by title" onInput={e=>setKeywords(e.target.value)} onKeyUp={e=>setKeywords(e.target.value)}/>):null}
                 <TableContainer>
                     <Table className={classes.table} aria-labelledby="tableTitle" size={'small'} >
-                        <EnhancedTableHead classes={classes} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} rowCount={rows.length}/>
+                        <EnhancedTableHead classes={classes} order={order} orderBy={orderBy} onRequestSort={handleRequestSort} rowCount={rows.length} hiddenCells={hiddenCells}/>
                         <TableBody>
                             {rows.length?stableSort(rows, getComparator(order, orderBy))
+                                .filter(row=>row.title?.toLowerCase().includes(keywords.toLowerCase()))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
+                                    let projects_id=null;
+                                    let projects_title=null;
+
+                                    if(row.projects_id){
+                                        projects_id=row.projects_id
+                                    }else{
+                                        projects_id=(!row?.parent_task)?row?.list?.projects_id:row?.parent_task?.list?.projects_id;
+                                    }
+                                    if(row.projects_title){
+                                        projects_title=row?.projects_title
+                                    }else{
+                                        projects_title=(!row.parent_task)?row?.list?.projects_title:row?.parent_task?.list?.projects_title;
+                                    }  
                                     return (
                                         <TableRow hover role="checkbox" key={row.id}>
-                                            <TableCell padding="checkbox">
-                                                {!row.cards?.length?(
-                                                    <div style={{display:'flex'}}>
-                                                        <UpdateProgressButtons data={row} alwaysShow={true} onUpdate={handleProgressOnUpdate}/>
-                                                    </div>):null}
-                                            </TableCell>
-                                            <TableCell component="th" scope="row" padding="none" style={{ cursor: 'pointer' }}
-                                                onClick={() => {
-                                                    var projects_id=(!row.parent_task)?row.list.projects_id:row.parent_task.list.projects_id;
-                                                    var lists_id=(!row.parent_task)?row.list.projects_id:row.parent_task.list.projects_id;
-                                                    handleModalOpen({  projects_id: projects_id,  lists_id: lists_id,  tasks_id: row.id,  open: true });
-                                                }}>
-                                                {row.title} {data.cards?`(${row.progress?Math.round(row.progress):'0'}%)`:''}
-                                            </TableCell>
-                                            <TableCell align="right">{row.start ? moment(row.start).format('DD MMM YYYY') : ''} - {row.end ? moment(row.end).format('DD MMM YYYY') : ''}</TableCell>
-                                            <TableCell align="right">
-                                                <Link to={`/projects/${(!row.parent_task)?row.list.projects_id:row.parent_task.list.projects_id}/`} style={{ textDecoration: 'none', color: 'black' }}>
-                                                    {(!row.parent_task)?row.list.project.title:row.parent_task.list.project.title}
-                                                </Link>
-                                            </TableCell>
+                                            {!hiddenCells.includes('title')?(
+                                                <TableCell padding="checkbox">
+                                                    {!row.cards?.length?(
+                                                        <div style={{display:'flex'}}>
+                                                            <UpdateProgressButtons data={row} alwaysShow={true} onUpdate={handleProgressOnUpdate}/>
+                                                        </div>):null}
+                                                </TableCell>
+                                            ):null}
+                                            {!hiddenCells.includes('title')?(
+                                                <TableCell component="th" scope="row" padding="none" style={{ cursor: 'pointer' }}>
+                                                    <Link to={`/projects/${projects_id}/timeline?tasks_id=${row.id}`} style={{ textDecoration: 'none', color: 'black' }}>
+                                                        {row.title} {data.cards?`(${row.progress?Math.round(row.progress):'0'}%)`:''}
+                                                    </Link>
+                                                </TableCell>
+                                            ):null}
+                                            {!hiddenCells.includes('deadline')?(
+                                                <TableCell align="right">
+                                                    <Link to={`/projects/${projects_id}/timeline?tasks_id=${row.id}`} style={{ textDecoration: 'none', color: 'black' }}>
+                                                        {row.start ? moment(row.start).format('DD MMM YYYY') : ''} - {row.end ? moment(row.end).format('DD MMM YYYY') : ''}
+                                                    </Link>
+                                                </TableCell>
+                                            ):null}
+                                            {!hiddenCells.includes('project')?(
+                                                <TableCell align="right">
+                                                    <Link to={`/projects/${projects_id}/timeline?tasks_id=${row.id}`} style={{ textDecoration: 'none', color: 'black' }}>
+                                                        {projects_title}
+                                                    </Link>
+                                                </TableCell>
+                                            ):null}
                                         </TableRow>
                                     );
                                 }):(
@@ -189,10 +187,8 @@ export default function EnhancedTable({data}) {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <TablePagination rowsPerPageOptions={[10, 20, 30]} component="div" count={rows.length} rowsPerPage={rowsPerPage} 
-                    page={page} onPageChange={handleChangePage} onRowsPerPageChange={handleChangeRowsPerPage}/>
+                <TablePagination rowsPerPageOptions={[10, 20, 30]} component="div" count={rows.length} rowsPerPage={rowsPerPage}  page={page} onPageChange={handleChangePage} onRowsPerPageChange={handleChangeRowsPerPage}/>
             </Paper>
-            {showModalDetailTask()}
         </div>
     );
 }
@@ -204,5 +200,6 @@ EnhancedTableHead.propTypes = {
     orderBy: PropTypes.string.isRequired,
     rowCount: PropTypes.number.isRequired,
 };
+
 
 

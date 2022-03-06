@@ -138,6 +138,7 @@ const DetailProject = (props) => {
     useEffect(()=>{
         const currentProject=getProjectFromState(global.state.projects, params.id);
         if(currentProject) setDetailProject(currentProject);
+        console.log('Project Update :',currentProject.progress);
     },[global.state.projects]);
 
     const handleModalCreateList = (open) => setShowModalCreateList(open);
