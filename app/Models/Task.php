@@ -50,6 +50,29 @@ class Task extends Model
             
             
             if($task->actual_start){
+                //start project when the first task get started
+                $project=null;
+                if($task->parentTask){
+                    if($task->parentTask->list){
+                        if($task->parentTask->list->project){
+                            $project=$task->parentTask->project;
+                        }
+                    }
+                }else{
+                    if($task->list){
+                        if($task->list->project){
+                            $project=$task->list->project;
+                        }
+                    }
+                }
+
+                if(!empty($project)){
+                    if(empty($project->actual_start)){
+                        //if the project hasn't started, start project progress
+                        $project->startProgress();
+                    }
+                }
+
                 $start = Carbon::parse($task->start)->format('Y-m-d');
                 $actual_start = Carbon::parse($task->actual_start)->format('Y-m-d');
                 if($actual_start<$start) $task->start_label='Mulai lebih cepat';

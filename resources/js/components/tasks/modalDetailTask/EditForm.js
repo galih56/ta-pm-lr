@@ -105,11 +105,10 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                                 <Typography style={{ whiteSpace: 'noWrap'}}>Work Days : {data.work_days}</Typography>   
                                 {([1,2,4].includes(global.state.role?.id))?(
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                        <MobileDateRangePicker startText="Start at : " endText="Finish at : "
+                                        <MobileDateRangePicker startText="Start at : " endText="Finish at : "  
+                                            toolbarPlaceholder="DD/MM/YYYY"
                                             value={realizationDateRange}
                                             onChange={(newValue) => {
-                                                console.log(moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss'),moment(newValue[1]).format('YYYY-MM-DD HH:mm:ss'))
-
                                                 if(newValue[0]){
                                                     setData({...data, actual_start:moment(newValue[0]).format('YYYY-MM-DD HH:mm:ss')})
                                                 }

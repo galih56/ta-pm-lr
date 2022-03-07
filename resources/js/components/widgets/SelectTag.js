@@ -11,7 +11,6 @@ const SelectTag = (props) => {
     const {isEdit, defaultValue, onChange}=props;
     const global = useContext(UserContext);
     const [data, setData] = useState([]);
-    console.log(props);
 
     const getTags = () => {
         if (window.navigator.onLine) {

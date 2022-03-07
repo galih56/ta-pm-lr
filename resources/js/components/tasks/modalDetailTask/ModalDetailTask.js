@@ -273,8 +273,8 @@ export default function ModalDetailTask(props) {
                 success: (result)=>{
                     result=result.data;
                     setData({...data,...result});
-                    // if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
-                    // else global.dispatch({ type: 'store-detail-task', payload: result });
+                    if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                    else global.dispatch({ type: 'store-detail-task', payload: result });
                     return <b>Successfully updated</b>
                 },
                 error: (error)=>{

@@ -163,26 +163,14 @@ const Attachments = (props) => {
             return (
                 <ListItem button>
                     <ListItemText primary={`Add new attachment`} />
-                    <IconButton
-                        edge="end"
-                        aria-label="Choose existing file"
-                        onClick={()=>{
-                            setChooseFileModalOpen(true)
-                        }}
-                        size="large">
+                    <IconButton edge="end" aria-label="Choose existing file" onClick={()=>{     setChooseFileModalOpen(true) }} size="large">
                         <AttachFileIcon/>
                     </IconButton>
                     <IconButton edge="end" aria-label="Add new attachment" onClick={() => { setUploadModalOpen(true) }}>
                         <PublishRoundedIcon />
                     </IconButton>
-                    <GoogleDriveButton payload={payload}></GoogleDriveButton>
-                    <DropzoneDialog
-                        open={uploadModalOpen}
-                        onClose={() => setUploadModalOpen(false)}
-                        onSave={(files) => { onUploadFiles(files, payload) }}
-                        showFileNamesInPreview={true}
-                        showAlerts={false}
-                    />
+                    {/* <GoogleDriveButton payload={payload}></GoogleDriveButton> */}
+                    <DropzoneDialog open={uploadModalOpen} onClose={() => setUploadModalOpen(false)} onSave={(files) => { onUploadFiles(files, payload) }} showFileNamesInPreview={true} showAlerts={false}/>
                 </ListItem>
             );
         } else return (<></>)
