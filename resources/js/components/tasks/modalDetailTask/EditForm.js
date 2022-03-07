@@ -105,7 +105,8 @@ const OpenEditForm = ({ isEdit, data, setData,detailProject,getProgress,getDetai
                                 <Typography style={{ whiteSpace: 'noWrap'}}>Work Days : {data.work_days}</Typography>   
                                 {([1,2,4].includes(global.state.role?.id))?(
                                     <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                        <MobileDateRangePicker startText="Start at : " endText="Finish at : "
+                                        <MobileDateRangePicker startText="Start at : " endText="Finish at : "  
+                                            toolbarPlaceholder="DD/MM/YYYY"
                                             value={realizationDateRange}
                                             onChange={(newValue) => {
                                                 if(newValue[0]){

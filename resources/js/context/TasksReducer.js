@@ -1,6 +1,6 @@
 const average = (arr,subtasks=false) => {
-    var result=0
-    if(typeof arr !== 'undefined'){
+    var result=0                
+    if(Array.isArray(arr) && arr?.length > 0){
         if(subtasks){
             var value_per_task=100/arr.length;
             var complete_subtask_counter=0;
@@ -22,22 +22,25 @@ const average = (arr,subtasks=false) => {
 };
 
 const storeDetailTask = (payload) => {
+    console.log(payload);
     var user = JSON.parse(localStorage.getItem('user'));
     const newProjects = user.projects.map((project) => {
-        project.columns = project.columns.map(column => {
-            column.cards = column.cards.map((card) => {
-                if (card.id == payload.id) {
-                    card = payload;
-                } 
-                if(typeof arr !== 'undefined' && arr?.length > 0){
-                    card.progress=average(card.cards,true);
+        if(project.id==payload?.list?.project?.id || project.id==payload?.parent_task?.list?.project?.id){   
+            project.columns = project.columns.map(column => {
+                if(column.id==payload?.list?.id || column.id==payload?.parent_task?.list?.id){
+                    column.cards = column.cards.map((card) => {
+                        if (card.id == payload.id) {
+                            card = payload;
+                        } 
+                        card.progress=average(card.cards,true);
+                        return card
+                    });
+                    column.progress=average(column.cards)
                 }
-                return card
+                return column;
             });
-            column.progress=average(column.cards)
-            return column;
-        });
-        project.progress=average(project.columns)
+            project.progress=average(project.columns)
+        }
         return project
     });
     user.projects = newProjects;
@@ -46,29 +49,28 @@ const storeDetailTask = (payload) => {
 }
 
 const storeDetailSubtask = (payload) => {
+    console.log(payload);
     var user = JSON.parse(localStorage.getItem('user'));
     const newProjects = user.projects.map((project) => {
-        project.columns = project.columns.map(column => {
-            column.cards = column.cards.map((card) => {
-                if (card.id == payload.parent_task_id) {
-                    card.cards=card.cards.map((subtask)=>{
-                        if(subtask.parent_task){
-                            card.progress=subtask.parent_task.progress;
+        if(project.id==payload?.list?.project?.id || project.id==payload?.parent_task?.list?.project?.id){
+            project.columns = project.columns.map(column => {
+                if(column.id==payload?.list?.id || column.id==payload?.parent_task?.list?.id){
+                    column.cards = column.cards.map((card) => {
+                        if (card.id == payload.parent_task_id) {
+                            card.cards=card.cards.map((subtask)=>{
+                                if(subtask.id==payload.id){ return payload}
+                                return subtask;
+                            })
                         }
-                        if(subtask.id==payload.id){ return payload}
-                        return subtask;
-                    })
+                        card.progress=average(card.cards,true)
+                        return card
+                    });
+                    column.progress=average(column.cards)
                 }
-                
-                if(typeof arr !== 'undefined' && arr?.length > 0){
-                    card.progress=average(card.cards,true)
-                }
-                return card
+                return column;
             });
-            column.progress=average(column.cards)
-            return column;
-        });
-        project.progress=average(project.columns)
+            project.progress=average(project.columns)
+        }
         return project
     });
     user.projects = newProjects;
@@ -85,10 +87,7 @@ const storeSubtasks = (payload) => {
                     column.cards = column.cards.map((card) => {
                         if (card.id == payload.parent_task_id){
                             card.cards = payload;
-                            
-                            if(typeof arr !== 'undefined' && arr?.length > 0){
-                                card.progress=average(card.cards,true)
-                            }
+                            card.progress=average(card.cards,true)    
                             return card
                         }
                     })
@@ -152,9 +151,7 @@ const createNewSubtask = (payload) => {
                 if (card.id == payload.parent_task_id) {
                     card.cards.push(payload);
                 }
-                if(typeof arr !== 'undefined' && arr?.length > 0){
-                    card.progress=average(card.cards,true)
-                }
+                card.progress=average(card.cards,true)
                 return card
             });
             column.progress=average(column.cards)
@@ -180,9 +177,7 @@ const removeSubtask = (payload) => {
                         if (item.id != payload.id)  return  item;
                     });
                 }
-                if(typeof arr !== 'undefined' && arr?.length > 0){
-                    card.progress=average(card.cards,true)
-                }
+                card.progress=average(card.cards,true)
                 return card
             });
             column.progress=average(column.cards)
@@ -248,3 +243,8 @@ export {
     createNewSubtask, removeSubtask,
     createNewAttachments, removeAttachment
 }
+
+
+
+
+

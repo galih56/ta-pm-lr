@@ -41,7 +41,7 @@ const UserMenu = ({classes}) => {
                 var url = `${process.env.MIX_BACK_END_BASE_URL}users/${global.state.id}/refresh-last-login`;
                 axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
                 axios.defaults.headers.post['Content-Type'] = 'application/json';
-                axios.post(url).then(console.log).catch(console.log);
+                axios.post(url).catch(console.log);
             }
         }
         refreshLastLogin()

@@ -8,12 +8,10 @@ import axios from 'axios';
 
 
 const SelectTag = (props) => {
-    const isEditing = props.isEdit;
-    const defaultValue = props.defaultValue;
+    const {isEdit, defaultValue, onChange}=props;
     const global = useContext(UserContext);
-    const handleValueChange = props.onChange;
     const [data, setData] = useState([]);
-    
+
     const getTags = () => {
         if (window.navigator.onLine) {
             const url = `${process.env.MIX_BACK_END_BASE_URL}tags`;
@@ -30,14 +28,9 @@ const SelectTag = (props) => {
         getTags();
     }, []);
 
-    if (isEditing) {
+    if (isEdit) {
         return (
-            <Autocomplete
-                multiple
-                onChange={(event, arrValues) => { 
-                    console.log(arrValues);
-                    handleValueChange(arrValues) 
-                }}
+            <Autocomplete multiple onChange={(event, arrValues) => onChange(arrValues) }
                 filterOptions={(options, params) => {
                     options=options.filter(function(item){
                         if(item.title.toLowerCase().includes(params.inputValue.toLowerCase()))
@@ -61,14 +54,12 @@ const SelectTag = (props) => {
                 }}
                 renderTags={(value, getTagProps) =>{
                     return value.map((option, index) => (
-                        <Chip variant="outlined" label={option.title} {...getTagProps({ index })} />
+                        <Chip key={option.id} variant="outlined" label={option.title} {...getTagProps({ index })} />
                     ))
                 }}
                 style={{ width: '100%' }}
                 freeSolo
-                renderInput={(params) => (
-                    <TextField {...params} variant="standard" label="Place tags to categorize cards" />
-                )}
+                renderInput={(params) => <TextField {...params} variant="standard" label="Place tags to categorize cards" />}
                 defaultValue={defaultValue}
             />
         );

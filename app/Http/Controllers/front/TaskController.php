@@ -133,33 +133,9 @@ class TaskController extends Controller
         if($request->has('actual_cost')) $task->actual_cost=$request->actual_cost;
         if($request->has('start')) $task->start=$request->start;
         if($request->has('end')) $task->end=$request->end;
-        if(($request->has('actual_start') 
-            && !empty($request->actual_start))) $task->actual_start=$request->actual_start;
-        if(($request->has('actual_end')) 
-            && !empty($request->actual_end)) $task->actual_end=$request->actual_end;
+        if($request->has('actual_start')) $task->actual_start=$request->actual_start;
+        if($request->has('actual_end')) $task->actual_end=$request->actual_end;
         if($request->has('parent_task_id')) $task->parent_task_id=$request->parent_task_id;
-
-        if(($request->has('actual_start') && !empty($request->actual_start))){
-            $start = Carbon::parse($task->start)->format('Y-m-d');
-            $actual_start = Carbon::parse($task->actual_start)->format('Y-m-d');
-            if($actual_start<$start) $task->start_label='Mulai lebih cepat';
-            if($actual_start>$start) $task->start_label='Mulai terlambat';
-            if($actual_start==$start) $task->start_label='Mulai tepat waktu';
-        }else{
-            $task->actual_start=$request->actual_start;
-            $task->start_label='Belum dimulai';
-        }
-        
-        if(($request->has('actual_end')) && !empty($request->actual_end)){
-            $end = Carbon::parse($task->end)->format('Y-m-d');
-            $actual_end = Carbon::parse($task->actual_end)->format('Y-m-d');
-            if($actual_end<$end) $task->end_label='Selesai lebih cepat';
-            if($actual_end>$end) $task->end_label='Selesai terlambat';
-            if($actual_end==$end) $task->end_label='Selesai tepat waktu';
-        }else{
-            $task->actual_end=$request->actual_end;
-            $task->end_label='Belum selesai';
-        }
 
         $task->save();
         
@@ -227,74 +203,21 @@ class TaskController extends Controller
     public function startTask(Request $request,$id){
         $task=Task::with('parentTask')->findOrFail($id);
         $task->actual_start= Carbon::now()->toDateTimeString();
-        if($task->actual_start){
-            $start = Carbon::parse($task->start)->format('Y-m-d');
-            $actual_start = Carbon::parse($task->actual_start)->format('Y-m-d');
-            if($actual_start<$start) $task->start_label='Mulai lebih cepat';
-            if($actual_start>$start) $task->start_label='Mulai terlambat';
-            if($actual_start==$start) $task->start_label='Mulai tepat waktu';
-        }
-        if($task->parentTask){
-            if(empty($task->parentTask->actual_start)){
-                $task->parentTask->actual_start=Carbon::now()->toDateTimeString();
-            }
-        }
         $task->save();
         $task=$this->getDetailTask($id);
         return response()->json($task);
     }
 
-    function updateParentProgress($parent_task_id){
-        $parent_task=Task::with('cards')->findOrFail($parent_task_id);
-        $valuePerSubtask=100/count($parent_task->cards);
-        $completeSubtaskCounter=0;
-        for ($i = 0; $i < count($parent_task->cards); $i++) {
-            $subtask = $parent_task->cards[$i];
-            if($subtask->complete){ $completeSubtaskCounter++; }
-        }
-        $progress=round($completeSubtaskCounter*$valuePerSubtask);
-        $parent_task->progress=$progress;
-        if($progress>=100){
-            $parent_task->actual_end = Carbon::now()->toDateTimeString();
-            $parent_task->complete=true;
-        }else{
-            $parent_task->actual_end = null;
-            $parent_task->complete=false;
-        }
-        $parent_task->save();
-    }    
-
     public function updateComplete(Request $request,$id){
         $task=Task::with('cards')->with('parentTask')->findOrFail($id);
         if($request->has('complete')){ 
-            if($task->parentTask){
-                $this->updateParentProgress($task->parentTask->id);
-            }
-
             if($request->complete){
                 if(!count($task->cards)){
                     $task->progress=100;
                 }
                 $task->complete=true;
-                    
-                $end = Carbon::parse($task->end)->format('Y-m-d');
-                $task->actual_end = Carbon::now()->toDateTimeString();
-                if($task->actual_end<$end) $task->end_label='Selesai lebih cepat';
-                if($task->actual_end>$end) $task->end_label='Selesai terlambat';
-                if($task->actual_end==$end) $task->end_label='Selesai tepat waktu';
-            }else{
-                if($task->parentTask && count($task->cards)>0){
-                    $valuePerSubtask=100/count($task->cards);
-                    $completeSubtaskCounter=0;
-                    for ($i = 0; $i < count($task->parentTask->cards); $i++) {
-                        $subtask = $task->cards[$i];
-                        if($subtask->complete){ $completeSubtaskCounter++; }
-                    }
-                    $progress=$completeSubtaskCounter*$valuePerSubtask;
-                    $task->progress=round($progress);
-                    if($task->progress>=100)$task->actual_end = Carbon::now()->toDateTimeString();
-                    $task->save();
-                }                
+                $task->actual_end=Carbon::now()->toDateTimeString();
+            }else{        
                 $task->actual_end = null;
                 $task->end_label='Belum Selesai';
                 $task->complete=false;

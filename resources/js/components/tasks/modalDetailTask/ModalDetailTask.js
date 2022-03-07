@@ -64,22 +64,22 @@ const removeTaskIdQueryString=(history)=>{
 }
 
 export default function ModalDetailTask(props) {
-    const { id } = props.initialState;
-    const {open,closeModalDetailTask,onTaskUpdate,onTaskDelete} = props;
+    const {initialState, open,closeModalDetailTask,onTaskUpdate,onTaskDelete} = props;
     const initConfirmState={open:false,type:'',callback:()=>{}};
     const [confirm,setConfirm]=useState(initConfirmState);
     const [emptyInputErrors,setEmptyInputErrors]=useState(false);
-  
+
     const global = useContext(UserContext);
     const history = useHistory();
     const [data, setData] = useState({
-        id: id, projects_id: '', lists_id: null, list:null,
+        id: initialState.id, projects_id: initialState.projects_id||null, lists_id: initialState.lists_id||null, list:null,
         title: '', description: '', label: '', complete: false, progress: 0,
         start:null,end:null,actual_start:null, actual_end:null, start_label:'',end_label:'',
         tags: [], members: [], parent_task_id:'',parent_task:null, cards: [], logs: [], cost:'',
         cost:'', actual_cost:'',
         comments: [], attachments: [],creator:null,is_subtask:false
     });
+
     const [detailProject,setDetailProject]=useState({
         id:'',title:'',members:[],clients:[],columns:[]
     })
@@ -99,7 +99,7 @@ export default function ModalDetailTask(props) {
     
     const getDetailTask = () => {
         var body={projects_id:detailProject.id,users_id:global.state.id}
-        const url = `${process.env.MIX_BACK_END_BASE_URL}tasks/${id}`;
+        const url = `${process.env.MIX_BACK_END_BASE_URL}tasks/${initialState.id}`;
         axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
         axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url,body)
@@ -107,6 +107,7 @@ export default function ModalDetailTask(props) {
                 result=result.data
                 setData({ ...data, ...result });
                 const payload = { projects_id: data.projects_id, lists_id: data.lists_id, ...result };
+                console.log(payload)
                 if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: payload })
                 else global.dispatch({ type: 'store-detail-task', payload: payload })
             }).catch((error) => {
@@ -130,7 +131,7 @@ export default function ModalDetailTask(props) {
             const paramsEdit = params.get('edit');
             if(paramsEdit==1) setIsEditing(true);
         }
-    }, [id,props.initialState.id]);
+    }, [initialState.id]);
 
     useEffect(()=>{
         getProgress();
@@ -242,7 +243,6 @@ export default function ModalDetailTask(props) {
     }
 
     const saveChanges = (e) => {
-        console.log(e);
         e.preventDefault();
         var body=data;
         if(!body) body= {
@@ -273,8 +273,8 @@ export default function ModalDetailTask(props) {
                 success: (result)=>{
                     result=result.data;
                     setData({...data,...result});
-                    // if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
-                    // else global.dispatch({ type: 'store-detail-task', payload: result });
+                    if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                    else global.dispatch({ type: 'store-detail-task', payload: result });
                     return <b>Successfully updated</b>
                 },
                 error: (error)=>{
@@ -347,13 +347,13 @@ export default function ModalDetailTask(props) {
                     </DialogTitle>
                     <DialogContent dividers> 
                         {emptyInputErrors?<Alert severity="warning">Required inputs are empty</Alert>:null}
-                            <EditForm isEdit={isEditing} data={data} setData={setData} 
-                                isAdmin={global.state.isAdmin} detailProject={detailProject}
-                                getProgress={getProgress} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete} 
-                                confirm={confirm} startConfirmOpen={()=>setConfirm({open:true,callback:handleStartTask})}
-                                completeConfirmOpen={()=>setConfirm({open:true,callback:markAsComplete})}
-                                getDetailTask={getDetailTask}
-                            /> 
+                        <EditForm isEdit={isEditing} data={data} setData={setData} 
+                            isAdmin={global.state.isAdmin} detailProject={detailProject}
+                            getProgress={getProgress} onTaskUpdate={onTaskUpdate} onTaskDelete={onTaskDelete} 
+                            confirm={confirm} startConfirmOpen={()=>setConfirm({open:true,callback:handleStartTask})}
+                            completeConfirmOpen={()=>setConfirm({open:true,callback:markAsComplete})}
+                            getDetailTask={getDetailTask}
+                        /> 
                     </DialogContent>                
                     <DialogActions>
                         <DialogActionButtons isEdit={isEditing} saveChanges={submitForm} setEditMode={handleEditingMode}
@@ -363,11 +363,7 @@ export default function ModalDetailTask(props) {
                     </DialogActions>
                 </form>
             </Dialog>
-            <DialogConfirm
-                open={confirm.open}
-                handleConfirm={confirm.callback}
-                handleClose={handleCloseConfirm}  
-                title={"Are you sure?"}>
+            <DialogConfirm open={confirm.open} handleConfirm={confirm.callback} handleClose={handleCloseConfirm}   title={"Are you sure?"}>
                 <DialogContentText>Data will be changed permanently</DialogContentText>
             </DialogConfirm>
         </>

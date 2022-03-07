@@ -17,7 +17,6 @@ const TableSubtask = lazy(() => import('./TableSubtasks'));
 
 const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete})=>{
     const [openCollapsible, setOpenCollapsible] = useState(false);
-    const [progress, setProgress] = useState(0);
 
     const [anchorEl, setAnchorEl] = useState(null);
     const [openPopOver, setOpenPopOver] = useState(null);
@@ -50,31 +49,6 @@ const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete
             return false;
         }
     }
-
-    useEffect(()=>{
-        const getProgress=()=>{
-            if(!data.parent_task){
-                try {
-                    if(data.cards?.length>0){
-                        var valuePerSubtask=100/data.cards.length;
-                        var completeSubtaskCounter=0;
-                        for (let i = 0; i < data.cards.length; i++) {
-                            const subtask = data.cards[i];
-                            if(subtask.complete)completeSubtaskCounter++;
-                        }
-                        var finalValue=completeSubtaskCounter*valuePerSubtask;
-                        setProgress(finalValue);
-                    }else{
-                        if(data.complete) setProgress(100);
-                        else setProgress(0);
-                    }  
-                } catch (error) {
-                    console.log(error,data);
-                }
-            }
-        }
-        getProgress();
-    },[])
     
     return(
         <Suspense fallback={null}>
@@ -97,7 +71,7 @@ const TaskRow=({data, handleDetailTaskOpen,headCells, onTaskUpdate, onTaskDelete
                         handleDetailTaskOpen(taskInfo);
                     }}  
                     to={{ pathname: pathname, search: searchParams.toString() }} style={{ textDecoration: 'none', color: '#393939' }}>
-                        {data.title} {data.cards?'('+Math.round(progress)+'%)':''}
+                        {data.title} {data.cards?'('+Math.round(data.progress)+'%)':''}
                     </Link>
                 </TableCell>
                 <TableCell style={{maxWidth:'100px'}}>

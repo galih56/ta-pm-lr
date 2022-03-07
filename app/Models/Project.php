@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Project extends Model
 {
@@ -24,6 +25,11 @@ class Project extends Model
     
     public static function boot() {
         parent::boot();
+        static::saving(function($project) { 
+            if($project->progress>=100){
+                $project->actual_end= Carbon::now()->toDateTimeString();
+            }
+        });
 
         static::deleting(function($project) { 
             
@@ -67,7 +73,15 @@ class Project extends Model
         }
         return $this->progress;
     }
+
     
+    public function startProgress(){      
+        $this->actual_start= Carbon::now()->toDateTimeString();
+        $this->save();
+        return $this;
+    }
+
+
     public function scopeExclude($query, $value = []) 
     {
         return $query->select(array_diff($this->fillable, (array) $value));
