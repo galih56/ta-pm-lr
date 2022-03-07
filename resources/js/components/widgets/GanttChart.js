@@ -131,9 +131,8 @@ class GanttChart extends React.Component {
         };
         var labelStyle={  position: "absolute", fontSize: "12px",  color: "white", top: "5px", left: "10px",  fontFamily: "Segoe UI", cursor: "move" }
         const task=props.taskData;
-        console.log(task.title,task?.metadata?.realization);
         
-        if(task?.metadata?.realization){
+        // if(task?.metadata?.realization){
             if(!task?.metadata?.actual_start && !task?.metadata?.actual_end){
                 taskBarStyle={height: "100%" };
                 labelStyle.color='black';
@@ -150,13 +149,13 @@ class GanttChart extends React.Component {
                 taskBarStyle={ backgroundColor:'#43a047',height: "100%",border:'1px solid #07650b' }
                 progressBarStyle={ backgroundColor:'#43a047', width: props.ganttProperties.progressWidth + "px", height: "100%" };    
             }
-        }else{
-            taskBarStyle={height: "100%" };
-            progressBarStyle={
-                width: props.ganttProperties.progressWidth + "px",
-                height: "100%"
-            };
-        }
+        // }else{
+        //     taskBarStyle={height: "100%" };
+        //     progressBarStyle={
+        //         width: props.ganttProperties.progressWidth + "px",
+        //         height: "100%"
+        //     };
+        // }
 
         return (
         <div className="e-gantt-child-taskbar-inner-div e-gantt-child-taskbar" 
