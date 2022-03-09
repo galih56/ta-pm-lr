@@ -34,6 +34,6 @@ class Approval extends Model
 
     public function notifications()
     {
-        return $this->morphMany('App\Models\Notification', 'notifiable');
+        return $this->morphMany(Notification::class, 'notifiable');
     }
 }

@@ -122,4 +122,9 @@ class Project extends Model
     public function clients(){
         return $this->belongsToMany(Client::class,'clients_has_projects','projects_id','clients_id');
     }
+
+    public function notifications()
+    {
+        return $this->morphMany(Notification::class, 'notifable');
+    }
 }

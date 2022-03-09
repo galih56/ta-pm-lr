@@ -244,6 +244,11 @@ class Task extends Model
         }
     }
 
+    public function notifications()
+    {
+        return $this->morphMany(Notification::class, 'notifable');
+    }
+
 }
 
 

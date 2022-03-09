@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, lazy, Suspense } from 'react';
-import { Link, useHistory,Switch, Route, BrowserRouter as Router, useLocation,Redirect } from "react-router-dom";
+import { Link, useHistory,Switch, Route, BrowserRouter as Router, useLocation,Redirect, withRouter } from "react-router-dom";
 import Paper from '@material-ui/core/Paper';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -126,14 +126,21 @@ const DetailProject = (props) => {
         }
     }
 
+    
     useEffect(() => {
-        getDetailProject();
         const query = new URLSearchParams(props.location.search);
         const paramTaskId = query.get('tasks_id');
         const paramMeetingId = query.get('meetings_id');
         if (paramTaskId) handleDetailTaskOpen({ task:{...clickedTask, id: paramTaskId}, open: true });
         if (paramMeetingId) handleDetailMeetingOpen({ meeting : { id:paramMeetingId,...clickedMeeting }, open: true });
     }, []);
+
+    useEffect(()=>{
+        getDetailProject();
+        return history.listen(location=>{
+            getDetailProject();
+        });
+    },[history]);
 
     useEffect(()=>{
         const currentProject=getProjectFromState(global.state.projects, params.id);
@@ -155,6 +162,7 @@ const DetailProject = (props) => {
         setDetailMeetingOpen(meetingInfo.open);
         setClickedMeeting({ ...meetingInfo.meeting });
     };
+
     return (
         <Router>
             <Paper>
@@ -178,20 +186,13 @@ const DetailProject = (props) => {
                     <Route path={"/projects/:id/others"} render={() => <TabOthers  tabState={tabState} index={5} detailProject={detailProject} getDetailProject={getDetailProject}handleDetailTaskOpen={handleDetailTaskOpen}/>} />
                 </Switch>
                 <ModalImportExcel projects_id={params.id} open={showModalImportExcel} closeModal={()=>handleModalImportExcel(false)} onUpdate={getDetailProject}/>
-                <ModalCreateList projects_id={params.id} open={showModalCreateList} closeModal={()=>handleModalCreateList(false)} 
-                    detailProject={detailProject}
-                />
-                <ModalCreateMeeting detailProject={detailProject} projects_id={params.id} open={showModalCreateMeeting}  handleClose={()=>handleModalCreateMeeting(false)} />
-                        
-                {(clickedTask.id && detailTaskOpen == true)?(
-                    <ModalDetailTask open={detailTaskOpen} closeModalDetailTask={() => handleDetailTaskOpen({task :clickedTaskInitialState,open:false})} projects_id={detailProject.id} detailProject={detailProject} setDetailProject={setDetailProject} initialState={clickedTask}  onTaskUpdate={clickedTask.onTaskUpdate} onTaskDelete={clickedTask.onTaskDelete}/>
-                ):<></>}
-                {(clickedMeeting.id && detailMeetingOpen)?
-                <ModalDetailMeeting open={detailMeetingOpen} closeModal={()=>handleDetailMeetingOpen({open:false,meeting:clickedMeetingInitialState})} detailProject={detailProject} initialState={clickedMeeting} />:<></>}
+                <ModalCreateList projects_id={params.id} open={showModalCreateList} closeModal={()=>handleModalCreateList(false)} detailProject={detailProject}/>
+                <ModalCreateMeeting detailProject={detailProject} projects_id={params.id} open={showModalCreateMeeting}  handleClose={()=>handleModalCreateMeeting(false)} />       
+                {(clickedTask.id && detailTaskOpen == true)?(<ModalDetailTask open={detailTaskOpen} closeModalDetailTask={() => handleDetailTaskOpen({task :clickedTaskInitialState,open:false})} projects_id={detailProject.id} detailProject={detailProject} setDetailProject={setDetailProject} initialState={clickedTask}  onTaskUpdate={clickedTask.onTaskUpdate} onTaskDelete={clickedTask.onTaskDelete}/>):<></>}
+                {(clickedMeeting.id && detailMeetingOpen)?<ModalDetailMeeting open={detailMeetingOpen} closeModal={()=>handleDetailMeetingOpen({open:false,meeting:clickedMeetingInitialState})} detailProject={detailProject} initialState={clickedMeeting} />:<></>}
             </Suspense>
         </Router>
-    );
-        
+    ); 
 }
 
-export default DetailProject;
+export default withRouter(DetailProject);
