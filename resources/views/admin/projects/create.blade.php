@@ -40,7 +40,7 @@
                             <label class="my-1 me-2" for="progress">Progress</label>
                             <input type="text" name="progress" id="progress" 
                                 class="form-control @error('progress') is-invalid @enderror"
-                                value="{{$project->progress}}" required>
+                                required>
                             @error('progress')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
@@ -109,7 +109,7 @@
                                     <option value="{{$user->id}}"  
                                         @if(old('users'))
                                             {{collect(old('users'))->contains($item->id)? 'selected' : ''}}
-                                        @endif>{{$user->name}} - {{$user->role->name}}</option>
+                                        @endif>{{$user->name}} {{$user->role?" - ".$user->role->name:''}}</option>
                                     @endforeach
                             </select>
                             @error('users')
@@ -174,7 +174,7 @@
                     <div class="col-12 mt-1">
                         <div class="mb-2">
                             <label class="my-1 me-2" for="teams">Import excel</label>
-                            <input type="file" name="file" id="file">   
+                            <input type="file" name="file" id="file"accept=".csv, .xls, .xlsx, text/csv, application/csv, text/comma-separated-values, application/csv, application/excel, application/vnd.msexcel, text/anytext, application/vnd. ms-excel, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">   
                         </div>
                     </div>
                     

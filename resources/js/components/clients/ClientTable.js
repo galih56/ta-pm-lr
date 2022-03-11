@@ -112,8 +112,6 @@ export default function EnhancedTable() {
     const getClients = () => {
         const toast_loading = toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}clients`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setRows(result.data);
@@ -177,7 +175,7 @@ export default function EnhancedTable() {
                                 <TableBody>
                                     {(rows.length>0)?stableSort(rows, getComparator(order, orderBy))
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                        .map((row) =><Row data={row}/>):(    
+                                        .map((row) =><Row key={row.id} data={row}/>):(    
                                             <TableRow>
                                                 <TableCell  colSpan={headCells.length} align="center">
                                                     <Typography variant="body1">There is no data to show</Typography>

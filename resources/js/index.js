@@ -1,4 +1,4 @@
-import React, { useReducer, lazy } from 'react';
+import React, { useReducer, lazy,useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import { ThemeProvider, createTheme } from '@material-ui/core/styles';
@@ -17,11 +17,12 @@ import {
     storeDetailSubtask,storeSubtasks, createNewSubtask, removeSubtask,
     createNewAttachments, removeAttachment
 } from './context/TasksReducer';
-// import { addNotification, storeNotifications, updateNotification, removeNotification } from './context/NotificationsReducer';
+import { addNotification, storeNotifications, updateNotification, removeNotification } from './context/NotificationsReducer';
 import { addClientsToProject, storeClientsToProject, removeClientFromProject } from './context/ClientsReducer';
 import { LinearProgress } from '@material-ui/core/';
 import './index.css';
 import {Toaster} from 'react-hot-toast';
+import axios from 'axios';
 
 const Home = lazy(() => import("./layout/Home"));
 const DetailProject = lazy(() => import("./components/projects/DetailProject"));
@@ -29,7 +30,7 @@ const ProjectReports = lazy(() => import("./components/reports/ProjectList"));
 const DetailProjectReports = lazy(() => import("./components/reports/DetailProject"));
 const ApprovalTable = lazy(() => import("./components/approvals/ApprovalTable"));
 const DetailApproval = lazy(() => import("./components/approvals/DetailApproval"));
-// const NotificationList = lazy(() => import("./layout/notifications/NotificationList"));
+const NotificationList = lazy(() => import("./layout/notifications/NotificationList"));
 const TaskList = lazy(() => import("./components/tasks/TaskList"));
 const UserInformation = lazy(() => import("./components/users/UserInformation"));
 const ModalAuthentication = lazy(() => import("./layout/auth/ModalAuthentication"));
@@ -120,9 +121,16 @@ const reducer = (state, action) => {
 }
 
 const theme = createTheme();
+
+axios.defaults.headers.post['Content-Type'] = 'application/json';
+
 const App = () => {
     const [state, dispatch] = useReducer(reducer, initState);
-
+    useEffect(()=>{
+        if(state.token){
+            axios.defaults.headers.common['Authorization'] = `Bearer ${state.token}`;
+        }
+    },[state.token])
     return (
         <UserContext.Provider value={{ state, dispatch }}>
             <ThemeProvider theme={theme}>
@@ -172,7 +180,7 @@ const App = () => {
                                         </>
                                     )
                                 }} />
-                                {/* <Route path={`/notifications`} component={NotificationList} /> */}
+                                <Route path={`/notifications`} component={NotificationList} />
                                 <Route path='/' exact ><Redirect to='/projects' /></Route>
                             </Switch>
                         </React.Suspense>

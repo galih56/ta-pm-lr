@@ -3,9 +3,11 @@
 namespace App\Observers;
 
 use App\Models\Task;
+use App\Models\Notification;
 
 class TaskObserver
 {
+
     /**
      * Handle the Task "created" event.
      *
@@ -14,7 +16,13 @@ class TaskObserver
      */
     public function created(Task $task)
     {
-        //
+        Notification::create([
+            'title'=>'A new task has been created',
+            'message'=>$task->name,
+            'notifiable_id'=>$task->id,
+            'notifiable_type'=>'\App\Models\Task',
+            'route'=>'\tasks\\'.$task->id
+        ]);
     }
 
     /**
@@ -25,7 +33,13 @@ class TaskObserver
      */
     public function updated(Task $task)
     {
-        //
+        Notification::create([
+            'title'=>'A task has been updated',
+            'message'=>$task->name,
+            'notifiable_id'=>$task->id,
+            'notifiable_type'=>'\App\Models\Task',
+            'route'=>'\tasks\\'.$task->id
+        ]);
     }
 
     /**
@@ -36,28 +50,12 @@ class TaskObserver
      */
     public function deleted(Task $task)
     {
-        //
-    }
-
-    /**
-     * Handle the Task "restored" event.
-     *
-     * @param  \App\Models\Task  $task
-     * @return void
-     */
-    public function restored(Task $task)
-    {
-        //
-    }
-
-    /**
-     * Handle the Task "force deleted" event.
-     *
-     * @param  \App\Models\Task  $task
-     * @return void
-     */
-    public function forceDeleted(Task $task)
-    {
-        //
+        Notification::create([
+            'title'=>'A task has been deleted',
+            'message'=>$task->name,
+            'notifiable_id'=>$task->id,
+            'notifiable_type'=>'\App\Models\Task',
+            'route'=>'\tasks\\'.$task->id
+        ]);
     }
 }

@@ -108,6 +108,15 @@ class TaskController extends Controller
             }
         } 
         $task=$this->getDetailTask($task->id);
+
+        Notification::create([
+            'title'=>'A new task has been created',
+            'message'=>$task->name,
+            'notifiable_id'=>$task->id,
+            'notifiable_type'=>'\App\Models\Task',
+            'route'=>'\tasks\\'.$task->id
+        ]);
+
         return response()->json($task);
     }
 
@@ -198,12 +207,29 @@ class TaskController extends Controller
     public function destroy($id)
     {
         $task=Task::findOrFail($id);
-        return response()->json($task->delete());
+        $task->delete();
+        Notification::create([
+            'title'=>'A task has been deleted',
+            'message'=>$task->name,
+            'notifiable_id'=>$task->id,
+            'notifiable_type'=>'\App\Models\Task',
+            'route'=>'\tasks\\'.$task->id
+        ]);
+        return response()->json(true,200);
     }
     public function startTask(Request $request,$id){
         $task=Task::with('parentTask')->findOrFail($id);
         $task->actual_start= Carbon::now()->toDateTimeString();
         $task->save();
+        
+        Notification::create([
+            'title'=>'A task has been updated',
+            'message'=>$task->name,
+            'notifiable_id'=>$task->id,
+            'notifiable_type'=>'\App\Models\Task',
+            'route'=>'\tasks\\'.$task->id
+        ]);
+    
         $task=$this->getDetailTask($id);
         return response()->json($task);
     }

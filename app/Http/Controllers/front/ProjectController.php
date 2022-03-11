@@ -51,6 +51,14 @@ class ProjectController extends Controller
             if($project['error']==true){   
                 return response()->json($project);
             }else{
+                
+                Notification::create([
+                    'title'=>'A new project has been imported',
+                    'message'=>$project->name,
+                    'notifiable_id'=>$project->id,
+                    'notifiable_type'=>'\App\Models\Project',
+                    'route'=>'\projects\\'.$project->id
+                ]);
                 $project=$this->getDetailProject($project->id,$request); 
                 return response()->json($project);
             }
@@ -75,7 +83,15 @@ class ProjectController extends Controller
             if($request->has('clients')){
                 $project->clients()->sync($request->clients);
             }
-              
+             
+            Notification::create([
+                'title'=>'A new project has been created',
+                'message'=>$project->name,
+                'notifiable_id'=>$project->id,
+                'notifiable_type'=>'\App\Models\Project',
+                'route'=>'\projects\\'.$project->id
+            ]);
+             
             $project=$this->getDetailProject($project->id,$request); 
             return response()->json($project);
         }
@@ -139,12 +155,29 @@ class ProjectController extends Controller
         if($request->has('start')) $project->start=$request->start;
         if($request->has('end')) $project->end=$request->end;
         $project->save();
+        
+        Notification::create([
+            'title'=>'A project has been updated',
+            'message'=>$project->name,
+            'notifiable_id'=>$project->id,
+            'notifiable_type'=>'\App\Models\Project',
+            'route'=>'\projects\\'.$project->id.'\other'
+        ]);
+        
         return response()->json($project);
     }
 
     public function destroy($id)
     {
         $project=Project::findOrFail($id);
+        
+        Notification::create([
+            'title'=>'A project has been deleted',
+            'message'=>$project->name,
+            'notifiable_id'=>$project->id,
+            'notifiable_type'=>'\App\Models\Project',
+            'route'=>'\projects\\'.$project->id
+        ]);
         return response()->json($project->delete());
     }
 

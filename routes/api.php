@@ -7,7 +7,9 @@ Route::post('/register','App\Http\Controllers\front\UserController@register');
 Route::post('/login','App\Http\Controllers\front\UserController@login');
 Route::post('/logout','App\Http\Controllers\front\UserController@logout');
 
-Route::resource('clients', 'App\Http\Controllers\front\ClientController');
+Route::middleware('auth:sanctum')->group( function () {
+    Route::resource('clients', 'App\Http\Controllers\front\ClientController');
+});
 Route::resource('lists', 'App\Http\Controllers\front\ListController');
 Route::post('lists/{id}/extend-deadline', 'App\Http\Controllers\front\ListController@extendDeadline');
 Route::resource('tasks', 'App\Http\Controllers\front\TaskController');
@@ -36,8 +38,10 @@ Route::group(['prefix'=>'users'],function(){
     Route::get('/{id}/tasks','App\Http\Controllers\front\UserController@gettasks');
     Route::post('/{id}/get-github-access-token','App\Http\Controllers\front\UserController@getGithubAccessToken');
     Route::patch('/{id}/changepassword','App\Http\Controllers\front\UserController@changePassword');
+    Route::patch('/{id}/notifications','App\Http\Controllers\front\UserController@getNotifications');
 });
 Route::resource('users', 'App\Http\Controllers\front\UserController');
+Route::resource('notifications', 'App\Http\Controllers\front\NotificationController');
 Route::resource('roles', 'App\Http\Controllers\front\RoleController');
 Route::get('projects-overview','App\Http\Controllers\front\ProjectController@getoverallProjectReports');
 Route::get('import-format','App\Http\Controllers\admin\ProjectController@getImportFormat')->name('projects.download-import-format');
@@ -66,8 +70,9 @@ Route::group(['prefix'=>'project-members'],function(){
     Route::get('/{id}/tasks','App\Http\Controllers\front\ProjectMemberController@getTasks');
 });
 Route::resource('approvals', 'App\Http\Controllers\front\ApprovalController');
-Route::get('check-url', function (Request $request) {
-    return dd(url(''));
+Route::get('tes', function (Request $request) {
+    // https://stackoverflow.com/a/70525270
+    return response()->json([auth('sanctum')->user(),$request->user()]);
 });
 Route::post('check_file_import','App\Http\Controllers\front\ProjectController@check_file_format')->name('check-file-import');
 Route::middleware('auth:api')->get('/user', function (Request $request) {

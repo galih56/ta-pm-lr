@@ -119,8 +119,6 @@ export default function EnhancedTable() {
         }else{
             const toast_loading = toast.loading('Loading...');
             const url = `${process.env.MIX_BACK_END_BASE_URL}approvals?projects_id=${global.state.current_project_id}`;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.get(url)
                 .then((result) => {
                     setRows(result.data);
@@ -218,15 +216,7 @@ export default function EnhancedTable() {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                        <TablePagination
-                            page={page}
-                            component="div"
-                            count={rows.length}
-                            rowsPerPage={rowsPerPage}
-                            onPageChange={handleChangePage}
-                            rowsPerPageOptions={[10, 20, 30]}
-                            onRowsPerPageChange={handleChangeRowsPerPage}
-                        />
+                        <TablePagination page={page} component="div" count={rows.length} rowsPerPage={rowsPerPage} onPageChange={handleChangePage} rowsPerPageOptions={[10, 20, 30]} onRowsPerPageChange={handleChangeRowsPerPage}/>
                     </div>
                 </Paper>
             </Grid>

@@ -35,6 +35,15 @@ class ListController extends Controller
         $list->projects_id=$request->projects_id;
         $list->save();
         $list=TaskList::with('cards.cards')->findOrFail($list->id);
+
+        Notification::create([
+            'title'=>'A new list has been created',
+            'message'=>$list->name,
+            'notifiable_id'=>$list->id,
+            'notifiable_type'=>'\App\Models\Project',
+            'route'=>'\lists\\'.$list->id
+        ]);
+
         return response()->json($list);
     }
 
@@ -56,13 +65,32 @@ class ListController extends Controller
         if($request->has('start')) $list->start=$request->start;
         if($request->has('end')) $list->end=$request->end;
         $list->save();
+
+         
+        Notification::create([
+            'title'=>'A new list has been updated',
+            'message'=>$list->name,
+            'notifiable_id'=>$list->id,
+            'notifiable_type'=>'\App\Models\Project',
+            'route'=>'\lists\\'.$list->id
+        ]);
+
         return response()->json($list);
     }
 
     public function destroy($id)
     {
         $list=TaskList::findOrFail($id);
-        return response()->json($list->delete(),200);
+        $list->delete();
+        
+        Notification::create([
+            'title'=>'A new list has been deleted',
+            'message'=>$list->name,
+            'notifiable_id'=>$list->id,
+            'notifiable_type'=>'\App\Models\Project',
+        ]);
+        
+        return response()->json(true,200);
     }
     
     public function extendDeadline(Request $request){
