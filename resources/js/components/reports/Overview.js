@@ -33,8 +33,6 @@ const Overview=({detailProject,refreshDetailProject,handleDetailTaskOpen})=>{
         if(![1,2,3,4,5,6].includes(global.state.role?.id)){
             url+=`?users_id=${global.state.id}`;
         }
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url, {}, {})
             .then((result) => {
                 setAllTasks(result.data.all_tasks)

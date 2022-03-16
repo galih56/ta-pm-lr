@@ -28,11 +28,7 @@ const DialogTitle = withStyles(styles)((props) => {
         <MuiDialogTitle className={classes.root} {...other}>    
             <Typography>{children}</Typography>
             {onClose ? (
-                <IconButton
-                    aria-label="close"
-                    className={classes.closeButton}
-                    onClick={onClose}
-                    size="large">
+                <IconButton aria-label="close" className={classes.closeButton} onClick={onClose} size="large">
                     <CloseIcon />
                 </IconButton>
             ) : null}
@@ -51,7 +47,7 @@ const ModalCreateUser = ({open, closeModal, onCreate}) => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [email, setEmail] = useState('');
     const [rolesId, setRolesId] = useState('');
-    const [inputRequireAlert, setInputRequireAlert] = useState(false);
+    const [inputsEmpty, setInputsEmpty] = useState(false);
     const [emailTaken, setEmailTaken] = useState(false);
     const [passwordConfirmAlert, setPasswordConfirmAlert] = useState(false);
     const [offlineAlert, setOfflineAlert] = useState(false);
@@ -61,8 +57,6 @@ const ModalCreateUser = ({open, closeModal, onCreate}) => {
 
     const getRoles = () => {
         const url = `${process.env.MIX_BACK_END_BASE_URL}roles`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 var data=result.data.filter((item)=>{
@@ -72,7 +66,6 @@ const ModalCreateUser = ({open, closeModal, onCreate}) => {
                 })
                 setRoles(data);
             }).catch((error) => {
-                console.log(error);
                 switch(error.response.status){
                     case 401 : toast.error(<b>Unauthenticated</b>); break;
                     case 422 : toast.error(<b>Some required inputs are invalid</b>); break;
@@ -87,39 +80,26 @@ const ModalCreateUser = ({open, closeModal, onCreate}) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
-        if (username.trim() === '' || password.trim() === '' || email.trim() === '') {
-            setInputRequireAlert(true);
-            return;
-        } else {
-            setInputRequireAlert(false);
+        if (password.trim() === '' || confirmPassword.trim()==='') {
+            setInputsEmpty(true);
+        }else{
+            setInputsEmpty(false);
         }
         if (password === confirmPassword) {
             setPasswordConfirmAlert(false);
         } else {
             setPasswordConfirmAlert(true);
-            return;
         }
 
         if (!window.navigator.onLine) setOfflineAlert(true);
         else setOfflineAlert(false);
         
-        const body = {
-            name: username,
-            password: password,
-            roles_id: rolesId,
-            password_confirmation: confirmPassword,
-            email: email
-        }
-        
-        const url=`${process.env.MIX_BACK_END_BASE_URL}users`
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.post(url, body),
-            {
-                loading: 'Creating a new user',
-                success: (result)=>{ 
+        const body = { name: username, password: password, roles_id: rolesId, password_confirmation: confirmPassword, email: email}
+        if(!inputsEmpty){
+            const url=`${process.env.MIX_BACK_END_BASE_URL}users`        
+            const toast_loading = toast.loading('Creating a new user'); 
+            axios.post(url, body)
+                .then((result) => {   
                     setSignUpSuccess(true);
                     setUserExists(false);
                     setEmailTaken(false);
@@ -128,21 +108,18 @@ const ModalCreateUser = ({open, closeModal, onCreate}) => {
                     setPassword('');
                     setConfirmPassword('');
                     onCreate(result.data,'create');
-                    return <b>A new user successfuly created</b>
-                },
-                error: (error)=>{
+                    toast.dismiss(toast_loading)
+                    toast.success(<b>A new user successfuly created</b>)
+                }).catch((error)=> {
+                    toast.dismiss(toast_loading)
                     setSignUpSuccess(false);
-                    if(error.response.data.errors)
                     if (error.response.status===409) setUserExists(true);
-                    if (error.response.status==401) return <b>Unauthenticated</b>;
                     if (error.response.status==422){ 
                         if(error.response?.data?.errors?.email) setEmailTaken(true);
                         if(error.response?.data?.errors?.password) setPasswordConfirmAlert(true);
-                        return <b>Some required inputs are invalid</b>
                     };
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+                });
+        }
     }
 
     const handleUsernameOnChange=(e) => setUsername(e.target.value);
@@ -151,15 +128,14 @@ const ModalCreateUser = ({open, closeModal, onCreate}) => {
     const handlePasswordOnChange=(e) => setPassword(e.target.value); 
     const handleConfirmPasswordOnChange=(e) => setConfirmPassword(e.target.value)
     return (
-        <Dialog onClose={closeModal} aria-labelledby="Modal Create user" open={open} style={{ zIndex: '750' }}
-            maxWidth={'lg'} fullWidth>
+        <Dialog onClose={closeModal} aria-labelledby="Modal Create user" open={open} style={{ zIndex: '750' }} maxWidth={'lg'} fullWidth>
             <DialogTitle onClose={closeModal}>Create new user</DialogTitle>
             <DialogContent dividers>
                 <Container component="main" >
                     <CssBaseline />
                     { emailTaken ? <Alert severity="error" > The email has already been taken</Alert> : null}
                     { passwordConfirmAlert ? <Alert severity="error" > Password confirmation doesn't match</Alert> : null}
-                    { inputRequireAlert ? <Alert severity="error" >Some fields are empty</Alert> : null}
+                    { inputsEmpty ? <Alert severity="error" >Some fields are empty</Alert> : null}
                     { userExists ? <Alert severity="warning" >Email : <strong>{email} </strong>already in use</Alert> : null}
                     { signUpSuccess ? <Alert severity="success" ><strong>Success</strong><br />New user is now registered</Alert> : null}
                     { offlineAlert ? <Alert severity="warning" >You're currently offline. Please check your internet connection</Alert> : null}

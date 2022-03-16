@@ -100,8 +100,6 @@ const GoogleClient  = ({isEdit,meeting,detailProject,saveChanges}) => {
     const updateMeetingMember=(body)=>{
         if(!meeting.member?.id) return;
         const url = `${process.env.MIX_BACK_END_BASE_URL}meetings/${meeting.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.patch(url)
             .then((result) => {
                 var newMeetingData={...data}

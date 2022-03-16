@@ -62,17 +62,15 @@ const trimString=(str)=>{
 }
 const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
     const location = useLocation(); 
-    const [anchorPopover, setAnchorPopover] = useState(false);
-    const handleClick = (event) => setAnchorPopover(event.currentTarget);
-    const handleClose = () => setAnchorPopover(null);
+    const [anchorEl, setAnchorEl] = useState(false);
+    const handleClick = (event) => setAnchorEl(event.currentTarget);
+    const handleClose = () => setAnchorEl(null);
 
-    const open = Boolean(anchorPopover);
     const id = open ? 'file-popover' : undefined;
 
     var file_url = process.env.MIX_BACK_END_BASE_URL;
     if (file.source == 'upload') file_url += file.path
     if (file.source == 'google-drive') file_url = file.path;
-
     var srcCardMedia = null;
     var file_type='';
     if(file.type){
@@ -119,12 +117,7 @@ const CustomCard = ({ classes, file, handleDetailTaskOpen,onPick}) => {
                 title={file.file_name?trimString(file.file_name):''}
                 subheader={moment(file.createdAt).format('MMMM Do YYYY, h:mm a')}
             />
-            <Popover
-                id={id} open={open} anchorEl={anchorPopover} onClose={handleClose}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center'}}
-                transformOrigin={{ vertical: 'top', horizontal: 'center'}}
-                style={{ pointerEvents: 'none'}}
-            >
+            <Popover id={id} open={Boolean(anchorEl)} anchorEl={anchorEl} onClose={handleClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'center'}} transformOrigin={{ vertical: 'top', horizontal: 'center'}} style={{ pointerEvents: 'none'}}>
                 <List dense={true}>
                     <ListItem button onClick={()=>onPick(file)}>
                         <ListItemIcon>
@@ -174,7 +167,6 @@ const Files = (props) => {
     const getFiles = () => {
         const toast_loading = toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${projects_id}/files`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 const data = result.data;
@@ -191,22 +183,14 @@ const Files = (props) => {
     }
 
     const handleDelete = (id) => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'files/' + id;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.delete(url),
-            {
-                loading: 'Deleting...',
-                success: (result)=>{
-                    setChoosenFileId(null)
-                    return <b>Successfully deleted</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = `${process.env.MIX_BACK_END_BASE_URL}files/${id}`;
+        const toast_loading = toast.loading(`Deleting...`); 
+        axios.delete(url)
+            .then((result) => {
+                setChoosenFileId(null)
+                toast.dismiss(toast_loading);
+                toast.success(<b>Successfully deleted</b>)
+            }).catch(error=> toast.dismiss(toast_loading));
     }
 
     useEffect(() => {
@@ -220,12 +204,7 @@ const Files = (props) => {
                 {
                     files.map(file => (
                         <Grid item xl={2} lg={3} md={4} sm={6} xs={6} key={file.id}>
-                            <CustomCard 
-                                file={file} 
-                                classes={classes} 
-                                handleDetailTaskOpen={handleDetailTaskOpen} 
-                                onPick={onPick}
-                                />
+                            <CustomCard  file={file}  classes={classes}  handleDetailTaskOpen={handleDetailTaskOpen}  onPick={onPick}/>
                         </Grid>
                     ))
                 }

@@ -24,6 +24,20 @@ class Task extends Model
         'progress' => 'double',
     ];
 
+    protected $appends = array('project');
+
+    public function getProjectAttribute()
+    {
+        try { 
+            if($this->parentTask){
+                return $this->parentTask->list->project;
+            }else{
+                return $this->list->project;
+            }
+        } catch (\Throwable $th) {
+            return null;
+        }
+    }
 
     public static function boot() {
         parent::boot();
@@ -244,6 +258,14 @@ class Task extends Model
         }
     }
 
+    public function notifications(){
+        return $this->morphToMany(Notification::class, 'notifiable');
+    }
+
+    
+    public function activities(){
+        return $this->morphToMany(ActivityLog::class, 'loggable');
+    }
 }
 
 

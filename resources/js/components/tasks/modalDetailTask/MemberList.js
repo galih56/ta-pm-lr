@@ -34,54 +34,35 @@ const MemberList=({isEdit,data,setData,detailProject,exceptedData})=>{
     },[data.members])
 
     const addMembers = (body) => {
-       const url = process.env.MIX_BACK_END_BASE_URL + `task-members`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.post(url, body),
-            {
-                loading: 'Adding a new member',
-                success: (result)=>{
-                    const newDetailTask={...data,members:result.data};
-                    setData(newDetailTask);
-                    if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: newDetailTask })
-                    else global.dispatch({ type: 'store-detail-task', payload: newDetailTask })
-                    return <b>Successfuly updated</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = `${process.env.MIX_BACK_END_BASE_URL}task-members`;
+        const toast_loading = toast.loading('Adding a new member...'); 
+        axios.post(url, body)
+            .then((result) => {                      
+                const newDetailTask={...data,members:result.data};
+                setData(newDetailTask);
+                if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: newDetailTask })
+                else global.dispatch({ type: 'store-detail-task', payload: newDetailTask })
+                toast.dismiss(toast_loading)
+                toast.success(<b>Successfuly updated</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
     
     const removeMember = (user) => {
         const url = process.env.MIX_BACK_END_BASE_URL + `task-members/${user.task_members_id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.delete(url, {id:user.task_members_id}),
-            {
-                loading: 'Deleting...',
-                success: (result)=>{
-                    var newMemberList=members.filter(function(member){
-                        if(member.task_members_id!=user.task_members_id) return member;
-                    });
-                    console.log(user,newMemberList);
-                    setMembers(newMemberList);
-                    const newDetailTask={...data,members:newMemberList};
-                    setData(newDetailTask);
-                    if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: newDetailTask })
-                    else global.dispatch({ type: 'store-detail-task', payload: newDetailTask })
-                    return <b>Successfully deleted</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const toast_loading = toast.loading('Adding a new member...'); 
+        axios.delete(url, body)
+            .then((result) => {                      
+                var newMemberList=members.filter(function(member){
+                    if(member.task_members_id!=user.task_members_id) return member;
+                });
+                setMembers(newMemberList);
+                const newDetailTask={...data,members:newMemberList};
+                setData(newDetailTask);
+                if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: newDetailTask })
+                else global.dispatch({ type: 'store-detail-task', payload: newDetailTask })
+                toast.dismiss(toast_loading)
+                toast.success(<b>Successfully deleted</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
 
     const handleUserbarOnChange=(users)=> setNewMembers(users);

@@ -81,8 +81,6 @@ export default function ModalDetailUser(props) {
     const getDetailUser = () => {
         if(props.initialState.id){
             const url = `${process.env.MIX_BACK_END_BASE_URL}users/${props.initialState.id}`;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.get(url)
             .then((result) => {
                 setData(result.data);
@@ -92,48 +90,27 @@ export default function ModalDetailUser(props) {
     }
 
     const saveChanges = () => {
-        let body = {
-            id: data.id, name: data.name, email: data.email, 
-            roles_id: data.roles_id, profile_picture_path: ''
-        };
+        let body = { id: data.id, name: data.name, email: data.email,  roles_id: data.roles_id, profile_picture_path: ''};
         const url = process.env.MIX_BACK_END_BASE_URL + `users/${props.initialState.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url, body),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    setData(result.data);
-                    props.onUpdate(result.data, 'update');
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const toast_loading = toast.loading(`Updating`); 
+        axios.patch(url, body)
+            .then((result) => {
+                setData(result.data);
+                props.onUpdate(result.data, 'update');
+                toast.dismiss(toast_loading);
+                toast.success(<b>Successfully updated</b>)
+            }).catch(error=> toast.dismiss(toast_loading));
     }
 
     const deleteUser = () => {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         const url = process.env.MIX_BACK_END_BASE_URL + `users/${data.id}`;
-        toast.promise(
-            axios.delete(url),
-            {
-                loading: 'Deleting...',
-                success: (result)=>{
-                    props.onUpdate(data, 'delete');
-                    return <b>Successfully deleted</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const toast_loading = toast.loading(`Deleting...`); 
+        axios.delete(url)
+            .then((result) => {
+                props.onUpdate(data, 'delete');
+                toast.dismiss(toast_loading);
+                toast.success(<b>Successfully deleted</b>)
+            }).catch(error=> toast.dismiss(toast_loading));
     }
 
     return (
@@ -144,16 +121,9 @@ export default function ModalDetailUser(props) {
                 <EditForm open={open} isEdit={isEditing} data={data} setData={setData} asProfile={asProfile}/>
             </DialogContent>
             <DialogActions>
-                <DialogActionButtons
-                    isEdit={isEditing}
-                    deletable={!([1,2].includes(data.role?.id) || global.state.id==props.initialState.id)}
-                    saveChanges={saveChanges}
-                    setEditMode={handleEditingMode}
-                    deleteUser={deleteUser}
-                    deleteConfirmOpen={deleteConfirmOpen}
-                    setDeleteConfirmOpen={setDeleteConfirmOpen}
-                    closeModal={closeModal}
-                > </DialogActionButtons>
+                <DialogActionButtons isEdit={isEditing} deletable={!([1,2].includes(data.role?.id) || global.state.id==props.initialState.id)} 
+                    saveChanges={saveChanges} setEditMode={handleEditingMode} deleteUser={deleteUser} 
+                    deleteConfirmOpen={deleteConfirmOpen} setDeleteConfirmOpen={setDeleteConfirmOpen} closeModal={closeModal}/>
             </DialogActions>
         </Dialog>
     );

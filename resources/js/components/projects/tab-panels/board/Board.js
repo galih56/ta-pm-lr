@@ -22,8 +22,6 @@ const Kanban = (props) => {
             if(![1,2,3,4].includes(global.state.role?.id)){
                 url+=`?users_id=${global.state.id}`;
             }
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.get(url)
                 .then((result) => {
                     setBoard({lanes:result.data});
@@ -58,27 +56,19 @@ const Kanban = (props) => {
             if(member.id==global.state.id) newCard.projectMemberId=member.id; break;
         }
 
-        const url = process.env.MIX_BACK_END_BASE_URL + 'tasks/';
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.post(url, newCard),
-            {
-                loading: 'Creating a new task',
-                success: (result)=>{
-                    newCard.id = result.data.id;
-                    newCard.projects_id = detailProject.id;
-                    newCard.lists_id = laneId;
-                    newCard={...newCard,...result.data}
-                    global.dispatch({ type: 'create-new-task', payload: newCard })
-                    return <b>A new task successfully created</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = `${process.env.MIX_BACK_END_BASE_URL}tasks`;
+        
+        const toast_loading = toast.loading('Creating a new task...');
+        axios.post(url, newCard)
+            .then((result) => {  
+                newCard.id = result.data.id;
+                newCard.projects_id = detailProject.id;
+                newCard.lists_id = laneId;
+                newCard={...newCard,...result.data}
+                global.dispatch({ type: 'create-new-task', payload: newCard })
+                toast.dismiss(toast_loading)
+                toast.success(<b>A new task successfully created</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
         return newCard;
     }
 
@@ -86,23 +76,14 @@ const Kanban = (props) => {
         data.projects_id = detailProject.id;
         data.lists_id = laneId;
         if (window.navigator.onLine) {
-            const url = process.env.MIX_BACK_END_BASE_URL + 'lists/' + laneId;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            toast.promise(
-                axios.patch(url, data),
-                {
-                    loading: 'Updating...',
-                    success: (result)=>{
-                        global.dispatch({ type: 'update-list', payload: data })
-                        return <b>Successfully updated</b>
-                    },
-                    error: (error)=>{
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                        return <b>{error.response.statusText}</b>;
-                    },
-                });
+            const url = `${process.env.MIX_BACK_END_BASE_URL}lists/${laneId}`;
+            const toast_loading = toast.loading('Updating...'); 
+            axios.patch(url, data)
+                .then((result) => {                          
+                    global.dispatch({ type: 'update-list', payload: data })
+                    toast.dismiss(toast_loading)
+                    toast.success(<b>Successfully updated</b>)
+                }).catch((error)=> toast.dismiss(toast_loading));
         }
     }
     

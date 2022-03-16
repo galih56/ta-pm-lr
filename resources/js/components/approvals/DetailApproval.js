@@ -39,47 +39,24 @@ export default function DetailApproval(props) {
     }, []);
 
     const getDetailApproval=()=>{
-        const toast_loading = toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}approvals/${params.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.get(url)
-            .then((result) => {
+        const toast_loading = toast.loading(<b>Loading...</b>);
+        axios.get(url).then((result) => {                
                 setData(result.data);
                 toast.dismiss(toast_loading);
-            }).catch((error) => {
-                toast.dismiss(toast_loading);
-                switch(error.response.status){
-                    case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
-                    default : toast.error(<b>{error.response.statusText}</b>); break
-                }
-            });
+            }).catch(error=> toast.dismiss(toast_loading));      
     }
 
     const handleSubmit=(e)=>{
-        const body={
-            id:params.id,
-            status:data.status
-        }
-        const url = process.env.MIX_BACK_END_BASE_URL + 'approvals/'+params.id;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-    
-        toast.promise(
-            axios.patch(url, body),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    setData(result.data);
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const body={ id:params.id, status:data.status }
+        const url = `${process.env.MIX_BACK_END_BASE_URL}approvals/${params.id}`;
+        const toast_loading = toast.loading(<b>Updating...</b>);
+        axios.patch(url,body)
+            .then((result) => {                    
+                setData(result.data);
+                toast.dismiss(toast_loading);
+                toast.success(<b>Successfully updated</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
     var url=``;
     if(data.task){
@@ -96,12 +73,8 @@ export default function DetailApproval(props) {
                 <Grid xl={12}item lg={12} md={12} sm={12} xs={12}>
                     <Router>
                         <Breadcrumbs separator={<NavigateNextIcon fontSize="small" />} aria-label="projects">
-                            <Button component={Link}  color="primary"
-                                to="/projects">
-                                Projects
-                            </Button>
-                            <Button component={Link}  color="primary"
-                                to="/approvals">
+                            <Button component={Link}  color="primary" to="/projects"> Projects </Button>
+                            <Button component={Link}  color="primary" to="/approvals">
                                 Approvals
                             </Button>
                             <Typography color="textPrimary">{data.id}</Typography>
@@ -145,37 +118,21 @@ export default function DetailApproval(props) {
                     }}>
                     <Typography variant="body">Confirm : </Typography>
                     {(data.created_at!=data.updated_at)?(
-                         <Select
-                            required
-                            value={data.status}
-                            onChange={(event)=>setData({...data, status:event.target.value})}
-                            disabled
-                            style={{ minWidth: 150,marginRight:'1em'}}
-                            placeholder="Confirm"
-                            variant="standard"
+                         <Select required value={data.status} onChange={(event)=>setData({...data, status:event.target.value})}    
+                            style={{ minWidth: 150,marginRight:'1em'}} placeholder="Confirm" variant="standard" disabled 
                         >
                             <MenuItem value={"accepted"}>Accept</MenuItem>
                             <MenuItem value={"declined"}>Decline</MenuItem>
                         </Select>
                     ):(
-                        <Select
-                            required
-                            value={data.status}
-                            onChange={(event)=>setData({...data, status:event.target.value})}                       
-                            style={{ minWidth: 150,marginRight:'1em'}}
-                            placeholder="Confirm"
-                            >                            
-                            <option value={"accepted"}>Accept</option>
-                            <option value={"declined"}>Decline</option>
+                        <Select required value={data.status} onChange={(event)=>setData({...data, status:event.target.value})}                       
+                            style={{ minWidth: 150,marginRight:'1em'}} placeholder="Confirm" variant="standard">                            
+                            <MenuItem value={"accepted"}>Accept</MenuItem>
+                            <MenuItem value={"declined"}>Decline</MenuItem>
                         </Select>
                     )}
-                   
                     <Button variant="contained" color="primary" type="submit">Save</Button>
-                    <ModalConfirm 
-                        open={openModalConfirm} 
-                        handleConfirm={handleSubmit}
-                        handleClose={()=>setOpenModalConfirm(false)}
-                    />
+                    <ModalConfirm  open={openModalConfirm}  handleConfirm={handleSubmit} handleClose={()=>setOpenModalConfirm(false)}/>
                 </Grid>
             </Grid>
         </Paper>

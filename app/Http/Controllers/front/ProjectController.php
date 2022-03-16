@@ -18,24 +18,25 @@ use App\Models\TaskAttachment;
 use App\Models\Approval;
 use App\Models\Client;
 use App\Models\ClientsHasProjects;
+use App\Models\Notification;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\ProjectExport;
 use App\Imports\ProjectImport;
 use Carbon\Carbon;
-use DB;
 use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
+use DB;
 
 class ProjectController extends Controller
 {
     public function __construct(Request $request)
     {
-        $this->middleware('auth:sanctum',['only'=>['index','update','store','destroy']]); 
+        $this->middleware('auth:sanctum',['only'=>['update','store','destroy']]); 
     }
 
     public function index()
     {
-        $projects=Project::exclude(['description','extended','old_deadline','cost','actual_cost'])->with('columns.cards.cards')->get();
+        $projects=Project::exclude(['description','extended','old_deadline','cost','actual_cost'])->with('notifications')->get();
         return response()->json($projects);
     }
 
@@ -54,10 +55,11 @@ class ProjectController extends Controller
                 
                 Notification::create([
                     'title'=>'A new project has been imported',
-                    'message'=>$project->name,
+                    'message'=>" Project \"$project->name\" has been created by ".auth('sanctum')->user()->name,
                     'notifiable_id'=>$project->id,
                     'notifiable_type'=>'\App\Models\Project',
-                    'route'=>'\projects\\'.$project->id
+                    'route'=>'projects/'.$project->id,
+                    'users_id'=>auth('sanctum')->user()->id
                 ]);
                 $project=$this->getDetailProject($project->id,$request); 
                 return response()->json($project);
@@ -86,13 +88,15 @@ class ProjectController extends Controller
              
             Notification::create([
                 'title'=>'A new project has been created',
-                'message'=>$project->name,
+                'message'=>" Project \"$project->title\" has been created",
                 'notifiable_id'=>$project->id,
                 'notifiable_type'=>'\App\Models\Project',
-                'route'=>'\projects\\'.$project->id
+                'route'=>'projects/'.$project->id,
+                'users_id'=>auth('sanctum')->user()->id
             ]);
              
             $project=$this->getDetailProject($project->id,$request); 
+            
             return response()->json($project);
         }
     }
@@ -112,7 +116,7 @@ class ProjectController extends Controller
                     ->with('tags');
                     return $q1;
                 }]);
-        }])
+        }])->with('notifications')
         ->with('members.user.role')
         ->with('meetings')
         ->findOrFail($id);
@@ -158,10 +162,11 @@ class ProjectController extends Controller
         
         Notification::create([
             'title'=>'A project has been updated',
-            'message'=>$project->name,
+            'message'=>"Project \"$project->title\" has been updated",
             'notifiable_id'=>$project->id,
             'notifiable_type'=>'\App\Models\Project',
-            'route'=>'\projects\\'.$project->id.'\other'
+            'route'=>'projects/'.$project->id.'\other',
+            'users_id'=>auth('sanctum')->user()->id
         ]);
         
         return response()->json($project);
@@ -170,15 +175,16 @@ class ProjectController extends Controller
     public function destroy($id)
     {
         $project=Project::findOrFail($id);
-        
+        $project->delete();
         Notification::create([
             'title'=>'A project has been deleted',
-            'message'=>$project->name,
+            'message'=>"Project \"$project->title\" has been deleted",
             'notifiable_id'=>$project->id,
             'notifiable_type'=>'\App\Models\Project',
-            'route'=>'\projects\\'.$project->id
+            'route'=>'projects',
+            'users_id'=>auth('sanctum')->user()->id
         ]);
-        return response()->json($project->delete());
+        return response()->json();
     }
 
     public function getFiles(Request $request,$id){
@@ -566,6 +572,16 @@ class ProjectController extends Controller
         $new_approval->status="Waiting for confirmation";
         $new_approval->title="Project deadline extension request from ".$user->name ;
         $new_approval->save();
+        
+        Notification::create([
+            'title'=>$user->name." request a deadline extension",
+            'message'=>" Project \"$project->title\" has been created by ".auth('sanctum')->user()->name,
+            'notifiable_id'=>$approval->id,
+            'notifiable_type'=>'\App\Models\Approval',
+            'route'=>'approvals/'.$approval->id,
+            'users_id'=>auth('sanctum')->user()->id
+        ]);
+        
         return response()->json($project);
     } 
 

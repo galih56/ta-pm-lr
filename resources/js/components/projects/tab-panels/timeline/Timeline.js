@@ -127,32 +127,22 @@ function Timeline(props) {
         newTask.projects_id = detailProject.id;
         newTask.creator=global.state.id;
         const body=newTask;
-        const url = process.env.MIX_BACK_END_BASE_URL + 'tasks';
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.post(url, body),
-            {
-                loading: 'Creating a new task',
-                success: (result)=>{
-                    newTask.id = result.data.id;
-                    newTask.projects_id = detailProject.id;
-                    newTask.lists_id = laneId;
-                    global.dispatch({ type: 'create-new-task', payload: result.data })
-                    setRows(rows.map((row)=>{
-                        if(row.id==selectedList.id) row.cards.push(newTask)
-                        return row
-                    }))
-                    return <b>A new task successfuly created</b>
-                },
-                error: (error)=>{
-                    console.error(error);
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
-    
+        const url = `${process.env.MIX_BACK_END_BASE_URL}tasks`;
+        const toast_loading = toast.loading('Creating a new task'); 
+        axios.post(url, body)
+            .then((result) => {  
+                newTask.id = result.data.id;
+                newTask.projects_id = detailProject.id;
+                newTask.lists_id = laneId;
+                global.dispatch({ type: 'create-new-task', payload: result.data })
+                setRows(rows.map((row)=>{
+                    if(row.id==selectedList.id) row.cards.push(newTask)
+                    return row
+                }))
+                toast.dismiss(toast_loading)
+                toast.success(<b>A new task successfuly created</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
+
         if (!window.navigator.onLine) {
             toast.error(`You're currently offline. Please check your internet connection`);
         }

@@ -15,6 +15,7 @@ class AlterNotificationsTableChangeDataColumn extends Migration
     {
         Schema::table('notifications', function (Blueprint $table) {
             $table->json('data')->nullable();
+            $table->datetime('read_at')->nullable();
         });
     }
 
@@ -27,6 +28,7 @@ class AlterNotificationsTableChangeDataColumn extends Migration
     {
         Schema::table('notifications', function (Blueprint $table) {
             $table->dropColumn('data');
+            $table->dropColumn('read_at');
         });
     }
 }

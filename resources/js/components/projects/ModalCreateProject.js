@@ -127,11 +127,8 @@ export default function ModalCreateProject(props) {
             toast.error(`You are currently offline`);
         } 
 
-        var url = process.env.MIX_BACK_END_BASE_URL + 'projects';
-        const toast_loading = toast.loading('Loading...');
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        
+        var url = `${process.env.MIX_BACK_END_BASE_URL}projects`;
+        const toast_loading = toast.loading(<b>Loading...</b>);
         axios.post(url,body)
             .then((result) => {
                 if(!result.data?.error){
@@ -149,12 +146,7 @@ export default function ModalCreateProject(props) {
                         toast.error('Failed to import excel file')
                     }
                 }
-            }).catch((e)=>{
-                console.log(e)
-                toast.dismiss(toast_loading);
-                var error_message=error?.response?.statusText? error?.response?.statusText:'Something went wrong'
-                toast.error(error_message)
-            });
+            }).catch(e=>toast.dismiss(toast_loading));
     }
     
     return (

@@ -161,8 +161,6 @@ class UserController extends Controller
                     ->with(['creator'=>function($query){
                         return $query->select('id','name','email');
                     }]);
-        // dd($tasks->toSql());
-        // dd($tasks->count());
         $tasks=$tasks->get();
         return response()->json($tasks);
     }
@@ -237,13 +235,11 @@ class UserController extends Controller
     }
 
     public function logout(Request $request){
-        $user=auth()->user();
+        $user=auth('sanctum')->user();
         if($user){ 
-            $user->tokens()->delete();
+            $user->currentAccessToken()->delete();
         }
-        return response()->json([
-            'message'=>'Logged Out',
-        ]);
+        return response()->json([ 'message'=>'Logged Out' ]);
     }
 
     public function refreshLastLogin(Request $request, $id){
@@ -253,5 +249,15 @@ class UserController extends Controller
         return response()->json($user);
     }
 
+    public function getNotifications(Request $request){
+        $notifs=Notification::with('notifiable');
+        if($request->has('projects_id')){
+           $notifs=$notifs->whereHasMorph('notifiable',Project::class,function ($query) use($request) {
+                $query->where('id',$request->projects_id);
+            });
+        }
+        $notifs=$notifs->get();
+        return response()->json($notifs);
+    }
 }
 

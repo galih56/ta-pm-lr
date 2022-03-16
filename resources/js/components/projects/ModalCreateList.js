@@ -75,24 +75,16 @@ export default function ModalCreateList(props) {
             title: title, start: start, end: end,
             projects_id: projects_id, cards: []
         }
-        const url = process.env.MIX_BACK_END_BASE_URL + 'lists/';
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.post(url, body),
-            {
-                loading: 'Creating a new list',
-                success: (result)=>{
-                    setTitle(''); closeModal();
-                    global.dispatch({ type: 'create-new-list', payload: result.data });
-                    return <b>A new list successfully created</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = `${process.env.MIX_BACK_END_BASE_URL}lists`;
+        
+        const toast_loading = toast.loading('Creating a new list...');
+        axios.post(url, body)
+            .then((result) => {  
+                setTitle(''); closeModal();
+                global.dispatch({ type: 'create-new-list', payload: result.data });
+                toast.dismiss(toast_loading)
+                toast.success( <b>A new list successfully created</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
 
     return (

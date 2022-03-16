@@ -61,55 +61,36 @@ const Subtasks = ({detailProject,setDetailTask,detailTask,onTaskUpdate,onTaskDel
     
     const handleAddNewTask=()=>{
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        toast.promise(
-            axios.post(url, newTask),
-            {
-                loading: 'Creating a new subtask',
-                success: (result)=>{
-                    setShowCreateSubtaskForm(false);
-                    var newData=[...data,result.data];
-                    var newDetailTask={...detailTask,cards:newData}
-                    setData(newData);
-                    setDetailTask(newDetailTask);
-                    global.dispatch({ type: 'create-new-subtask', payload: result.data })
-                    if(onTaskUpdate)onTaskUpdate(newDetailTask);
-                    return <b>A new subtask successfuly created</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const toast_loading = toast.loading('Creating a new subtask...'); 
+        axios.post(url, newTask)
+            .then((result) => {      
+                setShowCreateSubtaskForm(false);
+                var newData=[...data,result.data];
+                var newDetailTask={...detailTask,cards:newData}
+                setData(newData);
+                setDetailTask(newDetailTask);
+                global.dispatch({ type: 'create-new-subtask', payload: result.data })
+                if(onTaskUpdate)onTaskUpdate(newDetailTask);
+                toast.dismiss(toast_loading)
+                toast.success(<b>A new subtask successfuly created</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
 
     const handleRemoveSubtask = (subtask) => {
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${subtask.id}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        
-        toast.promise(
-            axios.delete(url),
-            {
-                loading: 'Deleting...',
-                success: (result)=>{
-                    var newSubtasks = data.filter((item) => {
-                        if (item.id != subtask.id) return item
-                    });
-                    setData(newSubtasks)
-                    setDetailTask({...detailTask,cards:newSubtasks});
-                    if(onTaskDelete)onTaskDelete(subtask);
-                    global.dispatch({ type: 'remove-subtask', payload: subtask })
-                    return <b>Successfully deleted</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const toast_loading = toast.loading('Deleting...'); 
+        axios.delete(url)
+            .then((result) => {   
+                var newSubtasks = data.filter((item) => {
+                    if (item.id != subtask.id) return item
+                });
+                setData(newSubtasks)
+                setDetailTask({...detailTask,cards:newSubtasks});
+                if(onTaskDelete)onTaskDelete(subtask);
+                global.dispatch({ type: 'remove-subtask', payload: subtask })
+                toast.dismiss(toast_loading)
+                toast.success(<b>Successfully deleted</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
 
     const buttonShowCreateSubtask = (isEdit) => {

@@ -54,8 +54,6 @@ export default function ModalDetailMeeting(props) {
     const getDetailMeeting = () => {
         const toast_loading = toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}meetings/${initialState.id}?users_id=${global.state.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 const data = result.data;
@@ -88,52 +86,33 @@ export default function ModalDetailMeeting(props) {
             toast.error(message);
             return;
         }
-        const url = process.env.MIX_BACK_END_BASE_URL + `meetings/${initialState.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url, body),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    const data = result.data;
-                    var meeting=data.meeting;
-                    if(data.member){
-                        meeting.member=data.member;
-                    }
-                    global.dispatch({ type: 'store-detail-meeting', payload: meeting })
-                    setData(meeting);
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    console.log(error);
-                    if(error.response?.status==401) return <b>Unauthenticated</b>;
-                    if(error.response?.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
-    
+        const url = `${process.env.MIX_BACK_END_BASE_URL}meetings/${initialState.id}`;
+        const toast_loading = toast.loading('Updating...');
+        axios.patch(url, body)
+            .then((result) => {  
+                const data = result.data;
+                var meeting=data.meeting;
+                if(data.member){
+                    meeting.member=data.member;
+                }
+                global.dispatch({ type: 'store-detail-meeting', payload: meeting })
+                setData(meeting);
+                toast.dismiss(toast_loading)
+                toast.success( <b>Successfuly updated</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
 
     const deleteMeeting = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + `meetings/${data.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.delete(url),
-            {
-                loading: 'Deleting...',
-                success: (result)=>{
-                    global.dispatch({ type: 'remove-detail-meeting', payload: data })
-                    return <b>Successfully deleted</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = `${process.env.MIX_BACK_END_BASE_URL}meetings/${data.id}`;
+        const toast_loading = toast.loading('Deleting...');
+        axios.delete(url, body)
+            .then((result) => {  
+                global.dispatch({ type: 'remove-detail-meeting', payload: data })
+                toast.dismiss(toast_loading)
+                toast.success(<b>Successfully deleted</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
+    
     return (
         <Dialog open={open} maxWidth={'lg'} fullWidth>
             <DialogTitle onClose={closeModal}>Meeting information</DialogTitle>

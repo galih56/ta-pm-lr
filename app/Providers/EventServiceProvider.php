@@ -6,16 +6,6 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
-use App\Observers\ProjectObserver;
-use App\Observers\TaskObserver;
-use App\Observers\TaskListObserver;
-use App\Observers\UserObserver;
-use App\Observers\ClientObserver;
-use App\Models\Project;
-use App\Models\Task;
-use App\Models\TaskList;
-use App\Models\User;
-use App\Models\Client;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -37,11 +27,6 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // unused
-        // Project::observe(ProjectObserver::class);
-        // TaskList::observe(TaskListObserver::class);
-        // Task::observe(TaskObserver::class);
-        // User::observe(UserObserver::class);
-        // Client::observe(ClientObserver::class);
+        
     }
 }

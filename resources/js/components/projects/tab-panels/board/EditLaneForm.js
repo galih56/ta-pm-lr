@@ -114,7 +114,6 @@ const EditLaneForm = (props) => {
             setLaneDetail(list);
         }else{
             const url = `${process.env.MIX_BACK_END_BASE_URL}lists/${laneId}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.get(url)
                 .then((result) => {
                     setLaneDetail(result.data)
@@ -130,45 +129,28 @@ const EditLaneForm = (props) => {
 
     const updateLane = () => {
         const body = { id: laneDetail.id, title: laneDetail.title, project: laneDetail.project }
-        const url = process.env.MIX_BACK_END_BASE_URL+'lists/' + laneDetail.id;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url, body),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    global.dispatch({ type: 'update-list', payload: body });
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = `${process.env.MIX_BACK_END_BASE_URL}lists/${laneDetail.id}`;
+        
+        const toast_loading = toast.loading('Updating...'); 
+        axios.patch(url, data)
+            .then((result) => {                          
+                global.dispatch({ type: 'update-list', payload: body });
+                toast.dismiss(toast_loading)
+                toast.success(<b>Successfully updated</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
 
     const deleteList = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL+'lists/' + laneDetail.id;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.delete(url, { id: laneDetail.id }),
-            {
-                loading: 'Deleting...',
-                success: (result)=>{
-                    setModalOpen(false);
-                    onCancel();
-                    global.dispatch({ type: 'remove-list', payload: {projects_id:detailProject.id,id:laneId} });        
-                    return <b>Successfully deleted</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = `${process.env.MIX_BACK_END_BASE_URL}lists/${laneDetail.id}`;
+        const toast_loading = toast.loading('Deleting...'); 
+        axios.delete(url, { id: laneDetail.id })
+            .then((result) => {                          
+                setModalOpen(false);
+                onCancel();
+                global.dispatch({ type: 'remove-list', payload: {projects_id:detailProject.id,id:laneId} });        
+                toast.dismiss(toast_loading)
+                toast.success(<b>Successfully deleted</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
 
     const checkIfAuthenticated = () => {

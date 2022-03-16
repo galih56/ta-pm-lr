@@ -78,22 +78,14 @@ export default function ModalExtendDeadline({open,handleClose,task,detailProject
             }
             url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/extend-deadline`;
         }
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.post(url, body),
-            {
-                loading: 'Sending request',
-                success: (result)=>{
-                    handleClose();
-                    return <b>Request sent successfully</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });       
+        
+        const toast_loading = toast.loading(`Sending request...`); 
+        axios.post(url, body)
+            .then((result) => {
+                handleClose();
+                toast.dismiss(toast_loading);
+                toast.success(<b>Request sent successfully</b>)
+            }).catch(error=> toast.dismiss(toast_loading));
     }
 
     return (
@@ -106,8 +98,8 @@ export default function ModalExtendDeadline({open,handleClose,task,detailProject
                         <Grid item lg={12} md={12} sm={12} xs={12}>
                             <Typography>Current deadline {task?moment(task.end).format('DD MMMM YYYY'):moment(detailProject.end).format('DD MMMM YYYY')}</Typography>
                             <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                <MobileDatePicker  label="New deadline" value={null} minDate={minDate}
-                                    maxDate={maxDate}
+                                <MobileDatePicker  label="New deadline" minDate={minDate} maxDate={maxDate}
+                                    value={newDeadline}
                                     onChange={(value)=> setNewDeadline(parseISO(moment(value).format('YYYY-MM-DD HH:mm:ss')))}
                                     renderInput={(params)=><TextField {...params} variant="standard" style={{width:'100%'}}/>}
                                 />

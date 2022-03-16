@@ -122,4 +122,22 @@ class Project extends Model
     public function clients(){
         return $this->belongsToMany(Client::class,'clients_has_projects','projects_id','clients_id');
     }
+
+    public function notifications(){
+        return $this->morphMany('App\Models\Notification', 'notifiable');
+    }
+
+    public function activities(){
+        return $this->morphMany(ActivityLog::class, 'loggable');
+    }
+
+    public function notificationsCount()
+    {
+        return $this->notifications()->selectRaw('count(*) as count');
+    }
+    
+    public function activitiesCount()
+    {
+        return $this->activities()->selectRaw('count(*) as count');
+    }
 }

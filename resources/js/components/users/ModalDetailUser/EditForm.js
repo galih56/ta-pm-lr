@@ -41,32 +41,19 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
 
     const getRoles = () => {
         const url = `${process.env.MIX_BACK_END_BASE_URL}roles`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 var data=result.data;
                 data=data.filter(role=>(![1,2].includes(role.id)))
                 setRoles(data);
-            }).catch((error) => {
-                switch(error.response.status){
-                    case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are invalid</b>); break;
-                    default : toast.error(<b>{error.response.statusText}</b>); break
-                }
             });
     }
 
     const sendNewPassword=(e)=>{
         e.preventDefault();
-        const body={
-            new_password: newPassword,
-            confirm_password:confirmPassword,
-        }
-        
+        const body={ new_password: newPassword, confirm_password:confirmPassword }
         if (newPassword.trim() === '' || confirmPassword.trim()==='') {
             setChangePasswordInputsEmpty(true);
-            return;
         }else{
             setChangePasswordInputsEmpty(false);
         }
@@ -74,30 +61,22 @@ const OpenEditForm = ({ isEdit, data, setData,asProfile,open }) => {
             setPasswordConfirmAlert(false);
         } else {
             setPasswordConfirmAlert(true);
-            return;
         }
-        const url=`${process.env.MIX_BACK_END_BASE_URL}users/${data.id}/changepassword`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url, body),
-            {
-                loading: `Changing ${data.name}'s password`,
-                success: (result)=>{ 
+
+        if(!changePasswordInputsEmpty){
+            const url=`${process.env.MIX_BACK_END_BASE_URL}users/${data.id}/changepassword`;
+            const toast_loading = toast.loading(`Changing ${data.name}'s password`); 
+            axios.patch(url, body)
+                .then((result) => {   
                     setNewPassword('');
                     setConfirmPassword('');
                     setChangePasswordInputsEmpty(false);
                     setPasswordConfirmAlert(false);
-                    handleChange()
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    console.log(error)
-                    if (error.response.status==401) return <b>Unauthenticated</b>;
-                    if (error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+                    handleChange();
+                    toast.dismiss(toast_loading);
+                    toast.success(<b>Successfully updated</b>)
+                }).catch(error=> toast.dismiss(toast_loading));
+        }
     }
 
     useEffect(() => {

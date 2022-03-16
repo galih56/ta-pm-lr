@@ -123,14 +123,30 @@ const reducer = (state, action) => {
 const theme = createTheme();
 
 axios.defaults.headers.post['Content-Type'] = 'application/json';
-
 const App = () => {
     const [state, dispatch] = useReducer(reducer, initState);
+    
     useEffect(()=>{
         if(state.token){
             axios.defaults.headers.common['Authorization'] = `Bearer ${state.token}`;
         }
     },[state.token])
+    
+    useEffect(()=>{
+        const refreshLastLogin=()=>{
+            if(state.id && state.token){  
+                var url = `${process.env.MIX_BACK_END_BASE_URL}users/${state.id}/refresh-last-login`;
+                axios.post(url).catch(console.log);
+            }
+        }
+        refreshLastLogin()
+        
+        const interval = setInterval(() => {
+            refreshLastLogin();
+        }, 1000*60*15);
+        return () => clearInterval(interval);
+    },[state.id, state.token])
+    
     return (
         <UserContext.Provider value={{ state, dispatch }}>
             <ThemeProvider theme={theme}>

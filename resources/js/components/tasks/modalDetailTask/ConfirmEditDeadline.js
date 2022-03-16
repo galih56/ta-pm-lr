@@ -37,8 +37,6 @@ export default function ModalConfirmEditDeadline({open,handleClose,data,setData}
     const global=useContext(UserContext);
     const submitApproval=()=>{
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/extend-deadline`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.patch(url, body)
             .then((result) => {
                 var result=result.data;

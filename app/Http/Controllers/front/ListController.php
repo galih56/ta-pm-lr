@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\front;
 
 use App\Http\Controllers\Controller;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use App\Models\Approval;
 use App\Models\TaskList;
@@ -38,10 +39,11 @@ class ListController extends Controller
 
         Notification::create([
             'title'=>'A new list has been created',
-            'message'=>$list->name,
+            'message'=>$list->title,
             'notifiable_id'=>$list->id,
             'notifiable_type'=>'\App\Models\Project',
-            'route'=>'\lists\\'.$list->id
+            'route'=>'projects/'.$list->project->id,
+            'users_id'=>auth('sanctum')->user()->id
         ]);
 
         return response()->json($list);
@@ -69,10 +71,11 @@ class ListController extends Controller
          
         Notification::create([
             'title'=>'A new list has been updated',
-            'message'=>$list->name,
+            'message'=>$list->title,
             'notifiable_id'=>$list->id,
             'notifiable_type'=>'\App\Models\Project',
-            'route'=>'\lists\\'.$list->id
+            'route'=>'projects/'.$list->project->id,
+            'users_id'=>auth('sanctum')->user()->id
         ]);
 
         return response()->json($list);
@@ -81,13 +84,16 @@ class ListController extends Controller
     public function destroy($id)
     {
         $list=TaskList::findOrFail($id);
+        $project=$list->project;
         $list->delete();
         
         Notification::create([
-            'title'=>'A new list has been deleted',
-            'message'=>$list->name,
+            'title'=>'A list has been deleted',
+            'message'=>"List \"$list->title\" has been deleted",
             'notifiable_id'=>$list->id,
             'notifiable_type'=>'\App\Models\Project',
+            'route'=>'projects/'.$project->id,
+            'users_id'=>auth('sanctum')->user()->id
         ]);
         
         return response()->json(true,200);

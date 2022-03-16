@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Meeting;
 use App\Models\MeetingMember;
+use App\Models\Notification;
 
 class MeetingController extends Controller
 {
@@ -44,7 +45,17 @@ class MeetingController extends Controller
         if($request->has('users_id')){
             $member_ids[]=$request->users_id;
         }
+        
         $meeting->members()->sync($member_ids);
+        
+        Notification::create([
+            'title'=>"A meeting has been created",
+            'message'=>" Project \"$meeting->project->title\" has been created by ".auth('sanctum')->user()->name,
+            'notifiable_id'=>$meeting->project->id,
+            'notifiable_type'=>'\App\Models\Project',
+            'route'=>'projects/'.$meeting->project->id,
+            'users_id'=>auth('sanctum')->user()->id
+        ]);
         return response()->json($meeting);
     }
 
@@ -92,6 +103,15 @@ class MeetingController extends Controller
                 if($request->has('google_calendar_info') && $member) $member->google_calendar_info=$request->google_calendar_info;
             }   
         }
+        
+        Notification::create([
+            'title'=>"A meeting has been updated",
+            'message'=>" Project \"$meeting->project->title\" has been updated by ".auth('sanctum')->user()->name,
+            'notifiable_id'=>$meeting->project->id,
+            'notifiable_type'=>'\App\Models\Project',
+            'route'=>'projects/'.$meeting->project->id,
+            'users_id'=>auth('sanctum')->user()->id
+        ]);
         return response()->json(['meeting'=>$meeting,'member'=>$member,'user'=>$user]);
     
     }
@@ -99,6 +119,15 @@ class MeetingController extends Controller
     public function destroy($id)
     {
         $meeting=Meeting::findOrFail($id);
+    
+        Notification::create([
+            'title'=>"A meeting has been deleted",
+            'message'=>" Project \"$meeting->project->title\" has been deleted by ".auth('sanctum')->user()->name,
+            'notifiable_id'=>$meeting->project->id,
+            'notifiable_type'=>'\App\Models\Project',
+            'route'=>'projects/'.$meeting->project->id,
+            'users_id'=>auth('sanctum')->user()->id
+        ]);
         return response()->json($meeting->delete(),200);
     }
 
@@ -112,6 +141,15 @@ class MeetingController extends Controller
         $meeting->members()->sync($member_ids);
         
         $meeting=$this->getDetailMeeting($request->id,$request->users_id);
+        
+        Notification::create([
+            'title'=>"Project \"$meeting->project->title\" has been updated",
+            'message'=>auth('sanctum')->user()->name." invite new members to the meeting \"$meeting->title\"",
+            'notifiable_id'=>$meeting->project->id,
+            'notifiable_type'=>'\App\Models\Project',
+            'route'=>'projects/'.$meeting->project->id,
+            'users_id'=>auth('sanctum')->user()->id
+        ]);
         return response()->json($meeting);
     }
 
@@ -126,6 +164,14 @@ class MeetingController extends Controller
         
         $meeting=Meeting::with('creator')->with('members')->findOrFail($request->id)->toArray();
         
+        Notification::create([
+            'title'=>"Project \"$meeting->project->title\" has been updated",
+            'message'=>auth('sanctum')->user()->name." remove members from the meeting \"$meeting->title\"",
+            'notifiable_id'=>$meeting->project->id,
+            'notifiable_type'=>'\App\Models\Project',
+            'route'=>'projects/'.$meeting->project->id,
+            'users_id'=>auth('sanctum')->user()->id
+        ]);
         $meeting=$this->getDetailMeeting($request->id,$request->users_id);
         return response()->json($meeting);
     }

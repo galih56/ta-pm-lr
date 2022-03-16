@@ -4,6 +4,7 @@ namespace App\Http\Controllers\front;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Notification;
+use App\Models\Project;
 
 class NotificationController extends Controller
 {
@@ -12,9 +13,30 @@ class NotificationController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $notifs=Notification::with('notifiable')->get();
+        $notifs=Notification::with('notifiable');
+        $counter=$notifs;
+        
+        if($request->has('projects_id')){
+           $notifs=$notifs->whereHasMorph('notifiable',Project::class,function ($query) use($request) {
+                $query->where('id',$request->projects_id);
+            });
+        }
+        if($request->has('limit')){
+            $notifs=$notifs->limit($request->limit);
+        }
+        $notifs=$notifs->get();
+        
+        $count=[
+            'all'=>$counter->count(),
+            'read'=>$counter->whereNotNull('read_at')->count(),
+            'unread'=>$counter->whereNull('read_at')->count()
+        ];
+        $notifs=(object)[
+            'data'=>$notifs,
+            'count'=>$count
+        ];
         return response()->json($notifs);
     }
 

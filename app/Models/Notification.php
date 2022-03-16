@@ -24,18 +24,12 @@ class Notification extends Model
         parent::boot();
         
         static::created(function($notif) { 
-            event(new NotificationEvent($notif->toArray()));
-        });
-
-        static::updated(function($notif) { 
-            event(new NotificationEvent($notif->toArray()));
+            // event(new NotificationEvent($notif->toArray()));
         });
     }
 
     public function notifiable()
     {
-        return $this->morphTo(__FUNCTION__, 'notifiable_type', 'notifiable_id');
+        return $this->morphTo();
     }
-
-    // event(new \App\Events\Notification(['users_id'=>18]));
 }

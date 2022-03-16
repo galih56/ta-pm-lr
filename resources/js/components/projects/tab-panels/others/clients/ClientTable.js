@@ -111,8 +111,6 @@ export default function EnhancedTable(props) {
 
     const getClients = () => {
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/clients`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setRows(result.data);
@@ -128,26 +126,18 @@ export default function EnhancedTable(props) {
 
     const handleRemoveClient=(clients_id)=>{
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/clients/${clients_id}`;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            toast.promise(axios.delete(url),
-            {
-                loading: 'Deleting...',
-                success: (result)=>{
-                    setRows(rows.filter((row)=>{
-                        if(row.id!=clients_id){
-                            return row;
-                        }
-                    }));  
-                    global.dispatch({type:'remove-client-from-project',payload:{projects_id:detailProject.id,clients_id:clients_id}})
-                    return <b>Successfully deleted</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const toast_loading = toast.loading('Deleting...'); 
+        axios.delete(url)
+            .then((result) => {                          
+                setRows(rows.filter((row)=>{
+                    if(row.id!=clients_id){
+                        return row;
+                    }
+                }));  
+                global.dispatch({type:'remove-client-from-project',payload:{projects_id:detailProject.id,clients_id:clients_id}})  
+                toast.dismiss(toast_loading)
+                toast.success(<b>Successfully deleted</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';

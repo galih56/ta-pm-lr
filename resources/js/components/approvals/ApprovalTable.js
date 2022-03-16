@@ -53,6 +53,7 @@ const headCells = [
     { id: 'project', align: 'left', disablePadding: false, label: 'Project' },
     { id: 'status', align: 'left', disablePadding: false, label: 'Status' },
     { id: 'created_at', align: 'right', disablePadding: false, label: 'Created at' },
+    { id: 'updated_at', align: 'right', disablePadding: false, label: 'Updated at' },
 ];
 
 const useStyles = makeStyles((theme) => ({
@@ -70,17 +71,8 @@ function EnhancedTableHead(props) {
         <TableHead>
             <TableRow>
                 {headCells.map((headCell) => (
-                    <TableCell
-                        key={headCell.id}
-                        align={headCell.align}
-                        padding={headCell.disablePadding ? 'none' : 'normal'}
-                        sortDirection={orderBy === headCell.id ? order : false}
-                    >
-                        <TableSortLabel
-                            active={orderBy === headCell.id}
-                            direction={orderBy === headCell.id ? order : 'asc'}
-                            onClick={createSortHandler(headCell.id)}
-                        >
+                    <TableCell key={headCell.id} align={headCell.align} padding={headCell.disablePadding ? 'none' : 'normal'} sortDirection={orderBy === headCell.id ? order : false}>
+                        <TableSortLabel active={orderBy === headCell.id} direction={orderBy === headCell.id ? order : 'asc'} onClick={createSortHandler(headCell.id)}>
                             {headCell.label}
                             {orderBy === headCell.id ? (
                                 <span className={classes.sortSpan}>
@@ -98,8 +90,8 @@ function EnhancedTableHead(props) {
 export default function EnhancedTable() {
     const classes = useStyles();
     const [rows, setRows] = useState([]);
-    const [order, setOrder] = useState('asc');
-    const [orderBy, setOrderBy] = useState('name');
+    const [order, setOrder] = useState('desc');
+    const [orderBy, setOrderBy] = useState('updated_at');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -117,21 +109,13 @@ export default function EnhancedTable() {
         if(!([1,2,4,5].includes(global.state.role?.id) && global.state.current_project_id)) {
             history.push('/projects');
         }else{
-            const toast_loading = toast.loading('Loading...');
             const url = `${process.env.MIX_BACK_END_BASE_URL}approvals?projects_id=${global.state.current_project_id}`;
+            const toast_loading = toast.loading('Loading...');
             axios.get(url)
                 .then((result) => {
                     setRows(result.data);
                     toast.dismiss(toast_loading);
-                }).catch((error) => {
-                    toast.dismiss(toast_loading);
-                    console.error(error.response);
-                    switch(error.response?.status){
-                        case 401 : toast.error(<b>Unauthenticated</b>); break;
-                        case 422 : toast.error(<b>Some required inputs are empty</b>); break;
-                        default : toast.error(<b>{error.response.statusText}</b>); break
-                    }
-                });    
+                }).catch(error=> toast.dismiss(toast_loading));
         }
     }
 
@@ -191,19 +175,11 @@ export default function EnhancedTable() {
                                                         {trimmedString}
                                                     </TableCell>
                                                     <TableCell align="left">
-                                                        <Link target={"_blank"}  style={{textDecoration:'none'}}
-                                                            to={url}>{row.project.title}</Link>
+                                                        <Link target={"_blank"}  style={{textDecoration:'none'}} to={url}>{row.project.title}</Link>
                                                     </TableCell>
                                                     <TableCell align="left"><ApprovalStatus status={row.status}/></TableCell>
-                                                    <TableCell align="right">
-                                                        Created at : 
-                                                        <br/>
-                                                        {row.created_at ? moment(row.created_at).format('DD MMM YYYY') : ''}
-                                                        <br/>
-                                                        Updated at : 
-                                                        <br/>
-                                                        {row.updated_at ? moment(row.updated_at).format('DD MMM YYYY') : ''}
-                                                    </TableCell>
+                                                    <TableCell align="right">{row.created_at ? moment(row.created_at).format('DD MMM YYYY') : ''}</TableCell>
+                                                    <TableCell align="right">{row.updated_at ? moment(row.updated_at).format('DD MMM YYYY') : ''}</TableCell>
                                                 </TableRow>
                                             );
                                         }):(

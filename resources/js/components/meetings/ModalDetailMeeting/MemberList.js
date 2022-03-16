@@ -37,53 +37,36 @@ const MemberList=({isEdit,data,setData,exceptedData,detailProject})=>{
         if(newMembers.length==0){
             toast.error("Please select new participants")
         }
-       const url = `${process.env.MIX_BACK_END_BASE_URL}meetings/add-meeting-members`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url, body),
-            {
-                loading: 'Adding a new member',
-                success: (result)=>{
-                    const data = result.data;
-                    var meeting=data.meeting;
-                    if(data.member){
-                        meeting.member=data.member;
-                    }
-                    global.dispatch({ type: 'store-detail-meeting', payload: meeting })
-                    setData(meeting);
-                    return <b>Successfuly updated</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+
+        const url = `${process.env.MIX_BACK_END_BASE_URL}meetings/add-meeting-members`;
+        const toast_loading = toast.loading('Adding a new member...');
+        axios.patch(url,body)
+            .then((result) => {  
+                const data = result.data;
+                var meeting=data.meeting;
+                if(data.member){
+                    meeting.member=data.member;
+                }
+                toast.dismiss(toast_loading)
+                global.dispatch({ type: 'store-detail-meeting', payload: meeting })
+                setData(meeting);
+                toast.success( <b>Successfuly updated</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
     
     const removeMember = (user) => {
-        const url = process.env.MIX_BACK_END_BASE_URL + `meetings/remove-meeting-members`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url, {id:data.id,members:[user],users_id:global.state.id}),
-            {
-                loading: 'Deleting...',
-                success: (result)=>{
-                    var newMemberList=members.filter(function(member){
-                        if(member.id!=user.id) return member;
-                    });
-                    setMembers(newMemberList);
-                    setData({...data,members:newMemberList});
-                    return <b>Successfully deleted</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = `${process.env.MIX_BACK_END_BASE_URL}meetings/remove-meeting-members`;
+        const toast_loading = toast.loading('Removing a member...');
+        axios.patch(url, {id:data.id,members:[user],users_id:global.state.id})
+            .then((result) => {  
+                var newMemberList=members.filter(function(member){
+                    if(member.id!=user.id) return member;
+                });
+                setMembers(newMemberList);
+                setData({...data,members:newMemberList});
+                toast.dismiss(toast_loading)
+                toast.success( <b>Successfuly updated</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
 
     return(

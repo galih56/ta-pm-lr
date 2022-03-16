@@ -44,30 +44,19 @@ const FormCreateClient=({open,handleClose,onCreate})=>{
 
     const formCreateOnSubmit=()=>{
         const body = { city: city, institution: institution, description: description }
-        
-        const url = process.env.MIX_BACK_END_BASE_URL + 'clients';
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.post(url, body),
-            {
-                loading: 'Creating a new client',
-                success: (result)=>{
-                    onCreate(result.data);
-                    handleClose();
-                    return <b>A new client successfully created</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = `${process.env.MIX_BACK_END_BASE_URL}clients`;
+        const toast_loading = toast.loading(<b>Creating a new client...</b>);
+        axios.post(url,body)
+            .then((result) => {       
+                onCreate(result.data);
+                handleClose();
+                toast.dismiss(toast_loading)
+                toast.success(<b>A new client successfully created</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
 
     return(
         <Dialog aria-labelledby="Create a client" open={open}>
-             
             <DialogTitle onClose={() => handleClose() } > Create a new client </DialogTitle>
             <DialogContent dividers>
                 <form onSubmit={(e)=>{

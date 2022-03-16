@@ -87,24 +87,15 @@ export default function ModalCreateMeeting(props) {
             members: members,  users_id: global.state.id, google_calendar_info:null
         }
         
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        const url = process.env.MIX_BACK_END_BASE_URL + 'meetings/';
-        toast.promise(
-            axios.post(url, body),
-            {
-                loading: 'Creating a new meeting schedule',
-                success: (result)=>{
-                    clearState();
-                    global.dispatch({ type: 'create-new-meeting', payload: result.data });
-                    return <b>A new meeting successfuly created</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = `${process.env.MIX_BACK_END_BASE_URL}meetings`;
+        const toast_loading = toast.loading('Creating a new meeting schedule...');
+        axios.post(url,body)
+            .then((result) => {  
+                clearState();
+                toast.dismiss(toast_loading)
+                global.dispatch({ type: 'create-new-meeting', payload: result.data });
+                toast.success(<b>A new meeting successfuly created</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
 
     return (
