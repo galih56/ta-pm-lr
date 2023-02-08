@@ -42,27 +42,17 @@ const UpdateProgressButtons=({data,onUpdate,alwaysShow})=>{
     },[])
 
     const startProgress=(id)=>{
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/start`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    result=result.data;
-                    if(result.parent_task){ global.dispatch({ type: 'store-detail-subtask', payload: result });}
-                    else global.dispatch({ type: 'store-detail-task', payload: result });
-                    if(onUpdate)onUpdate(result);
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    console.error(error);
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = `${process.env.MIX_BACK_END_BASE_URL}tasks/${data.id}/start`;
+        const toast_loading = toast.loading(`Updating...`); 
+        axios.patch(url)
+            .then((result) => {
+                result=result.data;
+                if(result.parent_task){ global.dispatch({ type: 'store-detail-subtask', payload: result });}
+                else global.dispatch({ type: 'store-detail-task', payload: result });
+                if(onUpdate)onUpdate(result);
+                toast.dismiss(toast_loading);
+                toast.success( <b>Successfully updated</b>)
+            }).catch(error=> toast.dismiss(toast_loading));
     }
 
     const markAsComplete=(data)=>{
@@ -72,27 +62,16 @@ const UpdateProgressButtons=({data,onUpdate,alwaysShow})=>{
         }
         const body = { id: data.id, complete: !data.complete};
         const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/complete`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url, body),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    result=result.data
-                    if(result.parent_task){ global.dispatch({ type: 'store-detail-subtask', payload: result });}
-                    else global.dispatch({ type: 'store-detail-task', payload: result });
-                    if(onUpdate)onUpdate(result);
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==404) return <b>Task not found</b>;
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
-    
+        const toast_loading = toast.loading(`Updating...`); 
+        axios.patch(url, body)
+            .then((result) => {
+                result=result.data
+                if(result.parent_task){ global.dispatch({ type: 'store-detail-subtask', payload: result });}
+                else global.dispatch({ type: 'store-detail-task', payload: result });
+                if(onUpdate)onUpdate(result);
+                toast.dismiss(toast_loading);
+                toast.success( <b>Successfully updated</b>)
+            }).catch(error=> toast.dismiss(toast_loading));
     }
     
     return(

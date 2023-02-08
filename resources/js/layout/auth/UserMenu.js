@@ -35,22 +35,6 @@ const UserMenu = ({classes}) => {
         global.dispatch({ type: 'check-authentication', payload: { history: history } });
     }, []);
 
-    useEffect(()=>{
-        const refreshLastLogin=()=>{
-            if(global.state.id){
-                var url = `${process.env.MIX_BACK_END_BASE_URL}users/${global.state.id}/refresh-last-login`;
-                axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-                axios.defaults.headers.post['Content-Type'] = 'application/json';
-                axios.post(url).catch(console.log);
-            }
-        }
-        refreshLastLogin()
-        
-        const interval = setInterval(() => {
-            refreshLastLogin();
-        }, 1000*60*15);
-        return () => clearInterval(interval);
-    },[global.state.id])
 
     const {id,email,name,role,username,verified}=global.state;
     return (

@@ -32,65 +32,37 @@ export default function DetailClient(props) {
     }, []);
 
     const getDetailClient=()=>{
-        const toast_loading = toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}clients/${params.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
+        const toast_loading = toast.loading(<b>Loading...</b>);
         axios.get(url)
             .then((result) => {
                 setData(result.data);
                 toast.dismiss(toast_loading);
-            }).catch((error) => {
-                toast.dismiss(toast_loading);
-                switch(error.response.status){
-                    case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
-                    default : toast.error(<b>{error.response.statusText}</b>); break
-                }
-            });
+            }).catch(error => toast.dismiss(toast_loading));
     }
 
     const handleSubmit=(e)=>{
         e.preventDefault();
-        const url = process.env.MIX_BACK_END_BASE_URL + 'clients/'+params.id;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        
-        toast.promise(
-            axios.patch(url,data),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    setData(result.data);
-                    setEditing(false)
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url =`${process.env.MIX_BACK_END_BASE_URL}clients/${params.id}`;
+        const toast_loading = toast.loading(<b>Updating...</b>);
+        axios.patch(url,data)
+            .then((result) => {
+                setData(result.data);
+                setEditing(false)
+                toast.dismiss(toast_loading);
+                toast.success(<b>Successfully updated</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
     
     const handleDelete=()=>{
-        const url = process.env.MIX_BACK_END_BASE_URL + 'clients/'+params.id;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.delete(url,data),
-            {
-                loading: 'Deleting...',
-                success: (result)=>{
-                    history.push('/clients')
-                    return <b>Successfully deleted</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = `${process.env.MIX_BACK_END_BASE_URL}clients/${params.id}`;
+        const toast_loading = toast.loading(<b>Loading...</b>);
+        axios.delete(url)
+            .then((result) => {
+                toast.dismiss(toast_loading);
+                toast.success(<b>Successfully deleted</b>)
+                history.push('/clients')
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
 
     const handleCancle=(e)=>{

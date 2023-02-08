@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ProjectMember;
 use App\Models\TaskMember;
+use App\Models\Notification;
 
 class ProjectMemberController extends Controller
 {

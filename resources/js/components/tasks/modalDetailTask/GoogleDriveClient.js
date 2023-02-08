@@ -45,24 +45,15 @@ const GoogleDriveButton = (props) => {
             }
             if (!window.navigator.onLine) toast.error(`You are currently offline`);
 
-            const url = process.env.MIX_BACK_END_BASE_URL + 'task-attachments/';
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            toast.promise(
-                axios.post(url, body),
-                {
-                    loading: 'Uploading new attachments',
-                    success: (result)=>{
-                        Object.assign(payload, { data: result.data });
-                        global.dispatch({ type: 'create-new-attachments', payload: payload })
-                        return <b>A new attachment successfuly created</b>
-                    },
-                    error: (error)=>{
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                        return <b>{error.response.statusText}</b>;
-                    },
-                });
+            const url = `${process.env.MIX_BACK_END_BASE_URL}task-attachments`;
+            const toast_loading = toast.loading('Deleting...'); 
+            axios.delete(url, body)
+                .then((result) => {                      
+                    Object.assign(payload, { data: result.data });
+                    global.dispatch({ type: 'create-new-attachments', payload: payload })
+                    toast.dismiss(toast_loading)
+                    toast.success(<b>A new attachment successfuly created</b>)
+                }).catch((error)=> toast.dismiss(toast_loading));
         }
     }
     return (

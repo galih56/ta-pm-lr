@@ -15,26 +15,17 @@ export default function LogoutConfirmDialog(props) {
     const history=useHistory();
 
     const handleConfirm = () => {
-        toast.promise(
-            axios.post(process.env.MIX_BACK_END_BASE_URL + 'logout', {}, {
-                headers: { 
-                    'Authorization':`Bearer ${global.state.token}`, 
-                    'Content-Type': 'application/json' 
-                }
-             }),
-            {
-                loading: 'Logging Out',
-                success: (result)=>{
-                    handleClose();
-                    global.dispatch({ type: 'logout' });
-                    history.push('/auth');
-                    return <b>Logged Out</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                }
+        
+        const toast_loading = toast.loading(`Logging out...`); 
+        axios.post(`${process.env.MIX_BACK_END_BASE_URL}logout`)
+            .then((result) => {                      
+                handleClose();
+                global.dispatch({ type: 'logout' });
+                history.push('/auth');
+                toast.dismiss(toast_loading);
+                toast.success(<b>Logged Out</b>)
+            }).catch(error=> {
+                toast.dismiss(toast_loading)
             });
     }
 

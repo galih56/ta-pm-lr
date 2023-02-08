@@ -53,22 +53,21 @@ class ApprovalController extends Controller
         $approval->title=$request->title;
         $approval->description=$request->description;
         if($request->has('tasks_id')) $approval->tasks_id=$request->tasks_id;
-        if($request->has('users_id'))  $approval->users_id=$request->users_id;
         if($request->has('lists_id'))  $approval->lists_id=$request->lists_id;
         if($request->has('projects_id')) $approval->projects_id=$request->projects_id;
+        $approval->users_id=auth('sanctum')->user()->id;
         $approval->status=$request->status;
         $approval->save();
-        /*
-        $user=User::findOrFail($users_id);
-        $notif=new Notification();
-        $notif->notifiable_id=$approval->id;
-        $notif->notifiable_type='\App\Models\Approval';
-        $notif->title='A new approval created';
-        $notif->message=$user->name.' meminta perpanjangan waktu proyek';
-        $notif->route='\Approvals';
-        $notif->users_id=$user->id;
-        $notif->save(); 
-        */
+        
+        Notification::create([
+            'title'=>'A new approval has been created',
+            'message'=>$approval->title,
+            'notifiable_id'=>$approval->id,
+            'notifiable_type'=>'\App\Models\Approval',
+            'route'=>'approvals/'.$approval->id,
+            'users_id'=>auth('sanctum')->user()->id
+        ]);
+        
         return response()->json($approval,200);
     }
 

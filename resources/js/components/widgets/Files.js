@@ -169,7 +169,6 @@ const Files = (props) => {
     const getFiles = () => {
         const toast_loading = toast.loading('Loading...');
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${projects_id}/files`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 const data = result.data;
@@ -186,22 +185,14 @@ const Files = (props) => {
     }
 
     const handleDelete = (id) => {
-        const url = process.env.MIX_BACK_END_BASE_URL + 'files/' + id;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.delete(url),
-            {
-                loading: 'Deleting...',
-                success: (result)=>{
-                    setChoosenFileId(null)
-                    return <b>Successfully deleted</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = `${process.env.MIX_BACK_END_BASE_URL}files/${id}`;
+        const toast_loading = toast.loading(`Deleting...`); 
+        axios.delete(url)
+            .then((result) => {
+                setChoosenFileId(null)
+                toast.dismiss(toast_loading);
+                toast.success(<b>Successfully deleted</b>)
+            }).catch(error=> toast.dismiss(toast_loading));
     }
 
     useEffect(() => {

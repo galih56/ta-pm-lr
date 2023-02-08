@@ -4,6 +4,7 @@ namespace App\Http\Controllers\front;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Notification;
 use App\Models\File;
 use App\Models\Task;
 use App\Models\Tag;
@@ -108,6 +109,16 @@ class TaskController extends Controller
             }
         } 
         $task=$this->getDetailTask($task->id);
+
+        Notification::create([
+            'title'=>'A new task has been created',
+            'message'=>$task->title,
+            'notifiable_id'=>$task->id,
+            'notifiable_type'=>'\App\Models\Task',
+            'route'=>'projects'.$task->project->id.'tasks_id=',
+            'users_id'=>auth('sanctum')->user()->id
+        ]);
+
         return response()->json($task);
     }
 
@@ -192,18 +203,48 @@ class TaskController extends Controller
         }
 
         $task=$this->getDetailTask($id);
+
+        Notification::create([
+            'title'=>'A new task has been updated',
+            'message'=>'Task "'.$task->title.'"',
+            'notifiable_id'=>$task->id,
+            'notifiable_type'=>'\App\Models\Task',
+            'route'=>'projects/'.$task->project->id.'tasks_id=',
+            'users_id'=>auth('sanctum')->user()->id
+        ]);
         return response()->json($task);
     }
 
     public function destroy($id)
     {
         $task=Task::findOrFail($id);
-        return response()->json($task->delete());
+        $project=$task->project;
+        $task->delete();
+        
+        Notification::create([
+            'title'=>'A task has been deleted',
+            'message'=>"Task \"$task->title\" has been deleted",
+            'notifiable_id'=>$task->id,
+            'notifiable_type'=>'\App\Models\Task',
+            'route'=>'projects/'.$project->id,
+            'users_id'=>auth('sanctum')->user()->id
+        ]);
+
+        return response()->json(true,200);
     }
     public function startTask(Request $request,$id){
         $task=Task::with('parentTask')->findOrFail($id);
         $task->actual_start= Carbon::now()->toDateTimeString();
         $task->save();
+        
+        Notification::create([
+            'title'=>'A task has been updated',
+            'message'=>'Task "'.$task->title.'" has been started by '.auth('sanctum')->user()->name,
+            'notifiable_id'=>$task->id,
+            'notifiable_type'=>'\App\Models\Task',
+            'route'=>'projects/'.$task->project->id.'?tasks_id='.$task->id
+        ]);
+    
         $task=$this->getDetailTask($id);
         return response()->json($task);
     }
@@ -228,6 +269,15 @@ class TaskController extends Controller
         }
         $task->save();
         $task=$this->getDetailTask($task->id);
+        
+        Notification::create([
+            'title'=>$user->name." mark a task as completed",
+            'message'=>" Task \"$task->title\" has been marked as completed by ".auth('sanctum')->user()->name,
+            'notifiable_id'=>$task->id,
+            'notifiable_type'=>'\App\Models\Task',
+            'route'=>'projects/'.$task->project->id."?tasks_id=".$task->id,
+            'users_id'=>auth('sanctum')->user()->id
+        ]);
         return response()->json($task);
     }
 
@@ -372,6 +422,16 @@ class TaskController extends Controller
         $new_approval->status="Waiting for confirmation";
         $new_approval->title="Task deadline extension request from ".$user->name ;
         $new_approval->save();
+
+        Notification::create([
+            'title'=>$user->name." request a deadline extension",
+            'message'=>" Project \"$project->title\" has been created by ".auth('sanctum')->user()->name,
+            'notifiable_id'=>$approval->id,
+            'notifiable_type'=>'\App\Models\Approval',
+            'route'=>'approvals/'.$approval->id,
+            'users_id'=>auth('sanctum')->user()->id
+        ]);
+        
 
         $task=$this->getDetailTask($task->id);
         return response()->json($task);

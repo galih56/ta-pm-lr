@@ -100,8 +100,6 @@ export default function ModalDetailTask(props) {
     const getDetailTask = () => {
         var body={projects_id:detailProject.id,users_id:global.state.id}
         const url = `${process.env.MIX_BACK_END_BASE_URL}tasks/${initialState.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url,body)
             .then((result) => {
                 result=result.data
@@ -152,8 +150,6 @@ export default function ModalDetailTask(props) {
                 users_id:global.state.id
             }
             const url =`${process.env.MIX_BACK_END_BASE_URL}projects/${projects_id}`;
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
             axios.get(url,body)
                 .then((result) => {
                     setDetailProject(result.data)
@@ -187,28 +183,18 @@ export default function ModalDetailTask(props) {
     }
     
     const handleStartTask = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/start`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    result=result.data;
-                    setData(result);
-                    if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
-                    else global.dispatch({ type: 'store-detail-task', payload: result });
-                    handleCloseConfirm();
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    handleCloseConfirm()
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/start`;        
+        const toast_loading = toast.loading('Updating...'); 
+        axios.patch(url)
+            .then((result) => {                      
+                result=result.data;
+                setData(result);
+                if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                else global.dispatch({ type: 'store-detail-task', payload: result });
+                handleCloseConfirm();
+                toast.dismiss(toast_loading)
+                toast.success(<b>Successfully updated</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
     
     const markAsComplete=()=>{
@@ -217,29 +203,18 @@ export default function ModalDetailTask(props) {
             return;
         }
         const body = { id: data.id, complete: !data.complete};
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}/complete`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url, body),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    result=result.data;
-                    setData(result);
-                    if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
-                    else global.dispatch({ type: 'store-detail-task', payload: result });
-                    handleCloseConfirm();
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    handleCloseConfirm();
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
-    
+        const url = `${process.env.MIX_BACK_END_BASE_URL}tasks/${data.id}/complete`;
+        const toast_loading = toast.loading('Updating...'); 
+        axios.patch(url, body)
+            .then((result) => {      
+                result=result.data;
+                setData(result);
+                if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                else global.dispatch({ type: 'store-detail-task', payload: result });
+                handleCloseConfirm();
+                toast.dismiss(toast_loading)
+                toast.success(<b>Successfully updated</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
 
     const saveChanges = (e) => {
@@ -263,59 +238,35 @@ export default function ModalDetailTask(props) {
         if(data.cards.length<=0 && data.complete==true) body.progress=100 ;
         else if(data.cards.length<=0 && data.complete==false)body.progress=0 ;
 
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url, body),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    result=result.data;
-                    setData({...data,...result});
-                    if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
-                    else global.dispatch({ type: 'store-detail-task', payload: result });
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    console.log(error)
-                    if(error.response?.status==404){ 
-                        removeTaskIdQueryString(history)
-                        return <b>Unauthenticated</b>;
-                    }
-                    if(error.response?.status==401) return <b>Unauthenticated</b>;
-                    if(error.response?.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${data.id}`;   
+        const toast_loading = toast.loading('Updating...'); 
+        axios.patch(url, body)
+            .then((result) => {      
+                result=result.data;
+                setData({...data,...result});
+                if(data.parent_task) global.dispatch({ type: 'store-detail-subtask', payload: result });
+                else global.dispatch({ type: 'store-detail-task', payload: result });
+                toast.dismiss(toast_loading)
+                toast.success(<b>Successfully updated</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));     
     }
 
     const deleteTask = () => {
-        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.delete(url),
-            {
-                loading: 'Deleting...',
-                success: (result)=>{
-                    if(data.parent_task) global.dispatch({ type: 'remove-subtask', payload: data });
-                    else  global.dispatch({ type: 'remove-task', payload: data });
-                    removeTaskIdQueryString(history)
-                    if(props.onDelete)props.onDelete(data.list,id)
-                    if(onTaskDelete)onTaskDelete(data)
-                    handleCloseConfirm()
-                    closeModalDetailTask()
-                    return <b>Successfully deleted</b>
-                },
-                error: (error)=>{
-                    handleCloseConfirm();
-                    closeModalDetailTask();
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const url = process.env.MIX_BACK_END_BASE_URL + `tasks/${id}`;        
+        
+        const toast_loading = toast.loading('Deleting...'); 
+        axios.delete(url)
+            .then((result) => {      
+                if(data.parent_task) global.dispatch({ type: 'remove-subtask', payload: data });
+                else  global.dispatch({ type: 'remove-task', payload: data });
+                removeTaskIdQueryString(history)
+                if(props.onDelete)props.onDelete(data.list,id)
+                if(onTaskDelete)onTaskDelete(data)
+                handleCloseConfirm()
+                closeModalDetailTask()
+                toast.dismiss(toast_loading)
+                toast.success(<b>Successfully deleted</b>)
+            }).catch((error)=> toast.dismiss(toast_loading)); 
     }
     
     const submitForm=()=>{

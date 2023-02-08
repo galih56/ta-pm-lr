@@ -15,22 +15,16 @@ export default function UserSearchbar(props) {
 
     const getUsers = () => {
         const url = `${process.env.MIX_BACK_END_BASE_URL}users`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url).then(result => setUsers(result.data)).catch(console.log);
     }
     
     const getClients = () => {
         const url = `${process.env.MIX_BACK_END_BASE_URL}clients`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url).then(result => setClients(result.data)).catch(console.log);
     }
 
     const getDetailProject = () => {
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 const data = result.data;

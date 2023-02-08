@@ -76,4 +76,12 @@ class TaskList extends Model
     public function logs(){
         return $this->hasMany(ActivityLog::class,'lists_id');
     }
+    
+    public function notifications(){
+        return $this->morphToMany(Notification::class, 'notifiable');
+    }
+
+    public function activities(){
+        return $this->morphToMany(ActivityLog::class, 'loggable');
+    }
 }

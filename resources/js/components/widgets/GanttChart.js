@@ -11,9 +11,7 @@ class GanttChart extends React.Component {
             duration: 'duration', progress: 'progress', child: 'cards',
             dependency  : 'predecessor', manual: 'isManual'
         };
-        this.splitterSettings = {
-            position: "23%"
-        };
+        this.splitterSettings = { position: "23%" };
         this.GridRefresh = false;  // Prevent the Grid refresh in react state change
         this.labelSettings = {
             taskLabel: 'title'

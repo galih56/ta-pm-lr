@@ -56,8 +56,6 @@ export default function ModalImportExcel(props) {
 
     const submitData = () => {
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${projects_id}/import`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         let body = new FormData();        
         var fileBlob= new Blob(selectedFile);
         body.append("file", fileBlob);

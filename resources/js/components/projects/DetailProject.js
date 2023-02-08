@@ -101,8 +101,6 @@ const DetailProject = (props) => {
 
     const getDetailProject = () => {
         var url = `${process.env.MIX_BACK_END_BASE_URL}projects/${params.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 const data = result.data;

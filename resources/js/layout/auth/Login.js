@@ -32,24 +32,18 @@ const SignIn = (props) => {
         if (email.trim() == '' || password.trim() == '') setInputRequireAlert(true);
         else{ 
             setInputRequireAlert(false);
-            const url=`${process.env.MIX_BACK_END_BASE_URL}login`
-            toast.promise(
-                axios.post(url, body, 
-                { headers: { 'Content-Type': 'application/json' } }),
-                    {
-                    loading: 'Logging In...',
-                    success:(result)=>{ 
-                        global.dispatch({ type: 'authenticate', payload: result.data});
-                        return <b>Authenticated!</b>
-                    },
-                    error:(error)=>{ 
-                            setWrongCredentialAlert(true);
-                            if(error.response.status==401) return <b>Unauthenticated</b>;
-                            if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                            return <b>Wrong credentials</b>
-                        },
-                    }
-            );
+            const url=`${process.env.MIX_BACK_END_BASE_URL}login`;
+            
+            const toast_loading = toast.loading(`Logging in...`); 
+            axios.post(url, body)
+                .then((result) => {      
+                    global.dispatch({ type: 'authenticate', payload: result.data});
+                    toast.dismiss(toast_loading);
+                    toast.success(<b>Authenticated!</b>)
+                }).catch(error=> {
+                    setWrongCredentialAlert(true);
+                    toast.dismiss(toast_loading)
+                });
         }
     }
 

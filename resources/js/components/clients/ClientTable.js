@@ -110,22 +110,13 @@ export default function EnhancedTable() {
     },[history]);
 
     const getClients = () => {
-        const toast_loading = toast.loading('Loading...');
+        const toast_loading = toast.loading(<b>Loading...</b>);
         const url = `${process.env.MIX_BACK_END_BASE_URL}clients`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         axios.get(url)
             .then((result) => {
                 setRows(result.data);
                 toast.dismiss(toast_loading);
-            }).catch((error) => {
-                toast.dismiss(toast_loading);
-                switch(error.response.status){
-                    case 401 : toast.error(<b>Unauthenticated</b>); break;
-                    case 422 : toast.error(<b>Some required inputs are empty</b>); break;
-                    default : toast.error(<b>{error.response.statusText}</b>); break
-                }
-            });
+            }).catch(error => toast.dismiss(toast_loading) );
             
         if(!global.state.role?.id==8) history.push('/projects');
     }
@@ -177,7 +168,7 @@ export default function EnhancedTable() {
                                 <TableBody>
                                     {(rows.length>0)?stableSort(rows, getComparator(order, orderBy))
                                         .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                        .map((row) =><Row data={row}/>):(    
+                                        .map((row) =><Row key={row.id} data={row}/>):(    
                                             <TableRow>
                                                 <TableCell  colSpan={headCells.length} align="center">
                                                     <Typography variant="body1">There is no data to show</Typography>

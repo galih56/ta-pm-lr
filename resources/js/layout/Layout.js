@@ -1,4 +1,6 @@
-import React, { useState, useContext, useEffect, memo } from 'react';
+import React, { useState, useContext, useEffect, useMemo, memo } from 'react';
+import {withRouter, useHistory} from 'react-router-dom';
+import axios from 'axios';
 import clsx from 'clsx';
 import Footer from './Footer'; import UserMenu from './auth/UserMenu';
 import { BrowserRouter as Router, useLocation } from "react-router-dom";
@@ -14,12 +16,13 @@ import IconButton from '@material-ui/core/IconButton';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Toolbar from '@material-ui/core/Toolbar';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'; 
-// import Notification from './notifications/Notification'; 
+import Notification from './notifications/Notification'; 
 import MenuIcon from '@material-ui/icons/Menu';
 import { makeStyles } from '@material-ui/styles';
 import styleConfig from './Theme';
 import UserContext from '../context/UserContext';
 import mainLogo from'./../assets/images/logo_white.png';
+import toast from 'react-hot-toast';
 
 const useStyles = makeStyles((theme) => (styleConfig(theme)));
 
@@ -28,6 +31,7 @@ const Layout = (props) => {
     const windowWidth = window.innerWidth;
     const [drawerOpen, setDrawerOpen] = useState(true);
     const global = useContext(UserContext);
+    let history = useHistory();
     
     const handleDrawerOpen = () => setDrawerOpen(true);
     const handleDrawerClose = () => setDrawerOpen(false);
@@ -36,6 +40,33 @@ const Layout = (props) => {
         if (windowWidth <= 765) handleDrawerClose();
         global.dispatch({ type: 'remember-authentication' });
     }, []);
+
+    useMemo(()=>{
+        //axios.interceptors must be in here to access toaster 
+        axios.interceptors.response.use(function (response) {
+            return response;
+        }, function (error) {
+            console.log(error);
+            switch (error.response.status) {
+                case 404:
+                    toast.error(<b>Data not found</b>)
+                    history.goBack();
+                    return Promise.reject(error);
+                case 422:
+                    toast.error(<b>Some required inputs are empty</b>)
+                    return Promise.reject(error);
+                case 401:
+                    toast.error(<b>Unauthenticated</b>);
+                    // dispatch({type:'logout'});
+                    return Promise.reject(error);
+                case 500:
+                    toast.error(<b>Server error!</b>);
+                    return Promise.reject(error);
+                default:
+                    return Promise.reject(error);
+            }
+        });
+    },[])
 
     return (
         <div className={classes.root}>
@@ -47,7 +78,7 @@ const Layout = (props) => {
                         <MenuIcon />
                     </IconButton>
                     <Typography component="h1" variant="h6" color="inherit" noWrap className={classes.title}>ManPro</Typography>
-                        {/* <Notification/> */}
+                        <Notification/>
                     <UserMenu classes={classes}/>
                 </Toolbar>
             </AppBar>
@@ -83,6 +114,6 @@ const Layout = (props) => {
     )
 };
 
-export default Layout;
+export default withRouter(Layout);
 
 

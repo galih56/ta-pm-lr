@@ -67,10 +67,6 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class,'users_id');
     }
 
-    public function logs(){
-        return $this->hasMany(ActivityLog::class,'users_id');
-    }
-
     public function tasks(){
         return $this->hasMany(Task::class,'users_id');
     }
@@ -93,5 +89,14 @@ class User extends Authenticatable
 
     public function projects(){
         return $this->belongsToMany(Project::class,'project_members','users_id','projects_id');
+    }
+
+    public function activities(){
+        return $this->hasMany(ActivityLog::class,'users_id');
+    }
+
+    public function activitiesCount()
+    {
+        return $this->activities()->selectRaw('count(*) as count');
     }
 }

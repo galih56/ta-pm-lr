@@ -43,31 +43,17 @@ const FormAddClient=({open,handleClose,onCreate,detailProject})=>{
     const [newClients,setNewClients]=useState('');
 
     const formCreateOnSubmit=()=>{
-        const body = {
-            projects_id: detailProject.id,
-            clients: newClients,
-        }
-        
+        const body = { projects_id: detailProject.id, clients: newClients }
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}/clients`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.post(url, body),
-            {
-                loading: 'Creating a new client',
-                success: (result)=>{
-                    onCreate(result.data);
-                    handleClose();
-                    global.dispatch({type:'add-clients-to-project',payload:{projects_id:detailProject.id,clients:result.data}});
-                    return <b>A new client successfuly created</b>
-                },
-                error: (error)=>{
-                    console.log(error);
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const toast_loading = toast.loading('Creating a new client'); 
+        axios.post(url, body)
+            .then((result) => {         
+                onCreate(result.data);
+                handleClose();
+                global.dispatch({type:'add-clients-to-project',payload:{projects_id:detailProject.id,clients:result.data}});
+                toast.dismiss(toast_loading)
+                toast.success(<b>A new client successfuly created</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
 
     return(

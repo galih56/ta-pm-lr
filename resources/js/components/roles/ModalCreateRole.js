@@ -61,28 +61,20 @@ export default function ModalCreateRole(props) {
 
     const submitData = () => {
         const body = { name: name, children: children }
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
         if (!window.navigator.onLine) toast.error(`You are currently offline`);
         else {
-            const url = process.env.MIX_BACK_END_BASE_URL + 'roles';
-            toast.promise(
-                axios.post(url, body),
-                {
-                    loading: 'Creating a new role',
-                    success: (result)=>{
-                        setName('');
-                        setChildren([]);
-                        props.onCreate(result.data);
-                        closeModal();
-                        return <b>A new role successfully created</b>
-                    },
-                    error: (error)=>{
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                        return <b>{error.response.statusText}</b>;
-                    },
-                });
+            const url = `${process.env.MIX_BACK_END_BASE_URL}roles`;
+                
+            const toast_loading = toast.loading('Creating a new role'); 
+            axios.post(url, body)
+                .then((result) => {  
+                    setName('');
+                    setChildren([]);
+                    props.onCreate(result.data);
+                    closeModal();
+                    toast.dismiss(toast_loading)
+                    toast.success( <b>A new role successfully created</b>)
+                }).catch((error)=> toast.dismiss(toast_loading));
         }
     }
 

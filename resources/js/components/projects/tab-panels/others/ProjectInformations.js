@@ -50,23 +50,14 @@ const ProjectInfo = (props) => {
 
     const saveChanges = () => {        
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.patch(url, detailProject),
-            {
-                loading: 'Updating...',
-                success: (result)=>{
-                    setIsEditing(false)
-                    global.dispatch({ type: 'store-detail-project', payload: result.data });
-                    return <b>Successfully updated</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const toast_loading = toast.loading('Updating...'); 
+        axios.patch(url, detailProject)
+            .then((result) => {                          
+                setIsEditing(false)
+                global.dispatch({ type: 'store-detail-project', payload: result.data });;       
+                toast.dismiss(toast_loading)
+                toast.success(<b>Successfully updated</b>)
+            }).catch((error)=> toast.dismiss(toast_loading));
 
         if (!window.navigator.onLine) {
             toast.error(`You are currently offline`);
@@ -75,23 +66,15 @@ const ProjectInfo = (props) => {
 
     const handleRemoveProject = () => {      
         const url = `${process.env.MIX_BACK_END_BASE_URL}projects/${detailProject.id}`;
-        axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-        axios.defaults.headers.post['Content-Type'] = 'application/json';
-        toast.promise(
-            axios.delete(url),
-            {
-                loading: 'Deleting...',
-                success: (result)=>{
-                    global.dispatch({ type: 'remove-project', payload: detailProject.id });
-                    window.location.replace(window.location.origin)
-                    return <b>Successfully deleted</b>
-                },
-                error: (error)=>{
-                    if(error.response.status==401) return <b>Unauthenticated</b>;
-                    if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                    return <b>{error.response.statusText}</b>;
-                },
-            });
+        const toast_loading = toast.loading('Updating...'); 
+        axios.delete(url)
+            .then((result) => {                  
+                toast.dismiss(toast_loading)
+                toast.success(<b>Successfully deleted</b>)              
+                global.dispatch({ type: 'remove-project', payload: detailProject.id });
+                window.location.replace(window.location.origin)  
+                setDeleteConfirmOpen(false);
+            }).catch((error)=> toast.dismiss(toast_loading));
     }
     
     return (
@@ -194,10 +177,7 @@ const ProjectInfo = (props) => {
                             >
                                 <Button variant="contained" color="secondary" onClick={() => setDeleteConfirmOpen(true)} > Delete </Button>
                             </Grid>
-                            <DeleteConfirmDialog
-                                open={deleteConfirmOpen}
-                                handleClose={() => { setDeleteConfirmOpen(false); }}
-                                handleConfirm={handleRemoveProject}></DeleteConfirmDialog>
+                            <DeleteConfirmDialog open={deleteConfirmOpen} handleClose={() => { setDeleteConfirmOpen(false); }} handleConfirm={handleRemoveProject}></DeleteConfirmDialog>
                         </>
                     ):null}
                     <ExtendDeadlineForm  open={showExtendDeadlineForm}  handleClose={()=>setShowExtendDeadlineForm(false)} detailProject={detailProject} />
@@ -234,10 +214,7 @@ const DeleteConfirmDialog =(props) => {
     const handleClose = props.handleClose;
     const handleConfirm = props.handleConfirm;
     return (
-        <Dialog
-            open={open}
-            onClose={handleClose}
-        >
+        <Dialog open={open} onClose={handleClose}>
             <DialogTitle style={{ cursor: 'move' }}>Are you sure you want to delete this project?</DialogTitle>
             <DialogContent>
                 <DialogContentText>Data will be deleted permanently</DialogContentText>

@@ -59,26 +59,16 @@ export default function ModalCreateMember(props) {
         if (!showAlert) {
             const body = { projects_id: projects_id, members: newMembers }
             const url = process.env.MIX_BACK_END_BASE_URL + 'project-members/';
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-
-            toast.promise(
-                axios.post(url, body),
-                {
-                    loading: 'Loading...',
-                    success: (result)=>{ 
-                        onCreate(result.data)
-                        setNewMembers([]);
-                        closeModal();
-                        refreshProject();
-                        return <b>A new member successfully created</b>
-                    },
-                    error: (error)=>{
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                        return <b>{error.response.statusText}</b>;
-                    },
-                });
+            const toast_loading = toast.loading('Loading...'); 
+            axios.post(url, body)
+                .then((result) => {  
+                    onCreate(result.data)
+                    setNewMembers([]);
+                    closeModal();
+                    refreshProject();
+                    toast.dismiss(toast_loading)
+                    toast.success(<b>A new member successfully created</b>)
+                }).catch((error)=> toast.dismiss(toast_loading));
         }
         
     }

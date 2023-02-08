@@ -17,7 +17,7 @@ class ClientController extends Controller
 
     public function index()
     {
-        $clients=Client::all();
+;        $clients=Client::all();
         return response()->json($clients);
     }
 
@@ -38,6 +38,7 @@ class ClientController extends Controller
         if($request->has('city')) $client->city=$request->city;
         if($request->has('institution')) $client->institution=$request->institution;
         $client->save();
+      
         return response()->json($client);
     }
 
@@ -56,6 +57,7 @@ class ClientController extends Controller
 
     public function update(Request $request, $id)
     {
+
         $request->validate([
             'city'=>'required',
             'institution'=>'required',
@@ -66,6 +68,7 @@ class ClientController extends Controller
         $client->city=$request->city;
         $client->institution=$request->institution;
         $client->save();
+
         return response()->json($client);
     }
 
@@ -73,6 +76,7 @@ class ClientController extends Controller
     {
         $client=Client::findOrFail($id);
         ClientsHasProjects::where('clients_id',$client->id)->delete();
+        
         return response()->json($client->delete());
     }
 }

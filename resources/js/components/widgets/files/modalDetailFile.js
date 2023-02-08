@@ -61,47 +61,27 @@ export default function ModalDetailRole(props) {
     const saveChanges = () => {
         let body = data;
         if (window.navigator.onLine) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            const url = process.env.MIX_BACK_END_BASE_URL + `roles/${props.initialState.id}`;
-            
-            toast.promise( 
-                axios.patch(url, body),
-                {
-                    loading: 'Updating...',
-                    success: (result)=>{
-                        props.onUpdate(result.data);
-                        return <b>Successfully updated</b>
-                    },
-                    error: (error)=>{
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                        return <b>{error.response.statusText}</b>;
-                    },
-                });
+            const url = `${process.env.MIX_BACK_END_BASE_URL}roles/${props.initialState.id}`;
+            const toast_loading = toast.loading(`Updating...`); 
+            axios.delete(url)
+                .then((result) => {
+                    props.onUpdate(result.data);
+                    toast.dismiss(toast_loading);
+                    toast.success(<b>Successfully updated</b>)
+                }).catch(error=> toast.dismiss(toast_loading));
         }
     }
 
     const deleteRole = () => {
         if (window.navigator.onLine) {
-            
-            axios.defaults.headers.common['Authorization'] = `Bearer ${global.state.token}`;
-            axios.defaults.headers.post['Content-Type'] = 'application/json';
-            const url = process.env.MIX_BACK_END_BASE_URL + `roles/${data.id}`;
-            toast.promise(
-                axios.delete(url,data),
-                {
-                    loading: 'Deleting...',
-                    success: (result)=>{                    
-                        props.onDelete(data);
-                        return <b>Successfully deleted</b>
-                    },
-                    error: (error)=>{
-                        if(error.response.status==401) return <b>Unauthenticated</b>;
-                        if(error.response.status==422) return <b>Some required inputs are empty</b>;
-                        return <b>{error.response.statusText}</b>;
-                    },
-                });
+            const url = `${process.env.MIX_BACK_END_BASE_URL}roles/${data.id}`;
+            const toast_loading = toast.loading(`Deleting...`); 
+            axios.delete(url)
+                .then((result) => {               
+                    props.onDelete(data);
+                    toast.dismiss(toast_loading);
+                    toast.success(<b>Successfully deleted</b>)
+                }).catch(error=> toast.dismiss(toast_loading));
         }
     }
 
